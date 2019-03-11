@@ -66,6 +66,62 @@
     } ]
   }, {
     "type" : "record",
+    "name" : "NetworkFlow",
+    "namespace" : "sysflow.flow",
+    "fields" : [ {
+      "name" : "opFlags",
+      "type" : "int"
+    }, {
+      "name" : "startTs",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "endTs",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "procOID",
+      "type" : "sysflow.type.OID"
+    }, {
+      "name" : "tid",
+      "type" : "long"
+    }, {
+      "name" : "sip",
+      "type" : "int"
+    }, {
+      "name" : "sport",
+      "type" : "int"
+    }, {
+      "name" : "dip",
+      "type" : "int"
+    }, {
+      "name" : "dport",
+      "type" : "int"
+    }, {
+      "name" : "proto",
+      "type" : "int"
+    }, {
+      "name" : "numReads",
+      "type" : "long"
+    }, {
+      "name" : "numWrites",
+      "type" : "long"
+    }, {
+      "name" : "numRBytes",
+      "type" : "long"
+    }, {
+      "name" : "numWBytes",
+      "type" : "long"
+    }, {
+      "name" : "domain",
+      "type" : "string"
+    } ]
+  }, {
+    "type" : "record",
     "name" : "Container",
     "namespace" : "sysflow.entity",
     "fields" : [ {
@@ -141,7 +197,7 @@
     "name" : "SysFlow",
     "fields" : [ {
       "name" : "rec",
-      "type" : [ "sysflow.entity.SFHeader", "sysflow.entity.Container", "sysflow.entity.Process", "sysflow.flow.ProcessFlow" ]
+      "type" : [ "sysflow.entity.SFHeader", "sysflow.entity.Container", "sysflow.entity.Process", "sysflow.flow.ProcessFlow", "sysflow.flow.NetworkFlow" ]
     } ]
   } ],
   "messages" : { }
