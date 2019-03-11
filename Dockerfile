@@ -45,17 +45,17 @@ RUN cd /avro-cpp-1.8.2/ && cmake -G "Unix Makefiles" && make install
 #ENV FILTER=$filter
 RUN apt-get install libsparsehash-dev -y
 RUN mkdir -p /sysporter/
-RUN mkdir -p /sysdiginclude/ 
-RUN mkdir -p /libsysdig/ 
+RUN mkdir -p /include-sysdig/ 
+RUN mkdir -p /lib-sysdig/ 
 #COPY sysflow.tar.gz /sysporter/
 COPY  ./src/ /sysporter/
-COPY  ./sysdiginclude/ /sysdiginclude/
-COPY  ./libsysdig/ /libsysdig/
+COPY  ./include-sysdig/ /include-sysdig/
+COPY  ./lib-sysdig/ /lib-sysdig/
 #RUN  ls -la /sysporter/*
 #RUN  ls -la /sysdiginclude/*
 #RUN  ls -la /libsysdig/*
 RUN cd sysporter/ && make
-RUN cp /libsysdig/* /usr/lib/
+RUN cp /lib-sysdig/* /usr/lib/
 RUN mkdir -p /usr/local/sysflow/bin
 RUN mkdir -p /usr/local/sysflow/conf
 RUN cp /sysporter/sysporter /usr/local/sysflow/bin
