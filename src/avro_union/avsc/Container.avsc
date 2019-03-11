@@ -1,0 +1,26 @@
+{
+  "type" : "record",
+  "name" : "Container",
+  "namespace" : "sysflow.entity",
+  "fields" : [ {
+    "name" : "id",
+    "type" : "string"
+  }, {
+    "name" : "name",
+    "type" : "string"
+  }, {
+    "name" : "image",
+    "type" : "string"
+  }, {
+    "name" : "imageid",
+    "type" : "string"
+  }, {
+    "name" : "type",
+    "type" : {
+      "type" : "enum",
+      "name" : "ContainerType",
+      "namespace" : "sysflow.type",
+      "symbols" : [ "CT_DOCKER", "CT_LXC", "CT_LIBVIRT_LXC", "CT_MESOS", "CT_RKT", "CT_CUSTOM" ]
+    }
+  } ]
+}

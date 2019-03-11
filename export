@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo ibmcloud cr login
+sudo docker tag sf-collector us.icr.io/seccloud/sf-collector
+sudo docker push us.icr.io/seccloud/sf-collector
+sudo ibmcloud cr image-list

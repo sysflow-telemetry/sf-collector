@@ -1,0 +1,23 @@
+@namespace("sysflow.entity")
+protocol SysFlow {
+import idl "../type/datatypes.avdl";
+import idl "container.avdl";
+record Process {
+  sysflow.type.ActionType type; //event type
+  sysflow.type.OID oid; // host ID + monotonic process creation time + host PID
+  union{null, sysflow.type.OID} poid;
+  timestamp_ms ts;
+  //int hpid;
+  string exe;
+  string exeArgs;
+  int uid;
+  string userName;
+  int gid;
+  string groupName;
+  //int hostId;
+  //int duration;
+  //int threadCount;
+  //int childCount;
+  union{null, string} containerId;
+}
+}

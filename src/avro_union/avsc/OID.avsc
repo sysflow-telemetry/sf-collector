@@ -1,0 +1,15 @@
+{
+  "type" : "record",
+  "name" : "OID",
+  "namespace" : "sysflow.type",
+  "fields" : [ {
+    "name" : "createTS",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "hpid",
+    "type" : "long"
+  } ]
+}

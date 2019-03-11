@@ -1,0 +1,6 @@
+{
+  "type" : "enum",
+  "name" : "EventType",
+  "namespace" : "sysflow.type",
+  "symbols" : [ "CLONE", "EXEC", "EXIT" ]
+}

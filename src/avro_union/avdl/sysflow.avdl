@@ -1,0 +1,11 @@
+@namespace("sysflow")
+protocol SysFlow {
+import idl "flow/processflow.avdl";
+import idl "entity/process.avdl";
+import idl "entity/header.avdl";
+import idl "entity/container.avdl";
+
+record SysFlow {
+   union {sysflow.entity.SFHeader, sysflow.entity.Container, sysflow.entity.Process, sysflow.flow.ProcessFlow} rec;
+}
+}

@@ -1,0 +1,7 @@
+@namespace("sysflow.entity")
+protocol SysFlow {
+  record SFHeader {
+     long version;
+     string exporter; 
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "type" : "record",
+  "name" : "Process",
+  "namespace" : "sysflow.entity",
+  "fields" : [ {
+    "name" : "type",
+    "type" : {
+      "type" : "enum",
+      "name" : "ActionType",
+      "namespace" : "sysflow.type",
+      "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
+    }
+  }, {
+    "name" : "oid",
+    "type" : {
+      "type" : "record",
+      "name" : "OID",
+      "namespace" : "sysflow.type",
+      "fields" : [ {
+        "name" : "createTS",
+        "type" : {
+          "type" : "long",
+          "logicalType" : "timestamp-millis"
+        }
+      }, {
+        "name" : "hpid",
+        "type" : "long"
+      } ]
+    }
+  }, {
+    "name" : "poid",
+    "type" : [ "null", "sysflow.type.OID" ]
+  }, {
+    "name" : "ts",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "exe",
+    "type" : "string"
+  }, {
+    "name" : "exeArgs",
+    "type" : "string"
+  }, {
+    "name" : "uid",
+    "type" : "int"
+  }, {
+    "name" : "userName",
+    "type" : "string"
+  }, {
+    "name" : "gid",
+    "type" : "int"
+  }, {
+    "name" : "groupName",
+    "type" : "string"
+  }, {
+    "name" : "containerId",
+    "type" : [ "null", "string" ]
+  } ]
+}

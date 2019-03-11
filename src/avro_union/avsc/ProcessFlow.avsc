@@ -1,0 +1,49 @@
+{
+  "type" : "record",
+  "name" : "ProcessFlow",
+  "namespace" : "sysflow.flow",
+  "fields" : [ {
+    "name" : "type",
+    "type" : {
+      "type" : "enum",
+      "name" : "EventType",
+      "namespace" : "sysflow.type",
+      "symbols" : [ "CLONE", "EXEC", "EXIT" ]
+    }
+  }, {
+    "name" : "ts",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "procOID",
+    "type" : {
+      "type" : "record",
+      "name" : "OID",
+      "namespace" : "sysflow.type",
+      "fields" : [ {
+        "name" : "createTS",
+        "type" : {
+          "type" : "long",
+          "logicalType" : "timestamp-millis"
+        }
+      }, {
+        "name" : "hpid",
+        "type" : "long"
+      } ]
+    }
+  }, {
+    "name" : "tid",
+    "type" : "long"
+  }, {
+    "name" : "args",
+    "type" : {
+      "type" : "array",
+      "items" : "string"
+    }
+  }, {
+    "name" : "ret",
+    "type" : "int"
+  } ]
+}

@@ -1,0 +1,148 @@
+{
+  "protocol" : "SysFlow",
+  "namespace" : "sysflow",
+  "types" : [ {
+    "type" : "record",
+    "name" : "OID",
+    "namespace" : "sysflow.type",
+    "fields" : [ {
+      "name" : "createTS",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "hpid",
+      "type" : "long"
+    } ]
+  }, {
+    "type" : "fixed",
+    "name" : "ContainerID",
+    "namespace" : "sysflow.type",
+    "size" : 6
+  }, {
+    "type" : "enum",
+    "name" : "EventType",
+    "namespace" : "sysflow.type",
+    "symbols" : [ "CLONE", "EXEC", "EXIT" ]
+  }, {
+    "type" : "enum",
+    "name" : "ActionType",
+    "namespace" : "sysflow.type",
+    "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
+  }, {
+    "type" : "enum",
+    "name" : "ContainerType",
+    "namespace" : "sysflow.type",
+    "symbols" : [ "CT_DOCKER", "CT_LXC", "CT_LIBVIRT_LXC", "CT_MESOS", "CT_RKT", "CT_CUSTOM" ]
+  }, {
+    "type" : "record",
+    "name" : "ProcessFlow",
+    "namespace" : "sysflow.flow",
+    "fields" : [ {
+      "name" : "type",
+      "type" : "sysflow.type.EventType"
+    }, {
+      "name" : "ts",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "procOID",
+      "type" : "sysflow.type.OID"
+    }, {
+      "name" : "tid",
+      "type" : "long"
+    }, {
+      "name" : "args",
+      "type" : {
+        "type" : "array",
+        "items" : "string"
+      }
+    }, {
+      "name" : "ret",
+      "type" : "int"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "Container",
+    "namespace" : "sysflow.entity",
+    "fields" : [ {
+      "name" : "id",
+      "type" : "string"
+    }, {
+      "name" : "name",
+      "type" : "string"
+    }, {
+      "name" : "image",
+      "type" : "string"
+    }, {
+      "name" : "imageid",
+      "type" : "string"
+    }, {
+      "name" : "type",
+      "type" : "sysflow.type.ContainerType"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "Process",
+    "namespace" : "sysflow.entity",
+    "fields" : [ {
+      "name" : "type",
+      "type" : "sysflow.type.ActionType"
+    }, {
+      "name" : "oid",
+      "type" : "sysflow.type.OID"
+    }, {
+      "name" : "poid",
+      "type" : [ "null", "sysflow.type.OID" ]
+    }, {
+      "name" : "ts",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "exe",
+      "type" : "string"
+    }, {
+      "name" : "exeArgs",
+      "type" : "string"
+    }, {
+      "name" : "uid",
+      "type" : "int"
+    }, {
+      "name" : "userName",
+      "type" : "string"
+    }, {
+      "name" : "gid",
+      "type" : "int"
+    }, {
+      "name" : "groupName",
+      "type" : "string"
+    }, {
+      "name" : "containerId",
+      "type" : [ "null", "string" ]
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "SFHeader",
+    "namespace" : "sysflow.entity",
+    "fields" : [ {
+      "name" : "version",
+      "type" : "long"
+    }, {
+      "name" : "exporter",
+      "type" : "string"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "SysFlow",
+    "fields" : [ {
+      "name" : "rec",
+      "type" : [ "sysflow.entity.SFHeader", "sysflow.entity.Container", "sysflow.entity.Process", "sysflow.flow.ProcessFlow" ]
+    } ]
+  } ],
+  "messages" : { }
+}

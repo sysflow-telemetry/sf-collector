@@ -1,0 +1,12 @@
+{
+  "type" : "record",
+  "name" : "SFHeader",
+  "namespace" : "sysflow.entity",
+  "fields" : [ {
+    "name" : "version",
+    "type" : "long"
+  }, {
+    "name" : "exporter",
+    "type" : "string"
+  } ]
+}

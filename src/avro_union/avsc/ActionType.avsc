@@ -1,0 +1,6 @@
+{
+  "type" : "enum",
+  "name" : "ActionType",
+  "namespace" : "sysflow.type",
+  "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
+}

@@ -1,0 +1,35 @@
+@namespace ("sysflow.type")
+
+protocol SysFlow {
+//fixed OID(16);
+
+record OID {
+  timestamp_ms createTS;
+  long hpid;
+}
+
+
+fixed ContainerID(6);
+
+enum EventType {
+                 CLONE, 
+                 EXEC, 
+                 EXIT 
+               }
+enum ActionType {
+          CREATED, 
+          MODIFIED, 
+          REUP
+         }
+
+enum ContainerType {
+    CT_DOCKER,
+    CT_LXC,
+    CT_LIBVIRT_LXC,
+    CT_MESOS,
+    CT_RKT,
+    CT_CUSTOM
+}
+
+
+}
