@@ -1,0 +1,21 @@
+@namespace("sysflow.flow")
+protocol SysFlow {
+import idl "../type/datatypes.avdl";
+record NetworkFlow {
+  int opFlags;
+  timestamp_ms startTs;
+  timestamp_ms endTs;
+  sysflow.type.OID procOID; // host ID + monotonic process creation time + host PID
+  long tid;
+  int sip;
+  int sport;
+  int dip;
+  int dport;
+  int proto;
+  long numReads;
+  long numWrites;
+  long numRBytes;
+  long numWBytes;
+  string domain;
+}
+}

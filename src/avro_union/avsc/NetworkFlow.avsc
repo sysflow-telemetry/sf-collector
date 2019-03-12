@@ -1,0 +1,71 @@
+{
+  "type" : "record",
+  "name" : "NetworkFlow",
+  "namespace" : "sysflow.flow",
+  "fields" : [ {
+    "name" : "opFlags",
+    "type" : "int"
+  }, {
+    "name" : "startTs",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "endTs",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "procOID",
+    "type" : {
+      "type" : "record",
+      "name" : "OID",
+      "namespace" : "sysflow.type",
+      "fields" : [ {
+        "name" : "createTS",
+        "type" : {
+          "type" : "long",
+          "logicalType" : "timestamp-millis"
+        }
+      }, {
+        "name" : "hpid",
+        "type" : "long"
+      } ]
+    }
+  }, {
+    "name" : "tid",
+    "type" : "long"
+  }, {
+    "name" : "sip",
+    "type" : "int"
+  }, {
+    "name" : "sport",
+    "type" : "int"
+  }, {
+    "name" : "dip",
+    "type" : "int"
+  }, {
+    "name" : "dport",
+    "type" : "int"
+  }, {
+    "name" : "proto",
+    "type" : "int"
+  }, {
+    "name" : "numReads",
+    "type" : "long"
+  }, {
+    "name" : "numWrites",
+    "type" : "long"
+  }, {
+    "name" : "numRBytes",
+    "type" : "long"
+  }, {
+    "name" : "numWBytes",
+    "type" : "long"
+  }, {
+    "name" : "domain",
+    "type" : "string"
+  } ]
+}
