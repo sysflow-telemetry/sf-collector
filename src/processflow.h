@@ -7,9 +7,9 @@
 #include "utils.h"
 
 using namespace sysflow;
-
-void writeCloneEvent(Context* cxt, sinsp_evt* ev);
-void writeExitEvent(Context* cxt, sinsp_evt* ev);
-void writeExecEvent(Context* cxt, sinsp_evt* ev);
-
+namespace processflow {
+    void writeCloneEvent(Context* cxt, sinsp_evt* ev);
+    void writeExitEvent(Context* cxt, sinsp_evt* ev);
+    void writeExecEvent(Context* cxt, sinsp_evt* ev);
+}
 #endif

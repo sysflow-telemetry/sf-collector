@@ -16,7 +16,7 @@
 #include "avro/Encoder.hh"
 #include "avro/Decoder.hh"
 
-
+#include "syscall_defs.h"
 #include "hashtables.h"
 #include "utils.h"
 #include "container.h"
@@ -30,61 +30,20 @@ using namespace sysflow;
 Context* s_cxt = NULL;
 
 
-int runEventLoop(Context* cxt, string scapFile, string outputFile, string schemaFile, string exporterID, bool hasPrefix) {
+int runEventLoop(Context* cxt) {
 	int32_t res;
 	sinsp_evt* ev;
         //OID empkey = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0 } };
-        OID empkey;
-        empkey.hpid = 0; 
-        empkey.createTS = 0; 
-	cxt->procs.set_empty_key(&empkey);
-	cxt->conts.set_empty_key("0");
-        //OID delkey = { { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0 } };
-        OID delkey;
-        delkey.hpid = 1;
-        delkey.createTS = 1;
-	cxt->procs.set_deleted_key(&delkey);
-	cxt->conts.set_deleted_key("");
-	cout << "Loading scap file " << scapFile << endl;
        // avro::EncoderPtr encoder;
         //avro::EncoderPtr encoder = createEncoder(outputFile);
         //std::auto_ptr<avro::OutputStream> out = avro::fileOutputStream(outputFile.c_str());
         //avro::EncoderPtr encoder = avro::binaryEncoder();
         //encoder->init(*out);
-        string ofile;
-        time_t curTime = 0;
-     
-        if(cxt->start > 0) {
-          curTime = time(NULL);
-          if(hasPrefix) {
-              ofile = outputFile + "." + std::to_string(curTime);
-         }else {
-              ofile = outputFile + "/" + std::to_string(curTime);
-         }
-        }else {
-          if(hasPrefix) {
-            ofile = outputFile;
-          } else {
-            cout << "When not using the -G option, a file prefix must be set using -p." << endl;
-            return 1;
-         }
-        }
 
-
-        avro::ValidSchema sysfSchema;
-        try {
-            sysfSchema  = loadSchema(schemaFile.c_str());
-        }catch(avro::Exception& ex) {
-            return 1;
-        }
-        cxt->dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), sysfSchema, 80000, avro::Codec::DEFLATE_CODEC); 
-	cxt->inspector = new sinsp();
-        cxt->inspector->set_hostname_and_port_resolution_mode(false);
 	try
 	{
+                cxt->initialize();
 		//inspector->set_buffer_format(sinsp_evt::PF_NORMAL);
-		cxt->inspector->open(scapFile);
-		writeHeader(cxt, exporterID);
 		while(true) 
 		{
 			res = cxt->inspector->next(&ev);
@@ -102,26 +61,7 @@ int runEventLoop(Context* cxt, string scapFile, string outputFile, string schema
                                 if(cxt->exit) {
                                     break;
                                 }
-
-                                if(cxt->start > 0) {
-                                    curTime = time(NULL);
-                                    double duration = difftime(curTime, cxt->start);
-                                    if(duration >= cxt->fileDuration) {
-                                         if(hasPrefix) {
-                                            ofile = outputFile + "." + std::to_string(curTime);
-                                         }else {
-                                            ofile = outputFile + "/" + std::to_string(curTime);
-                                         }
-                                        cout << "Container Table: " << cxt->conts.size() <<  " Process Table: " << cxt->procs.size() << " Num Records Written: " << cxt->numRecs << " New File: " << ofile << endl;
-					cxt->numRecs = 0;
-   				        cxt->dfw->close();
-                                        delete cxt->dfw; 
-                                        cxt->dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), sysfSchema, 80000, avro::Codec::DEFLATE_CODEC); 
-					cxt->start = curTime;
-		                        writeHeader(cxt, exporterID);
-                                        clearTables(cxt);
-                                    }
-                                }
+				cxt->checkAndRotateFile();
 				continue;
 			}
 			else if(res == SCAP_EOF)
@@ -139,86 +79,38 @@ int runEventLoop(Context* cxt, string scapFile, string outputFile, string schema
 				cerr << "res = " << res << endl;
 				throw sinsp_exception(cxt->inspector->getlasterr().c_str());
 			}
+         	        if(cxt->exit) {
+                           break;
+                        }
+                        cxt->checkAndRotateFile();
+                        if(cxt->filterCont && !utils::isInContainer(ev)) {
+                              continue;
+                        }
 			switch(ev->get_type()) {
-                          case PPME_SYSCALL_EXECVE_8_E:
-                          case PPME_SYSCALL_EXECVE_13_E:
-                          case PPME_SYSCALL_EXECVE_14_E:
-                          case PPME_SYSCALL_EXECVE_15_E:
-                          case PPME_SYSCALL_EXECVE_16_E:
-                          case PPME_SYSCALL_EXECVE_17_E:
-                          case PPME_SYSCALL_EXECVE_18_E:
-                          case PPME_SYSCALL_EXECVE_19_E:
+                          SF_EXECVE_ENTER
                           {
                               break;
                           }
-                          case PPME_SYSCALL_EXECVE_8_X:
-			  case PPME_SYSCALL_EXECVE_13_X:
-			  case PPME_SYSCALL_EXECVE_14_X:
-			  case PPME_SYSCALL_EXECVE_15_X:
-			  case PPME_SYSCALL_EXECVE_16_X:
-			  case PPME_SYSCALL_EXECVE_17_X:
-			  case PPME_SYSCALL_EXECVE_18_X:
-			  case PPME_SYSCALL_EXECVE_19_X:
+                          SF_EXECVE_EXIT
                           {
-                              if(cxt->filterCont && !isInContainer(ev)) {
-                                    break;
-                              }
-			      writeExecEvent(cxt, ev);
+			      processflow::writeExecEvent(cxt, ev);
                               break;
                           }
-			  case PPME_SYSCALL_CLONE_16_X:
-			  case PPME_SYSCALL_CLONE_17_X:
-			  case PPME_SYSCALL_CLONE_20_X:
+                          SF_CLONE_EXIT
                           {
-                              if(cxt->filterCont && !isInContainer(ev)) {
-                                    break;
-                              }
-			      writeCloneEvent(cxt, ev);
+			      processflow::writeCloneEvent(cxt, ev);
                               break;
                           }
-			  case PPME_PROCEXIT_E:
-			  case PPME_PROCEXIT_X:
-			  case PPME_PROCEXIT_1_E:
-			  case PPME_PROCEXIT_1_X:
+                          SF_PROCEXIT_E_X	
 			  {
-                              if(cxt->filterCont && !isInContainer(ev)) {
-                                    break;
-                              }
-			      writeExitEvent(cxt, ev);		
+			      processflow::writeExitEvent(cxt, ev);		
 			      break;
                           }
 			
                        } 
-         	       if(cxt->exit) {
-                           break;
-                       }
-                       if(cxt->start > 0) {
-                             curTime = time(NULL);
-                             double duration = difftime(curTime, cxt->start);
-                             if(duration >= cxt->fileDuration) {
-                                 if(hasPrefix) {
-                                     ofile = outputFile + "." + std::to_string(curTime);
-                                 }else {
-                                     ofile = outputFile + "/" + std::to_string(curTime);
-                                 }
-                                 cout << "Container Table: " << cxt->conts.size() << " Process Table: " << cxt->procs.size() << " Num Records Written: " << cxt->numRecs << " New File: " << ofile << endl;
-			  	 cxt->numRecs = 0;
-   		                 cxt->dfw->close();
-                                 delete cxt->dfw; 
-                                 cxt->dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), sysfSchema, 80000, avro::Codec::DEFLATE_CODEC); 
-			         cxt->start = curTime;
-		                 writeHeader(cxt, exporterID);
-                                 clearTables(cxt);
-                               }
-                       }
 		}
                 cout << "Exiting scap loop... shutting down" << endl;
                 cout << "Container Table: " << cxt->conts.size() << " Process Table: " << cxt->procs.size() << " Num Records Written: " << cxt->numRecs << endl;
-                clearTables(cxt);
-		cxt->inspector->close();
-                //(encoder)->flush();
-		cxt->dfw->close();
-                delete cxt->dfw;
 	}
 	catch(sinsp_exception& e)
 	{
@@ -228,7 +120,7 @@ int runEventLoop(Context* cxt, string scapFile, string outputFile, string schema
             cout << "Avro Exception! Error: " << ex.what() << endl;
     	    return 1;
         }
-	delete cxt->inspector;
+	delete cxt;
 	return 0;
 }
 
@@ -262,7 +154,7 @@ STR2INT_ERROR str2int (int &i, char const *s, int base = 0)
 
 int main( int argc, char** argv )
 {
-	string scapFile;
+	string scapFile = "";
 	string outputDir;
         string prefix ="";
         string exporterID = "";
@@ -270,10 +162,12 @@ int main( int argc, char** argv )
 	char c;
         struct sigaction sigIntHandler;
         string schemaFile = "/usr/local/sysflow/conf/SysFlow.avsc";
-        s_cxt = new Context();
         sigIntHandler.sa_handler = signal_handler;
         sigemptyset(&sigIntHandler.sa_mask);
         sigIntHandler.sa_flags = 0;
+        bool filterCont = false;
+        int fileDuration = 0;
+        time_t start = 0;
 
         sigaction(SIGINT, &sigIntHandler, NULL);
 
@@ -296,22 +190,22 @@ int main( int argc, char** argv )
         			break;
                         case 'G': 
                                 duration = optarg;
-                                if(str2int(s_cxt->fileDuration, duration, 10)) {
+                                if(str2int(fileDuration, duration, 10)) {
                                     cout << "Unable to parse " << duration << endl;
                                     exit(1);
                                 }
-                                if(s_cxt->fileDuration < 1) {
+                                if(fileDuration < 1) {
 				    cout << "File duration must be higher than 0" << endl;
                                     exit(1);
                                 }
-                                s_cxt->start = time(NULL);
+                                start = time(NULL);
                                 break;
 			case 'l':
 				scapFile = "";
 				cout << "Live Capture initiated.." << endl;
 				break;
                         case 'c': 
-                               s_cxt->filterCont = true;
+                               filterCont = true;
                                break;
                         case 's':
                                schemaFile = optarg;
@@ -339,7 +233,14 @@ int main( int argc, char** argv )
         if(!prefix.empty()) {
             outputDir += prefix;
         }
+
+        if(prefix.empty() && start == 0) {
+            cout << "When not using the -G option, a file prefix must be set using -p." << endl;
+            return 1;
+        }
+
+        s_cxt = new Context(start, filterCont, fileDuration, !prefix.empty(), outputDir, scapFile, schemaFile, exporterID);
        
-	return runEventLoop(s_cxt, scapFile, outputDir, schemaFile, exporterID, !prefix.empty());
+	return runEventLoop(s_cxt);
 }
 

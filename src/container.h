@@ -6,9 +6,9 @@
 #include "hashtables.h"
 
 using namespace sysflow;
-
-Container*  createContainer(Context* cxt, sinsp_evt* ev); 
-void writeContainer(Context* cxt, Container* container);
-Container* getContainer(Context* cxt, sinsp_evt* ev);
-
+namespace container {
+    Container*  createContainer(Context* cxt, sinsp_evt* ev); 
+    void writeContainer(Context* cxt, Container* container);
+    Container* getContainer(Context* cxt, sinsp_evt* ev);
+}
 #endif

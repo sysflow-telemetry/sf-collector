@@ -3,11 +3,12 @@
 #include <string>
 
 #include "sysflow/sysflow.hh"
-#include "context.h"
+
+class Context;
 
 using namespace std;
 using namespace sysflow;
-
-void writeHeader(Context* cxt, string exporterID);
-
+namespace header {
+    void writeHeader(Context* cxt);
+}
 #endif

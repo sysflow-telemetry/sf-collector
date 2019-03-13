@@ -1,6 +1,6 @@
 #include "process.h"
 
-Process* createProcess(Context* cxt, sinsp_threadinfo* mainthread, sinsp_evt* ev, ActionType actType) {
+Process* process::createProcess(Context* cxt, sinsp_threadinfo* mainthread, sinsp_evt* ev, ActionType actType) {
    
    Process* proc = new Process();
    proc->type = actType;
@@ -35,10 +35,10 @@ Process* createProcess(Context* cxt, sinsp_threadinfo* mainthread, sinsp_evt* ev
     proc->uid = mainthread->m_uid;
     proc->gid = mainthread->m_gid;
    //cout << "Wrote gid/uid " << ti->m_uid << endl;
-   proc->userName = getUserName(cxt, mainthread->m_uid);
+   proc->userName = utils::getUserName(cxt, mainthread->m_uid);
   // cout << "Wrote username" << endl;
-    proc->groupName = getGroupName(cxt, mainthread->m_gid);
-    Container* cont = getContainer(cxt, ev);
+    proc->groupName = utils::getGroupName(cxt, mainthread->m_gid);
+    Container* cont = container::getContainer(cxt, ev);
     if(cont != NULL) {
        proc->containerId.set_string(cont->id);
     }else {
@@ -51,7 +51,7 @@ Process* createProcess(Context* cxt, sinsp_threadinfo* mainthread, sinsp_evt* ev
     //proc->childCount = mainthread->m_nchilds;
     return proc;
 }
-Process* getProcess(Context* cxt, sinsp_evt* ev, ActionType actType, bool& created) {
+Process* process::getProcess(Context* cxt, sinsp_evt* ev, ActionType actType, bool& created) {
       sinsp_threadinfo* ti = ev->get_thread_info();
       sinsp_threadinfo* mt = ti->get_main_thread();
       OID key;
@@ -85,12 +85,12 @@ Process* getProcess(Context* cxt, sinsp_evt* ev, ActionType actType, bool& creat
 
       for(vector<Process*>::reverse_iterator it = processes.rbegin(); it != processes.rend(); ++it) {
           cxt->procs[&(*it)->oid] = (*it);
-          writeProcess(cxt, (*it));
+          process::writeProcess(cxt, (*it));
       }
       return process;
 }
 
-void updateProcess(Context* cxt, Process* proc, sinsp_evt* ev, ActionType actType) {
+void process::updateProcess(Context* cxt, Process* proc, sinsp_evt* ev, ActionType actType) {
    sinsp_threadinfo* ti = ev->get_thread_info();
    sinsp_threadinfo* mainthread = ti->get_main_thread();
    proc->type = actType;
@@ -109,15 +109,15 @@ void updateProcess(Context* cxt, Process* proc, sinsp_evt* ev, ActionType actTyp
     proc->uid = mainthread->m_uid;
     proc->gid = mainthread->m_gid;
    //cout << "Wrote gid/uid " << ti->m_uid << endl;
-   proc->userName = getUserName(cxt, mainthread->m_uid);
+   proc->userName = utils::getUserName(cxt, mainthread->m_uid);
   // cout << "Wrote username" << endl;
-   proc->groupName = getGroupName(cxt, mainthread->m_gid);
+   proc->groupName = utils::getGroupName(cxt, mainthread->m_gid);
 
 }
 
 
 
-void writeProcess(Context* cxt, Process* proc) {
+void process::writeProcess(Context* cxt, Process* proc) {
     cxt->flow.rec.set_Process(*proc);
     cxt->numRecs++;
     cxt->dfw->write(cxt->flow);

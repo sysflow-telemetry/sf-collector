@@ -1,6 +1,6 @@
 #include "container.h"
 
-Container*  createContainer(Context* cxt, sinsp_evt* ev) {
+Container*  container::createContainer(Context* cxt, sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     
     if(ti->m_container_id.empty()) {
@@ -20,13 +20,13 @@ Container*  createContainer(Context* cxt, sinsp_evt* ev) {
     return cont;
 }
 
-void writeContainer(Context* cxt, Container* container) {
+void container::writeContainer(Context* cxt, Container* container) {
     cxt->flow.rec.set_Container(*container);
     cxt->numRecs++;
     cxt->dfw->write(cxt->flow);
 }
 
-Container* getContainer(Context* cxt, sinsp_evt* ev) {
+Container* container::getContainer(Context* cxt, sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     
     if(ti->m_container_id.empty()) {

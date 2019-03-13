@@ -6,13 +6,21 @@
 #include "avro/DataFile.hh"
 #include "avro/Encoder.hh"
 #include "avro/Decoder.hh"
-
+#include <string>
 
 #include <time.h>
 #include <sinsp.h>
 
+#include "utils.h"
+#include "header.h"
 #include "hashtables.h"
 #include "sysflow/sysflow.hh"
+
+#define CONT_TABLE_SIZE 100
+#define PROC_TABLE_SIZE 50000
+#define COMPRESS_BLOCK_SIZE 80000
+
+using namespace std;
 using namespace sysflow;
 class Context {
 public:
@@ -26,11 +34,23 @@ public:
     int fileDuration;
     int numRecs;
     avro::DataFileWriter<SysFlow>* dfw; 
-    sinsp* inspector; 
-    Context() : procs(50000), conts(100), exit(false), filterCont(false), 
-                      start(0), fileDuration(0), numRecs(0), dfw(NULL), inspector(NULL) {
+    sinsp* inspector;
+    bool hasPrefix;
+    string outputFile;
+    string scapFile;
+    string schemaFile;
+    string exporterID;
+    string ofile;
+    Context(time_t start, bool fCont, int fDur, bool prefix, string oFile, string sFile, string schFile, string exporterID); 
+    virtual ~Context();
+    int initialize();
+    bool checkAndRotateFile();
+    void clearTables();
+private:
+    OID empkey;
+    OID delkey;
+    avro::ValidSchema sysfSchema;
 
-    }
 };
 
 #endif

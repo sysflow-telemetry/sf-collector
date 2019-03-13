@@ -7,10 +7,10 @@
 #include "container.h"
 
 using namespace sysflow;
-
-void updateProcess(Context* cxt, Process* proc, sinsp_evt* ev, ActionType actType);
-void writeProcess(Context* cxt, Process* proc);
-Process* createProcess(Context* cxt, sinsp_threadinfo* mainthread, sinsp_evt* ev, ActionType actType);
-Process* getProcess(Context* cxt, sinsp_evt* ev, ActionType actType, bool& created);
-
+namespace process {
+    void updateProcess(Context* cxt, Process* proc, sinsp_evt* ev, ActionType actType);
+    void writeProcess(Context* cxt, Process* proc);
+    Process* createProcess(Context* cxt, sinsp_threadinfo* mainthread, sinsp_evt* ev, ActionType actType);
+    Process* getProcess(Context* cxt, sinsp_evt* ev, ActionType actType, bool& created);
+}
 #endif

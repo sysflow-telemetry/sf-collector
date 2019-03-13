@@ -1,5 +1,6 @@
 #include "utils.h"
-string getUserName(Context* cxt, uint32_t uid)
+#include "context.h"
+string utils::getUserName(Context* cxt, uint32_t uid)
 {
     unordered_map<uint32_t, scap_userinfo*>::const_iterator it;
     if(uid == 0xffffffff)
@@ -16,7 +17,7 @@ string getUserName(Context* cxt, uint32_t uid)
     return it->second->name;
 }
 
-string getGroupName(Context* cxt, uint32_t gid)
+string utils::getGroupName(Context* cxt, uint32_t gid)
 {
     unordered_map<uint32_t, scap_groupinfo*>::const_iterator it;
     if(gid == 0xffffffff)
@@ -32,23 +33,13 @@ string getGroupName(Context* cxt, uint32_t gid)
 
     return it->second->name;
 }
-bool isInContainer(sinsp_evt* ev) {
+bool utils::isInContainer(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     return !ti->m_container_id.empty();
 }
 
-void clearTables(Context* cxt) {
-   for(ProcessTable::iterator it = cxt->procs.begin(); it != cxt->procs.end(); ++it) {
-       delete it->second;
-   }
-   cxt->procs.clear();
-   for(ContainerTable::iterator it = cxt->conts.begin(); it != cxt->conts.end(); ++it) {
-       delete it->second;
-   }
-   cxt->conts.clear();
-}
 
-int64_t getSyscallResult(sinsp_evt* ev) {
+int64_t utils::getSyscallResult(sinsp_evt* ev) {
       int64_t res = -1;
       if(ev->get_num_params() >= 1) {
 	 const ppm_param_info* param = ev->get_param_info(0);
@@ -77,7 +68,7 @@ int64_t getSyscallResult(sinsp_evt* ev) {
 }
 
 
-avro::ValidSchema loadSchema(const char* filename)
+avro::ValidSchema utils::loadSchema(const char* filename)
 {
     avro::ValidSchema result;
     try {
