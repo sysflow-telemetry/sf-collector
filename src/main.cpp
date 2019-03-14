@@ -24,6 +24,8 @@
 #include "header.h"
 #include "context.h"
 #include "processflow.h"
+#include "dataflow.h"
+#include "op_flags.h"
 using namespace std;
 using namespace sysflow;
 
@@ -33,13 +35,6 @@ Context* s_cxt = NULL;
 int runEventLoop(Context* cxt) {
 	int32_t res;
 	sinsp_evt* ev;
-        //OID empkey = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0 } };
-       // avro::EncoderPtr encoder;
-        //avro::EncoderPtr encoder = createEncoder(outputFile);
-        //std::auto_ptr<avro::OutputStream> out = avro::fileOutputStream(outputFile.c_str());
-        //avro::EncoderPtr encoder = avro::binaryEncoder();
-        //encoder->init(*out);
-
 	try
 	{
                 cxt->initialize();
@@ -50,14 +45,6 @@ int runEventLoop(Context* cxt) {
 			//cout << "Retrieved a scap event... RES: " << res << endl;
 			if(res == SCAP_TIMEOUT)
 			{
-				/*	if(ev != NULL && ev->is_filtered_out())
-				{
-					//
-					// The event has been dropped by the filtering system.
-					// Give the chisels a chance to run their timeout logic.
-					//
-					chisels_do_timeout(ev);
-				}*/
                                 if(cxt->exit) {
                                     break;
                                 }
@@ -66,16 +53,10 @@ int runEventLoop(Context* cxt) {
 			}
 			else if(res == SCAP_EOF)
 			{
-				//handle_end_of_file(print_progress, formatter);
 				break;
 			}
 			else if(res != SCAP_SUCCESS)
 			{
-				//
-				// Event read error.
-				// Notify the chisels that we're exiting, and then die with an error.
-				//
-				//handle_end_of_file(print_progress, formatter);
 				cerr << "res = " << res << endl;
 				throw sinsp_exception(cxt->inspector->getlasterr().c_str());
 			}
@@ -87,25 +68,12 @@ int runEventLoop(Context* cxt) {
                               continue;
                         }
 			switch(ev->get_type()) {
-                          SF_EXECVE_ENTER
-                          {
-                              break;
-                          }
-                          SF_EXECVE_EXIT
-                          {
-			      processflow::writeExecEvent(cxt, ev);
-                              break;
-                          }
-                          SF_CLONE_EXIT
-                          {
-			      processflow::writeCloneEvent(cxt, ev);
-                              break;
-                          }
-                          SF_PROCEXIT_E_X	
-			  {
-			      processflow::writeExitEvent(cxt, ev);		
-			      break;
-                          }
+                          SF_EXECVE_ENTER()
+                          SF_EXECVE_EXIT(cxt, ev)
+                          SF_CLONE_EXIT(cxt, ev)
+                          SF_PROCEXIT_E_X(cxt, ev)
+                          SF_ACCEPT_EXIT(cxt, ev)
+                          SF_CONNECT_EXIT(cxt, ev)	
 			
                        } 
 		}

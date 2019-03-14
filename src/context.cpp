@@ -1,5 +1,5 @@
 #include "context.h"
-Context::Context(time_t strt, bool fCont, int fDur, bool prefix, string oFile, string sFile, string schFile, string expID ) : procs(PROC_TABLE_SIZE), conts(CONT_TABLE_SIZE), exit(false), filterCont(fCont), 
+Context::Context(time_t strt, bool fCont, int fDur, bool prefix, string oFile, string sFile, string schFile, string expID ) : procs(PROC_TABLE_SIZE), conts(CONT_TABLE_SIZE), netflows(NF_TABLE_SIZE), exit(false), filterCont(fCont), 
                       start(strt), fileDuration(fDur), numRecs(0), dfw(NULL), inspector(NULL), hasPrefix(prefix),
                       outputFile(oFile), scapFile(sFile), schemaFile(schFile), exporterID(expID) {
         empkey.hpid = 0; 
@@ -12,6 +12,16 @@ Context::Context(time_t strt, bool fCont, int fDur, bool prefix, string oFile, s
 	conts.set_deleted_key("");
         inspector = new sinsp();
         inspector->set_hostname_and_port_resolution_mode(false);
+        nfdelkey.ip1 = 0;
+        nfdelkey.ip2 = 0;
+        nfdelkey.port1 = 0;
+        nfdelkey.port2 = 0;
+        nfemptykey.ip1 = 0;
+        nfemptykey.ip2 = 0;
+        nfemptykey.port1 = 0;
+        nfemptykey.port2 = 1;
+        netflows.set_empty_key(nfemptykey);
+        netflows.set_deleted_key(nfdelkey);
 
     }
 

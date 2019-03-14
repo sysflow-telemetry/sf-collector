@@ -53,10 +53,10 @@
     "name" : "proto",
     "type" : "int"
   }, {
-    "name" : "numReads",
+    "name" : "numROps",
     "type" : "long"
   }, {
-    "name" : "numWrites",
+    "name" : "numWOps",
     "type" : "long"
   }, {
     "name" : "numRBytes",

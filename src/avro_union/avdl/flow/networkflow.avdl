@@ -12,8 +12,8 @@ record NetworkFlow {
   int dip;
   int dport;
   int proto;
-  long numReads;
-  long numWrites;
+  long numROps;
+  long numWOps;
   long numRBytes;
   long numWBytes;
   string domain;

@@ -175,8 +175,8 @@ struct NetworkFlow {
     int32_t dip;
     int32_t dport;
     int32_t proto;
-    int64_t numReads;
-    int64_t numWrites;
+    int64_t numROps;
+    int64_t numWOps;
     int64_t numRBytes;
     int64_t numWBytes;
     std::string domain;
@@ -191,8 +191,8 @@ struct NetworkFlow {
         dip(int32_t()),
         dport(int32_t()),
         proto(int32_t()),
-        numReads(int64_t()),
-        numWrites(int64_t()),
+        numROps(int64_t()),
+        numWOps(int64_t()),
         numRBytes(int64_t()),
         numWBytes(int64_t()),
         domain(std::string())
@@ -694,8 +694,8 @@ template<> struct codec_traits<sysflow::NetworkFlow> {
         avro::encode(e, v.dip);
         avro::encode(e, v.dport);
         avro::encode(e, v.proto);
-        avro::encode(e, v.numReads);
-        avro::encode(e, v.numWrites);
+        avro::encode(e, v.numROps);
+        avro::encode(e, v.numWOps);
         avro::encode(e, v.numRBytes);
         avro::encode(e, v.numWBytes);
         avro::encode(e, v.domain);
@@ -738,10 +738,10 @@ template<> struct codec_traits<sysflow::NetworkFlow> {
                     avro::decode(d, v.proto);
                     break;
                 case 10:
-                    avro::decode(d, v.numReads);
+                    avro::decode(d, v.numROps);
                     break;
                 case 11:
-                    avro::decode(d, v.numWrites);
+                    avro::decode(d, v.numWOps);
                     break;
                 case 12:
                     avro::decode(d, v.numRBytes);
@@ -767,8 +767,8 @@ template<> struct codec_traits<sysflow::NetworkFlow> {
             avro::decode(d, v.dip);
             avro::decode(d, v.dport);
             avro::decode(d, v.proto);
-            avro::decode(d, v.numReads);
-            avro::decode(d, v.numWrites);
+            avro::decode(d, v.numROps);
+            avro::decode(d, v.numWOps);
             avro::decode(d, v.numRBytes);
             avro::decode(d, v.numWBytes);
             avro::decode(d, v.domain);

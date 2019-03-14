@@ -15,7 +15,7 @@ TARGET3=sysporterf
 
 all: $(TARGET) $(TARGET2)
 
-$(TARGET): main.o MurmurHash3.o utils.o container.o process.o header.o processflow.o context.o
+$(TARGET): main.o MurmurHash3.o utils.o container.o process.o header.o processflow.o dataflow.o networkflow.o context.o
 	g++ $^ -o $@ $(LDFLAGS)
 
 #$(TARGET3): sysflowfork.o MurmurHash3.o
@@ -43,6 +43,12 @@ process.o: process.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
 processflow.o: processflow.cpp
+	g++ $(CFLAGS) -o $@ -c $^
+
+dataflow.o: dataflow.cpp
+	g++ $(CFLAGS) -o $@ -c $^
+
+networkflow.o: networkflow.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
 header.o: header.cpp

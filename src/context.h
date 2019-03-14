@@ -14,10 +14,12 @@
 #include "utils.h"
 #include "header.h"
 #include "hashtables.h"
+#include "networkflow.h"
 #include "sysflow/sysflow.hh"
 
 #define CONT_TABLE_SIZE 100
 #define PROC_TABLE_SIZE 50000
+#define NF_TABLE_SIZE 50000
 #define COMPRESS_BLOCK_SIZE 80000
 
 using namespace std;
@@ -28,6 +30,7 @@ public:
     ProcessFlow procFlow;
     ProcessTable procs;
     ContainerTable conts;
+    NetworkFlowTable netflows;
     bool exit;
     bool filterCont;
     time_t start;
@@ -50,6 +53,8 @@ private:
     OID empkey;
     OID delkey;
     avro::ValidSchema sysfSchema;
+    networkflow::NFKey nfdelkey;
+    networkflow::NFKey nfemptykey;
 
 };
 
