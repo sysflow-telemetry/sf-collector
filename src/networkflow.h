@@ -23,5 +23,6 @@ namespace networkflow {
             NetworkFlow netflow;
     };
     int handleNetFlowEvent(Context* cxt, sinsp_evt* ev, NFOpFlags flag);
+    void writeNetFlow(Context* cxt, NetFlowObj* nf);
 }
 #endif

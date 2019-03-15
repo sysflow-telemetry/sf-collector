@@ -2,6 +2,7 @@
 #include "context.h"
 #include "process.h"
 #include "hashtables.h"
+#include "utils.h"
 using namespace networkflow;
 
 
@@ -96,6 +97,26 @@ int networkflow::handleNetFlowEvent(Context* cxt, sinsp_evt* ev, NFOpFlags flag)
        nf->lastUpdate = time(NULL);
        nf->expireTime = getExpireTime(); 
        populateNetFlow(nf, flag, ev, proc);
+       if(flag == OP_NF_SEND) {
+           nf->netflow.numWOps++;
+           int res = utils::getSyscallResult(ev);
+           if(res > 0 ) {
+               nf->netflow.numWBytes+= res;
+           }
+       }else if(flag == OP_NF_RECV) {
+           nf->netflow.numROps++;
+           int res = utils::getSyscallResult(ev);
+           if(res > 0 ) {
+               nf->netflow.numRBytes+= res;
+           }
+       }
+       if(flag != OP_NF_CLOSE) {
+          cxt->netflows[key] = nf;
+       }else {
+          networkflow::writeNetFlow(cxt, nf);
+          delete nf;
+      }
+
 
    }
 
@@ -116,4 +137,10 @@ int networkflow::handleNetFlowEvent(Context* cxt, sinsp_evt* ev, NFOpFlags flag)
     
 
     return 0;
+}
+
+void networkflow::writeNetFlow(Context* cxt, NetFlowObj* nf) {
+   cxt->flow.rec.set_NetworkFlow(nf->netflow);
+   cxt->numRecs++;
+   cxt->dfw->write(cxt->flow);
 }

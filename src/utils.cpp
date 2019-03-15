@@ -47,6 +47,8 @@ int64_t utils::getSyscallResult(sinsp_evt* ev) {
          switch(param->type) {
             case PT_PID:
             case PT_ERRNO:
+            case PT_INT64:
+            case PT_INT32:
 		res = *(int64_t *)p->m_val;
                 break;
   	    default:
