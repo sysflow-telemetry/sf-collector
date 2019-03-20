@@ -110,8 +110,13 @@ Process* ProcessContext::getProcess(sinsp_evt* ev, ActionType actType, bool& cre
       processes.push_back(process);
       mt = mt->get_parent_thread();
       while(mt != NULL) {
+          if(mt->m_clone_ts == 0 && mt->m_pid == 0) {
+              mt = mt->get_parent_thread();
+              continue;
+          }
 	  key.createTS = mt->m_clone_ts;
 	  key.hpid = mt->m_pid;
+         // cout << "PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXE " << mt->m_exepath << endl;
           //std::memcpy(&key[0], &mt->m_clone_ts, sizeof(int64_t));
           //std::memcpy(&key[8], &mt->m_pid, sizeof(int32_t));
           ProcessTable::iterator proc2 = m_procs.find(&key);

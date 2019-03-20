@@ -8,14 +8,18 @@
 
 namespace dataflow {
     class DataFlowContext {
+        private:
+           networkflow::NetworkFlowContext* m_netflowCxt;
+           SysFlowContext*   m_cxt;
         public:
+           inline int getSize() {
+               return m_netflowCxt->getSize();
+           }
            int handleDataEvent(sinsp_evt* ev, NFOpFlags flag);
            DataFlowContext(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt);
            virtual ~DataFlowContext();
            void clearTables();
-        private:
-           networkflow::NetworkFlowContext* m_netflowCxt;
-           SysFlowContext*   m_cxt;
+           int checkForExpiredRecords();
     };
 }
 

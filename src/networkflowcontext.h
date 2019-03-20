@@ -14,12 +14,6 @@ namespace networkflow {
 
 
     class NetworkFlowContext {
-        public:
-            NetworkFlowContext(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* procCxt);
-            virtual ~NetworkFlowContext();
-            int handleNetFlowEvent(sinsp_evt* ev, NFOpFlags flag);
-            void clearNetFlows();
-            int checkForExpiredFlows();
         private:
             SysFlowContext* m_cxt;
             process::ProcessContext* m_processCxt;
@@ -37,6 +31,17 @@ namespace networkflow {
             void processNewFlow(sinsp_evt* ev, Process* proc, NFOpFlags flag, NFKey key) ;
             void removeAndWriteNetworkFlow(NetFlowObj** nf, NFKey* key);
             time_t getExportTime();
+            int32_t getProtocol(scap_l4_proto proto);
+        public:
+            NetworkFlowContext(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* procCxt);
+            virtual ~NetworkFlowContext();
+            int handleNetFlowEvent(sinsp_evt* ev, NFOpFlags flag);
+            void clearNetFlows();
+            int checkForExpiredFlows();
+            inline int getSize() {
+                return m_netflows.size();
+            }
+            
          
     };
 }

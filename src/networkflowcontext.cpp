@@ -24,6 +24,28 @@ NetworkFlowContext::~NetworkFlowContext() {
     clearNetFlows();
 }
 
+inline int32_t NetworkFlowContext::getProtocol(scap_l4_proto proto) {
+    int32_t prt = -1;
+    switch(proto)
+    {
+        case SCAP_L4_TCP:
+            prt = 6;
+            break;
+        case SCAP_L4_UDP:
+            prt = 17;
+            break;
+        case SCAP_L4_ICMP:
+            prt = 1;
+            break;
+        case SCAP_L4_RAW:
+            prt = 254;
+            break;
+         default:
+             break;
+    }
+    return prt;
+}
+
 
 inline void NetworkFlowContext::canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* key) {
     uint32_t sip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sip;
@@ -103,7 +125,7 @@ inline void NetworkFlowContext::populateNetFlow(NetFlowObj* nf, NFOpFlags flag, 
    nf->netflow.dip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dip; 
    nf->netflow.sport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sport; 
    nf->netflow.dport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dport; 
-   nf->netflow.proto = fdinfo->get_l4proto();
+   nf->netflow.proto = getProtocol(fdinfo->get_l4proto());
    nf->netflow.numROps = 0;
    nf->netflow.numWOps = 0;
    nf->netflow.numRBytes = 0;
@@ -167,8 +189,6 @@ inline void NetworkFlowContext::processExistingFlow(sinsp_evt* ev, Process* proc
           nf->netflow.opFlags |= OP_NF_INHERIT;
           nf->netflow.procOID.createTS = proc->oid.createTS;
           nf->netflow.procOID.hpid = proc->oid.hpid;
-          nf->lastUpdate = utils::getCurrentTime(m_cxt);
-
       }
       updateNetFlow(nf, flag, ev);
       if(flag == OP_NF_CLOSE) {
@@ -204,6 +224,9 @@ int NetworkFlowContext::handleNetFlowEvent(sinsp_evt* ev, NFOpFlags flag) {
         nf = it->second;
     }
 
+    string ip4tuple = ipv4tuple_to_string(&(fdinfo->m_sockinfo.m_ipv4info), false);
+
+    cout << proc->exe << " " << ip4tuple << " Proto: " << getProtocol(fdinfo->get_l4proto()) <<  endl;
 
     if(nf == NULL) {
        processNewFlow(ev, proc, flag, key);
@@ -236,9 +259,12 @@ int NetworkFlowContext::checkForExpiredFlows() {
                       it = m_nfSet.erase(it);
                 } else {
                      //else reup the expire time...remove from the m_nfSet and put back in.
-                     it++;
+                     NetFlowObj* nf = (*it);
+                     it = m_nfSet.erase(it);
+                     nf->exportTime = getExportTime();
+                     m_nfSet.insert(nf);
                 }
-
+                i++;
             }else {
                break;
             }
@@ -251,5 +277,12 @@ int NetworkFlowContext::checkForExpiredFlows() {
 
 
 void NetworkFlowContext::clearNetFlows() {
-
+     for(NetworkFlowTable::iterator it = m_netflows.begin(); it != m_netflows.end(); it++) {
+         it->second->netflow.opFlags |= OP_NF_TRUNCATE;
+         it->second->netflow.endTs = utils::getSysdigTime(m_cxt);
+         m_writer->writeNetFlow(&(it->second->netflow));
+         delete it->second;
+     }
+     m_netflows.clear();
+     m_nfSet.clear();
 }

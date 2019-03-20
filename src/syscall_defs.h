@@ -45,8 +45,12 @@
 
 #define SF_OPEN_EXIT    case PPME_SYSCALL_OPEN_X:
 
-#define SF_CLOSE_EXIT   case PPME_SYSCALL_CLOSE_X: \
-                        case PPME_SOCKET_SHUTDOWN_X: 
+#define SF_CLOSE_EXIT(EV)   case PPME_SYSCALL_CLOSE_X: \
+                        case PPME_SOCKET_SHUTDOWN_X: \
+			{                     \
+			    m_dfCxt->handleDataEvent(EV, OP_NF_CLOSE); \
+			    break;            \
+                        }
 
 #define SF_READ_EXIT    case PPME_SYSCALL_READ_X: \
                         case PPME_SYSCALL_PREAD_X: \
@@ -77,23 +81,31 @@
 			    break;            \
                         }
 
-#define SF_SEND_EXIT    case PPME_SOCKET_SEND_X: \
+#define SF_SEND_EXIT(EV)    case PPME_SOCKET_SEND_X: \
                         case PPME_SOCKET_SENDTO_X: \
                         case PPME_SOCKET_SENDMSG_X: \
                         case PPME_SOCKET_SENDMMSG_X: \
                         case PPME_SYSCALL_WRITEV_X: \
                         case PPME_SYSCALL_PWRITEV_X: \
                         case PPME_SYSCALL_PWRITE_X: \
-                        case PPME_SYSCALL_WRITE_X: 
+                        case PPME_SYSCALL_WRITE_X: \
+			{                     \
+			    m_dfCxt->handleDataEvent(EV, OP_NF_SEND); \
+			    break;            \
+                        }
 
-#define SF_RECV_EXIT    case PPME_SOCKET_RECV_X: \
+#define SF_RECV_EXIT(EV)    case PPME_SOCKET_RECV_X: \
                         case PPME_SOCKET_RECVFROM_X: \
                         case PPME_SOCKET_RECVMSG_X: \
                         case PPME_SOCKET_RECVMMSG_X: \
                         case PPME_SYSCALL_PREAD_X: \
                         case PPME_SYSCALL_PREADV_X: \
                         case PPME_SYSCALL_READV_X: \
-                        case PPME_SYSCALL_READ_X:
+                        case PPME_SYSCALL_READ_X: \
+			{                     \
+			    m_dfCxt->handleDataEvent(EV, OP_NF_RECV); \
+			    break;            \
+                        }
 
 #define SF_SOCKET_PAIR_EXIT case PPME_SOCKET_SOCKETPAIR_X:
 

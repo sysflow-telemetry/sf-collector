@@ -10,9 +10,9 @@
 #include "avro/Encoder.hh"
 #include "avro/Decoder.hh"
 #include  <time.h>
+#include "sysflowcontext.h"
 using namespace std;
 
-class SysFlowContext;
 namespace utils {
     string getUserName(SysFlowContext* cxt, uint32_t uid);
     string getGroupName(SysFlowContext* cxt, uint32_t gid);

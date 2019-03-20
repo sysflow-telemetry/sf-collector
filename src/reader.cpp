@@ -10,6 +10,8 @@
 #include "avro/DataFile.hh"
 #include "avro/Encoder.hh"
 #include "avro/Decoder.hh"
+#include <arpa/inet.h>
+#include "op_flags.h"
 using namespace std;
 using namespace sysflow;
 
@@ -17,12 +19,14 @@ using namespace sysflow;
 #define CONT 1 
 #define PROC 2
 #define PROC_FLOW 3
+#define NET_FLOW 4
 
 Process proc;
 ProcessFlow pf;
 SysFlow flow;
 SFHeader header;
 Container cont;
+NetworkFlow netflow;
 
 const char* Events[] = {"CLONE", "EXEC", "EXIT"};
 
@@ -38,6 +42,26 @@ avro::ValidSchema loadSchema(const char* filename)
          exit(1);
     }
     return result;
+}
+
+
+void printNetFlow(NetworkFlow netflow) {
+    struct in_addr srcIP;
+    struct in_addr dstIP;
+    srcIP.s_addr = netflow.sip;
+    dstIP.s_addr = netflow.dip;
+    string opFlags = "";
+    opFlags +=  ((netflow.opFlags & OP_NF_ACCEPT) ?  "A" : " ");
+    opFlags +=  ((netflow.opFlags & OP_NF_CONNECT) ?  "C" : " ");
+    opFlags +=  ((netflow.opFlags & OP_NF_SEND) ?  "S" : " ");
+    opFlags +=  ((netflow.opFlags & OP_NF_RECV) ?  "R" : " ");
+    opFlags +=  ((netflow.opFlags & OP_NF_CLOSE) ?  "C" : " ");
+    opFlags +=  ((netflow.opFlags & OP_NF_DELEGATE) ?  "D" : " ");
+    opFlags +=  ((netflow.opFlags & OP_NF_INHERIT) ?  "I" : " ");
+    opFlags +=  ((netflow.opFlags & OP_NF_TRUNCATE) ?  "T" : " ");
+    opFlags +=  ((netflow.opFlags & OP_NF_FINAL) ?  "F" : " ");
+
+    cout << "NETFLOW " << netflow.startTs << " " << netflow.endTs << " " <<  opFlags << " SIP: " << inet_ntoa(srcIP) << " " << " DIP: " << inet_ntoa(dstIP) << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << endl;
 }
 
 
@@ -86,6 +110,12 @@ int runEventLoop(string sysFile, string schemaFile) {
                 cont = flow.rec.get_Container();
 		cout << "CONT Name: " << cont.name << " ID: " << cont.id << " Image: " << cont.image << " Image ID: " << cont.imageid << " Type: " << cont.type << endl;
 		break;
+              }
+              case NET_FLOW:
+              {
+                  netflow = flow.rec.get_NetworkFlow();
+                  printNetFlow(netflow);
+                  break;
               }
               default:
               {

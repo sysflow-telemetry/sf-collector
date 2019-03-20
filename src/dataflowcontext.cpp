@@ -22,7 +22,7 @@ int DataFlowContext::handleDataEvent(sinsp_evt* ev, NFOpFlags flag) {
     }
 
     if(fdinfo == NULL) {
-       cout << "Uh oh!!! Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! " << endl;
+       cout << "Uh oh!!! Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ErrorCode: " << utils::getSyscallResult(ev) << endl;
        return 1;
     }
     if(fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket()) {
@@ -33,4 +33,8 @@ int DataFlowContext::handleDataEvent(sinsp_evt* ev, NFOpFlags flag) {
 
 void DataFlowContext::clearTables() {
     m_netflowCxt->clearNetFlows();
+}
+
+int DataFlowContext::checkForExpiredRecords() {
+    return m_netflowCxt->checkForExpiredFlows();
 }

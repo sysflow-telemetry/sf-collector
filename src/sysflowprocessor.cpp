@@ -16,11 +16,11 @@ SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
 
 SysFlowProcessor::~SysFlowProcessor() {
    delete m_cxt;
-   delete m_writer;
    delete m_containerCxt;
    delete m_processCxt;
    delete m_dfCxt;
    delete m_procFlowCxt;
+   delete m_writer;
 }
 
 void SysFlowProcessor::clearTables() {
@@ -32,7 +32,7 @@ bool SysFlowProcessor::checkAndRotateFile()  {
      bool fileRotated = false;
      time_t curTime = time(NULL);
      if(m_writer->isFileExpired(curTime)) {
-         cout << "Container Table: " << m_containerCxt->getSize() <<  " Process Table: " << m_processCxt->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
+         cout << "Container Table: " << m_containerCxt->getSize() <<  " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfCxt->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
          m_writer->resetFileWriter(curTime);
          clearTables();
          fileRotated = true;
@@ -57,6 +57,10 @@ int SysFlowProcessor::run() {
                                     break;
                                 }
 				checkAndRotateFile();
+                                int numExpired = m_dfCxt->checkForExpiredRecords();
+                                if(numExpired) {
+                                    cout << "Netflow Records exported: " << numExpired << endl;
+                                }
 				continue;
 			}
 			else if(res == SCAP_EOF)
@@ -72,6 +76,10 @@ int SysFlowProcessor::run() {
          	        if(m_exit) {
                            break;
                         }
+                        int numExpired = m_dfCxt->checkForExpiredRecords();
+                        if(numExpired) {
+                            cout << "Netflow Records exported: " << numExpired << endl;
+                        }
                         checkAndRotateFile();
                         if(m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
                               continue;
@@ -83,10 +91,13 @@ int SysFlowProcessor::run() {
                           SF_PROCEXIT_E_X(ev)
                           SF_ACCEPT_EXIT(ev)
                           SF_CONNECT_EXIT(ev)	
+                          SF_SEND_EXIT(ev)
+                          SF_RECV_EXIT(ev)	
+                          SF_CLOSE_EXIT(ev)	
                        } 
 		}
                 cout << "Exiting scap loop... shutting down" << endl;
-                cout << "Container Table: " << m_containerCxt->getSize() << " Process Table: " << m_processCxt->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
+                cout << "Container Table: " << m_containerCxt->getSize() << " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfCxt->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
 	}
 	catch(sinsp_exception& e)
 	{
