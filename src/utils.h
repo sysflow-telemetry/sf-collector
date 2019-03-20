@@ -9,14 +9,28 @@
 #include "avro/DataFile.hh"
 #include "avro/Encoder.hh"
 #include "avro/Decoder.hh"
-
-class Context;
+#include  <time.h>
 using namespace std;
+
+class SysFlowContext;
 namespace utils {
-    string getUserName(Context* cxt, uint32_t uid);
-    string getGroupName(Context* cxt, uint32_t gid);
+    string getUserName(SysFlowContext* cxt, uint32_t uid);
+    string getGroupName(SysFlowContext* cxt, uint32_t gid);
     bool isInContainer(sinsp_evt* ev);
     int64_t getSyscallResult(sinsp_evt* ev);
     avro::ValidSchema loadSchema(const char* filename);
+
+    inline time_t getCurrentTime(SysFlowContext* cxt) {
+        if(cxt->isOffline()) {
+            return (cxt->timeStamp)/1000000000;   
+        } 
+        return time(NULL);
+     }
+    inline uint64_t getSysdigTime(SysFlowContext* cxt) {
+        if(cxt->isOffline()) {
+            return cxt->timeStamp;   
+        } 
+        return sinsp_utils::get_current_time_ns();
+     }
 }
 #endif

@@ -1,6 +1,6 @@
 #include "utils.h"
-#include "context.h"
-string utils::getUserName(Context* cxt, uint32_t uid)
+#include "sysflowcontext.h"
+string utils::getUserName(SysFlowContext* cxt, uint32_t uid)
 {
     unordered_map<uint32_t, scap_userinfo*>::const_iterator it;
     if(uid == 0xffffffff)
@@ -8,8 +8,8 @@ string utils::getUserName(Context* cxt, uint32_t uid)
         return string("");
     }
 
-    it = cxt->inspector->m_userlist.find(uid);
-    if(it == cxt->inspector->m_userlist.end())
+    it = cxt->getInspector()->m_userlist.find(uid);
+    if(it == cxt->getInspector()->m_userlist.end())
     {
         return string("");
     }
@@ -17,7 +17,7 @@ string utils::getUserName(Context* cxt, uint32_t uid)
     return it->second->name;
 }
 
-string utils::getGroupName(Context* cxt, uint32_t gid)
+string utils::getGroupName(SysFlowContext* cxt, uint32_t gid)
 {
     unordered_map<uint32_t, scap_groupinfo*>::const_iterator it;
     if(gid == 0xffffffff)
@@ -25,8 +25,8 @@ string utils::getGroupName(Context* cxt, uint32_t gid)
         return string("");
     }
 
-    it = cxt->inspector->m_grouplist.find(gid);
-    if(it == cxt->inspector->m_grouplist.end())
+    it = cxt->getInspector()->m_grouplist.find(gid);
+    if(it == cxt->getInspector()->m_grouplist.end())
     {
         return string("");
     }

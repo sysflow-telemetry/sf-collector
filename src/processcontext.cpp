@@ -1,6 +1,24 @@
-#include "process.h"
+#include "processcontext.h"
 
-Process* process::createProcess(Context* cxt, sinsp_threadinfo* mainthread, sinsp_evt* ev, ActionType actType) {
+using namespace process;
+
+ProcessContext::ProcessContext(SysFlowContext* cxt, container::ContainerContext* ccxt, SysFlowWriter* writer) : m_procs(PROC_TABLE_SIZE) {
+    m_empkey.hpid = 0; 
+    m_empkey.createTS = 0; 
+    m_procs.set_empty_key(&m_empkey);
+    m_delkey.hpid = 1;
+    m_delkey.createTS = 1;
+    m_procs.set_deleted_key(&m_delkey);
+    m_cxt = cxt;
+    m_containerCxt = ccxt;
+    m_writer = writer;
+}
+
+ProcessContext::~ProcessContext() {
+    clearProcesses();
+}
+
+Process* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_evt* ev, ActionType actType) {
    
    Process* proc = new Process();
    proc->type = actType;
@@ -35,10 +53,10 @@ Process* process::createProcess(Context* cxt, sinsp_threadinfo* mainthread, sins
     proc->uid = mainthread->m_uid;
     proc->gid = mainthread->m_gid;
    //cout << "Wrote gid/uid " << ti->m_uid << endl;
-   proc->userName = utils::getUserName(cxt, mainthread->m_uid);
+   proc->userName = utils::getUserName(m_cxt, mainthread->m_uid);
   // cout << "Wrote username" << endl;
-    proc->groupName = utils::getGroupName(cxt, mainthread->m_gid);
-    Container* cont = container::getContainer(cxt, ev);
+    proc->groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
+    Container* cont = m_containerCxt->getContainer(ev);
     if(cont != NULL) {
        proc->containerId.set_string(cont->id);
     }else {
@@ -51,7 +69,29 @@ Process* process::createProcess(Context* cxt, sinsp_threadinfo* mainthread, sins
     //proc->childCount = mainthread->m_nchilds;
     return proc;
 }
-Process* process::getProcess(Context* cxt, sinsp_evt* ev, ActionType actType, bool& created) {
+
+bool ProcessContext::isAncestor(OID* oid, Process* proc) {
+
+   Process::poid_t poid = proc->poid;
+  
+   while(!poid.is_null()){
+       OID key = poid.get_OID();
+       ProcessTable::iterator p = m_procs.find(&(key));
+       if(p != m_procs.end()) {
+          OID o = p->second->oid;
+          if(oid->hpid == o.hpid && oid->createTS == o.createTS) {
+              return true;
+          }
+          poid = p->second->poid;
+       }else {
+           break;
+       }
+   }
+
+   return false;
+}
+
+Process* ProcessContext::getProcess(sinsp_evt* ev, ActionType actType, bool& created) {
       sinsp_threadinfo* ti = ev->get_thread_info();
       sinsp_threadinfo* mt = ti->get_main_thread();
       OID key;
@@ -60,13 +100,13 @@ Process* process::getProcess(Context* cxt, sinsp_evt* ev, ActionType actType, bo
       created = true;
       //std::memcpy(&key[0], &mt->m_clone_ts, sizeof(int64_t));
       //std::memcpy(&key[8], &mt->m_pid, sizeof(int32_t));
-      ProcessTable::iterator proc = cxt->procs.find(&key);
-      if(proc != cxt->procs.end()) {
+      ProcessTable::iterator proc = m_procs.find(&key);
+      if(proc != m_procs.end()) {
           created = false;
           return proc->second;
       }
       std::vector<Process*> processes; 
-      Process* process = createProcess(cxt, mt, ev, actType);
+      Process* process = createProcess(mt, ev, actType);
       processes.push_back(process);
       mt = mt->get_parent_thread();
       while(mt != NULL) {
@@ -74,23 +114,23 @@ Process* process::getProcess(Context* cxt, sinsp_evt* ev, ActionType actType, bo
 	  key.hpid = mt->m_pid;
           //std::memcpy(&key[0], &mt->m_clone_ts, sizeof(int64_t));
           //std::memcpy(&key[8], &mt->m_pid, sizeof(int32_t));
-          ProcessTable::iterator proc2 = cxt->procs.find(&key);
-          if(proc2 != cxt->procs.end()) {
+          ProcessTable::iterator proc2 = m_procs.find(&key);
+          if(proc2 != m_procs.end()) {
 	      break;
           }
-          Process* parent = createProcess(cxt, mt, ev, ActionType::REUP);
+          Process* parent = createProcess(mt, ev, ActionType::REUP);
           processes.push_back(parent);
           mt = mt->get_parent_thread();
       }
 
       for(vector<Process*>::reverse_iterator it = processes.rbegin(); it != processes.rend(); ++it) {
-          cxt->procs[&(*it)->oid] = (*it);
-          process::writeProcess(cxt, (*it));
+          m_procs[&(*it)->oid] = (*it);
+          m_writer->writeProcess((*it));
       }
       return process;
 }
 
-void process::updateProcess(Context* cxt, Process* proc, sinsp_evt* ev, ActionType actType) {
+void ProcessContext::updateProcess(Process* proc, sinsp_evt* ev, ActionType actType) {
    sinsp_threadinfo* ti = ev->get_thread_info();
    sinsp_threadinfo* mainthread = ti->get_main_thread();
    proc->type = actType;
@@ -109,17 +149,23 @@ void process::updateProcess(Context* cxt, Process* proc, sinsp_evt* ev, ActionTy
     proc->uid = mainthread->m_uid;
     proc->gid = mainthread->m_gid;
    //cout << "Wrote gid/uid " << ti->m_uid << endl;
-   proc->userName = utils::getUserName(cxt, mainthread->m_uid);
+   proc->userName = utils::getUserName(m_cxt, mainthread->m_uid);
   // cout << "Wrote username" << endl;
-   proc->groupName = utils::getGroupName(cxt, mainthread->m_gid);
+   proc->groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
 
 }
 
-
-
-void process::writeProcess(Context* cxt, Process* proc) {
-    cxt->flow.rec.set_Process(*proc);
-    cxt->numRecs++;
-    cxt->dfw->write(cxt->flow);
-    //avro::encode(*encoder, flow);
+void ProcessContext::clearProcesses() {
+    for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
+        delete it->second;
+    }
+    m_procs.clear();
 }
+
+void ProcessContext::deleteProcess(Process** proc) {
+    m_procs.erase(&((*proc)->oid));
+    delete *proc; 
+    *proc = NULL;
+}
+
+

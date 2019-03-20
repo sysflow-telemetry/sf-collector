@@ -9,92 +9,19 @@
 #include <string>
 #include <unistd.h>
 #include <signal.h>
-#include "sysflow/sysflow.hh"
-#include "avro/ValidSchema.hh"
-#include "avro/Compiler.hh"
-#include "avro/DataFile.hh"
-#include "avro/Encoder.hh"
-#include "avro/Decoder.hh"
+#include "sysflowprocessor.h"
 
-#include "syscall_defs.h"
-#include "hashtables.h"
-#include "utils.h"
-#include "container.h"
-#include "process.h"
-#include "header.h"
-#include "context.h"
-#include "processflow.h"
-#include "dataflow.h"
-#include "op_flags.h"
 using namespace std;
-using namespace sysflow;
 
-Context* s_cxt = NULL;
+using namespace sysflowprocessor;
+
+SysFlowProcessor* s_prc = NULL;
 
 
-int runEventLoop(Context* cxt) {
-	int32_t res;
-	sinsp_evt* ev;
-	try
-	{
-                cxt->initialize();
-		//inspector->set_buffer_format(sinsp_evt::PF_NORMAL);
-		while(true) 
-		{
-			res = cxt->inspector->next(&ev);
-			//cout << "Retrieved a scap event... RES: " << res << endl;
-			if(res == SCAP_TIMEOUT)
-			{
-                                if(cxt->exit) {
-                                    break;
-                                }
-				cxt->checkAndRotateFile();
-				continue;
-			}
-			else if(res == SCAP_EOF)
-			{
-				break;
-			}
-			else if(res != SCAP_SUCCESS)
-			{
-				cerr << "res = " << res << endl;
-				throw sinsp_exception(cxt->inspector->getlasterr().c_str());
-			}
-         	        if(cxt->exit) {
-                           break;
-                        }
-                        cxt->checkAndRotateFile();
-                        if(cxt->filterCont && !utils::isInContainer(ev)) {
-                              continue;
-                        }
-			switch(ev->get_type()) {
-                          SF_EXECVE_ENTER()
-                          SF_EXECVE_EXIT(cxt, ev)
-                          SF_CLONE_EXIT(cxt, ev)
-                          SF_PROCEXIT_E_X(cxt, ev)
-                          SF_ACCEPT_EXIT(cxt, ev)
-                          SF_CONNECT_EXIT(cxt, ev)	
-			
-                       } 
-		}
-                cout << "Exiting scap loop... shutting down" << endl;
-                cout << "Container Table: " << cxt->conts.size() << " Process Table: " << cxt->procs.size() << " Num Records Written: " << cxt->numRecs << endl;
-	}
-	catch(sinsp_exception& e)
-	{
-	    cerr << "Sysdig exception " << e.what() << endl;
-    	    return 1;
-        }catch(avro::Exception& ex) {
-            cout << "Avro Exception! Error: " << ex.what() << endl;
-    	    return 1;
-        }
-	delete cxt;
-	return 0;
-}
 
 void signal_handler(int i) {
    cout << "Received Signal " << i << endl;
-   s_cxt->exit = true;   
+   s_prc->exit();   
 }
 
 enum STR2INT_ERROR { SUCC, OFLOW, UFLOW, INCONVERTIBLE };
@@ -135,7 +62,6 @@ int main( int argc, char** argv )
         sigIntHandler.sa_flags = 0;
         bool filterCont = false;
         int fileDuration = 0;
-        time_t start = 0;
 
         sigaction(SIGINT, &sigIntHandler, NULL);
 
@@ -166,7 +92,6 @@ int main( int argc, char** argv )
 				    cout << "File duration must be higher than 0" << endl;
                                     exit(1);
                                 }
-                                start = time(NULL);
                                 break;
 			case 'l':
 				scapFile = "";
@@ -202,13 +127,15 @@ int main( int argc, char** argv )
             outputDir += prefix;
         }
 
-        if(prefix.empty() && start == 0) {
+        if(prefix.empty() && fileDuration == 0) {
             cout << "When not using the -G option, a file prefix must be set using -p." << endl;
             return 1;
         }
 
-        s_cxt = new Context(start, filterCont, fileDuration, !prefix.empty(), outputDir, scapFile, schemaFile, exporterID);
-       
-	return runEventLoop(s_cxt);
+        SysFlowContext* cxt = new SysFlowContext(filterCont, fileDuration, !prefix.empty(), outputDir, scapFile, schemaFile, exporterID);
+        s_prc = new SysFlowProcessor(cxt);
+        int ret =  s_prc->run();
+        delete s_prc;
+        return ret;
 }
 

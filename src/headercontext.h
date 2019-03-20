@@ -4,7 +4,6 @@
 
 #include "sysflow/sysflow.hh"
 
-class Context;
 
 using namespace std;
 using namespace sysflow;

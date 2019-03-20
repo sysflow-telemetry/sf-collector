@@ -15,7 +15,7 @@ TARGET3=sysporterf
 
 all: $(TARGET) $(TARGET2)
 
-$(TARGET): main.o MurmurHash3.o utils.o container.o process.o header.o processflow.o dataflow.o networkflow.o context.o
+$(TARGET): main.o MurmurHash3.o utils.o containercontext.o processcontext.o processflowcontext.o dataflowcontext.o networkflowcontext.o sysflowcontext.o sysflowprocessor.o sysflowwriter.o
 	g++ $^ -o $@ $(LDFLAGS)
 
 #$(TARGET3): sysflowfork.o MurmurHash3.o
@@ -36,25 +36,28 @@ MurmurHash3.o: MurmurHash3.cpp
 utils.o: utils.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
-container.o: container.cpp
+containercontext.o: containercontext.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
-process.o: process.cpp
+sysflowprocessor.o: sysflowprocessor.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
-processflow.o: processflow.cpp
+sysflowwriter.o: sysflowwriter.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
-dataflow.o: dataflow.cpp
+processcontext.o: processcontext.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
-networkflow.o: networkflow.cpp
+processflowcontext.o: processflowcontext.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
-header.o: header.cpp
+dataflowcontext.o: dataflowcontext.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
-context.o: context.cpp
+networkflowcontext.o: networkflowcontext.cpp
+	g++ $(CFLAGS) -o $@ -c $^
+
+sysflowcontext.o: sysflowcontext.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
 reader.o: reader.cpp
