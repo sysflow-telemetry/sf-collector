@@ -21,7 +21,7 @@ $(TARGET): main.o MurmurHash3.o utils.o containercontext.o processcontext.o proc
 #$(TARGET3): sysflowfork.o MurmurHash3.o
 #	g++ $^ -o $@ $(LDFLAGS)
 
-$(TARGET2): reader.o 
+$(TARGET2): reader.o MurmurHash3.o
 	g++ $^ -o $@ $(LDFLAGS2)
 
 main.o: main.cpp

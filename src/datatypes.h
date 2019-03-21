@@ -61,6 +61,7 @@ struct eqoid
 {
   bool operator()(const OID* s1, const OID* s2) const
   {
+    //cout << s1->hpid << " " << s2->hpid << " " << s1->createTS << " " << s2->createTS << " " << (s1->hpid == s2->hpid && s1->createTS == s2->createTS) << endl;
     return (s1->hpid == s2->hpid && s1->createTS == s2->createTS);
   }
 };
