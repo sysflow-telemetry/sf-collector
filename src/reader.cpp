@@ -35,6 +35,7 @@ ProcessTable s_procs;
 
 bool s_printProc = false;
 bool s_printCont = false;
+bool s_keepProcOnExit = false;
 
 const char* Events[] = {"CLONE", "EXEC", "EXIT"};
 
@@ -69,10 +70,13 @@ void printNetFlow(NetworkFlow netflow) {
     opFlags +=  ((netflow.opFlags & OP_NF_TRUNCATE) ?  "T" : " ");
     opFlags +=  ((netflow.opFlags & OP_NF_FINAL) ?  "F" : " ");
 
+    string srcIPStr = string(inet_ntoa(srcIP));
+    string dstIPStr = string(inet_ntoa(dstIP));
+
    ProcessTable::iterator it = s_procs.find(&(netflow.procOID));
    if(it == s_procs.end()) {
        cout << "Uh Oh! Can't find process for netflow!! " << endl;
-       cout << "NETFLOW " << netflow.startTs << " " << netflow.endTs << " " <<  opFlags << " SIP: " << inet_ntoa(srcIP) << " " << " DIP: " << inet_ntoa(dstIP) << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
+       cout << "NETFLOW " << netflow.startTs << " " << netflow.endTs << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
   } else {
        time_t startTs = ((time_t)(netflow.startTs/NANO_TO_SECS));
        time_t endTs = ((time_t)(netflow.endTs/NANO_TO_SECS));
@@ -84,7 +88,8 @@ void printNetFlow(NetworkFlow netflow) {
        if(!it->second->containerId.is_null()) {
                   container = it->second->containerId.get_string();
        }
-       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " SIP: " << inet_ntoa(srcIP) << " " << " DIP: " << inet_ntoa(dstIP) << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
+       //cout << netflow.sip << "\t" << netflow.dip << endl;
+       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
 
  }
 }
@@ -208,7 +213,7 @@ int runEventLoop(string sysFile, string schemaFile) {
                    cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " <<  times << " " << Events[pf.type] << " " <<  " " << pf.ret <<  " " << pf.procOID.createTS << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
 
                 }
-               if(pf.type == 2) { // exit
+               if(!s_keepProcOnExit && pf.type == 2) { // exit
                    if(it != s_procs.end()) {
                         delete it->second;
                         s_procs.erase(&(pf.procOID));
@@ -257,7 +262,7 @@ int main( int argc, char** argv )
         delkey.hpid = 1;
         delkey.createTS = 1;
         s_procs.set_deleted_key(&delkey);
-	while ((c = getopt (argc, argv, "lr:w:s:pc")) != -1)
+	while ((c = getopt (argc, argv, "lr:w:s:pck")) != -1)
     	{
 		switch (c)
       		{
@@ -269,9 +274,13 @@ int main( int argc, char** argv )
                                break;
                         case 'p':
                                s_printProc = true;
+                               break;
                         case 'c':
                                s_printCont = true;
-
+                               break;
+                        case 'k':
+                               s_keepProcOnExit = true;
+                               break;
       			case '?':
         			if (optopt == 'r' || optopt == 'm')
           				fprintf (stderr, "Option -%c requires an argument.\n", optopt);

@@ -25,6 +25,8 @@ namespace process {
             void updateProcess(Process* proc, sinsp_evt* ev, ActionType actType);
             Process* createProcess(sinsp_threadinfo* mainthread, sinsp_evt* ev, ActionType actType);
             Process* getProcess(sinsp_evt* ev, ActionType actType, bool& created);
+            Process* getProcess(OID* oid);
+            void printAncestors(Process* proc);
             bool isAncestor(OID* oid, Process* proc);
             void clearProcesses();
             void deleteProcess(Process** proc);

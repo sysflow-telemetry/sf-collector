@@ -45,8 +45,15 @@ void ProcessFlowContext::writeExecEvent(sinsp_evt* ev) {
    /* if(!created) {
       cout << "Exec on an existing process!" << endl;
     }*/
-    m_processCxt->updateProcess(proc, ev, ActionType::MODIFIED);
-    m_writer->writeProcess(proc);
+
+    //If Clones are filtered out (or a process like bash is filtered out) then we will only see
+    // the EXEC of this process, and the getProcess above will actually create it.  So the question is
+   // do we want to add another process record just to mark it modified at this point?
+    if(!created) {
+        m_processCxt->updateProcess(proc, ev, ActionType::MODIFIED);
+        cout << "Writing modified process..." << proc->exe << endl;
+        m_writer->writeProcess(proc);
+    }
 
     m_procFlow.type =  EXEC;
     m_procFlow.ts = ev->get_ts();

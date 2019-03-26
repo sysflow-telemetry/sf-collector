@@ -26,6 +26,8 @@ Process* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_evt* 
    proc->oid.hpid = mainthread->m_pid;
    proc->oid.createTS = mainthread->m_clone_ts;
 
+  sinsp_threadinfo* ti = ev->get_thread_info();
+
    sinsp_threadinfo* parent = mainthread->get_parent_thread();
 
    if(parent != NULL) {
@@ -38,7 +40,8 @@ Process* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_evt* 
    //std::memcpy(&proc->oid[0], &mainthread->m_clone_ts, sizeof(int64_t));
    //std::memcpy(&proc->oid[8], &proc->hpid, sizeof(int32_t));
    //cout << "Wrote OID" << endl;
-   proc->exe = mainthread->m_exepath;
+   proc->exe = (mainthread->m_exepath.empty()) ? mainthread->m_exe : mainthread->m_exepath;
+   cout << "The exepath is " << proc->exe <<  " ti: " << ti->get_exepath() << " EXE: " << mainthread->get_exe() << endl;
    proc->exeArgs.clear();
    int i = 0;
    for(std::vector<string>::iterator it = mainthread->m_args.begin(); it != mainthread->m_args.end(); ++it) {
@@ -69,6 +72,24 @@ Process* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_evt* 
     //proc->childCount = mainthread->m_nchilds;
     return proc;
 }
+
+void ProcessContext::printAncestors(Process* proc) {
+   Process::poid_t poid = proc->poid;
+  
+   while(!poid.is_null()){
+       OID key = poid.get_OID();
+       ProcessTable::iterator p = m_procs.find(&(key));
+       if(p != m_procs.end()) {
+          poid = p->second->poid;
+          cout << "-->" << p->second->oid.hpid << " " << p->second->oid.createTS << " " << p->second->exe << " " << p->second->exeArgs << endl;
+       }else {
+           break;
+       }
+   }
+
+}
+
+
 
 bool ProcessContext::isAncestor(OID* oid, Process* proc) {
 
@@ -116,7 +137,7 @@ Process* ProcessContext::getProcess(sinsp_evt* ev, ActionType actType, bool& cre
           }
 	  key.createTS = mt->m_clone_ts;
 	  key.hpid = mt->m_pid;
-         // cout << "PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXE " << mt->m_exepath << endl;
+         cout << "PARENT PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe << endl;
           //std::memcpy(&key[0], &mt->m_clone_ts, sizeof(int64_t));
           //std::memcpy(&key[8], &mt->m_pid, sizeof(int32_t));
           ProcessTable::iterator proc2 = m_procs.find(&key);
@@ -129,18 +150,30 @@ Process* ProcessContext::getProcess(sinsp_evt* ev, ActionType actType, bool& cre
       }
 
       for(vector<Process*>::reverse_iterator it = processes.rbegin(); it != processes.rend(); ++it) {
+          cout << "Going to write process " << (*it)->exe << " " << (*it)->oid.hpid << endl;
           m_procs[&(*it)->oid] = (*it);
           m_writer->writeProcess((*it));
       }
+      cout << "Returning process " << endl;
       return process;
 }
+
+Process* ProcessContext::getProcess(OID* oid) {
+      ProcessTable::iterator proc = m_procs.find(oid);
+      if(proc != m_procs.end()) {
+          return proc->second;
+      }
+      return NULL;
+}
+
 
 void ProcessContext::updateProcess(Process* proc, sinsp_evt* ev, ActionType actType) {
    sinsp_threadinfo* ti = ev->get_thread_info();
    sinsp_threadinfo* mainthread = ti->get_main_thread();
    proc->type = actType;
    proc->ts = ev->get_ts();
-   proc->exe = mainthread->m_exepath;
+   //proc->exe = mainthread->m_exepath;
+   proc->exe = (mainthread->m_exepath.empty()) ? mainthread->m_exe : mainthread->m_exepath;
    proc->exeArgs.clear();
    int i = 0;
    for(std::vector<string>::iterator it = mainthread->m_args.begin(); it != mainthread->m_args.end(); ++it) {

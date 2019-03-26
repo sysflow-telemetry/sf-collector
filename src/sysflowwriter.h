@@ -35,6 +35,7 @@ class SysFlowWriter {
              m_dfw->write(m_flow);
         }
         inline void writeProcess(Process* proc) {
+            cout << "Write Proc: " << proc->oid.hpid << " " << proc->oid.createTS << " "  << proc->exe << " " << proc->exeArgs << endl;
             m_flow.rec.set_Process(*proc);
             m_numRecs++;
             m_dfw->write(m_flow);

@@ -53,12 +53,12 @@ inline void NetworkFlowContext::canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* k
     uint32_t sport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sport;
     uint32_t dport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dport;
 
-    if(sip < dip) {
+//    if(sip < dip) {
        key->ip1 = sip;
        key->port1 = sport;
        key->ip2 = dip;
        key->port2 = dport;
-    } else if(dip < sip) {
+ /*   } else if(dip < sip) {
        key->ip1 = dip;
        key->port1 = dport;
        key->ip2 = sip;
@@ -73,7 +73,7 @@ inline void NetworkFlowContext::canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* k
        key->port1 = dport;
        key->ip2 = sip;
        key->port2 = sport;
-    }
+    }*/
 }
 
 inline void NetworkFlowContext::canonicalizeKey(NetFlowObj* nf, NFKey* key) {
@@ -82,12 +82,12 @@ inline void NetworkFlowContext::canonicalizeKey(NetFlowObj* nf, NFKey* key) {
     uint32_t sport = nf->netflow.sport;
     uint32_t dport = nf->netflow.dport;
 
-    if(sip < dip) {
+   // if(sip < dip) {
        key->ip1 = sip;
        key->port1 = sport;
        key->ip2 = dip;
        key->port2 = dport;
-    } else if(dip < sip) {
+   /* } else if(dip < sip) {
        key->ip1 = dip;
        key->port1 = dport;
        key->ip2 = sip;
@@ -102,7 +102,7 @@ inline void NetworkFlowContext::canonicalizeKey(NetFlowObj* nf, NFKey* key) {
        key->port1 = dport;
        key->ip2 = sip;
        key->port2 = sport;
-    }
+    }*/
 }
 
 inline time_t NetworkFlowContext::getExportTime() {
@@ -176,12 +176,23 @@ inline void NetworkFlowContext::removeAndWriteNetworkFlow(NetFlowObj** nf, NFKey
 
 
 inline void NetworkFlowContext::processExistingFlow(sinsp_evt* ev, Process* proc, NFOpFlags flag, NFKey key, NetFlowObj* nf) {
+     sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
+
      if(!(nf->netflow.procOID.hpid == proc->oid.hpid  &&
           nf->netflow.procOID.createTS == proc->oid.createTS)){
           //DO WE WANT TO ALLOW processes that aren't ancestors of each other to delegate? If not,
           //what should we do?
           if(!m_processCxt->isAncestor(&(nf->netflow.procOID), proc)) {
                cout << "Netflow: " << nf->netflow.sip << " " << nf->netflow.dip << " " << nf->netflow.sport << " " << nf->netflow.dport << " already exists but isn't an ancestor of: " << proc->exe <<  " Writing! " << endl;
+               Process* nfProc = m_processCxt->getProcess(&(nf->netflow.procOID));
+               if(nfProc != NULL) {
+                   cout << "Netflow proc oid: " << nf->netflow.procOID.hpid << " " << nf->netflow.procOID.createTS << " " << nfProc->exe << " " << nfProc->exeArgs << "Netflow proc ancestors: Old proc" <<  endl;
+                   m_processCxt->printAncestors(nfProc);
+                   cout << "Current proc oid: " << proc->oid.hpid << " " << proc->oid.createTS << " " << proc->exe << " " << proc->exeArgs << " Current Process ancestors: Is ROLE SERVER? " << fdinfo->is_role_server() << endl;
+                   m_processCxt->printAncestors(proc);
+              }else {
+                   cout << "Netflow proc oid: " << nf->netflow.procOID.hpid << " " << nf->netflow.procOID.createTS << " " << "Process is NULL" << endl;
+              }
           } 
           nf->netflow.opFlags |= OP_NF_DELEGATE;
           m_writer->writeNetFlow(&(nf->netflow));
@@ -226,7 +237,7 @@ int NetworkFlowContext::handleNetFlowEvent(sinsp_evt* ev, NFOpFlags flag) {
 
     string ip4tuple = ipv4tuple_to_string(&(fdinfo->m_sockinfo.m_ipv4info), false);
 
-    cout << proc->exe << " " << ip4tuple << " Proto: " << getProtocol(fdinfo->get_l4proto()) <<  endl;
+    cout << proc->exe << " " << ip4tuple << " Proto: " << getProtocol(fdinfo->get_l4proto()) << " Server: " << fdinfo->is_role_server() << " Client: " << fdinfo->is_role_client() << " " << ev->get_name() <<  endl;
 
     if(nf == NULL) {
        processNewFlow(ev, proc, flag, key);
