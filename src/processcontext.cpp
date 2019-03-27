@@ -3,8 +3,8 @@
 using namespace process;
 
 ProcessContext::ProcessContext(SysFlowContext* cxt, container::ContainerContext* ccxt, SysFlowWriter* writer) : m_procs(PROC_TABLE_SIZE) {
-    m_empkey.hpid = 0; 
-    m_empkey.createTS = 0; 
+    m_empkey.hpid = 2; 
+    m_empkey.createTS = 2; 
     m_procs.set_empty_key(&m_empkey);
     m_delkey.hpid = 1;
     m_delkey.createTS = 1;
@@ -119,6 +119,7 @@ Process* ProcessContext::getProcess(sinsp_evt* ev, ActionType actType, bool& cre
       key.createTS = mt->m_clone_ts;
       key.hpid = mt->m_pid;
       created = true;
+      cout << "PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe << endl;
       //std::memcpy(&key[0], &mt->m_clone_ts, sizeof(int64_t));
       //std::memcpy(&key[8], &mt->m_pid, sizeof(int32_t));
       ProcessTable::iterator proc = m_procs.find(&key);
@@ -128,6 +129,7 @@ Process* ProcessContext::getProcess(sinsp_evt* ev, ActionType actType, bool& cre
       }
       std::vector<Process*> processes; 
       Process* process = createProcess(mt, ev, actType);
+      cout << "CREATING PROCESS FOR WRITING: PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe << endl;
       processes.push_back(process);
       mt = mt->get_parent_thread();
       while(mt != NULL) {

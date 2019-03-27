@@ -3,21 +3,6 @@
   "name" : "NetworkFlow",
   "namespace" : "sysflow.flow",
   "fields" : [ {
-    "name" : "opFlags",
-    "type" : "int"
-  }, {
-    "name" : "startTs",
-    "type" : {
-      "type" : "long",
-      "logicalType" : "timestamp-millis"
-    }
-  }, {
-    "name" : "endTs",
-    "type" : {
-      "type" : "long",
-      "logicalType" : "timestamp-millis"
-    }
-  }, {
     "name" : "procOID",
     "type" : {
       "type" : "record",
@@ -35,8 +20,23 @@
       } ]
     }
   }, {
+    "name" : "ts",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
     "name" : "tid",
     "type" : "long"
+  }, {
+    "name" : "opFlags",
+    "type" : "int"
+  }, {
+    "name" : "endTs",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
   }, {
     "name" : "sip",
     "type" : "int"
@@ -64,8 +64,5 @@
   }, {
     "name" : "numWBytes",
     "type" : "long"
-  }, {
-    "name" : "domain",
-    "type" : "string"
   } ]
 }

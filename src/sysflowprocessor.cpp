@@ -10,8 +10,8 @@ SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
    m_writer = new SysFlowWriter(cxt, start);
    m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
    m_processCxt = new process::ProcessContext(m_cxt, m_containerCxt, m_writer);
-   m_procFlowCxt = new processflow::ProcessFlowContext(m_writer, m_processCxt);
    m_dfCxt = new dataflow::DataFlowContext(m_cxt, m_writer, m_processCxt);
+   m_procFlowCxt = new processflow::ProcessFlowContext(m_writer, m_processCxt, m_dfCxt);
 }
 
 SysFlowProcessor::~SysFlowProcessor() {

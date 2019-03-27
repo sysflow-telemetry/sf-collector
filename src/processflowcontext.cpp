@@ -1,9 +1,10 @@
 #include "processflowcontext.h"
 
 using namespace processflow;
-ProcessFlowContext::ProcessFlowContext(SysFlowWriter* writer, process::ProcessContext* pc) {
+ProcessFlowContext::ProcessFlowContext(SysFlowWriter* writer, process::ProcessContext* pc, dataflow::DataFlowContext* dfc) {
     m_processCxt = pc;
     m_writer = writer;
+    m_dfCxt = dfc;
 }
 
 ProcessFlowContext::~ProcessFlowContext() {
@@ -33,6 +34,7 @@ void ProcessFlowContext::writeExitEvent(sinsp_evt* ev) {
     m_procFlow.procOID.createTS = proc->oid.createTS;
     m_procFlow.tid = ti->m_tid;
     m_procFlow.ret = utils::getSyscallResult(ev);
+    m_dfCxt->removeAndWriteDFFromProc(&(proc->oid));
     m_writer->writeProcessFlow(&m_procFlow);
     // delete the process from the proc table after an exit
     m_processCxt->deleteProcess(&proc);

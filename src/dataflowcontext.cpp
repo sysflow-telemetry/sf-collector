@@ -31,6 +31,10 @@ int DataFlowContext::handleDataEvent(sinsp_evt* ev, NFOpFlags flag) {
     return 2;
 }
 
+int DataFlowContext::removeAndWriteDFFromProc(OID* oid) {
+   return m_netflowCxt->removeAndWriteNFFromProc(oid);
+}
+
 void DataFlowContext::clearTables() {
     m_netflowCxt->clearNetFlows();
 }

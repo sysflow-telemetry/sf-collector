@@ -28,12 +28,6 @@
 #include "avro/Decoder.hh"
 
 namespace sysflow.flow {
-enum EventType {
-    CLONE,
-    EXEC,
-    EXIT,
-};
-
 struct OID {
     int64_t createTS;
     int64_t hpid;
@@ -43,18 +37,24 @@ struct OID {
         { }
 };
 
+enum EventType {
+    CLONE,
+    EXEC,
+    EXIT,
+};
+
 struct ProcessFlow {
-    EventType type;
-    int64_t ts;
     OID procOID;
+    int64_t ts;
     int64_t tid;
+    EventType type;
     std::vector<std::string > args;
     int32_t ret;
     ProcessFlow() :
-        type(EventType()),
-        ts(int64_t()),
         procOID(OID()),
+        ts(int64_t()),
         tid(int64_t()),
+        type(EventType()),
         args(std::vector<std::string >()),
         ret(int32_t())
         { }
@@ -62,28 +62,6 @@ struct ProcessFlow {
 
 }
 namespace avro {
-template<> struct codec_traits<sysflow.flow::EventType> {
-    static void encode(Encoder& e, sysflow.flow::EventType v) {
-		if (v < sysflow.flow::CLONE || v > sysflow.flow::EXIT)
-		{
-			std::ostringstream error;
-			error << "enum value " << v << " is out of bound for sysflow.flow::EventType and cannot be encoded";
-			throw avro::Exception(error.str());
-		}
-        e.encodeEnum(v);
-    }
-    static void decode(Decoder& d, sysflow.flow::EventType& v) {
-		size_t index = d.decodeEnum();
-		if (index < sysflow.flow::CLONE || index > sysflow.flow::EXIT)
-		{
-			std::ostringstream error;
-			error << "enum value " << index << " is out of bound for sysflow.flow::EventType and cannot be decoded";
-			throw avro::Exception(error.str());
-		}
-        v = static_cast<sysflow.flow::EventType>(index);
-    }
-};
-
 template<> struct codec_traits<sysflow.flow::OID> {
     static void encode(Encoder& e, const sysflow.flow::OID& v) {
         avro::encode(e, v.createTS);
@@ -113,12 +91,34 @@ template<> struct codec_traits<sysflow.flow::OID> {
     }
 };
 
+template<> struct codec_traits<sysflow.flow::EventType> {
+    static void encode(Encoder& e, sysflow.flow::EventType v) {
+		if (v < sysflow.flow::CLONE || v > sysflow.flow::EXIT)
+		{
+			std::ostringstream error;
+			error << "enum value " << v << " is out of bound for sysflow.flow::EventType and cannot be encoded";
+			throw avro::Exception(error.str());
+		}
+        e.encodeEnum(v);
+    }
+    static void decode(Decoder& d, sysflow.flow::EventType& v) {
+		size_t index = d.decodeEnum();
+		if (index < sysflow.flow::CLONE || index > sysflow.flow::EXIT)
+		{
+			std::ostringstream error;
+			error << "enum value " << index << " is out of bound for sysflow.flow::EventType and cannot be decoded";
+			throw avro::Exception(error.str());
+		}
+        v = static_cast<sysflow.flow::EventType>(index);
+    }
+};
+
 template<> struct codec_traits<sysflow.flow::ProcessFlow> {
     static void encode(Encoder& e, const sysflow.flow::ProcessFlow& v) {
-        avro::encode(e, v.type);
-        avro::encode(e, v.ts);
         avro::encode(e, v.procOID);
+        avro::encode(e, v.ts);
         avro::encode(e, v.tid);
+        avro::encode(e, v.type);
         avro::encode(e, v.args);
         avro::encode(e, v.ret);
     }
@@ -130,16 +130,16 @@ template<> struct codec_traits<sysflow.flow::ProcessFlow> {
                 it != fo.end(); ++it) {
                 switch (*it) {
                 case 0:
-                    avro::decode(d, v.type);
+                    avro::decode(d, v.procOID);
                     break;
                 case 1:
                     avro::decode(d, v.ts);
                     break;
                 case 2:
-                    avro::decode(d, v.procOID);
+                    avro::decode(d, v.tid);
                     break;
                 case 3:
-                    avro::decode(d, v.tid);
+                    avro::decode(d, v.type);
                     break;
                 case 4:
                     avro::decode(d, v.args);
@@ -152,10 +152,10 @@ template<> struct codec_traits<sysflow.flow::ProcessFlow> {
                 }
             }
         } else {
-            avro::decode(d, v.type);
-            avro::decode(d, v.ts);
             avro::decode(d, v.procOID);
+            avro::decode(d, v.ts);
             avro::decode(d, v.tid);
+            avro::decode(d, v.type);
             avro::decode(d, v.args);
             avro::decode(d, v.ret);
         }

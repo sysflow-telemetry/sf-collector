@@ -38,11 +38,11 @@ struct OID {
 };
 
 struct NetworkFlow {
-    int32_t opFlags;
-    int64_t startTs;
-    int64_t endTs;
     OID procOID;
+    int64_t ts;
     int64_t tid;
+    int32_t opFlags;
+    int64_t endTs;
     int32_t sip;
     int32_t sport;
     int32_t dip;
@@ -52,13 +52,12 @@ struct NetworkFlow {
     int64_t numWOps;
     int64_t numRBytes;
     int64_t numWBytes;
-    std::string domain;
     NetworkFlow() :
-        opFlags(int32_t()),
-        startTs(int64_t()),
-        endTs(int64_t()),
         procOID(OID()),
+        ts(int64_t()),
         tid(int64_t()),
+        opFlags(int32_t()),
+        endTs(int64_t()),
         sip(int32_t()),
         sport(int32_t()),
         dip(int32_t()),
@@ -67,8 +66,7 @@ struct NetworkFlow {
         numROps(int64_t()),
         numWOps(int64_t()),
         numRBytes(int64_t()),
-        numWBytes(int64_t()),
-        domain(std::string())
+        numWBytes(int64_t())
         { }
 };
 
@@ -105,11 +103,11 @@ template<> struct codec_traits<sysflow.flow::OID> {
 
 template<> struct codec_traits<sysflow.flow::NetworkFlow> {
     static void encode(Encoder& e, const sysflow.flow::NetworkFlow& v) {
-        avro::encode(e, v.opFlags);
-        avro::encode(e, v.startTs);
-        avro::encode(e, v.endTs);
         avro::encode(e, v.procOID);
+        avro::encode(e, v.ts);
         avro::encode(e, v.tid);
+        avro::encode(e, v.opFlags);
+        avro::encode(e, v.endTs);
         avro::encode(e, v.sip);
         avro::encode(e, v.sport);
         avro::encode(e, v.dip);
@@ -119,7 +117,6 @@ template<> struct codec_traits<sysflow.flow::NetworkFlow> {
         avro::encode(e, v.numWOps);
         avro::encode(e, v.numRBytes);
         avro::encode(e, v.numWBytes);
-        avro::encode(e, v.domain);
     }
     static void decode(Decoder& d, sysflow.flow::NetworkFlow& v) {
         if (avro::ResolvingDecoder *rd =
@@ -129,19 +126,19 @@ template<> struct codec_traits<sysflow.flow::NetworkFlow> {
                 it != fo.end(); ++it) {
                 switch (*it) {
                 case 0:
-                    avro::decode(d, v.opFlags);
-                    break;
-                case 1:
-                    avro::decode(d, v.startTs);
-                    break;
-                case 2:
-                    avro::decode(d, v.endTs);
-                    break;
-                case 3:
                     avro::decode(d, v.procOID);
                     break;
-                case 4:
+                case 1:
+                    avro::decode(d, v.ts);
+                    break;
+                case 2:
                     avro::decode(d, v.tid);
+                    break;
+                case 3:
+                    avro::decode(d, v.opFlags);
+                    break;
+                case 4:
+                    avro::decode(d, v.endTs);
                     break;
                 case 5:
                     avro::decode(d, v.sip);
@@ -170,19 +167,16 @@ template<> struct codec_traits<sysflow.flow::NetworkFlow> {
                 case 13:
                     avro::decode(d, v.numWBytes);
                     break;
-                case 14:
-                    avro::decode(d, v.domain);
-                    break;
                 default:
                     break;
                 }
             }
         } else {
-            avro::decode(d, v.opFlags);
-            avro::decode(d, v.startTs);
-            avro::decode(d, v.endTs);
             avro::decode(d, v.procOID);
+            avro::decode(d, v.ts);
             avro::decode(d, v.tid);
+            avro::decode(d, v.opFlags);
+            avro::decode(d, v.endTs);
             avro::decode(d, v.sip);
             avro::decode(d, v.sport);
             avro::decode(d, v.dip);
@@ -192,7 +186,6 @@ template<> struct codec_traits<sysflow.flow::NetworkFlow> {
             avro::decode(d, v.numWOps);
             avro::decode(d, v.numRBytes);
             avro::decode(d, v.numWBytes);
-            avro::decode(d, v.domain);
         }
     }
 };

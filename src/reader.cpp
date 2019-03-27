@@ -76,9 +76,9 @@ void printNetFlow(NetworkFlow netflow) {
    ProcessTable::iterator it = s_procs.find(&(netflow.procOID));
    if(it == s_procs.end()) {
        cout << "Uh Oh! Can't find process for netflow!! " << endl;
-       cout << "NETFLOW " << netflow.startTs << " " << netflow.endTs << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
+       cout << "NETFLOW " << netflow.ts << " " << netflow.endTs << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
   } else {
-       time_t startTs = ((time_t)(netflow.startTs/NANO_TO_SECS));
+       time_t startTs = ((time_t)(netflow.ts/NANO_TO_SECS));
        time_t endTs = ((time_t)(netflow.endTs/NANO_TO_SECS));
        char startTime[100];
        char endTime[100];

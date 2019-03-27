@@ -18,10 +18,13 @@ namespace networkflow {
             SysFlowContext* m_cxt;
             process::ProcessContext* m_processCxt;
             SysFlowWriter* m_writer;
-            NetworkFlowTable m_netflows;
+            //NetworkFlowTable m_netflows;
             NetworkFlowSet m_nfSet;
+            OIDNetworkTable m_oidnfTable;
             NFKey m_nfdelkey;
             NFKey m_nfemptykey;
+            OID m_oiddelkey;
+            OID m_oidemptykey;
             time_t m_lastCheck;
             void canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* key);
             void canonicalizeKey(NetFlowObj* nf, NFKey* key);
@@ -30,8 +33,11 @@ namespace networkflow {
             void processExistingFlow(sinsp_evt* ev, Process* proc, NFOpFlags flag, NFKey key, NetFlowObj* nf);
             void processNewFlow(sinsp_evt* ev, Process* proc, NFOpFlags flag, NFKey key) ;
             void removeAndWriteNetworkFlow(NetFlowObj** nf, NFKey* key);
+            void removeNetworkFlow(NetFlowObj** nf, NFKey* key);
+         
             time_t getExportTime();
             int32_t getProtocol(scap_l4_proto proto);
+            NetworkFlowTable* createNetworkFlowTable();
         public:
             NetworkFlowContext(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* procCxt);
             virtual ~NetworkFlowContext();
@@ -39,8 +45,13 @@ namespace networkflow {
             void clearNetFlows();
             int checkForExpiredFlows();
             inline int getSize() {
-                return m_netflows.size();
+                int total = 0;
+                for(OIDNetworkTable::iterator it = m_oidnfTable.begin(); it != m_oidnfTable.end(); it++) {
+                     total+= it->second->size();
+                 }
+                return total;
             }
+            int removeAndWriteNFFromProc(OID* oid);
             
          
     };

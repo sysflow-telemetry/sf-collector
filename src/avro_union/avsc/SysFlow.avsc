@@ -105,13 +105,8 @@
       "name" : "ProcessFlow",
       "namespace" : "sysflow.flow",
       "fields" : [ {
-        "name" : "type",
-        "type" : {
-          "type" : "enum",
-          "name" : "EventType",
-          "namespace" : "sysflow.type",
-          "symbols" : [ "CLONE", "EXEC", "EXIT" ]
-        }
+        "name" : "procOID",
+        "type" : "sysflow.type.OID"
       }, {
         "name" : "ts",
         "type" : {
@@ -119,11 +114,16 @@
           "logicalType" : "timestamp-millis"
         }
       }, {
-        "name" : "procOID",
-        "type" : "sysflow.type.OID"
-      }, {
         "name" : "tid",
         "type" : "long"
+      }, {
+        "name" : "type",
+        "type" : {
+          "type" : "enum",
+          "name" : "EventType",
+          "namespace" : "sysflow.type",
+          "symbols" : [ "CLONE", "EXEC", "EXIT" ]
+        }
       }, {
         "name" : "args",
         "type" : {
@@ -139,26 +139,26 @@
       "name" : "NetworkFlow",
       "namespace" : "sysflow.flow",
       "fields" : [ {
-        "name" : "opFlags",
-        "type" : "int"
+        "name" : "procOID",
+        "type" : "sysflow.type.OID"
       }, {
-        "name" : "startTs",
+        "name" : "ts",
         "type" : {
           "type" : "long",
           "logicalType" : "timestamp-millis"
         }
+      }, {
+        "name" : "tid",
+        "type" : "long"
+      }, {
+        "name" : "opFlags",
+        "type" : "int"
       }, {
         "name" : "endTs",
         "type" : {
           "type" : "long",
           "logicalType" : "timestamp-millis"
         }
-      }, {
-        "name" : "procOID",
-        "type" : "sysflow.type.OID"
-      }, {
-        "name" : "tid",
-        "type" : "long"
       }, {
         "name" : "sip",
         "type" : "int"
@@ -186,9 +186,6 @@
       }, {
         "name" : "numWBytes",
         "type" : "long"
-      }, {
-        "name" : "domain",
-        "type" : "string"
       } ]
     } ]
   } ]

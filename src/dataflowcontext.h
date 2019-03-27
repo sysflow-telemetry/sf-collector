@@ -20,6 +20,7 @@ namespace dataflow {
            virtual ~DataFlowContext();
            void clearTables();
            int checkForExpiredRecords();
+           int removeAndWriteDFFromProc(OID* oid);
     };
 }
 

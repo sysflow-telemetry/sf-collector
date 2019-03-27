@@ -2,11 +2,11 @@
 protocol SysFlow {
 import idl "../type/datatypes.avdl";
 record NetworkFlow {
-  int opFlags;
-  timestamp_ms startTs;
-  timestamp_ms endTs;
   sysflow.type.OID procOID; // host ID + monotonic process creation time + host PID
+  timestamp_ms ts;
   long tid;
+  int opFlags;
+  timestamp_ms endTs;
   int sip;
   int sport;
   int dip;
@@ -16,6 +16,5 @@ record NetworkFlow {
   long numWOps;
   long numRBytes;
   long numWBytes;
-  string domain;
 }
 }
