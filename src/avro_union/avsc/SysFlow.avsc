@@ -102,6 +102,48 @@
       } ]
     }, {
       "type" : "record",
+      "name" : "File",
+      "namespace" : "sysflow.entity",
+      "fields" : [ {
+        "name" : "type",
+        "type" : "sysflow.type.ActionType"
+      }, {
+        "name" : "oid",
+        "type" : {
+          "type" : "record",
+          "name" : "FOID",
+          "namespace" : "sysflow.type",
+          "fields" : [ {
+            "name" : "upperbits",
+            "type" : "long"
+          }, {
+            "name" : "lowerbits",
+            "type" : "long"
+          } ]
+        }
+      }, {
+        "name" : "ts",
+        "type" : {
+          "type" : "long",
+          "logicalType" : "timestamp-millis"
+        }
+      }, {
+        "name" : "restype",
+        "type" : {
+          "type" : "enum",
+          "name" : "ResourceType",
+          "namespace" : "sysflow.type",
+          "symbols" : [ "FILE", "DIRECTORY", "PIPE", "UNIX" ]
+        }
+      }, {
+        "name" : "path",
+        "type" : "string"
+      }, {
+        "name" : "containerDirectory",
+        "type" : [ "null", "string" ]
+      } ]
+    }, {
+      "type" : "record",
       "name" : "ProcessFlow",
       "namespace" : "sysflow.flow",
       "fields" : [ {
@@ -173,6 +215,50 @@
         "type" : "int"
       }, {
         "name" : "proto",
+        "type" : "int"
+      }, {
+        "name" : "numROps",
+        "type" : "long"
+      }, {
+        "name" : "numWOps",
+        "type" : "long"
+      }, {
+        "name" : "numRBytes",
+        "type" : "long"
+      }, {
+        "name" : "numWBytes",
+        "type" : "long"
+      } ]
+    }, {
+      "type" : "record",
+      "name" : "FileFlow",
+      "namespace" : "sysflow.flow",
+      "fields" : [ {
+        "name" : "procOID",
+        "type" : "sysflow.type.OID"
+      }, {
+        "name" : "ts",
+        "type" : {
+          "type" : "long",
+          "logicalType" : "timestamp-millis"
+        }
+      }, {
+        "name" : "tid",
+        "type" : "long"
+      }, {
+        "name" : "opFlags",
+        "type" : "int"
+      }, {
+        "name" : "endTs",
+        "type" : {
+          "type" : "long",
+          "logicalType" : "timestamp-millis"
+        }
+      }, {
+        "name" : "fileOID",
+        "type" : "sysflow.type.FOID"
+      }, {
+        "name" : "fd",
         "type" : "int"
       }, {
         "name" : "numROps",

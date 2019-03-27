@@ -1,0 +1,12 @@
+{
+  "type" : "record",
+  "name" : "FOID",
+  "namespace" : "sysflow.type",
+  "fields" : [ {
+    "name" : "upperbits",
+    "type" : "long"
+  }, {
+    "name" : "lowerbits",
+    "type" : "long"
+  } ]
+}

@@ -1,0 +1,48 @@
+{
+  "type" : "record",
+  "name" : "File",
+  "namespace" : "sysflow.entity",
+  "fields" : [ {
+    "name" : "type",
+    "type" : {
+      "type" : "enum",
+      "name" : "ActionType",
+      "namespace" : "sysflow.type",
+      "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
+    }
+  }, {
+    "name" : "oid",
+    "type" : {
+      "type" : "record",
+      "name" : "FOID",
+      "namespace" : "sysflow.type",
+      "fields" : [ {
+        "name" : "upperbits",
+        "type" : "long"
+      }, {
+        "name" : "lowerbits",
+        "type" : "long"
+      } ]
+    }
+  }, {
+    "name" : "ts",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "restype",
+    "type" : {
+      "type" : "enum",
+      "name" : "ResourceType",
+      "namespace" : "sysflow.type",
+      "symbols" : [ "FILE", "DIRECTORY", "PIPE", "UNIX" ]
+    }
+  }, {
+    "name" : "path",
+    "type" : "string"
+  }, {
+    "name" : "containerDirectory",
+    "type" : [ "null", "string" ]
+  } ]
+}

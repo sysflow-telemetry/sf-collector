@@ -1,0 +1,70 @@
+{
+  "type" : "record",
+  "name" : "FileFlow",
+  "namespace" : "sysflow.flow",
+  "fields" : [ {
+    "name" : "procOID",
+    "type" : {
+      "type" : "record",
+      "name" : "OID",
+      "namespace" : "sysflow.type",
+      "fields" : [ {
+        "name" : "createTS",
+        "type" : {
+          "type" : "long",
+          "logicalType" : "timestamp-millis"
+        }
+      }, {
+        "name" : "hpid",
+        "type" : "long"
+      } ]
+    }
+  }, {
+    "name" : "ts",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "tid",
+    "type" : "long"
+  }, {
+    "name" : "opFlags",
+    "type" : "int"
+  }, {
+    "name" : "endTs",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "fileOID",
+    "type" : {
+      "type" : "record",
+      "name" : "FOID",
+      "namespace" : "sysflow.type",
+      "fields" : [ {
+        "name" : "upperbits",
+        "type" : "long"
+      }, {
+        "name" : "lowerbits",
+        "type" : "long"
+      } ]
+    }
+  }, {
+    "name" : "fd",
+    "type" : "int"
+  }, {
+    "name" : "numROps",
+    "type" : "long"
+  }, {
+    "name" : "numWOps",
+    "type" : "long"
+  }, {
+    "name" : "numRBytes",
+    "type" : "long"
+  }, {
+    "name" : "numWBytes",
+    "type" : "long"
+  } ]
+}

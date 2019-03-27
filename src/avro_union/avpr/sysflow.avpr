@@ -16,6 +16,17 @@
       "type" : "long"
     } ]
   }, {
+    "type" : "record",
+    "name" : "FOID",
+    "namespace" : "sysflow.type",
+    "fields" : [ {
+      "name" : "upperbits",
+      "type" : "long"
+    }, {
+      "name" : "lowerbits",
+      "type" : "long"
+    } ]
+  }, {
     "type" : "fixed",
     "name" : "ContainerID",
     "namespace" : "sysflow.type",
@@ -30,6 +41,11 @@
     "name" : "ActionType",
     "namespace" : "sysflow.type",
     "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
+  }, {
+    "type" : "enum",
+    "name" : "ResourceType",
+    "namespace" : "sysflow.type",
+    "symbols" : [ "FILE", "DIRECTORY", "PIPE", "UNIX" ]
   }, {
     "type" : "enum",
     "name" : "ContainerType",
@@ -119,6 +135,50 @@
     } ]
   }, {
     "type" : "record",
+    "name" : "FileFlow",
+    "namespace" : "sysflow.flow",
+    "fields" : [ {
+      "name" : "procOID",
+      "type" : "sysflow.type.OID"
+    }, {
+      "name" : "ts",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "tid",
+      "type" : "long"
+    }, {
+      "name" : "opFlags",
+      "type" : "int"
+    }, {
+      "name" : "endTs",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "fileOID",
+      "type" : "sysflow.type.FOID"
+    }, {
+      "name" : "fd",
+      "type" : "int"
+    }, {
+      "name" : "numROps",
+      "type" : "long"
+    }, {
+      "name" : "numWOps",
+      "type" : "long"
+    }, {
+      "name" : "numRBytes",
+      "type" : "long"
+    }, {
+      "name" : "numWBytes",
+      "type" : "long"
+    } ]
+  }, {
+    "type" : "record",
     "name" : "Container",
     "namespace" : "sysflow.entity",
     "fields" : [ {
@@ -191,10 +251,36 @@
     } ]
   }, {
     "type" : "record",
+    "name" : "File",
+    "namespace" : "sysflow.entity",
+    "fields" : [ {
+      "name" : "type",
+      "type" : "sysflow.type.ActionType"
+    }, {
+      "name" : "oid",
+      "type" : "sysflow.type.FOID"
+    }, {
+      "name" : "ts",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "restype",
+      "type" : "sysflow.type.ResourceType"
+    }, {
+      "name" : "path",
+      "type" : "string"
+    }, {
+      "name" : "containerDirectory",
+      "type" : [ "null", "string" ]
+    } ]
+  }, {
+    "type" : "record",
     "name" : "SysFlow",
     "fields" : [ {
       "name" : "rec",
-      "type" : [ "sysflow.entity.SFHeader", "sysflow.entity.Container", "sysflow.entity.Process", "sysflow.flow.ProcessFlow", "sysflow.flow.NetworkFlow" ]
+      "type" : [ "sysflow.entity.SFHeader", "sysflow.entity.Container", "sysflow.entity.Process", "sysflow.entity.File", "sysflow.flow.ProcessFlow", "sysflow.flow.NetworkFlow", "sysflow.flow.FileFlow" ]
     } ]
   } ],
   "messages" : { }

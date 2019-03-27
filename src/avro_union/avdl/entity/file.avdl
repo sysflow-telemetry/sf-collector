@@ -1,0 +1,13 @@
+@namespace("sysflow.entity")
+protocol SysFlow {
+import idl "../type/datatypes.avdl";
+import idl "container.avdl";
+record File {
+  sysflow.type.ActionType type; //event type
+  sysflow.type.FOID oid; // hash file id, container id, into 128 bit value.
+  timestamp_ms ts;
+  sysflow.type.ResourceType restype; 
+  string path;
+  union{null, string} containerDirectory;
+}
+}

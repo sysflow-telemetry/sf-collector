@@ -1,0 +1,6 @@
+{
+  "type" : "enum",
+  "name" : "ResourceType",
+  "namespace" : "sysflow.type",
+  "symbols" : [ "FILE", "DIRECTORY", "PIPE", "UNIX" ]
+}

@@ -8,6 +8,11 @@ record OID {
   long hpid;
 }
 
+record FOID {
+  long upperbits;
+  long lowerbits;
+}
+
 
 fixed ContainerID(6);
 
@@ -21,6 +26,13 @@ enum ActionType {
           MODIFIED, 
           REUP
          }
+
+enum ResourceType {
+          FILE,
+          DIRECTORY,
+          PIPE,
+          UNIX
+        }
 
 enum ContainerType {
     CT_DOCKER,
