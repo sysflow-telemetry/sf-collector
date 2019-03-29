@@ -39,16 +39,19 @@
           "namespace" : "sysflow.type",
           "symbols" : [ "CT_DOCKER", "CT_LXC", "CT_LIBVIRT_LXC", "CT_MESOS", "CT_RKT", "CT_CUSTOM" ]
         }
+      }, {
+        "name" : "privileged",
+        "type" : "boolean"
       } ]
     }, {
       "type" : "record",
       "name" : "Process",
       "namespace" : "sysflow.entity",
       "fields" : [ {
-        "name" : "type",
+        "name" : "state",
         "type" : {
           "type" : "enum",
-          "name" : "ActionType",
+          "name" : "SFObjectState",
           "namespace" : "sysflow.type",
           "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
         }
@@ -105,8 +108,8 @@
       "name" : "File",
       "namespace" : "sysflow.entity",
       "fields" : [ {
-        "name" : "type",
-        "type" : "sysflow.type.ActionType"
+        "name" : "status",
+        "type" : "sysflow.type.SFObjectState"
       }, {
         "name" : "oid",
         "type" : {
@@ -133,13 +136,16 @@
           "type" : "enum",
           "name" : "ResourceType",
           "namespace" : "sysflow.type",
-          "symbols" : [ "FILE", "DIRECTORY", "PIPE", "UNIX" ]
+          "symbols" : [ "SF_FILE", "SF_DIRECTORY", "SF_PIPE", "SF_UNIX" ]
         }
       }, {
         "name" : "path",
         "type" : "string"
       }, {
         "name" : "containerDirectory",
+        "type" : [ "null", "string" ]
+      }, {
+        "name" : "containerId",
         "type" : [ "null", "string" ]
       } ]
     }, {
@@ -159,13 +165,8 @@
         "name" : "tid",
         "type" : "long"
       }, {
-        "name" : "type",
-        "type" : {
-          "type" : "enum",
-          "name" : "EventType",
-          "namespace" : "sysflow.type",
-          "symbols" : [ "CLONE", "EXEC", "EXIT" ]
-        }
+        "name" : "opFlags",
+        "type" : "int"
       }, {
         "name" : "args",
         "type" : {

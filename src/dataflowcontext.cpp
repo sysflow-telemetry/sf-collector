@@ -2,20 +2,21 @@
 
 using namespace dataflow;
 
-DataFlowContext::DataFlowContext(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt) {
-     m_cxt = cxt;
-     m_netflowCxt = new networkflow::NetworkFlowContext(cxt, writer, processCxt);
+DataFlowContext::DataFlowContext(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt) : m_dfSet() {
+    m_cxt = cxt;
+    m_netflowCxt = new networkflow::NetworkFlowContext(cxt, writer, processCxt, &m_dfSet);
+    m_lastCheck = 0;
 }
 
 DataFlowContext::~DataFlowContext() {
    //clearTables();
-   if(m_netflowCxt != NULL) {
-      delete m_netflowCxt;
-   }
+    if(m_netflowCxt != NULL) {
+        delete m_netflowCxt;
+    }
 }
 
 
-int DataFlowContext::handleDataEvent(sinsp_evt* ev, NFOpFlags flag) {
+int DataFlowContext::handleDataEvent(sinsp_evt* ev, OpFlags flag) {
     sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
     if(fdinfo == NULL && ev->get_type() == PPME_SYSCALL_SELECT_X) {
        return 0;
@@ -31,8 +32,8 @@ int DataFlowContext::handleDataEvent(sinsp_evt* ev, NFOpFlags flag) {
     return 2;
 }
 
-int DataFlowContext::removeAndWriteDFFromProc(OID* oid) {
-   return m_netflowCxt->removeAndWriteNFFromProc(oid);
+int DataFlowContext::removeAndWriteDFFromProc(ProcessObj* proc) {
+   return m_netflowCxt->removeAndWriteNFFromProc(proc);
 }
 
 void DataFlowContext::clearTables() {
@@ -40,5 +41,39 @@ void DataFlowContext::clearTables() {
 }
 
 int DataFlowContext::checkForExpiredRecords() {
-    return m_netflowCxt->checkForExpiredFlows();
+     time_t now = utils::getCurrentTime(m_cxt);
+     if(m_lastCheck == 0) {
+        m_lastCheck = now;
+        return 0;
+     }
+     if(difftime(now, m_lastCheck) < 1.0) {
+        return 0;
+     }
+     m_lastCheck = now;
+     int i = 0;
+     cout << "Checking expired Flows!!!...." << endl;
+     for(DataFlowSet::iterator it = m_dfSet.begin(); it != m_dfSet.end(); ) {
+             cout << "Checking flow with exportTime: " << (*it)->exportTime << " Now: " << now << endl;
+            if((*it)->exportTime <= now) {
+                 cout << "Exporting flow!!! " << endl; 
+                if(difftime(now, (*it)->lastUpdate) >= m_cxt->getNFExpireInterval()) {
+                    if((*it)->isNetworkFlow) {
+                         m_netflowCxt->removeNetworkFlow((*it));
+                    }
+                    it = m_dfSet.erase(it);
+                } else {
+                    if((*it)->isNetworkFlow) {
+                         m_netflowCxt->exportNetworkFlow((*it), now);
+                    }
+                    DataFlowObj* dfo = (*it);
+                    it = m_dfSet.erase(it);
+                    dfo->exportTime = utils::getExportTime(m_cxt);
+                    m_dfSet.insert(dfo);
+                }
+                i++;
+            }else {
+               break;
+            }
+     }
+     return i;
 }

@@ -43,12 +43,14 @@ struct Container {
     std::string image;
     std::string imageid;
     ContainerType type;
+    bool privileged;
     Container() :
         id(std::string()),
         name(std::string()),
         image(std::string()),
         imageid(std::string()),
-        type(ContainerType())
+        type(ContainerType()),
+        privileged(bool())
         { }
 };
 
@@ -83,6 +85,7 @@ template<> struct codec_traits<sysflow.entity::Container> {
         avro::encode(e, v.image);
         avro::encode(e, v.imageid);
         avro::encode(e, v.type);
+        avro::encode(e, v.privileged);
     }
     static void decode(Decoder& d, sysflow.entity::Container& v) {
         if (avro::ResolvingDecoder *rd =
@@ -106,6 +109,9 @@ template<> struct codec_traits<sysflow.entity::Container> {
                 case 4:
                     avro::decode(d, v.type);
                     break;
+                case 5:
+                    avro::decode(d, v.privileged);
+                    break;
                 default:
                     break;
                 }
@@ -116,6 +122,7 @@ template<> struct codec_traits<sysflow.entity::Container> {
             avro::decode(d, v.image);
             avro::decode(d, v.imageid);
             avro::decode(d, v.type);
+            avro::decode(d, v.privileged);
         }
     }
 };

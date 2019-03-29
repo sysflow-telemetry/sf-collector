@@ -5,7 +5,7 @@ record ProcessFlow {
   sysflow.type.OID procOID; // host ID + monotonic process creation time + host PID
   timestamp_ms ts;
   long tid;
-  sysflow.type.EventType type;
+  int opFlags;
   array<string> args;
   int ret;
 

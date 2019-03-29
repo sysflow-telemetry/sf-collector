@@ -3,8 +3,8 @@ protocol SysFlow {
 import idl "../type/datatypes.avdl";
 import idl "container.avdl";
 record Process {
-  sysflow.type.ActionType type; //event type
-  sysflow.type.OID oid; // host ID + monotonic process creation time + host PID
+  sysflow.type.SFObjectState state; //sysflow process object state.. created, modified, reupped
+  sysflow.type.OID oid; // monotonic process creation time + host PID
   union{null, sysflow.type.OID} poid;
   timestamp_ms ts;
   //int hpid;

@@ -19,6 +19,7 @@ namespace utils {
     bool isInContainer(sinsp_evt* ev);
     int64_t getSyscallResult(sinsp_evt* ev);
     avro::ValidSchema loadSchema(const char* filename);
+    time_t getExportTime(SysFlowContext* cxt);
 
     inline time_t getCurrentTime(SysFlowContext* cxt) {
         if(cxt->isOffline()) {

@@ -3,10 +3,10 @@
   "name" : "File",
   "namespace" : "sysflow.entity",
   "fields" : [ {
-    "name" : "type",
+    "name" : "status",
     "type" : {
       "type" : "enum",
-      "name" : "ActionType",
+      "name" : "SFObjectState",
       "namespace" : "sysflow.type",
       "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
     }
@@ -36,13 +36,16 @@
       "type" : "enum",
       "name" : "ResourceType",
       "namespace" : "sysflow.type",
-      "symbols" : [ "FILE", "DIRECTORY", "PIPE", "UNIX" ]
+      "symbols" : [ "SF_FILE", "SF_DIRECTORY", "SF_PIPE", "SF_UNIX" ]
     }
   }, {
     "name" : "path",
     "type" : "string"
   }, {
     "name" : "containerDirectory",
+    "type" : [ "null", "string" ]
+  }, {
+    "name" : "containerId",
     "type" : [ "null", "string" ]
   } ]
 }

@@ -9,5 +9,6 @@ record Container {
   string image;
   string imageid;
   sysflow.type.ContainerType type; 
+  boolean privileged;
 }
 }

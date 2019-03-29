@@ -29,13 +29,8 @@
     "name" : "tid",
     "type" : "long"
   }, {
-    "name" : "type",
-    "type" : {
-      "type" : "enum",
-      "name" : "EventType",
-      "namespace" : "sysflow.type",
-      "symbols" : [ "CLONE", "EXEC", "EXIT" ]
-    }
+    "name" : "opFlags",
+    "type" : "int"
   }, {
     "name" : "args",
     "type" : {

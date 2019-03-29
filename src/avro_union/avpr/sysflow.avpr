@@ -33,19 +33,14 @@
     "size" : 6
   }, {
     "type" : "enum",
-    "name" : "EventType",
-    "namespace" : "sysflow.type",
-    "symbols" : [ "CLONE", "EXEC", "EXIT" ]
-  }, {
-    "type" : "enum",
-    "name" : "ActionType",
+    "name" : "SFObjectState",
     "namespace" : "sysflow.type",
     "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
   }, {
     "type" : "enum",
     "name" : "ResourceType",
     "namespace" : "sysflow.type",
-    "symbols" : [ "FILE", "DIRECTORY", "PIPE", "UNIX" ]
+    "symbols" : [ "SF_FILE", "SF_DIRECTORY", "SF_PIPE", "SF_UNIX" ]
   }, {
     "type" : "enum",
     "name" : "ContainerType",
@@ -68,8 +63,8 @@
       "name" : "tid",
       "type" : "long"
     }, {
-      "name" : "type",
-      "type" : "sysflow.type.EventType"
+      "name" : "opFlags",
+      "type" : "int"
     }, {
       "name" : "args",
       "type" : {
@@ -196,14 +191,17 @@
     }, {
       "name" : "type",
       "type" : "sysflow.type.ContainerType"
+    }, {
+      "name" : "privileged",
+      "type" : "boolean"
     } ]
   }, {
     "type" : "record",
     "name" : "Process",
     "namespace" : "sysflow.entity",
     "fields" : [ {
-      "name" : "type",
-      "type" : "sysflow.type.ActionType"
+      "name" : "state",
+      "type" : "sysflow.type.SFObjectState"
     }, {
       "name" : "oid",
       "type" : "sysflow.type.OID"
@@ -254,8 +252,8 @@
     "name" : "File",
     "namespace" : "sysflow.entity",
     "fields" : [ {
-      "name" : "type",
-      "type" : "sysflow.type.ActionType"
+      "name" : "status",
+      "type" : "sysflow.type.SFObjectState"
     }, {
       "name" : "oid",
       "type" : "sysflow.type.FOID"
@@ -273,6 +271,9 @@
       "type" : "string"
     }, {
       "name" : "containerDirectory",
+      "type" : [ "null", "string" ]
+    }, {
+      "name" : "containerId",
       "type" : [ "null", "string" ]
     } ]
   }, {

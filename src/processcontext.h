@@ -22,17 +22,26 @@ namespace process {
         public:
             ProcessContext(SysFlowContext* cxt, container::ContainerContext* ccxt, SysFlowWriter* writer);
             virtual ~ProcessContext();
-            void updateProcess(Process* proc, sinsp_evt* ev, ActionType actType);
-            Process* createProcess(sinsp_threadinfo* mainthread, sinsp_evt* ev, ActionType actType);
-            Process* getProcess(sinsp_evt* ev, ActionType actType, bool& created);
-            Process* getProcess(OID* oid);
+            void updateProcess(Process* proc, sinsp_evt* ev, SFObjectState state);
+            ProcessObj* createProcess(sinsp_threadinfo* mainthread, sinsp_evt* ev, SFObjectState state);
+            ProcessObj* getProcess(sinsp_evt* ev, SFObjectState state, bool& created);
+            ProcessObj* getProcess(OID* oid);
             void printAncestors(Process* proc);
             bool isAncestor(OID* oid, Process* proc);
             void clearProcesses();
-            void deleteProcess(Process** proc);
+            void deleteProcess(ProcessObj** proc);
             inline int getSize() {
                 return m_procs.size();
             }
+            inline int getNumNetworkFlows() {
+                int total = 0;
+                for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); it++) {
+                     total+= it->second->netflows.size();
+                 }
+                return total;
+            }
+
+
     };
 }
 #endif

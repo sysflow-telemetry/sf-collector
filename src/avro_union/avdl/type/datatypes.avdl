@@ -16,22 +16,22 @@ record FOID {
 
 fixed ContainerID(6);
 
-enum EventType {
+/*enum EventType {
                  CLONE, 
                  EXEC, 
                  EXIT 
-               }
-enum ActionType {
+               }*/
+enum SFObjectState {
           CREATED, 
           MODIFIED, 
           REUP
          }
 
 enum ResourceType {
-          FILE,
-          DIRECTORY,
-          PIPE,
-          UNIX
+          SF_FILE,
+          SF_DIRECTORY,
+          SF_PIPE,
+          SF_UNIX
         }
 
 enum ContainerType {

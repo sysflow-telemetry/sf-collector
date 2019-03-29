@@ -22,5 +22,8 @@
       "namespace" : "sysflow.type",
       "symbols" : [ "CT_DOCKER", "CT_LXC", "CT_LIBVIRT_LXC", "CT_MESOS", "CT_RKT", "CT_CUSTOM" ]
     }
+  }, {
+    "name" : "privileged",
+    "type" : "boolean"
   } ]
 }

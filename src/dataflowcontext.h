@@ -11,16 +11,18 @@ namespace dataflow {
         private:
            networkflow::NetworkFlowContext* m_netflowCxt;
            SysFlowContext*   m_cxt;
+           DataFlowSet m_dfSet;
+           time_t m_lastCheck;
         public:
            inline int getSize() {
                return m_netflowCxt->getSize();
            }
-           int handleDataEvent(sinsp_evt* ev, NFOpFlags flag);
+           int handleDataEvent(sinsp_evt* ev, OpFlags flag);
            DataFlowContext(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt);
            virtual ~DataFlowContext();
            void clearTables();
            int checkForExpiredRecords();
-           int removeAndWriteDFFromProc(OID* oid);
+           int removeAndWriteDFFromProc(ProcessObj* proc);
     };
 }
 

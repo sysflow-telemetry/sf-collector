@@ -3,10 +3,10 @@
   "name" : "Process",
   "namespace" : "sysflow.entity",
   "fields" : [ {
-    "name" : "type",
+    "name" : "state",
     "type" : {
       "type" : "enum",
-      "name" : "ActionType",
+      "name" : "SFObjectState",
       "namespace" : "sysflow.type",
       "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
     }

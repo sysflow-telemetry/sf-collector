@@ -16,11 +16,21 @@ struct NFKey {
    uint32_t ip2;
    uint16_t port2;
 };
-   
-class NetFlowObj {
+
+class DataFlowObj {
     public:
-       time_t exportTime;
-       time_t lastUpdate;
+      time_t exportTime;
+      time_t lastUpdate;
+      bool isNetworkFlow;
+      DataFlowObj(bool inf) : exportTime(0), lastUpdate(0), isNetworkFlow(inf) {
+           
+      }
+      
+
+};
+   
+class NetFlowObj : public DataFlowObj {
+    public:
        NetworkFlow netflow;
        bool operator ==(const NetFlowObj& nfo) {
          if(exportTime != nfo.exportTime) {
@@ -37,8 +47,24 @@ class NetFlowObj {
             netflow.ts == nfo.netflow.ts);
        // cout << "Result: " << result << endl;
         //return result;
+      
       }
+      NetFlowObj() : DataFlowObj(true) {
+         
+      }
+ 
+
 };
+
+class FileFlowObj : public DataFlowObj  {
+    public:
+        FileFlow fileflow;
+        FileFlowObj() : DataFlowObj(false) {
+         
+        }
+};
+
+
 
 // simple hash adapter for types without pointers
 template<typename T> 
@@ -126,9 +152,9 @@ struct eqnfkey {
   }
 };
 
-struct eqnfobj {
-  bool operator()(const NetFlowObj* nf1, const NetFlowObj* nf2) {
-      return (nf1->exportTime < nf2->exportTime);  
+struct eqdfobj {
+  bool operator()(const DataFlowObj* df1, const DataFlowObj* df2) {
+      return (df1->exportTime < df2->exportTime);  
  }
 
 
@@ -136,11 +162,39 @@ struct eqnfobj {
 
 
 
-typedef google::dense_hash_map<OID*, Process*, MurmurHasher<OID*>, eqoidptr> ProcessTable;
 typedef google::dense_hash_map<int, string> ParameterMapping;
 typedef google::dense_hash_map<string, Container*, MurmurHasher<string>, eqstr> ContainerTable;
 //typedef google::dense_hash_map<OID*, ProcessFlow*, MurmurHasher<OID*>, eqoid> ProcessFlowTable;
 typedef google::dense_hash_map<NFKey, NetFlowObj*, MurmurHasher<NFKey>, eqnfkey> NetworkFlowTable;
+typedef google::dense_hash_map<string, FileFlowObj*, MurmurHasher<string>, eqstr> FileFlowTable;
 typedef google::dense_hash_map<OID, NetworkFlowTable*,MurmurHasher<OID>, eqoid> OIDNetworkTable;
-typedef multiset<NetFlowObj*, eqnfobj>  NetworkFlowSet;
+//typedef multiset<NetFlowObj*, eqnfobj>  NetworkFlowSet;
+typedef multiset<DataFlowObj*, eqdfobj>  DataFlowSet;
+
+class ProcessObj {
+    private:
+        static NFKey m_nfdelkey;
+        static NFKey m_nfemptykey;
+    public:
+        bool written;
+        Process proc;
+        NetworkFlowTable netflows;
+        FileFlowTable    fileflows;
+        ProcessObj() : written(false) {
+            m_nfdelkey.ip1 = 1;
+            m_nfdelkey.ip2 = 1;
+            m_nfdelkey.port1 = 1;
+            m_nfdelkey.port2 = 1;
+            m_nfemptykey.ip1 = 1;
+            m_nfemptykey.ip2 = 0;
+            m_nfemptykey.port1 = 1;
+            m_nfemptykey.port2 = 1;
+            netflows.set_empty_key(m_nfemptykey);
+            netflows.set_deleted_key(m_nfdelkey);
+      }
+};
+
+typedef google::dense_hash_map<OID*, ProcessObj*, MurmurHasher<OID*>, eqoidptr> ProcessTable;
+
+
 #endif

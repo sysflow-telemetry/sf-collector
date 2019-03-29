@@ -28,7 +28,7 @@
 #include "avro/Decoder.hh"
 
 namespace sysflow.entity {
-enum ActionType {
+enum SFObjectState {
     CREATED,
     MODIFIED,
     REUP,
@@ -82,7 +82,7 @@ public:
 struct Process {
     typedef _Process_avsc_Union__0__ poid_t;
     typedef _Process_avsc_Union__1__ containerId_t;
-    ActionType type;
+    SFObjectState state;
     OID oid;
     poid_t poid;
     int64_t ts;
@@ -94,7 +94,7 @@ struct Process {
     std::string groupName;
     containerId_t containerId;
     Process() :
-        type(ActionType()),
+        state(SFObjectState()),
         oid(OID()),
         poid(poid_t()),
         ts(int64_t()),
@@ -140,25 +140,25 @@ inline _Process_avsc_Union__0__::_Process_avsc_Union__0__() : idx_(0) { }
 inline _Process_avsc_Union__1__::_Process_avsc_Union__1__() : idx_(0) { }
 }
 namespace avro {
-template<> struct codec_traits<sysflow.entity::ActionType> {
-    static void encode(Encoder& e, sysflow.entity::ActionType v) {
+template<> struct codec_traits<sysflow.entity::SFObjectState> {
+    static void encode(Encoder& e, sysflow.entity::SFObjectState v) {
 		if (v < sysflow.entity::CREATED || v > sysflow.entity::REUP)
 		{
 			std::ostringstream error;
-			error << "enum value " << v << " is out of bound for sysflow.entity::ActionType and cannot be encoded";
+			error << "enum value " << v << " is out of bound for sysflow.entity::SFObjectState and cannot be encoded";
 			throw avro::Exception(error.str());
 		}
         e.encodeEnum(v);
     }
-    static void decode(Decoder& d, sysflow.entity::ActionType& v) {
+    static void decode(Decoder& d, sysflow.entity::SFObjectState& v) {
 		size_t index = d.decodeEnum();
 		if (index < sysflow.entity::CREATED || index > sysflow.entity::REUP)
 		{
 			std::ostringstream error;
-			error << "enum value " << index << " is out of bound for sysflow.entity::ActionType and cannot be decoded";
+			error << "enum value " << index << " is out of bound for sysflow.entity::SFObjectState and cannot be decoded";
 			throw avro::Exception(error.str());
 		}
-        v = static_cast<sysflow.entity::ActionType>(index);
+        v = static_cast<sysflow.entity::SFObjectState>(index);
     }
 };
 
@@ -255,7 +255,7 @@ template<> struct codec_traits<sysflow.entity::_Process_avsc_Union__1__> {
 
 template<> struct codec_traits<sysflow.entity::Process> {
     static void encode(Encoder& e, const sysflow.entity::Process& v) {
-        avro::encode(e, v.type);
+        avro::encode(e, v.state);
         avro::encode(e, v.oid);
         avro::encode(e, v.poid);
         avro::encode(e, v.ts);
@@ -275,7 +275,7 @@ template<> struct codec_traits<sysflow.entity::Process> {
                 it != fo.end(); ++it) {
                 switch (*it) {
                 case 0:
-                    avro::decode(d, v.type);
+                    avro::decode(d, v.state);
                     break;
                 case 1:
                     avro::decode(d, v.oid);
@@ -312,7 +312,7 @@ template<> struct codec_traits<sysflow.entity::Process> {
                 }
             }
         } else {
-            avro::decode(d, v.type);
+            avro::decode(d, v.state);
             avro::decode(d, v.oid);
             avro::decode(d, v.poid);
             avro::decode(d, v.ts);

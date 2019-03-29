@@ -39,6 +39,14 @@ bool utils::isInContainer(sinsp_evt* ev) {
 }
 
 
+time_t utils::getExportTime(SysFlowContext* cxt) {
+    time_t now = utils::getCurrentTime(cxt);
+    struct tm exportTM = *localtime( &now);
+    exportTM.tm_sec += cxt->getNFExportInterval();   // add 30 seconds to the time
+    return mktime( &exportTM);      // normalize iti
+}
+
+
 int64_t utils::getSyscallResult(sinsp_evt* ev) {
       int64_t res = -1;
       if(ev->get_num_params() >= 1) {

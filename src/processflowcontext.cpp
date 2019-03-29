@@ -14,11 +14,11 @@ ProcessFlowContext::~ProcessFlowContext() {
 void ProcessFlowContext::writeCloneEvent(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     bool created = false;
-    Process* proc = m_processCxt->getProcess(ev, ActionType::CREATED, created);
-    m_procFlow.type =  CLONE;
+    ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::CREATED, created);
+    m_procFlow.opFlags =  OP_CLONE;
     m_procFlow.ts = ev->get_ts();
-    m_procFlow.procOID.hpid = proc->oid.hpid;
-    m_procFlow.procOID.createTS = proc->oid.createTS;
+    m_procFlow.procOID.hpid = proc->proc.oid.hpid;
+    m_procFlow.procOID.createTS = proc->proc.oid.createTS;
     m_procFlow.tid = ti->m_tid;
     m_procFlow.ret = utils::getSyscallResult(ev);
     m_writer->writeProcessFlow(&m_procFlow);
@@ -27,14 +27,14 @@ void ProcessFlowContext::writeCloneEvent(sinsp_evt* ev) {
 void ProcessFlowContext::writeExitEvent(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     bool created = false;
-    Process* proc = m_processCxt->getProcess(ev, ActionType::REUP, created);
-    m_procFlow.type =  EXIT;
+    ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
+    m_procFlow.opFlags =  OP_EXIT;
     m_procFlow.ts = ev->get_ts();
-    m_procFlow.procOID.hpid = proc->oid.hpid;
-    m_procFlow.procOID.createTS = proc->oid.createTS;
+    m_procFlow.procOID.hpid = proc->proc.oid.hpid;
+    m_procFlow.procOID.createTS = proc->proc.oid.createTS;
     m_procFlow.tid = ti->m_tid;
     m_procFlow.ret = utils::getSyscallResult(ev);
-    m_dfCxt->removeAndWriteDFFromProc(&(proc->oid));
+    m_dfCxt->removeAndWriteDFFromProc(proc);
     m_writer->writeProcessFlow(&m_procFlow);
     // delete the process from the proc table after an exit
     m_processCxt->deleteProcess(&proc);
@@ -43,7 +43,7 @@ void ProcessFlowContext::writeExitEvent(sinsp_evt* ev) {
 void ProcessFlowContext::writeExecEvent(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     bool created = false;
-    Process* proc = m_processCxt->getProcess(ev, ActionType::CREATED, created);
+    ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::CREATED, created);
    /* if(!created) {
       cout << "Exec on an existing process!" << endl;
     }*/
@@ -52,15 +52,15 @@ void ProcessFlowContext::writeExecEvent(sinsp_evt* ev) {
     // the EXEC of this process, and the getProcess above will actually create it.  So the question is
    // do we want to add another process record just to mark it modified at this point?
     if(!created) {
-        m_processCxt->updateProcess(proc, ev, ActionType::MODIFIED);
-        cout << "Writing modified process..." << proc->exe << endl;
-        m_writer->writeProcess(proc);
+        m_processCxt->updateProcess(&(proc->proc), ev, SFObjectState::MODIFIED);
+        cout << "Writing modified process..." << proc->proc.exe << endl;
+        m_writer->writeProcess(&(proc->proc));
     }
 
-    m_procFlow.type =  EXEC;
+    m_procFlow.opFlags =  OP_EXEC;
     m_procFlow.ts = ev->get_ts();
-    m_procFlow.procOID.hpid = proc->oid.hpid;
-    m_procFlow.procOID.createTS = proc->oid.createTS;
+    m_procFlow.procOID.hpid = proc->proc.oid.hpid;
+    m_procFlow.procOID.createTS = proc->proc.oid.createTS;
     m_procFlow.tid = ti->m_tid;
     m_procFlow.ret = utils::getSyscallResult(ev);
     m_writer->writeProcessFlow(&m_procFlow);

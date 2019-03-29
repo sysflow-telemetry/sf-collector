@@ -1,0 +1,6 @@
+{
+  "type" : "enum",
+  "name" : "SFObjectState",
+  "namespace" : "sysflow.type",
+  "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
+}
