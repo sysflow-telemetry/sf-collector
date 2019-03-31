@@ -21,7 +21,7 @@
                         case PPME_SYSCALL_EXECVE_18_X: \
                         case PPME_SYSCALL_EXECVE_19_X: \
                         {                              \
-			    m_procFlowCxt->writeExecEvent(EV); \
+			    m_procFlowPrcr->writeExecEvent(EV); \
                             break;                     \
                         }
 
@@ -29,7 +29,7 @@
                         case PPME_SYSCALL_CLONE_17_X: \
                         case PPME_SYSCALL_CLONE_20_X: \
                         {                             \
-			    m_procFlowCxt->writeCloneEvent(EV); \
+			    m_procFlowPrcr->writeCloneEvent(EV); \
                             break;                    \
                         }
 
@@ -38,7 +38,7 @@
                         case PPME_PROCEXIT_1_E: \
                         case PPME_PROCEXIT_1_X: \
 			  {                     \
-			      m_procFlowCxt->writeExitEvent(EV); \
+			      m_procFlowPrcr->writeExitEvent(EV); \
 			      break;            \
                           }
 
@@ -48,7 +48,7 @@
 #define SF_CLOSE_EXIT(EV)   case PPME_SYSCALL_CLOSE_X: \
                         case PPME_SOCKET_SHUTDOWN_X: \
 			{                     \
-			    m_dfCxt->handleDataEvent(EV, OP_CLOSE); \
+			    m_dfPrcr->handleDataEvent(EV, OP_CLOSE); \
 			    break;            \
                         }
 
@@ -69,7 +69,7 @@
                         case PPME_SYSCALL_SELECT_X:  \
                         case PPM_SC_PSELECT6:     \
 			{                     \
-			    m_dfCxt->handleDataEvent(EV, OP_ACCEPT); \
+			    m_dfPrcr->handleDataEvent(EV, OP_ACCEPT); \
 			    break;            \
                         }
 
@@ -77,7 +77,7 @@
 
 #define SF_CONNECT_EXIT(EV) case PPME_SOCKET_CONNECT_X: \
 			{                     \
-			    m_dfCxt->handleDataEvent(EV, OP_CONNECT); \
+			    m_dfPrcr->handleDataEvent(EV, OP_CONNECT); \
 			    break;            \
                         }
 
@@ -90,7 +90,7 @@
                         case PPME_SYSCALL_PWRITE_X: \
                         case PPME_SYSCALL_WRITE_X: \
 			{                     \
-			    m_dfCxt->handleDataEvent(EV, OP_WRITE_SEND); \
+			    m_dfPrcr->handleDataEvent(EV, OP_WRITE_SEND); \
 			    break;            \
                         }
 
@@ -103,7 +103,7 @@
                         case PPME_SYSCALL_READV_X: \
                         case PPME_SYSCALL_READ_X: \
 			{                     \
-			    m_dfCxt->handleDataEvent(EV, OP_READ_RECV); \
+			    m_dfPrcr->handleDataEvent(EV, OP_READ_RECV); \
 			    break;            \
                         }
 

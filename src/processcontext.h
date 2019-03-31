@@ -7,6 +7,7 @@
 #include "containercontext.h"
 #include "container.h"
 #include "utils.h"
+#include "op_flags.h"
 
 #define PROC_TABLE_SIZE 50000
 using namespace sysflow;
@@ -29,7 +30,9 @@ namespace process {
             void printAncestors(Process* proc);
             bool isAncestor(OID* oid, Process* proc);
             void clearProcesses();
+            void clearAllProcesses();
             void deleteProcess(ProcessObj** proc);
+            bool exportProcess(OID* oid);
             inline int getSize() {
                 return m_procs.size();
             }

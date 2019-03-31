@@ -15,7 +15,7 @@ ProcessContext::ProcessContext(SysFlowContext* cxt, container::ContainerContext*
 }
 
 ProcessContext::~ProcessContext() {
-    clearProcesses();
+    clearAllProcesses();
 }
 
 ProcessObj* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_evt* ev, SFObjectState state) {
@@ -186,6 +186,21 @@ ProcessObj* ProcessContext::getProcess(OID* oid) {
       return NULL;
 }
 
+bool ProcessContext::exportProcess(OID* oid) {
+    ProcessObj* p = getProcess(oid);
+    bool expt = false;
+    if(p == NULL) {
+        cout << "Uh oh!!!  Can't find process! for oid: " << oid->hpid << " " << oid->createTS << endl;
+        return expt;
+    }
+    if(!p->written){
+          m_writer->writeProcess(&(p->proc));
+          p->written = true;
+          expt = true;
+    }
+    return expt;
+}
+
 
 void ProcessContext::updateProcess(Process* proc, sinsp_evt* ev, SFObjectState state) {
    sinsp_threadinfo* ti = ev->get_thread_info();
@@ -224,6 +239,32 @@ void ProcessContext::clearProcesses() {
         }
     }
 }
+
+void ProcessContext::clearAllProcesses() {
+    for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
+        if(((!it->second->netflows.empty()) || (!it->second->fileflows.empty())) &&
+               !it->second->written) {
+            m_writer->writeProcess(&(it->second->proc));
+            it->second->written = true;
+         }
+         for(NetworkFlowTable::iterator nfi = it->second->netflows.begin(); nfi != it->second->netflows.end(); nfi++) {
+             nfi->second->netflow.opFlags |= OP_TRUNCATE;
+             nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
+             m_writer->writeNetFlow(&(nfi->second->netflow));
+             delete nfi->second;
+          }
+         /*for(FileFlowTable::iterator ffi = it->second->fileflows.begin(); ffi != it->second->fileflows.end(); ffi++) {
+             ffi->second->fileflow.opFlags |= OP_TRUNCATE;
+             ffi->second->fileflow.endTs = utils::getSysdigTime(m_cxt);
+             m_writer->writeFileFlow(&(ffi->second->fileflow));
+             delete ffi->second;
+          }*/
+          delete it->second;
+    }
+}
+
+
+
 
 void ProcessContext::deleteProcess(ProcessObj** proc) {
     m_procs.erase(&((*proc)->proc.oid));

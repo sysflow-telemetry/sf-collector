@@ -50,6 +50,11 @@ class SysFlowWriter {
             m_numRecs++;
             m_dfw->write(m_flow);
         }
+        inline void writeFileFlow(FileFlow* ff) {
+            m_flow.rec.set_FileFlow(*ff);
+            m_numRecs++;
+            m_dfw->write(m_flow);
+        }
         inline bool isFileExpired(time_t curTime) {
              if(m_start > 0) {
                 double duration = getDuration(curTime);

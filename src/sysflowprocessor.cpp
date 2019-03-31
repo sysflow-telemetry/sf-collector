@@ -10,16 +10,16 @@ SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
    m_writer = new SysFlowWriter(cxt, start);
    m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
    m_processCxt = new process::ProcessContext(m_cxt, m_containerCxt, m_writer);
-   m_dfCxt = new dataflow::DataFlowContext(m_cxt, m_writer, m_processCxt);
-   m_procFlowCxt = new processflow::ProcessFlowContext(m_writer, m_processCxt, m_dfCxt);
+   m_dfPrcr = new dataflow::DataFlowProcessor(m_cxt, m_writer, m_processCxt);
+   m_procFlowPrcr = new processflow::ProcessFlowProcessor(m_writer, m_processCxt, m_dfPrcr);
 }
 
 SysFlowProcessor::~SysFlowProcessor() {
    delete m_cxt;
    delete m_containerCxt;
    delete m_processCxt;
-   delete m_dfCxt;
-   delete m_procFlowCxt;
+   delete m_dfPrcr;
+   delete m_procFlowPrcr;
    delete m_writer;
 }
 
@@ -32,7 +32,7 @@ bool SysFlowProcessor::checkAndRotateFile()  {
      bool fileRotated = false;
      time_t curTime = time(NULL);
      if(m_writer->isFileExpired(curTime)) {
-         cout << "Container Table: " << m_containerCxt->getSize() <<  " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfCxt->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
+         cout << "Container Table: " << m_containerCxt->getSize() <<  " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfPrcr->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
          m_writer->resetFileWriter(curTime);
          clearTables();
          fileRotated = true;
@@ -56,11 +56,11 @@ int SysFlowProcessor::run() {
                                 if(m_exit) {
                                     break;
                                 }
-				checkAndRotateFile();
-                                int numExpired = m_dfCxt->checkForExpiredRecords();
+                                int numExpired = m_dfPrcr->checkForExpiredRecords();
                                 if(numExpired) {
-                                    cout << "Netflow Records exported: " << numExpired << endl;
+                                    cout << "Data Flow Records exported: " << numExpired << endl;
                                 }
+				checkAndRotateFile();
 				continue;
 			}
 			else if(res == SCAP_EOF)
@@ -76,9 +76,9 @@ int SysFlowProcessor::run() {
          	        if(m_exit) {
                            break;
                         }
-                        int numExpired = m_dfCxt->checkForExpiredRecords();
+                        int numExpired = m_dfPrcr->checkForExpiredRecords();
                         if(numExpired) {
-                            cout << "Netflow Records exported: " << numExpired << endl;
+                            cout << "Data Flow Records exported: " << numExpired << endl;
                         }
                         checkAndRotateFile();
                         if(m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
@@ -97,7 +97,7 @@ int SysFlowProcessor::run() {
                        } 
 		}
                 cout << "Exiting scap loop... shutting down" << endl;
-                cout << "Container Table: " << m_containerCxt->getSize() << " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfCxt->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
+                cout << "Container Table: " << m_containerCxt->getSize() << " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfPrcr->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
 	}
 	catch(sinsp_exception& e)
 	{

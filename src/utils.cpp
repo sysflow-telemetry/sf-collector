@@ -1,5 +1,35 @@
 #include "utils.h"
 #include "sysflowcontext.h"
+#include "datatypes.h"
+static NFKey s_nfdelkey;
+static NFKey s_nfemptykey;
+static bool s_nfkeysinit = false;
+
+void initKeys() {
+   s_nfdelkey.ip1 = 1;
+   s_nfdelkey.ip2 = 1;
+   s_nfdelkey.port1 = 1;
+   s_nfdelkey.port2 = 1;
+   s_nfemptykey.ip1 = 1;
+   s_nfemptykey.ip2 = 0;
+   s_nfemptykey.port1 = 1;
+   s_nfemptykey.port2 = 1;
+}
+
+NFKey* utils::getNFEmptyKey() {
+    if(!s_nfkeysinit) {
+         initKeys();
+     }
+     return &s_nfemptykey;
+}
+
+NFKey* utils::getNFDelKey() {
+    if(!s_nfkeysinit) {
+         initKeys();
+     }
+     return &s_nfdelkey;
+}
+
 string utils::getUserName(SysFlowContext* cxt, uint32_t uid)
 {
     unordered_map<uint32_t, scap_userinfo*>::const_iterator it;

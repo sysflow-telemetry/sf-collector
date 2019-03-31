@@ -5,8 +5,8 @@
 #include "sysflowcontext.h"
 #include "processcontext.h"
 #include "containercontext.h"
-#include "processflowcontext.h"
-#include "dataflowcontext.h"
+#include "processflowprocessor.h"
+#include "dataflowprocessor.h"
 #include <string> 
 
 namespace sysflowprocessor {
@@ -24,8 +24,8 @@ namespace sysflowprocessor {
             SysFlowWriter* m_writer;
             container::ContainerContext* m_containerCxt;
             process::ProcessContext* m_processCxt;
-            processflow::ProcessFlowContext* m_procFlowCxt;
-            dataflow::DataFlowContext* m_dfCxt;
+            processflow::ProcessFlowProcessor* m_procFlowPrcr;
+            dataflow::DataFlowProcessor* m_dfPrcr;
             void clearTables();
             bool checkAndRotateFile();
      };

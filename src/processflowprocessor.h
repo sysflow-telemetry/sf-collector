@@ -4,22 +4,22 @@
 #include "sysflow/sysflow.hh"
 #include "sysflowwriter.h"
 #include "processcontext.h"
-#include "dataflowcontext.h"
+#include "dataflowprocessor.h"
 #include "utils.h"
 
 using namespace sysflow;
 namespace processflow {
-    class ProcessFlowContext {
+    class ProcessFlowProcessor {
        public:
-          ProcessFlowContext(SysFlowWriter* writer, process::ProcessContext* pc, dataflow::DataFlowContext* dfc);
-          virtual ~ProcessFlowContext();
+          ProcessFlowProcessor(SysFlowWriter* writer, process::ProcessContext* pc, dataflow::DataFlowProcessor* dfPrcr);
+          virtual ~ProcessFlowProcessor();
           void writeCloneEvent(sinsp_evt* ev);
           void writeExitEvent(sinsp_evt* ev);
           void writeExecEvent(sinsp_evt* ev);
        private:
           SysFlowWriter* m_writer;
           process::ProcessContext* m_processCxt;
-          dataflow::DataFlowContext* m_dfCxt;
+          dataflow::DataFlowProcessor* m_dfPrcr;
           ProcessFlow m_procFlow;
    };
 }

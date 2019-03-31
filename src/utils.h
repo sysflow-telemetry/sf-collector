@@ -12,7 +12,7 @@
 #include  <time.h>
 #include "sysflowcontext.h"
 using namespace std;
-
+struct NFKey;
 namespace utils {
     string getUserName(SysFlowContext* cxt, uint32_t uid);
     string getGroupName(SysFlowContext* cxt, uint32_t gid);
@@ -20,6 +20,8 @@ namespace utils {
     int64_t getSyscallResult(sinsp_evt* ev);
     avro::ValidSchema loadSchema(const char* filename);
     time_t getExportTime(SysFlowContext* cxt);
+    NFKey* getNFDelKey();
+    NFKey* getNFEmptyKey();
 
     inline time_t getCurrentTime(SysFlowContext* cxt) {
         if(cxt->isOffline()) {

@@ -13,7 +13,7 @@ using namespace sysflow;
 namespace networkflow {
 
 
-    class NetworkFlowContext {
+    class NetworkFlowProcessor {
         private:
             SysFlowContext* m_cxt;
             process::ProcessContext* m_processCxt;
@@ -35,8 +35,8 @@ namespace networkflow {
             int32_t getProtocol(scap_l4_proto proto);
             int removeNetworkFlowFromSet(NetFlowObj** nfo, bool deleteNetFlow);
         public:
-            NetworkFlowContext(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* procCxt, DataFlowSet* dfSet);
-            virtual ~NetworkFlowContext();
+            NetworkFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* procCxt, DataFlowSet* dfSet);
+            virtual ~NetworkFlowProcessor();
             int handleNetFlowEvent(sinsp_evt* ev, OpFlags flag);
             void clearNetFlows();
             int checkForExpiredFlows();

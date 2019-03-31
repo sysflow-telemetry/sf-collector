@@ -20,8 +20,11 @@ using namespace sysflow;
 #define HEADER 0
 #define CONT 1 
 #define PROC 2
-#define PROC_FLOW 3
-#define NET_FLOW 4
+#define FILE_ 3
+#define PROC_FLOW 4
+#define NET_FLOW 5
+#define FILE_FLOW 6
+
 #define NANO_TO_SECS 1000000000
 
 Process proc;
@@ -31,13 +34,14 @@ SFHeader header;
 Container cont;
 NetworkFlow netflow;
 
-ProcessTable s_procs;
+typedef google::dense_hash_map<OID*, Process*, MurmurHasher<OID*>, eqoidptr> PTable;
+PTable s_procs;
 
 bool s_printProc = false;
 bool s_printCont = false;
 bool s_keepProcOnExit = false;
 
-const char* Events[] = {"CLONE", "EXEC", "EXIT"};
+const char* Events[] = {"", "CLONE", "EXEC", "",  "EXIT"};
 
 
 avro::ValidSchema loadSchema(const char* filename)
@@ -60,30 +64,28 @@ void printNetFlow(NetworkFlow netflow) {
     srcIP.s_addr = netflow.sip;
     dstIP.s_addr = netflow.dip;
     string opFlags = "";
-    opFlags +=  ((netflow.opFlags & OP_NF_ACCEPT) ?  "A" : " ");
-    opFlags +=  ((netflow.opFlags & OP_NF_CONNECT) ?  "C" : " ");
-    opFlags +=  ((netflow.opFlags & OP_NF_SEND) ?  "S" : " ");
-    opFlags +=  ((netflow.opFlags & OP_NF_RECV) ?  "R" : " ");
-    opFlags +=  ((netflow.opFlags & OP_NF_CLOSE) ?  "C" : " ");
-    opFlags +=  ((netflow.opFlags & OP_NF_DELEGATE) ?  "D" : " ");
-    opFlags +=  ((netflow.opFlags & OP_NF_INHERIT) ?  "I" : " ");
-    opFlags +=  ((netflow.opFlags & OP_NF_TRUNCATE) ?  "T" : " ");
-    opFlags +=  ((netflow.opFlags & OP_NF_FINAL) ?  "F" : " ");
+    opFlags +=  ((netflow.opFlags & OP_ACCEPT) ?  "A" : " ");
+    opFlags +=  ((netflow.opFlags & OP_CONNECT) ?  "C" : " ");
+    opFlags +=  ((netflow.opFlags & OP_WRITE_SEND) ?  "S" : " ");
+    opFlags +=  ((netflow.opFlags & OP_READ_RECV) ?  "R" : " ");
+    opFlags +=  ((netflow.opFlags & OP_CLOSE) ?  "C" : " ");
+    opFlags +=  ((netflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
+    opFlags +=  ((netflow.opFlags & OP_DIGEST) ?  "D" : " ");
 
     string srcIPStr = string(inet_ntoa(srcIP));
     string dstIPStr = string(inet_ntoa(dstIP));
+    time_t startTs = ((time_t)(netflow.ts/NANO_TO_SECS));
+    time_t endTs = ((time_t)(netflow.endTs/NANO_TO_SECS));
+    char startTime[100];
+    char endTime[100];
+    strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
+     strftime(endTime, 99, "%x %X %Z", localtime(&endTs));
 
-   ProcessTable::iterator it = s_procs.find(&(netflow.procOID));
+   PTable::iterator it = s_procs.find(&(netflow.procOID));
    if(it == s_procs.end()) {
        cout << "Uh Oh! Can't find process for netflow!! " << endl;
-       cout << "NETFLOW " << netflow.ts << " " << netflow.endTs << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
+       cout << "NETFLOW " << startTime << " " << endTime << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
   } else {
-       time_t startTs = ((time_t)(netflow.ts/NANO_TO_SECS));
-       time_t endTs = ((time_t)(netflow.endTs/NANO_TO_SECS));
-       char startTime[100];
-       char endTime[100];
-       strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
-       strftime(endTime, 99, "%x %X %Z", localtime(&endTs));
        string container = "";
        if(!it->second->containerId.is_null()) {
                   container = it->second->containerId.get_string();
@@ -96,7 +98,7 @@ void printNetFlow(NetworkFlow netflow) {
 
 Process*  createProcess(Process proc) {
    Process* p = new Process();
-   p->type = proc.type;
+   p->state = proc.state;
    p->ts = proc.ts;
    p->oid.hpid = proc.oid.hpid;
    p->oid.createTS = proc.oid.createTS;
@@ -162,7 +164,7 @@ int runEventLoop(string sysFile, string schemaFile) {
               {
                  proc = flow.rec.get_Process();
                  if(s_printProc) {
-		     cout << "PROC " << proc.oid.hpid << " " << proc.oid.createTS << " " <<   proc.ts << " " << proc.type << " " << proc.exe << " " <<  proc.exeArgs << " " << proc.oid.hpid << " " <<  proc.userName << " " << proc.oid.createTS;
+		     cout << "PROC " << proc.oid.hpid << " " << proc.oid.createTS << " " <<   proc.ts << " " << proc.state << " " << proc.exe << " " <<  proc.exeArgs << " " << proc.oid.hpid << " " <<  proc.userName << " " << proc.oid.createTS;
                      if(!proc.poid.is_null()) {
                          cout << " Parent: " << proc.poid.get_OID().hpid << " " << proc.poid.get_OID().createTS;
                      }
@@ -172,8 +174,8 @@ int runEventLoop(string sysFile, string schemaFile) {
                          cout << endl;
                      }
                  }
-                 ProcessTable::iterator it = s_procs.find(&(proc.oid));
-                 if(it != s_procs.end() && proc.type != ActionType::MODIFIED) {
+                 PTable::iterator it = s_procs.find(&(proc.oid));
+                 if(it != s_procs.end() && proc.state != SFObjectState::MODIFIED) {
                      cout << "Uh oh! Process " << it->second->exe << " already in the process table PID: " << it->second->oid.hpid << " Create TS: " << it->second->oid.createTS << endl;
                  }else {
                      Process* p = createProcess(proc);
@@ -198,10 +200,10 @@ int runEventLoop(string sysFile, string schemaFile) {
                 time_t timestamp = ((time_t)(pf.ts/NANO_TO_SECS));
                 char times[100];
                 strftime(times, 99, "%x %X %Z", localtime(&timestamp));
-                ProcessTable::iterator it = s_procs.find(&(pf.procOID));
+                PTable::iterator it = s_procs.find(&(pf.procOID));
                 if(it == s_procs.end()) {
                    cout << "Can't find process for process flow!  shouldn't happen!!" << endl;
-                   cout << "PROC_FLOW " << times << " " << Events[pf.type] << " " <<  " " << pf.ret << " OID: " << pf.procOID.hpid << " " << pf.procOID.createTS << endl;
+                   cout << "PROC_FLOW " << times << " " << Events[pf.opFlags] << " " <<  " " << pf.ret << " OID: " << pf.procOID.hpid << " " << pf.procOID.createTS << endl;
                 }  else {
                    
                    string container = "";
@@ -210,10 +212,10 @@ int runEventLoop(string sysFile, string schemaFile) {
                   }
            
 
-                   cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " <<  times << " " << Events[pf.type] << " " <<  " " << pf.ret <<  " " << pf.procOID.createTS << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
+                   cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " <<  times << " " << Events[pf.opFlags] << " " <<  " " << pf.ret <<  " " << pf.procOID.createTS << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
 
                 }
-               if(!s_keepProcOnExit && pf.type == 2) { // exit
+               if(!s_keepProcOnExit && pf.opFlags == OP_EXIT) { // exit
                    if(it != s_procs.end()) {
                         delete it->second;
                         s_procs.erase(&(pf.procOID));

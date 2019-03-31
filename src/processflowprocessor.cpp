@@ -1,17 +1,17 @@
-#include "processflowcontext.h"
+#include "processflowprocessor.h"
 
 using namespace processflow;
-ProcessFlowContext::ProcessFlowContext(SysFlowWriter* writer, process::ProcessContext* pc, dataflow::DataFlowContext* dfc) {
+ProcessFlowProcessor::ProcessFlowProcessor(SysFlowWriter* writer, process::ProcessContext* pc, dataflow::DataFlowProcessor* dfPrcr) {
     m_processCxt = pc;
     m_writer = writer;
-    m_dfCxt = dfc;
+    m_dfPrcr = dfPrcr;
 }
 
-ProcessFlowContext::~ProcessFlowContext() {
+ProcessFlowProcessor::~ProcessFlowProcessor() {
 
 }
 
-void ProcessFlowContext::writeCloneEvent(sinsp_evt* ev) {
+void ProcessFlowProcessor::writeCloneEvent(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     bool created = false;
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::CREATED, created);
@@ -24,7 +24,7 @@ void ProcessFlowContext::writeCloneEvent(sinsp_evt* ev) {
     m_writer->writeProcessFlow(&m_procFlow);
 }
 
-void ProcessFlowContext::writeExitEvent(sinsp_evt* ev) {
+void ProcessFlowProcessor::writeExitEvent(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     bool created = false;
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
@@ -34,13 +34,13 @@ void ProcessFlowContext::writeExitEvent(sinsp_evt* ev) {
     m_procFlow.procOID.createTS = proc->proc.oid.createTS;
     m_procFlow.tid = ti->m_tid;
     m_procFlow.ret = utils::getSyscallResult(ev);
-    m_dfCxt->removeAndWriteDFFromProc(proc);
+    m_dfPrcr->removeAndWriteDFFromProc(proc);
     m_writer->writeProcessFlow(&m_procFlow);
     // delete the process from the proc table after an exit
     m_processCxt->deleteProcess(&proc);
 }
 
-void ProcessFlowContext::writeExecEvent(sinsp_evt* ev) {
+void ProcessFlowProcessor::writeExecEvent(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     bool created = false;
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::CREATED, created);

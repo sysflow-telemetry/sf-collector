@@ -5,6 +5,7 @@
 #include <google/dense_hash_map>
 #include <set>
 #include "sysflow/sysflow.hh"
+#include "utils.h"
 
 using namespace std;
 using namespace sysflow;
@@ -173,24 +174,16 @@ typedef multiset<DataFlowObj*, eqdfobj>  DataFlowSet;
 
 class ProcessObj {
     private:
-        static NFKey m_nfdelkey;
-        static NFKey m_nfemptykey;
     public:
         bool written;
         Process proc;
         NetworkFlowTable netflows;
         FileFlowTable    fileflows;
         ProcessObj() : written(false) {
-            m_nfdelkey.ip1 = 1;
-            m_nfdelkey.ip2 = 1;
-            m_nfdelkey.port1 = 1;
-            m_nfdelkey.port2 = 1;
-            m_nfemptykey.ip1 = 1;
-            m_nfemptykey.ip2 = 0;
-            m_nfemptykey.port1 = 1;
-            m_nfemptykey.port2 = 1;
-            netflows.set_empty_key(m_nfemptykey);
-            netflows.set_deleted_key(m_nfdelkey);
+            NFKey* emptykey = utils::getNFEmptyKey();
+            NFKey* delkey = utils::getNFDelKey();
+            netflows.set_empty_key(*emptykey);
+            netflows.set_deleted_key(*delkey);
       }
 };
 
