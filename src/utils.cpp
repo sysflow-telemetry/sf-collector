@@ -16,6 +16,11 @@ void initKeys() {
    s_nfemptykey.port2 = 1;
 }
 
+
+void  utils::generateFOID(string key, FOID* foid) {
+    SHA1((const unsigned char*)key.c_str(), key.size(), foid->begin());
+}
+
 NFKey* utils::getNFEmptyKey() {
     if(!s_nfkeysinit) {
          initKeys();

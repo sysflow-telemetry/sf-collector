@@ -16,16 +16,10 @@
       "type" : "long"
     } ]
   }, {
-    "type" : "record",
+    "type" : "fixed",
     "name" : "FOID",
     "namespace" : "sysflow.type",
-    "fields" : [ {
-      "name" : "upperbits",
-      "type" : "long"
-    }, {
-      "name" : "lowerbits",
-      "type" : "long"
-    } ]
+    "size" : 20
   }, {
     "type" : "fixed",
     "name" : "ContainerID",
@@ -36,11 +30,6 @@
     "name" : "SFObjectState",
     "namespace" : "sysflow.type",
     "symbols" : [ "CREATED", "MODIFIED", "REUP" ]
-  }, {
-    "type" : "enum",
-    "name" : "ResourceType",
-    "namespace" : "sysflow.type",
-    "symbols" : [ "SF_FILE", "SF_DIRECTORY", "SF_PIPE", "SF_UNIX" ]
   }, {
     "type" : "enum",
     "name" : "ContainerType",
@@ -252,7 +241,7 @@
     "name" : "File",
     "namespace" : "sysflow.entity",
     "fields" : [ {
-      "name" : "status",
+      "name" : "state",
       "type" : "sysflow.type.SFObjectState"
     }, {
       "name" : "oid",
@@ -265,13 +254,10 @@
       }
     }, {
       "name" : "restype",
-      "type" : "sysflow.type.ResourceType"
+      "type" : "int"
     }, {
       "name" : "path",
       "type" : "string"
-    }, {
-      "name" : "containerDirectory",
-      "type" : [ "null", "string" ]
     }, {
       "name" : "containerId",
       "type" : [ "null", "string" ]

@@ -1,12 +1,6 @@
 {
-  "type" : "record",
+  "type" : "fixed",
   "name" : "FOID",
   "namespace" : "sysflow.type",
-  "fields" : [ {
-    "name" : "upperbits",
-    "type" : "long"
-  }, {
-    "name" : "lowerbits",
-    "type" : "long"
-  } ]
+  "size" : 20
 }

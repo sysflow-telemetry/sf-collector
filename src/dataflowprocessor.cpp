@@ -36,9 +36,6 @@ int DataFlowProcessor::removeAndWriteDFFromProc(ProcessObj* proc) {
    return m_netflowPrcr->removeAndWriteNFFromProc(proc);
 }
 
-void DataFlowProcessor::clearTables() {
-    m_netflowPrcr->clearNetFlows();
-}
 
 int DataFlowProcessor::checkForExpiredRecords() {
      time_t now = utils::getCurrentTime(m_cxt);

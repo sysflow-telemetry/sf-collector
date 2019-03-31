@@ -3,7 +3,7 @@
   "name" : "File",
   "namespace" : "sysflow.entity",
   "fields" : [ {
-    "name" : "status",
+    "name" : "state",
     "type" : {
       "type" : "enum",
       "name" : "SFObjectState",
@@ -13,16 +13,10 @@
   }, {
     "name" : "oid",
     "type" : {
-      "type" : "record",
+      "type" : "fixed",
       "name" : "FOID",
       "namespace" : "sysflow.type",
-      "fields" : [ {
-        "name" : "upperbits",
-        "type" : "long"
-      }, {
-        "name" : "lowerbits",
-        "type" : "long"
-      } ]
+      "size" : 20
     }
   }, {
     "name" : "ts",
@@ -32,18 +26,10 @@
     }
   }, {
     "name" : "restype",
-    "type" : {
-      "type" : "enum",
-      "name" : "ResourceType",
-      "namespace" : "sysflow.type",
-      "symbols" : [ "SF_FILE", "SF_DIRECTORY", "SF_PIPE", "SF_UNIX" ]
-    }
+    "type" : "int"
   }, {
     "name" : "path",
     "type" : "string"
-  }, {
-    "name" : "containerDirectory",
-    "type" : [ "null", "string" ]
   }, {
     "name" : "containerId",
     "type" : [ "null", "string" ]

@@ -1,5 +1,5 @@
-#ifndef _SF_NET_FLOW_
-#define _SF_NET_FLOW_
+#ifndef _SF_FIlE_FLOW_
+#define _SF_FILE_FLOW_
 #include <ctime>
 #include "datatypes.h"
 #include <sinsp.h>
@@ -9,10 +9,10 @@
 #include "processcontext.h"
 #include "sysflow/sysflow.hh"
 using namespace sysflow;
-namespace networkflow {
+namespace fileflow {
 
 
-    class NetworkFlowProcessor {
+    class FileFlowProcessor {
         private:
             SysFlowContext* m_cxt;
             process::ProcessContext* m_processCxt;
@@ -31,12 +31,11 @@ namespace networkflow {
             void removeAndWriteNetworkFlow(ProcessObj* proc, NetFlowObj** nf, NFKey* key);
             void removeNetworkFlow(ProcessObj* proc, NetFlowObj** nf, NFKey* key);
          
-            int32_t getProtocol(scap_l4_proto proto);
             int removeNetworkFlowFromSet(NetFlowObj** nfo, bool deleteNetFlow);
         public:
-            NetworkFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* procCxt, DataFlowSet* dfSet);
-            virtual ~NetworkFlowProcessor();
-            int handleNetFlowEvent(sinsp_evt* ev, OpFlags flag);
+            FileFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* procCxt, DataFlowSet* dfSet);
+            virtual ~FileFlowProcessor();
+            int handleFileFlowEvent(sinsp_evt* ev, OpFlags flag);
             inline int getSize() {
                  return m_processCxt->getNumNetworkFlows();
             }

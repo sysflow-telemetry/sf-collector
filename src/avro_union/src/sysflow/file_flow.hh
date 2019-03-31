@@ -37,22 +37,13 @@ struct OID {
         { }
 };
 
-struct FOID {
-    int64_t upperbits;
-    int64_t lowerbits;
-    FOID() :
-        upperbits(int64_t()),
-        lowerbits(int64_t())
-        { }
-};
-
 struct FileFlow {
     OID procOID;
     int64_t ts;
     int64_t tid;
     int32_t opFlags;
     int64_t endTs;
-    FOID fileOID;
+    boost::array<uint8_t, 20> fileOID;
     int32_t fd;
     int64_t numROps;
     int64_t numWOps;
@@ -64,7 +55,7 @@ struct FileFlow {
         tid(int64_t()),
         opFlags(int32_t()),
         endTs(int64_t()),
-        fileOID(FOID()),
+        fileOID(boost::array<uint8_t, 20>()),
         fd(int32_t()),
         numROps(int64_t()),
         numWOps(int64_t()),
@@ -100,35 +91,6 @@ template<> struct codec_traits<sysflow.flow::OID> {
         } else {
             avro::decode(d, v.createTS);
             avro::decode(d, v.hpid);
-        }
-    }
-};
-
-template<> struct codec_traits<sysflow.flow::FOID> {
-    static void encode(Encoder& e, const sysflow.flow::FOID& v) {
-        avro::encode(e, v.upperbits);
-        avro::encode(e, v.lowerbits);
-    }
-    static void decode(Decoder& d, sysflow.flow::FOID& v) {
-        if (avro::ResolvingDecoder *rd =
-            dynamic_cast<avro::ResolvingDecoder *>(&d)) {
-            const std::vector<size_t> fo = rd->fieldOrder();
-            for (std::vector<size_t>::const_iterator it = fo.begin();
-                it != fo.end(); ++it) {
-                switch (*it) {
-                case 0:
-                    avro::decode(d, v.upperbits);
-                    break;
-                case 1:
-                    avro::decode(d, v.lowerbits);
-                    break;
-                default:
-                    break;
-                }
-            }
-        } else {
-            avro::decode(d, v.upperbits);
-            avro::decode(d, v.lowerbits);
         }
     }
 };

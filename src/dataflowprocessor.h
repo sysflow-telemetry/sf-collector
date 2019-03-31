@@ -20,7 +20,6 @@ namespace dataflow {
            int handleDataEvent(sinsp_evt* ev, OpFlags flag);
            DataFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt);
            virtual ~DataFlowProcessor();
-           void clearTables();
            int checkForExpiredRecords();
            int removeAndWriteDFFromProc(ProcessObj* proc);
     };

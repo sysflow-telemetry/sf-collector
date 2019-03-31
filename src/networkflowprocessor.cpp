@@ -11,7 +11,6 @@ NetworkFlowProcessor::NetworkFlowProcessor(SysFlowContext* cxt, SysFlowWriter* w
 }
 
 NetworkFlowProcessor::~NetworkFlowProcessor() {
-    clearNetFlows();
 }
 
 inline int32_t NetworkFlowProcessor::getProtocol(scap_l4_proto proto) {
@@ -321,19 +320,3 @@ void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj* dfo, time_t now) {
      nfo->netflow.numWBytes = 0;
 }
 
-
-
-void NetworkFlowProcessor::clearNetFlows() {
-    /*& for(OIDNetworkTable::iterator it = m_oidnfTable.begin(); it != m_oidnfTable.end(); it++) {
-         for(NetworkFlowTable::iterator nfi = it->second->begin(); nfi != it->second->end(); nfi++) {
-             nfi->second->netflow.opFlags |= OP_TRUNCATE;
-             nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
-             m_writer->writeNetFlow(&(nfi->second->netflow));
-             delete nfi->second;
-          }
-          it->second->clear();
-          delete it->second;
-     }*/
-     //m_oidnfTable.clear();
-     //m_nfSet.clear();
-}

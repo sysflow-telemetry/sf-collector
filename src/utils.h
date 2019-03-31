@@ -11,6 +11,10 @@
 #include "avro/Decoder.hh"
 #include  <time.h>
 #include "sysflowcontext.h"
+#include <openssl/sha.h>
+#include "boost/any.hpp"
+
+typedef boost::array<uint8_t, 20> FOID;
 using namespace std;
 struct NFKey;
 namespace utils {
@@ -22,6 +26,7 @@ namespace utils {
     time_t getExportTime(SysFlowContext* cxt);
     NFKey* getNFDelKey();
     NFKey* getNFEmptyKey();
+    void generateFOID(string key, FOID* foid);
 
     inline time_t getCurrentTime(SysFlowContext* cxt) {
         if(cxt->isOffline()) {

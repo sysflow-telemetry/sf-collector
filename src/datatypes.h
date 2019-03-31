@@ -161,6 +161,17 @@ struct eqdfobj {
 
 };
 
+class FileObj {
+    public:
+        bool written;
+        uint32_t refs;
+        string key;
+        File file;
+        FileObj() : written(false), refs(0) {
+        }
+
+};
+
 
 
 typedef google::dense_hash_map<int, string> ParameterMapping;
@@ -168,12 +179,12 @@ typedef google::dense_hash_map<string, Container*, MurmurHasher<string>, eqstr> 
 //typedef google::dense_hash_map<OID*, ProcessFlow*, MurmurHasher<OID*>, eqoid> ProcessFlowTable;
 typedef google::dense_hash_map<NFKey, NetFlowObj*, MurmurHasher<NFKey>, eqnfkey> NetworkFlowTable;
 typedef google::dense_hash_map<string, FileFlowObj*, MurmurHasher<string>, eqstr> FileFlowTable;
+typedef google::dense_hash_map<string, FileObj*, MurmurHasher<string>, eqstr> FileTable;
 typedef google::dense_hash_map<OID, NetworkFlowTable*,MurmurHasher<OID>, eqoid> OIDNetworkTable;
 //typedef multiset<NetFlowObj*, eqnfobj>  NetworkFlowSet;
 typedef multiset<DataFlowObj*, eqdfobj>  DataFlowSet;
 
 class ProcessObj {
-    private:
     public:
         bool written;
         Process proc;
@@ -188,6 +199,5 @@ class ProcessObj {
 };
 
 typedef google::dense_hash_map<OID*, ProcessObj*, MurmurHasher<OID*>, eqoidptr> ProcessTable;
-
 
 #endif

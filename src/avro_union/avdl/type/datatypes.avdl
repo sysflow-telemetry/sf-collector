@@ -8,10 +8,13 @@ record OID {
   long hpid;
 }
 
-record FOID {
-  long upperbits;
-  long lowerbits;
-}
+/*record FOID {
+  long bits0;
+  long bits8;
+  long bits16;
+}*/
+
+fixed FOID(20);
 
 
 fixed ContainerID(6);
@@ -26,13 +29,13 @@ enum SFObjectState {
           MODIFIED, 
           REUP
          }
-
+/*
 enum ResourceType {
           SF_FILE,
           SF_DIRECTORY,
           SF_PIPE,
           SF_UNIX
-        }
+        }*/
 
 enum ContainerType {
     CT_DOCKER,
