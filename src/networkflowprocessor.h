@@ -40,7 +40,7 @@ namespace networkflow {
             inline int getSize() {
                  return m_processCxt->getNumNetworkFlows();
             }
-            int removeAndWriteNFFromProc(ProcessObj* proc);
+            int removeAndWriteNFFromProc(ProcessObj* proc, int64_t tid);
             void removeNetworkFlow(DataFlowObj* dfo);
             void exportNetworkFlow(DataFlowObj* dfo, time_t now);
          

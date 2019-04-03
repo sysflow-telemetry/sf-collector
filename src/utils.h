@@ -13,9 +13,11 @@
 #include "sysflowcontext.h"
 #include <openssl/sha.h>
 #include "boost/any.hpp"
+#include "sysflow/sysflow.hh"
 
 typedef boost::array<uint8_t, 20> FOID;
 using namespace std;
+using namespace sysflow;
 struct NFKey;
 namespace utils {
     string getUserName(SysFlowContext* cxt, uint32_t uid);
@@ -26,6 +28,8 @@ namespace utils {
     time_t getExportTime(SysFlowContext* cxt);
     NFKey* getNFDelKey();
     NFKey* getNFEmptyKey();
+    OID* getOIDDelKey();
+    OID* getOIDEmptyKey();
     void generateFOID(string key, FOID* foid);
 
     inline time_t getCurrentTime(SysFlowContext* cxt) {

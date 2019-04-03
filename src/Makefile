@@ -3,7 +3,7 @@
 #LDFLAGS=-rdynamic  -L../../sysdig-0.23.0/build/userspace/libsinsp/ -lsinsp -L../../sysdig-0.23.0/build/userspace/libscap/ -lscap -lelf -L../../sysdig-0.23.0/build/zlib-prefix/src/zlib/ -lz -L../../sysdig-0.23.0/build/jq-prefix/src/jq/.libs/ -ljq -L../../sysdig-0.23.0/build/b64-prefix/src/b64/src/ -lb64 -L../../sysdig-0.23.0/build/curl-prefix/src/curl/lib/.libs/ -lcurl -lrt -lanl -L../../sysdig-0.23.0/build/openssl-prefix/src/openssl/target/lib/ -lssl -L../../sysdig-0.23.0/build/openssl-prefix/src/openssl/target/lib/ -lcrypto -L../../sysdig-0.23.0/build/luajit-prefix/src/luajit/src/ -lluajit -ldl -lpthread -lstdc++ -lm -lavrocpp
 #LDFLAGS=-rdynamic  -L../../../sysdig-0.23.0/build/userspace/libsinsp/ -lsinsp -L../../../sysdig-0.23.0/build/userspace/libscap/ -lscap -lelf -L../../../sysdig-0.23.0/build/zlib-prefix/src/zlib/ -lz -L../../../sysdig-0.23.0/build/jq-prefix/src/jq/.libs/ -ljq  -L../../../sysdig-0.23.0/build/b64-prefix/src/b64/src/ -lb64 -L../../../sysdig-0.23.0/build/curl-prefix/src/curl/lib/.libs/ -lcurl -lrt  -lanl -L../../../sysdig-0.23.0/build/openssl-prefix/src/openssl/target/lib/ -lssl -L../../../sysdig-0.23.0/build/openssl-prefix/src/openssl/target/lib/ -lcrypto -L../../../sysdig-0.23.0/build/luajit-prefix/src/luajit/src/ -lpthread -lm -lavrocpp 
 LDFLAGS=-rdynamic  -L./../lib-sysdig/ -lsinsp -lscap -lelf -lz -ljq -lb64 -lcurl -lrt  -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -ltbb
-LDFLAGS2=-lpthread -lm -lavrocpp 
+LDFLAGS2=-L./../lib-sysdig/ -lpthread -lm -lavrocpp -lb64
 #CFLAGS=-std=c++11 -ggdb -I../../sysdig-0.23.0/userspace/libsinsp/ -I../../sysdig-0.23.0/userspace/libscap/ -I../../sysdig-0.23.0/userspace/libsinsp/third-party/jsoncpp/ -I.. -I./avro_union/src/
 #CFLAGS= -std=c++11 -Wall -ggdb -O3 -DNDEBUG -ggdb -I../../sysdig-0.23.0/userspace/libsinsp/ -I../../sysdig-0.23.0/userspace/libscap/ -I../../sysdig-0.23.0/userspace/libsinsp/third-party/jsoncpp/ -I.. -I./avro_union/src/ -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -I../../sysdig-0.23.0/build/curl-prefix/src/curl/include/
 CFLAGS= -std=c++11 -Wall -ggdb -O3 -ggdb -I./../include-sysdig -I.. -I./avro_union/src/ -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -fPIE -I./../include-sysdig/driver/ -I./../include-sysdig/userspace/libsinsp/ -I./../include-sysdig/userspace/libscap/
@@ -15,7 +15,7 @@ TARGET3=sysporterf
 
 all: $(TARGET) $(TARGET2)
 
-$(TARGET): main.o MurmurHash3.o utils.o containercontext.o processcontext.o processflowprocessor.o dataflowprocessor.o networkflowprocessor.o sysflowcontext.o sysflowprocessor.o sysflowwriter.o filecontext.o
+$(TARGET): main.o MurmurHash3.o utils.o containercontext.o processcontext.o processflowprocessor.o dataflowprocessor.o networkflowprocessor.o fileflowprocessor.o sysflowcontext.o sysflowprocessor.o sysflowwriter.o filecontext.o
 	g++ $^ -o $@ $(LDFLAGS)
 
 #$(TARGET3): sysflowfork.o MurmurHash3.o
@@ -55,6 +55,9 @@ dataflowprocessor.o: dataflowprocessor.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
 networkflowprocessor.o: networkflowprocessor.cpp
+	g++ $(CFLAGS) -o $@ -c $^
+
+fileflowprocessor.o: fileflowprocessor.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
 sysflowcontext.o: sysflowcontext.cpp

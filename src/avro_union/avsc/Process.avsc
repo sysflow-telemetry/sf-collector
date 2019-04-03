@@ -55,6 +55,9 @@
     "name" : "groupName",
     "type" : "string"
   }, {
+    "name" : "tty",
+    "type" : "boolean"
+  }, {
     "name" : "containerId",
     "type" : [ "null", "string" ]
   } ]

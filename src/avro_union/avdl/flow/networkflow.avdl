@@ -12,9 +12,9 @@ record NetworkFlow {
   int dip;
   int dport;
   int proto;
-  long numROps;
-  long numWOps;
-  long numRBytes;
-  long numWBytes;
+  long numRRecvOps;
+  long numWSendOps;
+  long numRRecvBytes;
+  long numWSendBytes;
 }
 }

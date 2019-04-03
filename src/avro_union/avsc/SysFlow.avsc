@@ -100,6 +100,9 @@
         "name" : "groupName",
         "type" : "string"
       }, {
+        "name" : "tty",
+        "type" : "boolean"
+      }, {
         "name" : "containerId",
         "type" : [ "null", "string" ]
       } ]
@@ -204,16 +207,16 @@
         "name" : "proto",
         "type" : "int"
       }, {
-        "name" : "numROps",
+        "name" : "numRRecvOps",
         "type" : "long"
       }, {
-        "name" : "numWOps",
+        "name" : "numWSendOps",
         "type" : "long"
       }, {
-        "name" : "numRBytes",
+        "name" : "numRRecvBytes",
         "type" : "long"
       }, {
-        "name" : "numWBytes",
+        "name" : "numWSendBytes",
         "type" : "long"
       } ]
     }, {
@@ -248,16 +251,16 @@
         "name" : "fd",
         "type" : "int"
       }, {
-        "name" : "numROps",
+        "name" : "numRRecvOps",
         "type" : "long"
       }, {
-        "name" : "numWOps",
+        "name" : "numWSendOps",
         "type" : "long"
       }, {
-        "name" : "numRBytes",
+        "name" : "numRRecvBytes",
         "type" : "long"
       }, {
-        "name" : "numWBytes",
+        "name" : "numWSendBytes",
         "type" : "long"
       } ]
     } ]

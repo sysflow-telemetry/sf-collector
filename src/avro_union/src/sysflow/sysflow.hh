@@ -127,6 +127,7 @@ struct Process {
     std::string userName;
     int32_t gid;
     std::string groupName;
+    bool tty;
     containerId_t containerId;
     Process() :
         state(SFObjectState()),
@@ -139,6 +140,7 @@ struct Process {
         userName(std::string()),
         gid(int32_t()),
         groupName(std::string()),
+        tty(bool()),
         containerId(containerId_t())
         { }
 };
@@ -207,10 +209,10 @@ struct NetworkFlow {
     int32_t dip;
     int32_t dport;
     int32_t proto;
-    int64_t numROps;
-    int64_t numWOps;
-    int64_t numRBytes;
-    int64_t numWBytes;
+    int64_t numRRecvOps;
+    int64_t numWSendOps;
+    int64_t numRRecvBytes;
+    int64_t numWSendBytes;
     NetworkFlow() :
         procOID(OID()),
         ts(int64_t()),
@@ -222,10 +224,10 @@ struct NetworkFlow {
         dip(int32_t()),
         dport(int32_t()),
         proto(int32_t()),
-        numROps(int64_t()),
-        numWOps(int64_t()),
-        numRBytes(int64_t()),
-        numWBytes(int64_t())
+        numRRecvOps(int64_t()),
+        numWSendOps(int64_t()),
+        numRRecvBytes(int64_t()),
+        numWSendBytes(int64_t())
         { }
 };
 
@@ -237,10 +239,10 @@ struct FileFlow {
     int64_t endTs;
     boost::array<uint8_t, 20> fileOID;
     int32_t fd;
-    int64_t numROps;
-    int64_t numWOps;
-    int64_t numRBytes;
-    int64_t numWBytes;
+    int64_t numRRecvOps;
+    int64_t numWSendOps;
+    int64_t numRRecvBytes;
+    int64_t numWSendBytes;
     FileFlow() :
         procOID(OID()),
         ts(int64_t()),
@@ -249,10 +251,10 @@ struct FileFlow {
         endTs(int64_t()),
         fileOID(boost::array<uint8_t, 20>()),
         fd(int32_t()),
-        numROps(int64_t()),
-        numWOps(int64_t()),
-        numRBytes(int64_t()),
-        numWBytes(int64_t())
+        numRRecvOps(int64_t()),
+        numWSendOps(int64_t()),
+        numRRecvBytes(int64_t()),
+        numWSendBytes(int64_t())
         { }
 };
 
@@ -658,6 +660,7 @@ template<> struct codec_traits<sysflow::Process> {
         avro::encode(e, v.userName);
         avro::encode(e, v.gid);
         avro::encode(e, v.groupName);
+        avro::encode(e, v.tty);
         avro::encode(e, v.containerId);
     }
     static void decode(Decoder& d, sysflow::Process& v) {
@@ -698,6 +701,9 @@ template<> struct codec_traits<sysflow::Process> {
                     avro::decode(d, v.groupName);
                     break;
                 case 10:
+                    avro::decode(d, v.tty);
+                    break;
+                case 11:
                     avro::decode(d, v.containerId);
                     break;
                 default:
@@ -715,6 +721,7 @@ template<> struct codec_traits<sysflow::Process> {
             avro::decode(d, v.userName);
             avro::decode(d, v.gid);
             avro::decode(d, v.groupName);
+            avro::decode(d, v.tty);
             avro::decode(d, v.containerId);
         }
     }
@@ -861,10 +868,10 @@ template<> struct codec_traits<sysflow::NetworkFlow> {
         avro::encode(e, v.dip);
         avro::encode(e, v.dport);
         avro::encode(e, v.proto);
-        avro::encode(e, v.numROps);
-        avro::encode(e, v.numWOps);
-        avro::encode(e, v.numRBytes);
-        avro::encode(e, v.numWBytes);
+        avro::encode(e, v.numRRecvOps);
+        avro::encode(e, v.numWSendOps);
+        avro::encode(e, v.numRRecvBytes);
+        avro::encode(e, v.numWSendBytes);
     }
     static void decode(Decoder& d, sysflow::NetworkFlow& v) {
         if (avro::ResolvingDecoder *rd =
@@ -904,16 +911,16 @@ template<> struct codec_traits<sysflow::NetworkFlow> {
                     avro::decode(d, v.proto);
                     break;
                 case 10:
-                    avro::decode(d, v.numROps);
+                    avro::decode(d, v.numRRecvOps);
                     break;
                 case 11:
-                    avro::decode(d, v.numWOps);
+                    avro::decode(d, v.numWSendOps);
                     break;
                 case 12:
-                    avro::decode(d, v.numRBytes);
+                    avro::decode(d, v.numRRecvBytes);
                     break;
                 case 13:
-                    avro::decode(d, v.numWBytes);
+                    avro::decode(d, v.numWSendBytes);
                     break;
                 default:
                     break;
@@ -930,10 +937,10 @@ template<> struct codec_traits<sysflow::NetworkFlow> {
             avro::decode(d, v.dip);
             avro::decode(d, v.dport);
             avro::decode(d, v.proto);
-            avro::decode(d, v.numROps);
-            avro::decode(d, v.numWOps);
-            avro::decode(d, v.numRBytes);
-            avro::decode(d, v.numWBytes);
+            avro::decode(d, v.numRRecvOps);
+            avro::decode(d, v.numWSendOps);
+            avro::decode(d, v.numRRecvBytes);
+            avro::decode(d, v.numWSendBytes);
         }
     }
 };
@@ -947,10 +954,10 @@ template<> struct codec_traits<sysflow::FileFlow> {
         avro::encode(e, v.endTs);
         avro::encode(e, v.fileOID);
         avro::encode(e, v.fd);
-        avro::encode(e, v.numROps);
-        avro::encode(e, v.numWOps);
-        avro::encode(e, v.numRBytes);
-        avro::encode(e, v.numWBytes);
+        avro::encode(e, v.numRRecvOps);
+        avro::encode(e, v.numWSendOps);
+        avro::encode(e, v.numRRecvBytes);
+        avro::encode(e, v.numWSendBytes);
     }
     static void decode(Decoder& d, sysflow::FileFlow& v) {
         if (avro::ResolvingDecoder *rd =
@@ -981,16 +988,16 @@ template<> struct codec_traits<sysflow::FileFlow> {
                     avro::decode(d, v.fd);
                     break;
                 case 7:
-                    avro::decode(d, v.numROps);
+                    avro::decode(d, v.numRRecvOps);
                     break;
                 case 8:
-                    avro::decode(d, v.numWOps);
+                    avro::decode(d, v.numWSendOps);
                     break;
                 case 9:
-                    avro::decode(d, v.numRBytes);
+                    avro::decode(d, v.numRRecvBytes);
                     break;
                 case 10:
-                    avro::decode(d, v.numWBytes);
+                    avro::decode(d, v.numWSendBytes);
                     break;
                 default:
                     break;
@@ -1004,10 +1011,10 @@ template<> struct codec_traits<sysflow::FileFlow> {
             avro::decode(d, v.endTs);
             avro::decode(d, v.fileOID);
             avro::decode(d, v.fd);
-            avro::decode(d, v.numROps);
-            avro::decode(d, v.numWOps);
-            avro::decode(d, v.numRBytes);
-            avro::decode(d, v.numWBytes);
+            avro::decode(d, v.numRRecvOps);
+            avro::decode(d, v.numWSendOps);
+            avro::decode(d, v.numRRecvBytes);
+            avro::decode(d, v.numWSendBytes);
         }
     }
 };

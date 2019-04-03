@@ -9,23 +9,26 @@ SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
    }
    m_writer = new SysFlowWriter(cxt, start);
    m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
-   m_processCxt = new process::ProcessContext(m_cxt, m_containerCxt, m_writer);
-   m_dfPrcr = new dataflow::DataFlowProcessor(m_cxt, m_writer, m_processCxt);
+   m_fileCxt = new file::FileContext(m_containerCxt, m_writer);
+   m_processCxt = new process::ProcessContext(m_cxt, m_containerCxt, m_fileCxt, m_writer);
+   m_dfPrcr = new dataflow::DataFlowProcessor(m_cxt, m_writer, m_processCxt, m_fileCxt);
    m_procFlowPrcr = new processflow::ProcessFlowProcessor(m_writer, m_processCxt, m_dfPrcr);
 }
 
 SysFlowProcessor::~SysFlowProcessor() {
    delete m_cxt;
-   delete m_containerCxt;
    delete m_processCxt;
    delete m_dfPrcr;
+   delete m_fileCxt;
    delete m_procFlowPrcr;
+   delete m_containerCxt;
    delete m_writer;
 }
 
 void SysFlowProcessor::clearTables() {
    m_processCxt->clearProcesses();
    m_containerCxt->clearContainers();
+   m_fileCxt->clearFiles();
 }
 
 bool SysFlowProcessor::checkAndRotateFile()  {
@@ -89,6 +92,7 @@ int SysFlowProcessor::run() {
                           SF_EXECVE_EXIT(ev)
                           SF_CLONE_EXIT(ev)
                           SF_PROCEXIT_E_X(ev)
+                          SF_OPEN_EXIT(ev)
                           SF_ACCEPT_EXIT(ev)
                           SF_CONNECT_EXIT(ev)	
                           SF_SEND_EXIT(ev)

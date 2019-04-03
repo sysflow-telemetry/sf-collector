@@ -9,9 +9,9 @@ record FileFlow {
   timestamp_ms endTs;
   sysflow.type.FOID fileOID;
   int fd;
-  long numROps;
-  long numWOps;
-  long numRBytes;
-  long numWBytes;
+  long numRRecvOps;
+  long numWSendOps;
+  long numRRecvBytes;
+  long numWSendBytes;
 }
 }

@@ -4,6 +4,7 @@
 #include "syscall_defs.h"
 #include "sysflowcontext.h"
 #include "processcontext.h"
+#include "filecontext.h"
 #include "containercontext.h"
 #include "processflowprocessor.h"
 #include "dataflowprocessor.h"
@@ -23,6 +24,7 @@ namespace sysflowprocessor {
             SysFlowContext* m_cxt;
             SysFlowWriter* m_writer;
             container::ContainerContext* m_containerCxt;
+            file::FileContext* m_fileCxt;           
             process::ProcessContext* m_processCxt;
             processflow::ProcessFlowProcessor* m_procFlowPrcr;
             dataflow::DataFlowProcessor* m_dfPrcr;

@@ -5,7 +5,8 @@
 #include "sysflowcontext.h"
 #include "datatypes.h"
 #include "containercontext.h"
-#include "container.h"
+#include "filecontext.h"
+//#include "container.h"
 #include "utils.h"
 #include "op_flags.h"
 
@@ -18,10 +19,11 @@ namespace process {
             SysFlowWriter* m_writer;
             container::ContainerContext* m_containerCxt;
             ProcessTable m_procs;
-            OID m_empkey;
-            OID m_delkey;
+            file::FileContext* m_fileCxt;
+            void writeProcessAndAncestors(ProcessObj* proc); 
+            void reupContainer(sinsp_evt* ev, ProcessObj* proc);
         public:
-            ProcessContext(SysFlowContext* cxt, container::ContainerContext* ccxt, SysFlowWriter* writer);
+            ProcessContext(SysFlowContext* cxt, container::ContainerContext* ccxt, file::FileContext* fileCxt, SysFlowWriter* writer);
             virtual ~ProcessContext();
             void updateProcess(Process* proc, sinsp_evt* ev, SFObjectState state);
             ProcessObj* createProcess(sinsp_threadinfo* mainthread, sinsp_evt* ev, SFObjectState state);
@@ -40,6 +42,13 @@ namespace process {
                 int total = 0;
                 for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); it++) {
                      total+= it->second->netflows.size();
+                 }
+                return total;
+            }
+            inline int getNumFileFlows() {
+                int total = 0;
+                for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); it++) {
+                     total+= it->second->fileflows.size();
                  }
                 return total;
             }

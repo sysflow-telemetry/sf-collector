@@ -11,11 +11,14 @@ namespace file {
             SysFlowWriter* m_writer;
             FileTable m_files;
             container::ContainerContext* m_containerCxt;
+            void clearAllFiles();
         public:
             FileContext(container::ContainerContext* containerCxt, SysFlowWriter* writer);
             virtual ~FileContext();
             FileObj* getFile(sinsp_evt* ev, SFObjectState state, bool& created);
+            FileObj* getFile(string key);
             FileObj* createFile(sinsp_evt* ev, SFObjectState state, string key);
+            bool exportFile(string key);
             void clearFiles();
             inline int getSize() {
                 return m_files.size();

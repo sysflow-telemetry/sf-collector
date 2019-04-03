@@ -3,6 +3,7 @@
 #include "MurmurHash3.h"
 
 #include <google/dense_hash_map>
+#include <google/dense_hash_set>
 #include <set>
 #include "sysflow/sysflow.hh"
 #include "utils.h"
@@ -60,6 +61,13 @@ class NetFlowObj : public DataFlowObj {
 class FileFlowObj : public DataFlowObj  {
     public:
         FileFlow fileflow;
+        string key;
+       bool operator ==(const FileFlowObj& ffo) {
+         if(exportTime != ffo.exportTime) {
+            return false;
+         }
+         return (key.compare(ffo.key) == 0);
+       }
         FileFlowObj() : DataFlowObj(false) {
          
         }
@@ -172,15 +180,25 @@ class FileObj {
 
 };
 
+class ContainerObj {
+    public:
+        bool written;
+        uint32_t refs;
+        Container cont;
+        ContainerObj() : written(false), refs(0) {
+        }
+
+};
 
 
 typedef google::dense_hash_map<int, string> ParameterMapping;
-typedef google::dense_hash_map<string, Container*, MurmurHasher<string>, eqstr> ContainerTable;
+typedef google::dense_hash_map<string, ContainerObj*, MurmurHasher<string>, eqstr> ContainerTable;
 //typedef google::dense_hash_map<OID*, ProcessFlow*, MurmurHasher<OID*>, eqoid> ProcessFlowTable;
 typedef google::dense_hash_map<NFKey, NetFlowObj*, MurmurHasher<NFKey>, eqnfkey> NetworkFlowTable;
 typedef google::dense_hash_map<string, FileFlowObj*, MurmurHasher<string>, eqstr> FileFlowTable;
 typedef google::dense_hash_map<string, FileObj*, MurmurHasher<string>, eqstr> FileTable;
 typedef google::dense_hash_map<OID, NetworkFlowTable*,MurmurHasher<OID>, eqoid> OIDNetworkTable;
+typedef google::dense_hash_set<OID, MurmurHasher<OID>, eqoid> ProcessSet;
 //typedef multiset<NetFlowObj*, eqnfobj>  NetworkFlowSet;
 typedef multiset<DataFlowObj*, eqdfobj>  DataFlowSet;
 
@@ -190,11 +208,18 @@ class ProcessObj {
         Process proc;
         NetworkFlowTable netflows;
         FileFlowTable    fileflows;
+        ProcessSet children;
         ProcessObj() : written(false) {
             NFKey* emptykey = utils::getNFEmptyKey();
             NFKey* delkey = utils::getNFDelKey();
+            OID* emptyoidkey = utils::getOIDEmptyKey();
+            OID* deloidkey = utils::getOIDDelKey();
             netflows.set_empty_key(*emptykey);
             netflows.set_deleted_key(*delkey);
+            fileflows.set_empty_key("-2");
+            fileflows.set_deleted_key("-1");
+            children.set_empty_key(*emptyoidkey);
+            children.set_deleted_key(*deloidkey);
       }
 };
 

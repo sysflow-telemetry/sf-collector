@@ -18,11 +18,15 @@ namespace container {
           ContainerTable m_containers;
           SysFlowContext* m_cxt;
           SysFlowWriter* m_writer;
-          Container*  createContainer(sinsp_evt* ev); 
+          ContainerObj*  createContainer(sinsp_evt* ev); 
        public:
           ContainerContext(SysFlowContext* cxt, SysFlowWriter* writer);
           virtual ~ContainerContext();
-          Container* getContainer(sinsp_evt* ev);
+          ContainerObj* getContainer(sinsp_evt* ev);
+          ContainerObj* getContainer(string id);
+          bool exportContainer(string id);
+          int derefContainer(string id);
+          void clearAllContainers();
           void clearContainers();
           inline int getSize() {
               return m_containers.size();

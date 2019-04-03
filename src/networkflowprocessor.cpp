@@ -114,26 +114,26 @@ inline void NetworkFlowProcessor::populateNetFlow(NetFlowObj* nf, OpFlags flag, 
    nf->netflow.sport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sport; 
    nf->netflow.dport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dport; 
    nf->netflow.proto = getProtocol(fdinfo->get_l4proto());
-   nf->netflow.numROps = 0;
-   nf->netflow.numWOps = 0;
-   nf->netflow.numRBytes = 0;
-   nf->netflow.numWBytes = 0;
+   nf->netflow.numRRecvOps = 0;
+   nf->netflow.numWSendOps = 0;
+   nf->netflow.numRRecvBytes = 0;
+   nf->netflow.numWSendBytes = 0;
 }
 
 inline void NetworkFlowProcessor::updateNetFlow(NetFlowObj* nf, OpFlags flag, sinsp_evt* ev) {
        nf->netflow.opFlags |= flag;
        nf->lastUpdate = utils::getCurrentTime(m_cxt);
        if(flag == OP_WRITE_SEND) {
-           nf->netflow.numWOps++;
+           nf->netflow.numWSendOps++;
            int res = utils::getSyscallResult(ev);
            if(res > 0 ) {
-               nf->netflow.numWBytes+= res;
+               nf->netflow.numWSendBytes+= res;
            }
        }else if(flag == OP_READ_RECV) {
-           nf->netflow.numROps++;
+           nf->netflow.numRRecvOps++;
            int res = utils::getSyscallResult(ev);
            if(res > 0 ) {
-               nf->netflow.numRBytes+= res;
+               nf->netflow.numRRecvBytes+= res;
            }
        }
 }
@@ -242,20 +242,24 @@ void NetworkFlowProcessor::removeNetworkFlow(ProcessObj* proc, NetFlowObj** nf, 
     nf = NULL;
 }
 
-int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj* proc) {
+int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj* proc, int64_t tid) {
     cout << "CALLING removeANDWRITE" << endl;
     int deleted = 0;
     for(NetworkFlowTable::iterator nfi = proc->netflows.begin(); nfi != proc->netflows.end(); nfi++) {
-        nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
-        nfi->second->netflow.opFlags |= OP_TRUNCATE;
-        cout << "Writing NETFLOW!!" << endl;
-        m_writer->writeNetFlow(&(nfi->second->netflow));
-        NetFlowObj* nfo = nfi->second;
-        cout << "Set size: " << m_dfSet->size() << endl;
-        deleted += removeNetworkFlowFromSet(&nfo, true);
-        cout << "After Set size: " << m_dfSet->size() << endl;
+        if(tid == -1 ||  tid == nfi->second->netflow.tid) {
+            nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
+            nfi->second->netflow.opFlags |= OP_TRUNCATE;
+            cout << "Writing NETFLOW!!" << endl;
+            m_writer->writeNetFlow(&(nfi->second->netflow));
+            NetFlowObj* nfo = nfi->second;
+            cout << "Set size: " << m_dfSet->size() << endl;
+            deleted += removeNetworkFlowFromSet(&nfo, true);
+           cout << "After Set size: " << m_dfSet->size() << endl;
+        }
     }
-    proc->netflows.clear();
+    if(tid == -1) {
+        proc->netflows.clear();
+    }
     return deleted;
 }
 
@@ -314,9 +318,9 @@ void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj* dfo, time_t now) {
      nfo->netflow.ts = utils::getSysdigTime(m_cxt);
      nfo->netflow.endTs = 0;
      nfo->netflow.opFlags = 0;
-     nfo->netflow.numROps = 0;
-     nfo->netflow.numWOps = 0;
-     nfo->netflow.numRBytes = 0;
-     nfo->netflow.numWBytes = 0;
+     nfo->netflow.numRRecvOps = 0;
+     nfo->netflow.numWSendOps = 0;
+     nfo->netflow.numRRecvBytes = 0;
+     nfo->netflow.numWSendBytes = 0;
 }
 

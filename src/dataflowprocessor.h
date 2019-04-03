@@ -4,12 +4,14 @@
 #include "sysflowcontext.h"
 #include "op_flags.h"
 #include "networkflowprocessor.h"
+#include "fileflowprocessor.h"
 #include "sysflowwriter.h"
 
 namespace dataflow {
     class DataFlowProcessor {
         private:
            networkflow::NetworkFlowProcessor* m_netflowPrcr;
+           fileflow::FileFlowProcessor* m_fileflowPrcr;
            SysFlowContext*   m_cxt;
            DataFlowSet m_dfSet;
            time_t m_lastCheck;
@@ -18,10 +20,10 @@ namespace dataflow {
                return m_netflowPrcr->getSize();
            }
            int handleDataEvent(sinsp_evt* ev, OpFlags flag);
-           DataFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt);
+           DataFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt, file::FileContext* fileCxt);
            virtual ~DataFlowProcessor();
            int checkForExpiredRecords();
-           int removeAndWriteDFFromProc(ProcessObj* proc);
+           int removeAndWriteDFFromProc(ProcessObj* proc, int64_t tid);
     };
 }
 

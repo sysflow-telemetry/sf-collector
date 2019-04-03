@@ -14,6 +14,8 @@
 #include "op_flags.h"
 #include "datatypes.h"
 #include <time.h>
+#define BUFFERSIZE 20
+#include "b64/encode.h"
 using namespace std;
 using namespace sysflow;
 
@@ -32,13 +34,16 @@ ProcessFlow pf;
 SysFlow flow;
 SFHeader header;
 Container cont;
+File file;
 NetworkFlow netflow;
+FileFlow fileflow;
 
 typedef google::dense_hash_map<OID*, Process*, MurmurHasher<OID*>, eqoidptr> PTable;
+typedef google::dense_hash_map<string, File*, MurmurHasher<string>, eqstr> FTable;
 PTable s_procs;
+FTable s_files;
 
-bool s_printProc = false;
-bool s_printCont = false;
+bool s_quiet = false;
 bool s_keepProcOnExit = false;
 
 const char* Events[] = {"", "CLONE", "EXEC", "",  "EXIT"};
@@ -55,6 +60,53 @@ avro::ValidSchema loadSchema(const char* filename)
          exit(1);
     }
     return result;
+}
+void printFileFlow(FileFlow fileflow) {
+    string opFlags = "";
+    opFlags +=  ((fileflow.opFlags & OP_OPEN) ?  "O" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_ACCEPT) ?  "A" : " ");
+    opFlags +=  ((netflow.opFlags & OP_CONNECT) ?  "C" : " ");
+    opFlags +=  ((netflow.opFlags & OP_WRITE_SEND) ?  "W" : " ");
+    opFlags +=  ((netflow.opFlags & OP_READ_RECV) ?  "R" : " ");
+    opFlags +=  ((netflow.opFlags & OP_CLOSE) ?  "C" : " ");
+    opFlags +=  ((netflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
+    opFlags +=  ((netflow.opFlags & OP_DIGEST) ?  "D" : " ");
+
+    time_t startTs = ((time_t)(netflow.ts/NANO_TO_SECS));
+    time_t endTs = ((time_t)(netflow.endTs/NANO_TO_SECS));
+    char startTime[100];
+    char endTime[100];
+    strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
+     strftime(endTime, 99, "%x %X %Z", localtime(&endTs));
+
+    string key(fileflow.fileOID.begin(), fileflow.fileOID.end());
+    FTable::iterator fi = s_files.find(key);
+    base64::encoder enc(20);
+    char b64encoded[60];
+    int len = enc.encode(key.c_str(), key.size(),  b64encoded);
+    string b64enc(b64encoded, len);
+    len = enc.encode_end(b64encoded);
+    b64enc += string(b64encoded, len);
+    if(fi == s_files.end()) {
+        cout << "Uh Oh! Can't find process for fileflow!! " << endl;
+        cout << "FILEFLOW " << startTime << " " << endTime << " " <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd << " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS <<  b64enc << endl;
+
+      }
+
+
+   PTable::iterator it = s_procs.find(&(fileflow.procOID));
+   if(it == s_procs.end()) {
+       cout << "Uh Oh! Can't find process for fileflow!! " << endl;
+       cout << "FILEFLOW " << startTime << " " << endTime << " " <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd << " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << b64enc << endl;
+  } else {
+       string container = "";
+       if(!it->second->containerId.is_null()) {
+                  container = it->second->containerId.get_string();
+       }
+       //cout << netflow.sip << "\t" << netflow.dip << endl;
+       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " Resource: " << fi->second->restype << " PATH: " << fi->second->path << " FD: " << fileflow.fd << " TID: " << fileflow.tid <<  " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs << b64enc << endl;
+
+ }
 }
 
 
@@ -84,17 +136,32 @@ void printNetFlow(NetworkFlow netflow) {
    PTable::iterator it = s_procs.find(&(netflow.procOID));
    if(it == s_procs.end()) {
        cout << "Uh Oh! Can't find process for netflow!! " << endl;
-       cout << "NETFLOW " << startTime << " " << endTime << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
+       cout << "NETFLOW " << startTime << " " << endTime << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWSendBytes << " RBytes: " << netflow.numRRecvBytes << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
   } else {
        string container = "";
        if(!it->second->containerId.is_null()) {
                   container = it->second->containerId.get_string();
        }
        //cout << netflow.sip << "\t" << netflow.dip << endl;
-       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWBytes << " RBytes: " << netflow.numRBytes << " WOps: " << netflow.numWOps << " ROps: " << netflow.numROps << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
+       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWSendBytes << " RBytes: " << netflow.numRRecvBytes << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
 
  }
 }
+
+File* createFile(File file) {
+   File* f = new File();
+   f->state = file.state;
+   f->ts = file.ts;
+   f->restype = file.restype;
+   f->path = file.path;
+   if(!file.containerId.is_null()) {
+       f->containerId.set_string(file.containerId.get_string());
+    }else {
+       f->containerId.set_null();
+    }
+    return f;
+}
+
 
 Process*  createProcess(Process proc) {
    Process* p = new Process();
@@ -163,8 +230,8 @@ int runEventLoop(string sysFile, string schemaFile) {
               case PROC:
               {
                  proc = flow.rec.get_Process();
-                 if(s_printProc) {
-		     cout << "PROC " << proc.oid.hpid << " " << proc.oid.createTS << " " <<   proc.ts << " " << proc.state << " " << proc.exe << " " <<  proc.exeArgs << " " << proc.oid.hpid << " " <<  proc.userName << " " << proc.oid.createTS;
+                 if(!s_quiet) {
+		     cout << "PROC " << proc.oid.hpid << " " << proc.oid.createTS << " " <<   proc.ts << " " << proc.state << " " << proc.exe << " " <<  proc.exeArgs << " " << proc.oid.hpid << " " <<  proc.userName << " " << proc.oid.createTS << " TTY: " << proc.tty;
                      if(!proc.poid.is_null()) {
                          cout << " Parent: " << proc.poid.get_OID().hpid << " " << proc.poid.get_OID().createTS;
                      }
@@ -193,6 +260,20 @@ int runEventLoop(string sysFile, string schemaFile) {
 
                  //cout << string(proc.oid.begin(), proc.oid.end());
                  break;
+              }
+              case FILE_:
+              {
+                  file = flow.rec.get_File();
+                  File* f = createFile(file);
+                  string key(file.oid.begin(), file.oid.end());
+                  FTable::iterator it = s_files.find(key);
+                  cout << "FILE: " << f->path << " " << f->ts << " " << f->state << " " << f->restype << " " << key << endl;
+                  //std::cout.write(&file.oid[0], 20);
+                  if(it != s_files.end()) {
+                      cout << "Uh oh!  File:  " << f->path << " already exists in the sysflow file" << endl;
+                  }
+                  s_files[key] = f;
+                  break;
               }
               case PROC_FLOW:
               {
@@ -227,7 +308,7 @@ int runEventLoop(string sysFile, string schemaFile) {
               case CONT: 
               {
                 cont = flow.rec.get_Container();
-                if(s_printCont) {
+                if(!s_quiet) {
 		    cout << "CONT Name: " << cont.name << " ID: " << cont.id << " Image: " << cont.image << " Image ID: " << cont.imageid << " Type: " << cont.type << endl;
                 }
 		break;
@@ -236,6 +317,12 @@ int runEventLoop(string sysFile, string schemaFile) {
               {
                   netflow = flow.rec.get_NetworkFlow();
                   printNetFlow(netflow);
+                  break;
+              }
+              case FILE_FLOW:
+              {
+                  fileflow = flow.rec.get_FileFlow();
+                  printFileFlow(fileflow);
                   break;
               }
               default:
@@ -264,7 +351,9 @@ int main( int argc, char** argv )
         delkey.hpid = 1;
         delkey.createTS = 1;
         s_procs.set_deleted_key(&delkey);
-	while ((c = getopt (argc, argv, "lr:w:s:pck")) != -1)
+        s_files.set_empty_key("-1");
+        s_files.set_deleted_key("-2");
+	while ((c = getopt (argc, argv, "lr:w:s:qk")) != -1)
     	{
 		switch (c)
       		{
@@ -274,11 +363,8 @@ int main( int argc, char** argv )
                         case 's':
                                schemaFile = optarg;
                                break;
-                        case 'p':
-                               s_printProc = true;
-                               break;
-                        case 'c':
-                               s_printCont = true;
+                        case 'q':
+                               s_quiet = true;
                                break;
                         case 'k':
                                s_keepProcOnExit = true;

@@ -43,7 +43,11 @@
                           }
 
 
-#define SF_OPEN_EXIT    case PPME_SYSCALL_OPEN_X:
+#define SF_OPEN_EXIT(EV)    case PPME_SYSCALL_OPEN_X: \
+			{                     \
+			    m_dfPrcr->handleDataEvent(EV, OP_OPEN); \
+			    break;            \
+                        }
 
 #define SF_CLOSE_EXIT(EV)   case PPME_SYSCALL_CLOSE_X: \
                         case PPME_SOCKET_SHUTDOWN_X: \

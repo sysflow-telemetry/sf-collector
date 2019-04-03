@@ -14,6 +14,7 @@ record Process {
   string userName;
   int gid;
   string groupName;
+  boolean tty;
   //int hostId;
   //int duration;
   //int threadCount;

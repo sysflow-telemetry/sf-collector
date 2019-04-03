@@ -3,7 +3,12 @@
 #include "datatypes.h"
 static NFKey s_nfdelkey;
 static NFKey s_nfemptykey;
-static bool s_nfkeysinit = false;
+static bool s_keysinit = false;
+
+static OID s_oiddelkey;
+static OID s_oidemptykey;
+
+
 
 void initKeys() {
    s_nfdelkey.ip1 = 1;
@@ -14,6 +19,11 @@ void initKeys() {
    s_nfemptykey.ip2 = 0;
    s_nfemptykey.port1 = 1;
    s_nfemptykey.port2 = 1;
+   s_oidemptykey.hpid = 2; 
+   s_oidemptykey.createTS = 2;
+   s_oiddelkey.hpid = 1; 
+   s_oiddelkey.createTS = 1;
+   s_keysinit = true;
 }
 
 
@@ -22,17 +32,31 @@ void  utils::generateFOID(string key, FOID* foid) {
 }
 
 NFKey* utils::getNFEmptyKey() {
-    if(!s_nfkeysinit) {
+    if(!s_keysinit) {
          initKeys();
      }
      return &s_nfemptykey;
 }
 
 NFKey* utils::getNFDelKey() {
-    if(!s_nfkeysinit) {
+    if(!s_keysinit) {
          initKeys();
      }
      return &s_nfdelkey;
+}
+
+OID* utils::getOIDEmptyKey() {
+    if(!s_keysinit) {
+         initKeys();
+     }
+     return &s_oidemptykey;
+}
+
+OID* utils::getOIDDelKey() {
+    if(!s_keysinit) {
+         initKeys();
+     }
+     return &s_oiddelkey;
 }
 
 string utils::getUserName(SysFlowContext* cxt, uint32_t uid)

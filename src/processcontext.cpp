@@ -2,16 +2,15 @@
 
 using namespace process;
 
-ProcessContext::ProcessContext(SysFlowContext* cxt, container::ContainerContext* ccxt, SysFlowWriter* writer) : m_procs(PROC_TABLE_SIZE) {
-    m_empkey.hpid = 2; 
-    m_empkey.createTS = 2; 
-    m_procs.set_empty_key(&m_empkey);
-    m_delkey.hpid = 1;
-    m_delkey.createTS = 1;
-    m_procs.set_deleted_key(&m_delkey);
+ProcessContext::ProcessContext(SysFlowContext* cxt, container::ContainerContext* ccxt, file::FileContext* fileCxt, SysFlowWriter* writer) : m_procs(PROC_TABLE_SIZE) {
+    OID* emptyoidkey = utils::getOIDEmptyKey();
+    OID* deloidkey = utils::getOIDDelKey();
+    m_procs.set_empty_key(emptyoidkey);
+    m_procs.set_deleted_key(deloidkey);
     m_cxt = cxt;
     m_containerCxt = ccxt;
     m_writer = writer;
+    m_fileCxt = fileCxt;
 }
 
 ProcessContext::~ProcessContext() {
@@ -25,10 +24,9 @@ ProcessObj* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_ev
    p->proc.ts = ev->get_ts();
    p->proc.oid.hpid = mainthread->m_pid;
    p->proc.oid.createTS = mainthread->m_clone_ts;
-   
-
-  sinsp_threadinfo* ti = ev->get_thread_info();
-
+ 
+   sinsp_threadinfo* ti = ev->get_thread_info();
+   p->proc.tty = ti->m_tty;
    sinsp_threadinfo* parent = mainthread->get_parent_thread();
 
    if(parent != NULL) {
@@ -57,12 +55,13 @@ ProcessObj* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_ev
     p->proc.uid = mainthread->m_uid;
     p->proc.gid = mainthread->m_gid;
    //cout << "Wrote gid/uid " << ti->m_uid << endl;
-   p->proc.userName = utils::getUserName(m_cxt, mainthread->m_uid);
+    p->proc.userName = utils::getUserName(m_cxt, mainthread->m_uid);
   // cout << "Wrote username" << endl;
     p->proc.groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
-    Container* cont = m_containerCxt->getContainer(ev);
+    ContainerObj* cont = m_containerCxt->getContainer(ev);
     if(cont != NULL) {
-       p->proc.containerId.set_string(cont->id);
+       p->proc.containerId.set_string(cont->cont.id);
+       cont->refs++;
     }else {
        p->proc.containerId.set_null();
     }
@@ -113,6 +112,27 @@ bool ProcessContext::isAncestor(OID* oid, Process* proc) {
    return false;
 }
 
+void ProcessContext::reupContainer(sinsp_evt* ev, ProcessObj* proc) {
+    string containerId = "";
+    if(!proc->proc.containerId.is_null()) {
+         containerId = proc->proc.containerId.get_string();
+    }
+    ContainerObj* cont1 = NULL;
+    if(!containerId.empty()) {    
+        cont1 = m_containerCxt->getContainer(containerId);
+        if(cont1 != NULL) {
+            cont1->refs--;
+        }
+    }
+    ContainerObj* cont = m_containerCxt->getContainer(ev);
+    if(cont != NULL) {
+        proc->proc.containerId.set_string(cont->cont.id);
+        cont->refs++;
+    }else {
+        proc->proc.containerId.set_null();
+    }
+}
+
 ProcessObj* ProcessContext::getProcess(sinsp_evt* ev, SFObjectState state, bool& created) {
       sinsp_threadinfo* ti = ev->get_thread_info();
       sinsp_threadinfo* mt = ti->get_main_thread();
@@ -136,7 +156,9 @@ ProcessObj* ProcessContext::getProcess(sinsp_evt* ev, SFObjectState state, bool&
       std::vector<ProcessObj*> processes;
       if(process == NULL) { 
            process = createProcess(mt, ev, state);
-       }
+       } else { // must make sure the container is in the sysflow file..
+           reupContainer(ev, process);
+      }
       cout << "CREATING PROCESS FOR WRITING: PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe << endl;
       processes.push_back(process);
       mt = mt->get_parent_thread();
@@ -163,7 +185,10 @@ ProcessObj* ProcessContext::getProcess(sinsp_evt* ev, SFObjectState state, bool&
           }
           if(parent == NULL) {
               parent = createProcess(mt, ev, SFObjectState::REUP);
+          }else {
+              reupContainer(ev, parent);
           } 
+          parent->children.insert(processes.back()->proc.oid);
           processes.push_back(parent);
           mt = mt->get_parent_thread();
       }
@@ -192,6 +217,9 @@ bool ProcessContext::exportProcess(OID* oid) {
     if(p == NULL) {
         cout << "Uh oh!!!  Can't find process! for oid: " << oid->hpid << " " << oid->createTS << endl;
         return expt;
+    }
+    if(!p->proc.containerId.is_null()) {
+         m_containerCxt->exportContainer(p->proc.containerId.get_string());
     }
     if(!p->written){
           m_writer->writeProcess(&(p->proc));
@@ -230,22 +258,87 @@ void ProcessContext::updateProcess(Process* proc, sinsp_evt* ev, SFObjectState s
 
 void ProcessContext::clearProcesses() {
     for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
-        if(it->second->netflows.empty() && it->second->fileflows.empty()) {
+        if(it->second->netflows.empty() && it->second->fileflows.empty() && it->second->children.empty()) {
                ProcessObj* proc = it->second;
+               Process::poid_t poid = proc->proc.poid;
+               ProcessObj* curProc = proc;
+
+               while(!poid.is_null()) {
+                    OID key = poid.get_OID();
+                    ProcessTable::iterator p = m_procs.find(&key);
+                    if(p != m_procs.end()) {
+                         ProcessObj* parentProc = p->second;
+                         parentProc->children.erase(curProc->proc.oid);
+                         if(parentProc->children.empty() && parentProc->netflows.empty() && parentProc->fileflows.empty()) {
+                             curProc = parentProc;
+                             poid = curProc->proc.poid; 
+                         }else {
+                            break;
+                         }
+                         
+                    }else {
+                        break; 
+                    }  
+               }
+               if(!proc->proc.containerId.is_null()) {
+                   m_containerCxt->derefContainer(proc->proc.containerId.get_string());
+               }
                m_procs.erase(it);
                delete proc;
         }else {
              it->second->written = false;
         }
     }
+    //run again to get rid of any processes who no longer have children
+    for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
+        if(it->second->netflows.empty() && it->second->fileflows.empty() && it->second->children.empty()) {
+               ProcessObj* proc = it->second;
+               if(!proc->proc.containerId.is_null()) {
+                   m_containerCxt->derefContainer(proc->proc.containerId.get_string());
+               }
+               m_procs.erase(it);
+               delete proc;
+        }
+    }
 }
+
+void ProcessContext::writeProcessAndAncestors(ProcessObj* proc) {
+    Process::poid_t poid = proc->proc.poid;
+    std::vector<ProcessObj*> processes;
+    processes.push_back(proc);
+
+    while(!poid.is_null()) {
+        OID key = poid.get_OID();
+        ProcessTable::iterator p = m_procs.find(&key);
+        if(p != m_procs.end()) {
+            if(!p->second->written) {
+               processes.push_back(p->second);
+            }
+            poid = p->second->proc.poid;
+        } else {
+            break;
+        }
+    }
+      for(vector<ProcessObj*>::reverse_iterator it = processes.rbegin(); it != processes.rend(); ++it) {
+          cout << "Final: Going to write process " << (*it)->proc.exe << " " << (*it)->proc.oid.hpid << endl;
+          ProcessObj* proc = (*it);
+          if(!proc->proc.containerId.is_null()) {
+              m_containerCxt->exportContainer(proc->proc.containerId.get_string());
+          }
+          m_writer->writeProcess(&((*it)->proc));
+          (*it)->written = true;
+      }
+}
+
+
 
 void ProcessContext::clearAllProcesses() {
     for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
         if(((!it->second->netflows.empty()) || (!it->second->fileflows.empty())) &&
                !it->second->written) {
-            m_writer->writeProcess(&(it->second->proc));
-            it->second->written = true;
+            //m_writer->writeProcess(&(it->second->proc));
+            //it->second->written = true;
+             writeProcessAndAncestors(it->second);
          }
          for(NetworkFlowTable::iterator nfi = it->second->netflows.begin(); nfi != it->second->netflows.end(); nfi++) {
              nfi->second->netflow.opFlags |= OP_TRUNCATE;
@@ -253,20 +346,36 @@ void ProcessContext::clearAllProcesses() {
              m_writer->writeNetFlow(&(nfi->second->netflow));
              delete nfi->second;
           }
-         /*for(FileFlowTable::iterator ffi = it->second->fileflows.begin(); ffi != it->second->fileflows.end(); ffi++) {
+         for(FileFlowTable::iterator ffi = it->second->fileflows.begin(); ffi != it->second->fileflows.end(); ffi++) {
              ffi->second->fileflow.opFlags |= OP_TRUNCATE;
              ffi->second->fileflow.endTs = utils::getSysdigTime(m_cxt);
+             m_fileCxt->exportFile(ffi->second->key);
              m_writer->writeFileFlow(&(ffi->second->fileflow));
              delete ffi->second;
-          }*/
+          }
+    }
+
+    for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
           delete it->second;
     }
+
 }
 
 
 
 
 void ProcessContext::deleteProcess(ProcessObj** proc) {
+    Process::poid_t poid = (*proc)->proc.poid;
+    if(!poid.is_null()) {
+        OID key = poid.get_OID();
+        ProcessTable::iterator p = m_procs.find(&key);
+        if(p != m_procs.end()) {
+              p->second->children.erase((*proc)->proc.oid);
+        }
+    }
+    if(!(*proc)->proc.containerId.is_null()) {
+        m_containerCxt->derefContainer((*proc)->proc.containerId.get_string());
+    }
     m_procs.erase(&((*proc)->proc.oid));
     delete *proc; 
     *proc = NULL;

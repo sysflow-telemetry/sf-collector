@@ -34,10 +34,16 @@ void ProcessFlowProcessor::writeExitEvent(sinsp_evt* ev) {
     m_procFlow.procOID.createTS = proc->proc.oid.createTS;
     m_procFlow.tid = ti->m_tid;
     m_procFlow.ret = utils::getSyscallResult(ev);
-    m_dfPrcr->removeAndWriteDFFromProc(proc);
+    int64_t tid = -1;
+    if(!ti->is_main_thread()) {
+         tid = ti->m_tid;
+    }
+    m_dfPrcr->removeAndWriteDFFromProc(proc, tid);
     m_writer->writeProcessFlow(&m_procFlow);
     // delete the process from the proc table after an exit
-    m_processCxt->deleteProcess(&proc);
+    if(ti->is_main_thread()) {
+        m_processCxt->deleteProcess(&proc);
+    }
 }
 
 void ProcessFlowProcessor::writeExecEvent(sinsp_evt* ev) {

@@ -49,16 +49,16 @@
     "name" : "fd",
     "type" : "int"
   }, {
-    "name" : "numROps",
+    "name" : "numRRecvOps",
     "type" : "long"
   }, {
-    "name" : "numWOps",
+    "name" : "numWSendOps",
     "type" : "long"
   }, {
-    "name" : "numRBytes",
+    "name" : "numRRecvBytes",
     "type" : "long"
   }, {
-    "name" : "numWBytes",
+    "name" : "numWSendBytes",
     "type" : "long"
   } ]
 }
