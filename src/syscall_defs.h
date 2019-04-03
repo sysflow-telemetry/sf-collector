@@ -44,6 +44,9 @@
 
 
 #define SF_OPEN_EXIT(EV)    case PPME_SYSCALL_OPEN_X: \
+                            case PPME_SYSCALL_OPENAT_X: \
+                            case PPME_SYSCALL_OPENAT_2_X: \
+                            case PPME_SYSCALL_TIMERFD_CREATE_X: \
 			{                     \
 			    m_dfPrcr->handleDataEvent(EV, OP_OPEN); \
 			    break;            \

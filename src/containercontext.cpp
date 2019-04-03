@@ -29,6 +29,7 @@ ContainerObj*  ContainerContext::createContainer(sinsp_evt* ev) {
     cont->cont.id = container->m_id;
     cont->cont.imageid = container->m_imageid;
     cont->cont.type = (ContainerType)container->m_type;
+    cont->cont.privileged = container->m_privileged;
     return cont;
 }
 

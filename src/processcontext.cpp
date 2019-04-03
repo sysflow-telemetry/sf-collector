@@ -349,7 +349,7 @@ void ProcessContext::clearAllProcesses() {
          for(FileFlowTable::iterator ffi = it->second->fileflows.begin(); ffi != it->second->fileflows.end(); ffi++) {
              ffi->second->fileflow.opFlags |= OP_TRUNCATE;
              ffi->second->fileflow.endTs = utils::getSysdigTime(m_cxt);
-             m_fileCxt->exportFile(ffi->second->key);
+             m_fileCxt->exportFile(ffi->second->filekey);
              m_writer->writeFileFlow(&(ffi->second->fileflow));
              delete ffi->second;
           }

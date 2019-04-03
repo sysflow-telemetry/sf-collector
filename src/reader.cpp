@@ -65,15 +65,15 @@ void printFileFlow(FileFlow fileflow) {
     string opFlags = "";
     opFlags +=  ((fileflow.opFlags & OP_OPEN) ?  "O" : " ");
     opFlags +=  ((fileflow.opFlags & OP_ACCEPT) ?  "A" : " ");
-    opFlags +=  ((netflow.opFlags & OP_CONNECT) ?  "C" : " ");
-    opFlags +=  ((netflow.opFlags & OP_WRITE_SEND) ?  "W" : " ");
-    opFlags +=  ((netflow.opFlags & OP_READ_RECV) ?  "R" : " ");
-    opFlags +=  ((netflow.opFlags & OP_CLOSE) ?  "C" : " ");
-    opFlags +=  ((netflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
-    opFlags +=  ((netflow.opFlags & OP_DIGEST) ?  "D" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_CONNECT) ?  "C" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_WRITE_SEND) ?  "W" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_READ_RECV) ?  "R" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_CLOSE) ?  "C" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_DIGEST) ?  "D" : " ");
 
-    time_t startTs = ((time_t)(netflow.ts/NANO_TO_SECS));
-    time_t endTs = ((time_t)(netflow.endTs/NANO_TO_SECS));
+    time_t startTs = ((time_t)(fileflow.ts/NANO_TO_SECS));
+    time_t endTs = ((time_t)(fileflow.endTs/NANO_TO_SECS));
     char startTime[100];
     char endTime[100];
     strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
@@ -81,15 +81,15 @@ void printFileFlow(FileFlow fileflow) {
 
     string key(fileflow.fileOID.begin(), fileflow.fileOID.end());
     FTable::iterator fi = s_files.find(key);
-    base64::encoder enc(20);
+  /*  base64::encoder enc(20);
     char b64encoded[60];
     int len = enc.encode(key.c_str(), key.size(),  b64encoded);
     string b64enc(b64encoded, len);
     len = enc.encode_end(b64encoded);
-    b64enc += string(b64encoded, len);
+    b64enc += string(b64encoded, len);*/
     if(fi == s_files.end()) {
         cout << "Uh Oh! Can't find process for fileflow!! " << endl;
-        cout << "FILEFLOW " << startTime << " " << endTime << " " <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd << " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS <<  b64enc << endl;
+        cout << "FILEFLOW " << startTime << " " << endTime << " " <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd << " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << endl;
 
       }
 
@@ -97,14 +97,14 @@ void printFileFlow(FileFlow fileflow) {
    PTable::iterator it = s_procs.find(&(fileflow.procOID));
    if(it == s_procs.end()) {
        cout << "Uh Oh! Can't find process for fileflow!! " << endl;
-       cout << "FILEFLOW " << startTime << " " << endTime << " " <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd << " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << b64enc << endl;
+       cout << "FILEFLOW " << startTime << " " << endTime << " " <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd << " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << endl;
   } else {
        string container = "";
        if(!it->second->containerId.is_null()) {
                   container = it->second->containerId.get_string();
        }
        //cout << netflow.sip << "\t" << netflow.dip << endl;
-       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " Resource: " << fi->second->restype << " PATH: " << fi->second->path << " FD: " << fileflow.fd << " TID: " << fileflow.tid <<  " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs << b64enc << endl;
+       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " Resource: " << fi->second->restype << " PATH: " << fi->second->path << " FD: " << fileflow.fd << " TID: " << fileflow.tid <<  " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs <<  endl;
 
  }
 }
@@ -136,14 +136,14 @@ void printNetFlow(NetworkFlow netflow) {
    PTable::iterator it = s_procs.find(&(netflow.procOID));
    if(it == s_procs.end()) {
        cout << "Uh Oh! Can't find process for netflow!! " << endl;
-       cout << "NETFLOW " << startTime << " " << endTime << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWSendBytes << " RBytes: " << netflow.numRRecvBytes << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
+       cout << "NETFLOW " << startTime << " " << endTime << " " <<  opFlags <<  " TID: " << netflow.tid <<  " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWSendBytes << " RBytes: " << netflow.numRRecvBytes << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
   } else {
        string container = "";
        if(!it->second->containerId.is_null()) {
                   container = it->second->containerId.get_string();
        }
        //cout << netflow.sip << "\t" << netflow.dip << endl;
-       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWSendBytes << " RBytes: " << netflow.numRRecvBytes << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
+       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " TID: " << netflow.tid << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWSendBytes << " RBytes: " << netflow.numRRecvBytes << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
 
  }
 }
@@ -267,7 +267,7 @@ int runEventLoop(string sysFile, string schemaFile) {
                   File* f = createFile(file);
                   string key(file.oid.begin(), file.oid.end());
                   FTable::iterator it = s_files.find(key);
-                  cout << "FILE: " << f->path << " " << f->ts << " " << f->state << " " << f->restype << " " << key << endl;
+                  cout << "FILE: " << f->path << " " << f->ts << " " << f->state << " " << (char)f->restype <<  endl;
                   //std::cout.write(&file.oid[0], 20);
                   if(it != s_files.end()) {
                       cout << "Uh oh!  File:  " << f->path << " already exists in the sysflow file" << endl;
@@ -284,7 +284,7 @@ int runEventLoop(string sysFile, string schemaFile) {
                 PTable::iterator it = s_procs.find(&(pf.procOID));
                 if(it == s_procs.end()) {
                    cout << "Can't find process for process flow!  shouldn't happen!!" << endl;
-                   cout << "PROC_FLOW " << times << " " << Events[pf.opFlags] << " " <<  " " << pf.ret << " OID: " << pf.procOID.hpid << " " << pf.procOID.createTS << endl;
+                   cout << "PROC_FLOW " << times << " " << " TID: " << pf.tid << Events[pf.opFlags] << " " <<  " " << pf.ret << " OID: " << pf.procOID.hpid << " " << pf.procOID.createTS << endl;
                 }  else {
                    
                    string container = "";
@@ -293,13 +293,15 @@ int runEventLoop(string sysFile, string schemaFile) {
                   }
            
 
-                   cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " <<  times << " " << Events[pf.opFlags] << " " <<  " " << pf.ret <<  " " << pf.procOID.createTS << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
+                   cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " <<  times << " " << " TID: " << pf.tid << " " << Events[pf.opFlags] << " " <<  " " << pf.ret <<  " " << pf.procOID.createTS << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
 
                 }
                if(!s_keepProcOnExit && pf.opFlags == OP_EXIT) { // exit
                    if(it != s_procs.end()) {
-                        delete it->second;
-                        s_procs.erase(&(pf.procOID));
+                        if(it->second->oid.hpid == pf.tid) {
+                            delete it->second;
+                            s_procs.erase(&(pf.procOID));
+                        }
                    }
                 }
 
@@ -309,7 +311,7 @@ int runEventLoop(string sysFile, string schemaFile) {
               {
                 cont = flow.rec.get_Container();
                 if(!s_quiet) {
-		    cout << "CONT Name: " << cont.name << " ID: " << cont.id << " Image: " << cont.image << " Image ID: " << cont.imageid << " Type: " << cont.type << endl;
+		    cout << "CONT Name: " << cont.name << " ID: " << cont.id << " Image: " << cont.image << " Image ID: " << cont.imageid << " Type: " << cont.type << "Privileged:" << cont.privileged << endl;
                 }
 		break;
               }

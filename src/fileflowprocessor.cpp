@@ -14,7 +14,7 @@ FileFlowProcessor::FileFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer,
 FileFlowProcessor::~FileFlowProcessor() {
 }
 
-inline void FileFlowProcessor::populateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file) {
+inline void FileFlowProcessor::populateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file, string flowkey) {
    sinsp_threadinfo* ti = ev->get_thread_info();
    ff->fileflow.opFlags = flag;
    ff->fileflow.ts = ev->get_ts();
@@ -24,7 +24,8 @@ inline void FileFlowProcessor::populateFileFlow(FileFlowObj* ff, OpFlags flag, s
    ff->fileflow.tid = ti->m_tid;
    ff->fileflow.fd = ev->get_fd_num();
    ff->fileflow.fileOID = file->file.oid;
-   ff->key = file->key;
+   ff->filekey = file->key;
+   ff->flowkey = flowkey;
    ff->fileflow.numRRecvOps = 0;
    ff->fileflow.numWSendOps = 0;
    ff->fileflow.numRRecvBytes = 0;
@@ -49,14 +50,14 @@ inline void FileFlowProcessor::updateFileFlow(FileFlowObj* ff, OpFlags flag, sin
        }
 }
 
-inline void FileFlowProcessor::processNewFlow(sinsp_evt* ev, ProcessObj* proc, FileObj* file, OpFlags flag, string key) {
+inline void FileFlowProcessor::processNewFlow(sinsp_evt* ev, ProcessObj* proc, FileObj* file, OpFlags flag, string flowkey) {
     FileFlowObj* ff = new FileFlowObj();
     ff->exportTime = utils::getExportTime(m_cxt); 
     ff->lastUpdate = utils::getCurrentTime(m_cxt);
-    populateFileFlow(ff, flag, ev, proc, file);
+    populateFileFlow(ff, flag, ev, proc, file, flowkey);
     updateFileFlow(ff, flag, ev);
     if(flag != OP_CLOSE) {
-         proc->fileflows[key] = ff;
+         proc->fileflows[flowkey] = ff;
          file->refs++;
         //m_fileflows[key] = nf;
         m_dfSet->insert(ff);
@@ -67,20 +68,20 @@ inline void FileFlowProcessor::processNewFlow(sinsp_evt* ev, ProcessObj* proc, F
      }
 }
 
-inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj* proc, FileObj* file,  FileFlowObj** ff, string key) {
+inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj* proc, FileObj* file,  FileFlowObj** ff, string flowkey) {
     m_writer->writeFileFlow(&((*ff)->fileflow));
     //m_fileflows.erase(*key);
     //m_nfSet.erase((*nf));
     removeFileFlowFromSet(ff, false);
-    removeFileFlow(proc, file, ff, key);
+    removeFileFlow(proc, file, ff, flowkey);
 }
 
 
-inline void FileFlowProcessor::processExistingFlow(sinsp_evt* ev, ProcessObj* proc, FileObj* file, OpFlags flag, string key, FileFlowObj* ff) {
+inline void FileFlowProcessor::processExistingFlow(sinsp_evt* ev, ProcessObj* proc, FileObj* file, OpFlags flag, string flowkey, FileFlowObj* ff) {
       updateFileFlow(ff, flag, ev);
       if(flag == OP_CLOSE) {
           ff->fileflow.endTs = ev->get_ts();
-          removeAndWriteFileFlow(proc, file, &ff, key);
+          removeAndWriteFileFlow(proc, file, &ff, flowkey);
       }
 }
 
@@ -111,24 +112,25 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt* ev, OpFlags flag) {
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
     FileFlowObj* ff = NULL;
     sinsp_threadinfo* ti = ev->get_thread_info();
-    string key =  ti->m_container_id + fdinfo->m_name;
-    FileFlowTable::iterator ffi = proc->fileflows.find(key);
+    string filekey =  ti->m_container_id + fdinfo->m_name;
+    string flowkey = filekey + std::to_string(ti->m_tid);
+    FileFlowTable::iterator ffi = proc->fileflows.find(flowkey);
     if(ffi != proc->fileflows.end()) {
          ff = ffi->second;
     }
     FileObj* file = m_fileCxt->getFile(ev, SFObjectState::REUP, created);
-    cout << proc->proc.exe << " Name: " <<  fdinfo->m_name << " type: " << fdinfo->get_typechar() <<  " " << file->file.path << " " << endl; //file->file.oid <<  endl;
+    cout << proc->proc.exe << " Name: " <<  fdinfo->m_name << " type: " << fdinfo->get_typechar() <<  " " << file->file.path << " " <<  ev->get_name() << endl; //file->file.oid <<  endl;
 
     if(ff == NULL) {
-       processNewFlow(ev, proc, file, flag, key);
+       processNewFlow(ev, proc, file, flag, flowkey);
     }else {
-       processExistingFlow(ev, proc, file, flag, key, ff);
+       processExistingFlow(ev, proc, file, flag, flowkey, ff);
     }
     return 0;
 }
 
-void FileFlowProcessor::removeFileFlow(ProcessObj* proc, FileObj* file,  FileFlowObj** ff, string key) {
-    proc->fileflows.erase(key);
+void FileFlowProcessor::removeFileFlow(ProcessObj* proc, FileObj* file,  FileFlowObj** ff, string flowkey) {
+    proc->fileflows.erase(flowkey);
     delete *ff;
     ff = NULL;
     if(file != NULL) {
@@ -141,17 +143,18 @@ int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj* proc, int64_t tid) {
     int deleted = 0;
     for(FileFlowTable::iterator ffi = proc->fileflows.begin(); ffi != proc->fileflows.end(); ffi++) {
         if(tid == -1 || tid == ffi->second->fileflow.tid) {
-            FileObj* file = m_fileCxt->getFile(ffi->second->key);
+            FileObj* file = m_fileCxt->getFile(ffi->second->filekey);
             ffi->second->fileflow.endTs = utils::getSysdigTime(m_cxt);
             ffi->second->fileflow.opFlags |= OP_TRUNCATE;
             cout << "Writing FILEFLOW!!" << endl;
             m_writer->writeFileFlow(&(ffi->second->fileflow));
             FileFlowObj* ffo = ffi->second;
+            proc->fileflows.erase(ffi);
             cout << "Set size: " << m_dfSet->size() << endl;
             deleted += removeFileFlowFromSet(&ffo, true);
             cout << "After Set size: " << m_dfSet->size() << endl;
             if(file == NULL) {
-                cout << "Error: Uh oh! File object doesn't exist for fileflow: " << ffi->second->key << ". This shouldn't happen" << endl;
+                cout << "Error: Uh oh! File object doesn't exist for fileflow: " << ffi->second->filekey << ". This shouldn't happen" << endl;
             }else {
                 file->refs--;
             }
@@ -204,11 +207,11 @@ void FileFlowProcessor::removeFileFlow(DataFlowObj* dfo) {
      if(proc == NULL) {
          cout << "Error: Could not find proc " << ffo->fileflow.procOID.hpid << " " << ffo->fileflow.procOID.createTS << " This shouldn't happen!" << endl;
      } else {
-          FileObj* file = m_fileCxt->getFile(ffo->key);
+          FileObj* file = m_fileCxt->getFile(ffo->filekey);
           if(file == NULL) {
-             cout << "Error: Uh oh!!  Unable to find file object of key " << ffo->key  << ". Shouldn't happen!!" << endl;
+             cout << "Error: Uh oh!!  Unable to find file object of key " << ffo->filekey  << ". Shouldn't happen!!" << endl;
           }
-          removeFileFlow(proc, file, &ffo, ffo->key);
+          removeFileFlow(proc, file, &ffo, ffo->flowkey);
      }
 }
 
@@ -216,7 +219,7 @@ void FileFlowProcessor::exportFileFlow(DataFlowObj* dfo, time_t now) {
      FileFlowObj* ffo = static_cast<FileFlowObj*>(dfo);
      ffo->fileflow.endTs = utils::getSysdigTime(m_cxt);
      m_processCxt->exportProcess(&(ffo->fileflow.procOID));
-     m_fileCxt->exportFile(ffo->key);
+     m_fileCxt->exportFile(ffo->filekey);
      m_writer->writeFileFlow(&(ffo->fileflow));
      cout << "Reupping flow!!! " << endl;
      ffo->fileflow.ts = utils::getSysdigTime(m_cxt);

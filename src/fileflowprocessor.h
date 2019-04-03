@@ -21,12 +21,12 @@ namespace fileflow {
             SysFlowWriter* m_writer;
             DataFlowSet* m_dfSet;
             file::FileContext* m_fileCxt;
-            void populateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file);
+            void populateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file, string flowkey);
             void updateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev);
-            void processExistingFlow(sinsp_evt* ev, ProcessObj* proc, FileObj* file, OpFlags flag, string key, FileFlowObj* ff);
-            void processNewFlow(sinsp_evt* ev, ProcessObj* proc, FileObj* file,  OpFlags flag, string key) ;
-            void removeAndWriteFileFlow(ProcessObj* proc, FileObj* file,  FileFlowObj** nf, string key);
-            void removeFileFlow(ProcessObj* proc, FileObj* file, FileFlowObj** ff, string key);
+            void processExistingFlow(sinsp_evt* ev, ProcessObj* proc, FileObj* file, OpFlags flag, string flowkey, FileFlowObj* ff);
+            void processNewFlow(sinsp_evt* ev, ProcessObj* proc, FileObj* file,  OpFlags flag, string flowkey) ;
+            void removeAndWriteFileFlow(ProcessObj* proc, FileObj* file,  FileFlowObj** nf, string flowkey);
+            void removeFileFlow(ProcessObj* proc, FileObj* file, FileFlowObj** ff, string flowkey);
          
             int removeFileFlowFromSet(FileFlowObj** ffo, bool deleteFileFlow);
         public:

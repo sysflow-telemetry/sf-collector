@@ -22,7 +22,7 @@ namespace networkflow {
             //OIDNetworkTable m_oidnfTable;
             //OID m_oiddelkey;
             //OID m_oidemptykey;
-            void canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* key);
+            void canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* key,  uint64_t tid);
             void canonicalizeKey(NetFlowObj* nf, NFKey* key);
             void populateNetFlow(NetFlowObj* nf, OpFlags flag, sinsp_evt* ev, ProcessObj* proc);
             void updateNetFlow(NetFlowObj* nf, OpFlags flag, sinsp_evt* ev);

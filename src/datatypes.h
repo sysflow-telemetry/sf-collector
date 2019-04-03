@@ -13,6 +13,7 @@ using namespace sysflow;
 //typedef boost::array<uint8_t, 16> OID;
 struct NFKey {
    //OID oid;
+   uint64_t tid;
    uint32_t ip1;
    uint16_t port1;
    uint32_t ip2;
@@ -61,12 +62,13 @@ class NetFlowObj : public DataFlowObj {
 class FileFlowObj : public DataFlowObj  {
     public:
         FileFlow fileflow;
-        string key;
+        string filekey;
+        string flowkey;
        bool operator ==(const FileFlowObj& ffo) {
          if(exportTime != ffo.exportTime) {
             return false;
          }
-         return (key.compare(ffo.key) == 0);
+         return (flowkey.compare(ffo.flowkey) == 0);
        }
         FileFlowObj() : DataFlowObj(false) {
          

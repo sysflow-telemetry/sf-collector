@@ -36,7 +36,7 @@ inline int32_t NetworkFlowProcessor::getProtocol(scap_l4_proto proto) {
 }
 
 
-inline void NetworkFlowProcessor::canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* key) {
+inline void NetworkFlowProcessor::canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* key, uint64_t tid) {
     uint32_t sip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sip;
     uint32_t dip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dip;
     uint32_t sport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sport;
@@ -45,11 +45,13 @@ inline void NetworkFlowProcessor::canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey*
     //key->oid.hpid = oid->hpid;
     //key->oid.createTS = oid->createTS;
 
+    key->tid = tid;
+
 //    if(sip < dip) {
-       key->ip1 = sip;
-       key->port1 = sport;
-       key->ip2 = dip;
-       key->port2 = dport;
+    key->ip1 = sip;
+    key->port1 = sport;
+    key->ip2 = dip;
+    key->port2 = dport;
  /*   } else if(dip < sip) {
        key->ip1 = dip;
        key->port1 = dport;
@@ -73,14 +75,15 @@ inline void NetworkFlowProcessor::canonicalizeKey(NetFlowObj* nf, NFKey* key) {
     uint32_t dip = nf->netflow.dip;
     uint32_t sport = nf->netflow.sport;
     uint32_t dport = nf->netflow.dport;
+    key->tid = nf->netflow.tid;
     //key->oid.hpid = oid->hpid;
     //key->oid.createTS = oid->createTS;
 
    // if(sip < dip) {
-       key->ip1 = sip;
-       key->port1 = sport;
-       key->ip2 = dip;
-       key->port2 = dport;
+    key->ip1 = sip;
+    key->port1 = sport;
+    key->ip2 = dip;
+    key->port2 = dport;
    /* } else if(dip < sip) {
        key->ip1 = dip;
        key->port1 = dport;
@@ -217,8 +220,9 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
     //sysflow file.   This is important for long running NetworkFlows that may span across files.
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
     NetFlowObj* nf = NULL;
+    sinsp_threadinfo* ti = ev->get_thread_info();
     NFKey key;
-    canonicalizeKey(fdinfo, &key);
+    canonicalizeKey(fdinfo, &key, ti->m_tid);
     NetworkFlowTable::iterator nfi = proc->netflows.find(key);
     if(nfi != proc->netflows.end()) {
          nf = nfi->second;
@@ -252,6 +256,7 @@ int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj* proc, int64_t tid
             cout << "Writing NETFLOW!!" << endl;
             m_writer->writeNetFlow(&(nfi->second->netflow));
             NetFlowObj* nfo = nfi->second;
+            proc->netflows.erase(nfi);
             cout << "Set size: " << m_dfSet->size() << endl;
             deleted += removeNetworkFlowFromSet(&nfo, true);
            cout << "After Set size: " << m_dfSet->size() << endl;
