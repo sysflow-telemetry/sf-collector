@@ -1,0 +1,116 @@
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+The exepath is ./filer ti:  EXE: ./filer
+CREATING PROCESS FOR WRITING: PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+PARENT PID: 28161 ts 0 EXEPATH: /bin/bash EXE: bash
+The exepath is /bin/bash ti:  EXE: bash
+PARENT PID: 27685 ts 0 EXEPATH: /bin/dash EXE: -sh
+The exepath is /bin/dash ti:  EXE: -sh
+PARENT PID: 27684 ts 0 EXEPATH: /usr/sbin/sshd EXE: sshd: terylt@pts/0
+The exepath is /usr/sbin/sshd ti:  EXE: sshd: terylt@pts/0
+PARENT PID: 27578 ts 0 EXEPATH: /usr/sbin/sshd EXE: sshd: terylt [priv]
+The exepath is /usr/sbin/sshd ti:  EXE: sshd: terylt [priv]
+PARENT PID: 32020 ts 0 EXEPATH: /usr/sbin/sshd EXE: /usr/sbin/sshd
+The exepath is /usr/sbin/sshd ti:  EXE: /usr/sbin/sshd
+PARENT PID: 1 ts 0 EXEPATH: /lib/systemd/systemd EXE: /lib/systemd/systemd
+The exepath is /lib/systemd/systemd ti:  EXE: /lib/systemd/systemd
+Going to write process /lib/systemd/systemd 1
+Write Proc: 1 0 /lib/systemd/systemd --system --deserialize 26
+Going to write process /usr/sbin/sshd 32020
+Write Proc: 32020 0 /usr/sbin/sshd -D
+Going to write process /usr/sbin/sshd 27578
+Write Proc: 27578 0 /usr/sbin/sshd 
+Going to write process /usr/sbin/sshd 27684
+Write Proc: 27684 0 /usr/sbin/sshd  
+Going to write process /bin/dash 27685
+Write Proc: 27685 0 /bin/dash 
+Going to write process /bin/bash 28161
+Write Proc: 28161 0 /bin/bash 
+Going to write process ./filer 21726
+Write Proc: 21726 0 ./filer 
+Returning process 
+Clone Syscall result not of type pid!! Type: 14 Name: fd
+Uh oh!!! Event: open doesn't have an fdinfo associated with it! ErrorCode: -1
+Clone Syscall result not of type pid!! Type: 14 Name: fd
+Uh oh!!! Event: open doesn't have an fdinfo associated with it! ErrorCode: -1
+Clone Syscall result not of type pid!! Type: 14 Name: fd
+Uh oh!!! Event: open doesn't have an fdinfo associated with it! ErrorCode: -1
+Clone Syscall result not of type pid!! Type: 14 Name: fd
+Uh oh!!! Event: open doesn't have an fdinfo associated with it! ErrorCode: -1
+Clone Syscall result not of type pid!! Type: 14 Name: fd
+Uh oh!!! Event: open doesn't have an fdinfo associated with it! ErrorCode: -1
+Clone Syscall result not of type pid!! Type: 14 Name: fd
+Uh oh!!! Event: open doesn't have an fdinfo associated with it! ErrorCode: -1
+Clone Syscall result not of type pid!! Type: 14 Name: fd
+Uh oh!!! Event: open doesn't have an fdinfo associated with it! ErrorCode: -1
+Clone Syscall result not of type pid!! Type: 14 Name: fd
+Uh oh!!! Event: open doesn't have an fdinfo associated with it! ErrorCode: -1
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /etc/ld.so.cache type: f /etc/ld.so.cache open
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /etc/ld.so.cache type: f /etc/ld.so.cache close
+Removing element from multiset
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /lib/x86_64-linux-gnu/libc.so.6 type: f /lib/x86_64-linux-gnu/libc.so.6 open
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /lib/x86_64-linux-gnu/libc.so.6 type: f /lib/x86_64-linux-gnu/libc.so.6 read
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /lib/x86_64-linux-gnu/libc.so.6 type: f /lib/x86_64-linux-gnu/libc.so.6 close
+Removing element from multiset
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /tmp/tested_file.txt type: f /tmp/tested_file.txt open
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /tmp/tested_file.txt type: f /tmp/tested_file.txt write
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /tmp/tested_file.txt type: f /tmp/tested_file.txt close
+Removing element from multiset
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /tmp/tested_file2.txt type: f /tmp/tested_file2.txt open
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /tmp/tested_file2.txt type: f /tmp/tested_file2.txt write
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: /tmp/tested_file2.txt type: f /tmp/tested_file2.txt close
+Removing element from multiset
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: tested_file_test.txt type: f tested_file_test.txt open
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: tested_file_test.txt type: f tested_file_test.txt write
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+./filer Name: tested_file_test.txt type: f tested_file_test.txt close
+Removing element from multiset
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 28
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 28
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 26
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 33
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 26
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 26
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 25
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 28
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 27
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 28
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 28
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 29
+Uh oh!!! Event: write doesn't have an fdinfo associated with it! ErrorCode: 28
+PID: 21726 ts 0 EXEPATH:  EXE: ./filer
+CALLING removeANDWRITEFFFlows
+CALLING removeANDWRITE
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Checking expired Flows!!!....
+Exiting scap loop... shutting down
+Container Table: 0 Process Table: 6 NetworkFlow Table: 0 Num Records Written: 20
