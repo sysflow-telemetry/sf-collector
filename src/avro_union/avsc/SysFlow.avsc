@@ -239,6 +239,9 @@
         "name" : "opFlags",
         "type" : "int"
       }, {
+        "name" : "openFlags",
+        "type" : "int"
+      }, {
         "name" : "endTs",
         "type" : {
           "type" : "long",
@@ -262,6 +265,41 @@
       }, {
         "name" : "numWSendBytes",
         "type" : "long"
+      } ]
+    }, {
+      "type" : "record",
+      "name" : "AtomicFileFlow",
+      "namespace" : "sysflow.flow",
+      "fields" : [ {
+        "name" : "procOID",
+        "type" : "sysflow.type.OID"
+      }, {
+        "name" : "ts",
+        "type" : {
+          "type" : "long",
+          "logicalType" : "timestamp-millis"
+        }
+      }, {
+        "name" : "tid",
+        "type" : "long"
+      }, {
+        "name" : "opFlags",
+        "type" : "int"
+      }, {
+        "name" : "flags",
+        "type" : "int"
+      }, {
+        "name" : "fileOID",
+        "type" : "sysflow.type.FOID"
+      }, {
+        "name" : "fd",
+        "type" : "int"
+      }, {
+        "name" : "ret",
+        "type" : "int"
+      }, {
+        "name" : "newFileOID",
+        "type" : [ "null", "sysflow.type.FOID" ]
       } ]
     } ]
   } ]

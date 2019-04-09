@@ -32,6 +32,9 @@
     "name" : "opFlags",
     "type" : "int"
   }, {
+    "name" : "openFlags",
+    "type" : "int"
+  }, {
     "name" : "endTs",
     "type" : {
       "type" : "long",

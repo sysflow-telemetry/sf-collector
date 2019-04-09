@@ -13,15 +13,14 @@ FileContext::~FileContext() {
 }
 
 
-FileObj* FileContext::createFile(sinsp_evt* ev, SFObjectState state, string key) {
-    sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
+FileObj* FileContext::createFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, string key) {
     FileObj* f = new FileObj();
     f->key = key; 
     f->file.state = state;
     f->file.ts = ev->get_ts();
     utils::generateFOID(f->key, &(f->file.oid));
-    f->file.path = fdinfo->m_name;
-    f->file.restype = fdinfo->get_typechar();
+    f->file.path = path;
+    f->file.restype = typechar;
     ContainerObj* cont = m_containerCxt->getContainer(ev);
     if(cont != NULL) {
        f->file.containerId.set_string(cont->cont.id);
@@ -30,12 +29,15 @@ FileObj* FileContext::createFile(sinsp_evt* ev, SFObjectState state, string key)
     }
     return f;
 }
-
 FileObj* FileContext::getFile(sinsp_evt* ev, SFObjectState state, bool& created) {
-    sinsp_threadinfo* ti = ev->get_thread_info();
     sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
+    return getFile(ev, fdinfo->m_name, fdinfo->get_typechar(), state, created);
+}
+FileObj* FileContext::getFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, bool& created) {
+    sinsp_threadinfo* ti = ev->get_thread_info();
+    //sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
     created = true;
-    string key = ti->m_container_id + fdinfo->m_name;
+    string key = ti->m_container_id + path;
     FileTable::iterator f = m_files.find(key);
     FileObj* file = NULL;
     if(f != m_files.end()) {
@@ -47,7 +49,7 @@ FileObj* FileContext::getFile(sinsp_evt* ev, SFObjectState state, bool& created)
         file->file.state = SFObjectState::REUP;
     }
     if(file == NULL) {
-        file = createFile(ev, state, key);
+        file = createFile(ev, path, typechar, state, key);
     }
     m_files[key] = file;
     m_writer->writeFile(&(file->file));

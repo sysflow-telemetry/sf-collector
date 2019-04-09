@@ -116,4 +116,65 @@
 
 #define SF_SOCKET_PAIR_EXIT case PPME_SOCKET_SOCKETPAIR_X:
 
+
+#define SF_MKDIR_EXIT(EV)  case PPME_SYSCALL_MKDIR_X: \
+                           case PPME_SYSCALL_MKDIR_2_X: \
+                           case PPME_SYSCALL_MKDIRAT_X: \
+                           {       \
+                               m_dfPrcr->handleDataEvent(EV, OP_MKDIR); \
+                               break;                                   \
+                           }
+                             
+
+#define SF_RMDIR_EXIT(EV)  case PPME_SYSCALL_RMDIR_X: \
+                           case PPME_SYSCALL_RMDIR_2_X: \
+                           {       \
+                               m_dfPrcr->handleDataEvent(EV, OP_RMDIR); \
+                               break;                                   \
+                           }
+
+#define SF_LINK_EXIT(EV)  case PPME_SYSCALL_LINK_X: \
+                          case PPME_SYSCALL_LINK_2_X: \
+                          case PPME_SYSCALL_LINKAT_X: \
+                          case PPME_SYSCALL_LINKAT_2_X: \
+                          {       \
+                              m_dfPrcr->handleDataEvent(EV, OP_LINK); \
+                              break;                                   \
+                          }
+
+
+#define SF_UNLINK_EXIT(EV)  case PPME_SYSCALL_UNLINK_X: \
+                          case PPME_SYSCALL_UNLINK_2_X: \
+                          case PPME_SYSCALL_UNLINKAT_X: \
+                          case PPME_SYSCALL_UNLINKAT_2_X: \
+                          {       \
+                              m_dfPrcr->handleDataEvent(EV, OP_UNLINK); \
+                              break;                                   \
+                          }
+
+
+#define SF_SYMLINK_EXIT(EV)  case PPME_SYSCALL_SYMLINK_X: \
+                          case PPME_SYSCALL_SYMLINKAT_X: \
+                          {       \
+                               m_dfPrcr->handleDataEvent(EV, OP_SYMLINK); \
+                               break;                                   \
+                          }
+
+#define SF_SETUID_EXIT(EV)  case PPME_SYSCALL_SETUID_X: \
+                          {       \
+                               m_dfPrcr->handleDataEvent(EV, OP_SETUID); \
+                               break;                                   \
+                          }
+
+#define SF_CHMOD_EXIT(EV)  case PPM_SC_CHMOD: \
+                          {       \
+                               cout << "GOT A CHMOD" << endl; \
+                               break;                         \
+                          }
+
+#define SF_SETNS_EXIT(EV)  case PPME_SYSCALL_SETNS_X: \
+                          {       \
+                               m_dfPrcr->handleDataEvent(EV, OP_SETNS); \
+                               break;  \
+                          }
 #endif

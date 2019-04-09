@@ -26,6 +26,7 @@ using namespace sysflow;
 #define PROC_FLOW 4
 #define NET_FLOW 5
 #define FILE_FLOW 6
+#define AT_FILE_FLOW 7 
 
 #define NANO_TO_SECS 1000000000
 
@@ -37,6 +38,7 @@ Container cont;
 File file;
 NetworkFlow netflow;
 FileFlow fileflow;
+AtomicFileFlow atfileflow;
 
 typedef google::dense_hash_map<OID*, Process*, MurmurHasher<OID*>, eqoidptr> PTable;
 typedef google::dense_hash_map<string, File*, MurmurHasher<string>, eqstr> FTable;
@@ -68,11 +70,13 @@ void printFileFlow(FileFlow fileflow) {
     opFlags +=  ((fileflow.opFlags & OP_CONNECT) ?  "C" : " ");
     opFlags +=  ((fileflow.opFlags & OP_WRITE_SEND) ?  "W" : " ");
     opFlags +=  ((fileflow.opFlags & OP_READ_RECV) ?  "R" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_SETNS) ?  "N" : " ");
     opFlags +=  ((fileflow.opFlags & OP_CLOSE) ?  "C" : " ");
     opFlags +=  ((fileflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
     opFlags +=  ((fileflow.opFlags & OP_DIGEST) ?  "D" : " ");
 
     time_t startTs = ((time_t)(fileflow.ts/NANO_TO_SECS));
+    //time_t endTs = (!fileflow.endTs.is_null()) ? ((time_t)(fileflow.endTs.get_long()/NANO_TO_SECS)) : 0;
     time_t endTs = ((time_t)(fileflow.endTs/NANO_TO_SECS));
     char startTime[100];
     char endTime[100];
@@ -104,8 +108,69 @@ void printFileFlow(FileFlow fileflow) {
                   container = it->second->containerId.get_string();
        }
        //cout << netflow.sip << "\t" << netflow.dip << endl;
-       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " Resource: " << fi->second->restype << " PATH: " << fi->second->path << " FD: " << fileflow.fd << " TID: " << fileflow.tid <<  " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs <<  endl;
+       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " Resource: " << fi->second->restype << " PATH: " << fi->second->path << " FD: " << fileflow.fd << " TID: " << fileflow.tid <<  " Open Flags: " << fileflow.openFlags <<  " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs <<  endl;
 
+ }
+}
+
+void printATFileFlow(AtomicFileFlow fileflow) {
+    string opFlags = "";
+    opFlags +=  ((fileflow.opFlags & OP_MKDIR) ?  "MKDIR" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_RMDIR) ?  "RMDIR" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_LINK) ?  "LINK" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_SYMLINK) ?  "SYMLINK" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_UNLINK) ?  "UNLINK" : " ");
+    /*opFlags +=  ((fileflow.opFlags & OP_ACCEPT) ?  "A" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_CONNECT) ?  "C" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_WRITE_SEND) ?  "W" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_READ_RECV) ?  "R" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_CLOSE) ?  "C" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
+    opFlags +=  ((fileflow.opFlags & OP_DIGEST) ?  "D" : " ");
+   */
+    time_t startTs = ((time_t)(fileflow.ts/NANO_TO_SECS));
+    //time_t endTs = (!fileflow.endTs.is_null()) ? ((time_t)(fileflow.endTs.get_long()/NANO_TO_SECS)) : 0;
+    char startTime[100];
+    strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
+
+    string key(fileflow.fileOID.begin(), fileflow.fileOID.end());
+    FTable::iterator fi = s_files.find(key);
+  /*  base64::encoder enc(20);
+    char b64encoded[60];
+    int len = enc.encode(key.c_str(), key.size(),  b64encoded);
+    string b64enc(b64encoded, len);
+    len = enc.encode_end(b64encoded);
+    b64enc += string(b64encoded, len);*/
+    if(fi == s_files.end()) {
+        cout << "Uh Oh! Can't find file for atfileflow!! " << endl;
+        cout << "AT_FILEFLOW " << startTime << " "  <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd <<  " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << endl;
+
+      }
+   
+
+   PTable::iterator it = s_procs.find(&(fileflow.procOID));
+   if(it == s_procs.end()) {
+       cout << "Uh Oh! Can't find process for fileflow!! " << endl;
+        cout << "AT_FILEFLOW " << startTime << " "  <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd <<  " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << " " << fi->second->restype << " " << fi->second->path << endl;
+  } else {
+       string container = "";
+       if(!it->second->containerId.is_null()) {
+                  container = it->second->containerId.get_string();
+       }
+       //cout << netflow.sip << "\t" << netflow.dip << endl;
+       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime  << " " <<  opFlags << " Resource: " << fi->second->restype << " PATH: " << fi->second->path <<  " FD: " << fileflow.fd << " TID: " << fileflow.tid <<  " " <<  it->second->exe << " " << it->second->exeArgs;
+       if(!fileflow.newFileOID.is_null()) {
+          FOID newFileOID = fileflow.newFileOID.get_FOID();
+          string key2(newFileOID.begin(), newFileOID.end());
+          FTable::iterator fi2 = s_files.find(key2);
+          if(fi2 == s_files.end()) {
+              cout << "Uh Oh! Can't find file 2 for atfileflow!! " << endl;
+           }else {
+              cout << " PATH 2: " << fi2->second->path << endl;
+           }
+       } else {
+           cout << endl;
+      }
  }
 }
 
@@ -325,6 +390,12 @@ int runEventLoop(string sysFile, string schemaFile) {
               {
                   fileflow = flow.rec.get_FileFlow();
                   printFileFlow(fileflow);
+                  break;
+              }
+              case AT_FILE_FLOW:
+              {
+                  atfileflow = flow.rec.get_AtomicFileFlow();
+                  printATFileFlow(atfileflow);
                   break;
               }
               default:

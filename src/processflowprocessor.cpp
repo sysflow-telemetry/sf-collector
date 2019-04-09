@@ -24,6 +24,22 @@ void ProcessFlowProcessor::writeCloneEvent(sinsp_evt* ev) {
     m_writer->writeProcessFlow(&m_procFlow);
 }
 
+/*void ProcessFlowProcessor::writeSetNS(sinsp_evt* ev) {
+    sinsp_threadinfo* ti = ev->get_thread_info();
+    bool created = false;
+    ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
+    m_procFlow.opFlags =  OP_SETNS;
+    m_procFlow.ts = ev->get_ts();
+    m_procFlow.procOID.hpid = proc->proc.oid.hpid;
+    m_procFlow.procOID.createTS = proc->proc.oid.createTS;
+    m_procFlow.tid = ti->m_tid;
+    m_procFlow.ret = utils::getSyscallResult(ev);
+    m_writer->writeProcessFlow(&m_procFlow);
+}*/
+
+
+
+
 void ProcessFlowProcessor::writeExitEvent(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     bool created = false;

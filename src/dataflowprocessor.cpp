@@ -6,6 +6,7 @@ DataFlowProcessor::DataFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer,
     m_cxt = cxt;
     m_netflowPrcr = new networkflow::NetworkFlowProcessor(cxt, writer, processCxt, &m_dfSet);
     m_fileflowPrcr = new fileflow::FileFlowProcessor(cxt, writer, processCxt, &m_dfSet, fileCxt);
+    m_atflowPrcr = new atomicflow::AtomicFileFlowProcessor(writer, processCxt, fileCxt);
     m_lastCheck = 0;
 }
 
@@ -16,6 +17,9 @@ DataFlowProcessor::~DataFlowProcessor() {
     }
     if(m_fileflowPrcr != NULL) {
         delete m_fileflowPrcr;
+    }
+    if(m_atflowPrcr != NULL) {
+        delete m_atflowPrcr;
     }
 }
 
@@ -28,10 +32,15 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt* ev, OpFlags flag) {
 
     if(fdinfo == NULL) {
        cout << "Uh oh!!! Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ErrorCode: " << utils::getSyscallResult(ev) << endl;
+       if(IS_ATOMIC_FILE_FLOW(flag)) {
+           return m_atflowPrcr->handleFileFlowEvent(ev, flag);
+       }
        return 1;
     }
     if(fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket()) {
       return m_netflowPrcr->handleNetFlowEvent(ev, flag);
+    } else if(IS_ATOMIC_FILE_FLOW(flag)) {
+      return m_atflowPrcr->handleFileFlowEvent(ev, flag);
     } else {
       return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
     }

@@ -98,6 +98,12 @@ int SysFlowProcessor::run() {
                           SF_SEND_EXIT(ev)
                           SF_RECV_EXIT(ev)	
                           SF_CLOSE_EXIT(ev)	
+                          SF_SETNS_EXIT(ev)
+                          SF_MKDIR_EXIT(ev)
+                          SF_RMDIR_EXIT(ev)
+                          SF_LINK_EXIT(ev)
+                          SF_UNLINK_EXIT(ev)
+                          SF_SYMLINK_EXIT(ev)
                        } 
 		}
                 cout << "Exiting scap loop... shutting down" << endl;

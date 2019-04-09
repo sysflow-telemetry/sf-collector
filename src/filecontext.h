@@ -16,8 +16,9 @@ namespace file {
             FileContext(container::ContainerContext* containerCxt, SysFlowWriter* writer);
             virtual ~FileContext();
             FileObj* getFile(sinsp_evt* ev, SFObjectState state, bool& created);
+            FileObj* getFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, bool& created);
             FileObj* getFile(string key);
-            FileObj* createFile(sinsp_evt* ev, SFObjectState state, string key);
+            FileObj* createFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, string key);
             bool exportFile(string key);
             void clearFiles();
             inline int getSize() {

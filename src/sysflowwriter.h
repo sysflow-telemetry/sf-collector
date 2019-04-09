@@ -55,6 +55,11 @@ class SysFlowWriter {
             m_numRecs++;
             m_dfw->write(m_flow);
         }
+        inline void writeAtomicFileFlow(AtomicFileFlow* ff) {
+            m_flow.rec.set_AtomicFileFlow(*ff);
+            m_numRecs++;
+            m_dfw->write(m_flow);
+        }
         inline void writeFile(File* f) {
             m_flow.rec.set_File(*f);
             m_numRecs++;

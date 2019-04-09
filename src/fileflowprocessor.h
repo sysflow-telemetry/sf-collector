@@ -1,4 +1,4 @@
-#ifndef _SF_FIlE_FLOW_
+#ifndef _SF_FILE_FLOW_
 #define _SF_FILE_FLOW_
 #include <ctime>
 #include "datatypes.h"

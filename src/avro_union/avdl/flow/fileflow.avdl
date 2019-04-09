@@ -6,6 +6,7 @@ record FileFlow {
   timestamp_ms ts;
   long tid;
   int opFlags;
+  int openFlags;
   timestamp_ms endTs;
   sysflow.type.FOID fileOID;
   int fd;

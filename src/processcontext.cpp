@@ -40,7 +40,7 @@ ProcessObj* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_ev
    //std::memcpy(&proc->oid[8], &proc->hpid, sizeof(int32_t));
    //cout << "Wrote OID" << endl;
    p->proc.exe = (mainthread->m_exepath.empty()) ? mainthread->m_exe : mainthread->m_exepath;
-   cout << "The exepath is " << p->proc.exe <<  " ti: " << ti->get_exepath() << " EXE: " << mainthread->get_exe() << endl;
+   cout << "The exepath is " << p->proc.exe <<  " ti: " << ti->get_exepath() << " EXE: " << mainthread->get_exe() << " CWD: " << mainthread->get_cwd() << endl;
    p->proc.exeArgs.clear();
    int i = 0;
    for(std::vector<string>::iterator it = mainthread->m_args.begin(); it != mainthread->m_args.end(); ++it) {

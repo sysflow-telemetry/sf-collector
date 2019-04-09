@@ -16,8 +16,10 @@ FileFlowProcessor::~FileFlowProcessor() {
 
 inline void FileFlowProcessor::populateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file, string flowkey) {
    sinsp_threadinfo* ti = ev->get_thread_info();
+   sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
    ff->fileflow.opFlags = flag;
    ff->fileflow.ts = ev->get_ts();
+   ff->fileflow.openFlags = fdinfo->m_openflags;
    ff->fileflow.endTs = 0;
    ff->fileflow.procOID.hpid = proc->proc.oid.hpid;
    ff->fileflow.procOID.createTS = proc->proc.oid.createTS;
@@ -100,6 +102,7 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt* ev, OpFlags flag) {
 
     switch(restype) {
         case SF_FILE:
+        case SF_DIR:
         case SF_UNIX:
         case SF_PIPE:
             break;
@@ -114,11 +117,15 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt* ev, OpFlags flag) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     string filekey =  ti->m_container_id + fdinfo->m_name;
     string flowkey = filekey + std::to_string(ti->m_tid);
+    FileObj* file = m_fileCxt->getFile(ev, SFObjectState::REUP, created);
+    /*if(flag == OP_MKDIR) {
+             processNewFlow(ev, proc, file, flag, flowkey);
+             return 0;
+     }*/
     FileFlowTable::iterator ffi = proc->fileflows.find(flowkey);
     if(ffi != proc->fileflows.end()) {
          ff = ffi->second;
     }
-    FileObj* file = m_fileCxt->getFile(ev, SFObjectState::REUP, created);
     cout << proc->proc.exe << " Name: " <<  fdinfo->m_name << " type: " << fdinfo->get_typechar() <<  " " << file->file.path << " " <<  ev->get_name() << endl; //file->file.oid <<  endl;
 
     if(ff == NULL) {

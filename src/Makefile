@@ -7,7 +7,7 @@ LDFLAGS2=-L./../lib-sysdig/ -lpthread -lm -lavrocpp -lb64
 #CFLAGS=-std=c++11 -ggdb -I../../sysdig-0.23.0/userspace/libsinsp/ -I../../sysdig-0.23.0/userspace/libscap/ -I../../sysdig-0.23.0/userspace/libsinsp/third-party/jsoncpp/ -I.. -I./avro_union/src/
 #CFLAGS= -std=c++11 -Wall -ggdb -O3 -DNDEBUG -ggdb -I../../sysdig-0.23.0/userspace/libsinsp/ -I../../sysdig-0.23.0/userspace/libscap/ -I../../sysdig-0.23.0/userspace/libsinsp/third-party/jsoncpp/ -I.. -I./avro_union/src/ -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -I../../sysdig-0.23.0/build/curl-prefix/src/curl/include/
 CFLAGS= -std=c++11 -Wall -ggdb -O3 -ggdb -I./../include-sysdig -I.. -I./avro_union/src/ -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -fPIE -I./../include-sysdig/driver/ -I./../include-sysdig/userspace/libsinsp/ -I./../include-sysdig/userspace/libscap/
-CFLAGS2= -std=c++11 -O3 -I./avro_union/src/  -I./../include-sysdig/userspace/libsinsp/ -I./../include-sysdig/userspace/libscap/  -I./../include-sysdig
+CFLAGS2= -std=c++11 -ggdb -I./avro_union/src/  -I./../include-sysdig/userspace/libsinsp/ -I./../include-sysdig/userspace/libscap/  -I./../include-sysdig
 #CFLAGS= -std=c++11 -ggdb -ggdb -I../../sysdig-0.23.0/userspace/libsinsp/ -I../../sysdig-0.23.0/userspace/libscap/ -I../../sysdig-0.23.0/userspace/libsinsp/third-party/jsoncpp/ -I.. -I./avro_union/src/ -I../../sysdig-0.23.0/build/curl-prefix/src/curl/include/ -DHAS_CAPTURE
 TARGET=sysporter
 TARGET2=sysreader
@@ -15,7 +15,7 @@ TARGET3=sysporterf
 
 all: $(TARGET) $(TARGET2)
 
-$(TARGET): main.o MurmurHash3.o utils.o containercontext.o processcontext.o processflowprocessor.o dataflowprocessor.o networkflowprocessor.o fileflowprocessor.o sysflowcontext.o sysflowprocessor.o sysflowwriter.o filecontext.o
+$(TARGET): main.o MurmurHash3.o utils.o containercontext.o processcontext.o processflowprocessor.o dataflowprocessor.o networkflowprocessor.o fileflowprocessor.o atfileflowprocessor.o sysflowcontext.o sysflowprocessor.o sysflowwriter.o filecontext.o
 	g++ $^ -o $@ $(LDFLAGS)
 
 #$(TARGET3): sysflowfork.o MurmurHash3.o
@@ -58,6 +58,9 @@ networkflowprocessor.o: networkflowprocessor.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
 fileflowprocessor.o: fileflowprocessor.cpp
+	g++ $(CFLAGS) -o $@ -c $^
+
+atfileflowprocessor.o: atfileflowprocessor.cpp
 	g++ $(CFLAGS) -o $@ -c $^
 
 sysflowcontext.o: sysflowcontext.cpp
