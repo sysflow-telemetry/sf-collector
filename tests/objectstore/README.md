@@ -1,11 +1,18 @@
-# IRIS Environment
-Endpoint:  http://172.17.0.2:9000  http://127.0.0.1:9000
-AccessKey: RR3NKSS06BWSTXJWPRVP
-SecretKey: xtUGy5aIjX7f/3adth8sOd3pSXAavlVCwKKBonxB
+# MinIO
+To obtain keys:
+```
+./run
+sudo docker logs minio
+```
 
-Browser Access:
-   http://172.17.0.2:9000  http://127.0.0.1:9000
-
+To use MinIO client: 
 Command-line Access: https://docs.minio.io/docs/minio-client-quickstart-guide
-   $ mc config host add myminio http://172.17.0.2:9000 RR3NKSS06BWSTXJWPRVP xtUGy5aIjX7f/3adth8sOd3pSXAavlVCwKKBonxB
+```
+$ mc config host add minio http://172.17.0.4:9000 <accesskey> <secretkey> 
+$ mc ls minio/play
+$ mc cp --recursive minio/play /tmp/
+$ mc cp --recursive minio/play /tmp/
+$ mc cp --recursive /tmp/play/* minio/play/
+```
+
 
