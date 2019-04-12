@@ -1,0 +1,12 @@
+@namespace("sysflow.event")
+protocol SysFlow {
+import idl "../type/datatypes.avdl";
+record ProcessEvent {
+  sysflow.type.OID procOID; // host ID + monotonic process creation time + host PID
+  timestamp_ms ts;
+  long tid;
+  int opFlags;
+  array<string> args;
+  int ret;
+}
+}
