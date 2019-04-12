@@ -1,0 +1,3 @@
+#!/bin/bash
+docker pull minio/mc
+docker run minio/mc ls play

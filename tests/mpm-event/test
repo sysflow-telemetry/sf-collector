@@ -1,0 +1,2 @@
+#!/bin/bash
+ab -n 25 -c 3 http://localhost:8090/index.html

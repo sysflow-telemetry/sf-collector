@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo sysdig container.name=$1 -w $2

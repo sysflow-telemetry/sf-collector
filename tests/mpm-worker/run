@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo docker run -d --name httpd_worker -p 8090:80 httpd_worker
