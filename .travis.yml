@@ -1,0 +1,28 @@
+language: ruby
+#sudo: required
+dist: trusty
+services:
+ - docker
+
+before_install:
+ - docker build -t sysporter .
+ - docker run --name build -it sysporter /bin/hostname
+ - docker ps -a
+ - docker rm build
+#compiler:
+#- gcc
+#os:
+#- linux
+#ruby: 2.2.0
+#before_install:
+#- echo "before install"
+#script:
+#- echo "script"
+after_success:
+- echo "after success"
+branches:
+  only:
+  - master
+  - ci
+notifications:
+  email: false
