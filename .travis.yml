@@ -14,6 +14,7 @@ after_success:
 - echo "after success"
 branches:
   only:
+  - master
   - ci
 notifications:
   email: false
