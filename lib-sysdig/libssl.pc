@@ -1,4 +1,4 @@
-prefix=/home/terylt/workspace/cscap/sysdig-0.24.2/build/openssl-prefix/src/openssl/target
+prefix=/home/terylt/workspace/cscap/sysdig-0.24.2-unchanged/sysdig-0.24.2/build/openssl-prefix/src/openssl/target
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
