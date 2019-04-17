@@ -40,8 +40,8 @@ class SysFlowWriter {
             m_numRecs++;
             m_dfw->write(m_flow);
         }
-        inline void writeProcessFlow(ProcessFlow* pf) {
-            m_flow.rec.set_ProcessFlow(*pf);
+        inline void writeProcessEvent(ProcessEvent* pe) {
+            m_flow.rec.set_ProcessEvent(*pe);
             m_numRecs++;
             m_dfw->write(m_flow);  
         }
@@ -55,8 +55,8 @@ class SysFlowWriter {
             m_numRecs++;
             m_dfw->write(m_flow);
         }
-        inline void writeAtomicFileFlow(AtomicFileFlow* ff) {
-            m_flow.rec.set_AtomicFileFlow(*ff);
+        inline void writeFileEvent(FileEvent* fe) {
+            m_flow.rec.set_FileEvent(*fe);
             m_numRecs++;
             m_dfw->write(m_flow);
         }

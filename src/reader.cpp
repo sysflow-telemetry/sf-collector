@@ -23,22 +23,22 @@ using namespace sysflow;
 #define CONT 1 
 #define PROC 2
 #define FILE_ 3
-#define PROC_FLOW 4
+#define PROC_EVT 4
 #define NET_FLOW 5
 #define FILE_FLOW 6
-#define AT_FILE_FLOW 7 
+#define FILE_EVT 7 
 
 #define NANO_TO_SECS 1000000000
 
 Process proc;
-ProcessFlow pf;
+ProcessEvent procevt;
 SysFlow flow;
 SFHeader header;
 Container cont;
 File file;
 NetworkFlow netflow;
 FileFlow fileflow;
-AtomicFileFlow atfileflow;
+FileEvent  fileevt;
 
 typedef google::dense_hash_map<OID*, Process*, MurmurHasher<OID*>, eqoidptr> PTable;
 typedef google::dense_hash_map<string, File*, MurmurHasher<string>, eqstr> FTable;
@@ -48,7 +48,7 @@ FTable s_files;
 bool s_quiet = false;
 bool s_keepProcOnExit = false;
 
-const char* Events[] = {"", "CLONE", "EXEC", "",  "EXIT"};
+const char* Events[] = {"", "CLONE", "EXEC", "",  "EXIT", "" , "" , "" , "SETUID"};
 
 
 avro::ValidSchema loadSchema(const char* filename)
@@ -113,27 +113,20 @@ void printFileFlow(FileFlow fileflow) {
  }
 }
 
-void printATFileFlow(AtomicFileFlow fileflow) {
+void printFileEvent(FileEvent fileEvt) {
     string opFlags = "";
-    opFlags +=  ((fileflow.opFlags & OP_MKDIR) ?  "MKDIR" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_RMDIR) ?  "RMDIR" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_LINK) ?  "LINK" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_SYMLINK) ?  "SYMLINK" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_UNLINK) ?  "UNLINK" : " ");
-    /*opFlags +=  ((fileflow.opFlags & OP_ACCEPT) ?  "A" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_CONNECT) ?  "C" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_WRITE_SEND) ?  "W" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_READ_RECV) ?  "R" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_CLOSE) ?  "C" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_DIGEST) ?  "D" : " ");
-   */
-    time_t startTs = ((time_t)(fileflow.ts/NANO_TO_SECS));
+    opFlags +=  ((fileEvt.opFlags & OP_MKDIR) ?  "MKDIR" : " ");
+    opFlags +=  ((fileEvt.opFlags & OP_RMDIR) ?  "RMDIR" : " ");
+    opFlags +=  ((fileEvt.opFlags & OP_LINK) ?  "LINK" : " ");
+    opFlags +=  ((fileEvt.opFlags & OP_SYMLINK) ?  "SYMLINK" : " ");
+    opFlags +=  ((fileEvt.opFlags & OP_UNLINK) ?  "UNLINK" : " ");
+    opFlags +=  ((fileEvt.opFlags & OP_RENAME) ?  "RENAME" : " ");
+    time_t startTs = ((time_t)(fileEvt.ts/NANO_TO_SECS));
     //time_t endTs = (!fileflow.endTs.is_null()) ? ((time_t)(fileflow.endTs.get_long()/NANO_TO_SECS)) : 0;
     char startTime[100];
     strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
 
-    string key(fileflow.fileOID.begin(), fileflow.fileOID.end());
+    string key(fileEvt.fileOID.begin(), fileEvt.fileOID.end());
     FTable::iterator fi = s_files.find(key);
   /*  base64::encoder enc(20);
     char b64encoded[60];
@@ -143,24 +136,24 @@ void printATFileFlow(AtomicFileFlow fileflow) {
     b64enc += string(b64encoded, len);*/
     if(fi == s_files.end()) {
         cout << "Uh Oh! Can't find file for atfileflow!! " << endl;
-        cout << "AT_FILEFLOW " << startTime << " "  <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd <<  " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << endl;
+        cout << "FILE_EVT " << startTime << " "  <<  opFlags << " TID: " << fileEvt.tid << " " << fileEvt.procOID.hpid << " " << fileEvt.procOID.createTS << endl;
 
       }
    
 
-   PTable::iterator it = s_procs.find(&(fileflow.procOID));
+   PTable::iterator it = s_procs.find(&(fileEvt.procOID));
    if(it == s_procs.end()) {
        cout << "Uh Oh! Can't find process for fileflow!! " << endl;
-        cout << "AT_FILEFLOW " << startTime << " "  <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd <<  " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << " " << fi->second->restype << " " << fi->second->path << endl;
+        cout << "FILE_EVT " << startTime << " "  <<  opFlags << " TID: " << fileEvt.tid <<  " " << fileEvt.procOID.hpid << " " << fileEvt.procOID.createTS << " " << fi->second->restype << " " << fi->second->path << endl;
   } else {
        string container = "";
        if(!it->second->containerId.is_null()) {
                   container = it->second->containerId.get_string();
        }
        //cout << netflow.sip << "\t" << netflow.dip << endl;
-       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime  << " " <<  opFlags << " Resource: " << fi->second->restype << " PATH: " << fi->second->path <<  " FD: " << fileflow.fd << " TID: " << fileflow.tid <<  " " <<  it->second->exe << " " << it->second->exeArgs;
-       if(!fileflow.newFileOID.is_null()) {
-          FOID newFileOID = fileflow.newFileOID.get_FOID();
+       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime  << " " <<  opFlags << " Resource: " << (char)fi->second->restype << " PATH: " << fi->second->path <<  " TID: " << fileEvt.tid <<  " " <<  it->second->exe << " " << it->second->exeArgs;
+       if(!fileEvt.newFileOID.is_null()) {
+          FOID newFileOID = fileEvt.newFileOID.get_FOID();
           string key2(newFileOID.begin(), newFileOID.end());
           FTable::iterator fi2 = s_files.find(key2);
           if(fi2 == s_files.end()) {
@@ -340,16 +333,16 @@ int runEventLoop(string sysFile, string schemaFile) {
                   s_files[key] = f;
                   break;
               }
-              case PROC_FLOW:
+              case PROC_EVT:
               {
-		pf = flow.rec.get_ProcessFlow();
-                time_t timestamp = ((time_t)(pf.ts/NANO_TO_SECS));
+		procevt = flow.rec.get_ProcessEvent();
+                time_t timestamp = ((time_t)(procevt.ts/NANO_TO_SECS));
                 char times[100];
                 strftime(times, 99, "%x %X %Z", localtime(&timestamp));
-                PTable::iterator it = s_procs.find(&(pf.procOID));
+                PTable::iterator it = s_procs.find(&(procevt.procOID));
                 if(it == s_procs.end()) {
                    cout << "Can't find process for process flow!  shouldn't happen!!" << endl;
-                   cout << "PROC_FLOW " << times << " " << " TID: " << pf.tid << Events[pf.opFlags] << " " <<  " " << pf.ret << " OID: " << pf.procOID.hpid << " " << pf.procOID.createTS << endl;
+                   cout << "PROC_EVT " << times << " " << " TID: " << procevt.tid << Events[procevt.opFlags] << " " <<  " " << procevt.ret << " OID: " << procevt.procOID.hpid << " " << procevt.procOID.createTS << endl;
                 }  else {
                    
                    string container = "";
@@ -357,15 +350,20 @@ int runEventLoop(string sysFile, string schemaFile) {
                        container = it->second->containerId.get_string();
                   }
            
+                   cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " <<  times << " " << " TID: " << procevt.tid << " " << Events[procevt.opFlags] << " " <<  " " << procevt.ret <<  " " << procevt.procOID.createTS << " " <<  it->second->exe << " " << it->second->exeArgs ;
+                   if(procevt.args.empty()) {
+                       cout << endl;
+                   } else {
+                       cout << " " << procevt.args.back() << endl;
 
-                   cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " <<  times << " " << " TID: " << pf.tid << " " << Events[pf.opFlags] << " " <<  " " << pf.ret <<  " " << pf.procOID.createTS << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
+                   }
 
                 }
-               if(!s_keepProcOnExit && pf.opFlags == OP_EXIT) { // exit
+               if(!s_keepProcOnExit && procevt.opFlags == OP_EXIT) { // exit
                    if(it != s_procs.end()) {
-                        if(it->second->oid.hpid == pf.tid) {
+                        if(it->second->oid.hpid == procevt.tid) {
                             delete it->second;
-                            s_procs.erase(&(pf.procOID));
+                            s_procs.erase(&(procevt.procOID));
                         }
                    }
                 }
@@ -392,10 +390,10 @@ int runEventLoop(string sysFile, string schemaFile) {
                   printFileFlow(fileflow);
                   break;
               }
-              case AT_FILE_FLOW:
+              case FILE_EVT:
               {
-                  atfileflow = flow.rec.get_AtomicFileFlow();
-                  printATFileFlow(atfileflow);
+                  fileevt = flow.rec.get_FileEvent();
+                  printFileEvent(fileevt);
                   break;
               }
               default:

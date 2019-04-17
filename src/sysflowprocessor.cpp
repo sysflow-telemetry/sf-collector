@@ -12,7 +12,7 @@ SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
    m_fileCxt = new file::FileContext(m_containerCxt, m_writer);
    m_processCxt = new process::ProcessContext(m_cxt, m_containerCxt, m_fileCxt, m_writer);
    m_dfPrcr = new dataflow::DataFlowProcessor(m_cxt, m_writer, m_processCxt, m_fileCxt);
-   m_procFlowPrcr = new processflow::ProcessFlowProcessor(m_writer, m_processCxt, m_dfPrcr);
+   m_procEvtPrcr = new processevent::ProcessEventProcessor(m_writer, m_processCxt, m_dfPrcr);
 }
 
 SysFlowProcessor::~SysFlowProcessor() {
@@ -20,7 +20,7 @@ SysFlowProcessor::~SysFlowProcessor() {
    delete m_processCxt;
    delete m_dfPrcr;
    delete m_fileCxt;
-   delete m_procFlowPrcr;
+   delete m_procEvtPrcr;
    delete m_containerCxt;
    delete m_writer;
 }
@@ -104,6 +104,9 @@ int SysFlowProcessor::run() {
                           SF_LINK_EXIT(ev)
                           SF_UNLINK_EXIT(ev)
                           SF_SYMLINK_EXIT(ev)
+                          SF_RENAME_EXIT(ev)
+                          SF_SETUID_ENTER(ev)
+                          SF_SETUID_EXIT(ev)
                        } 
 		}
                 cout << "Exiting scap loop... shutting down" << endl;

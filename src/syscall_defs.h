@@ -21,7 +21,7 @@
                         case PPME_SYSCALL_EXECVE_18_X: \
                         case PPME_SYSCALL_EXECVE_19_X: \
                         {                              \
-			    m_procFlowPrcr->writeExecEvent(EV); \
+			    m_procEvtPrcr->writeExecEvent(EV); \
                             break;                     \
                         }
 
@@ -29,7 +29,7 @@
                         case PPME_SYSCALL_CLONE_17_X: \
                         case PPME_SYSCALL_CLONE_20_X: \
                         {                             \
-			    m_procFlowPrcr->writeCloneEvent(EV); \
+			    m_procEvtPrcr->writeCloneEvent(EV); \
                             break;                    \
                         }
 
@@ -38,7 +38,7 @@
                         case PPME_PROCEXIT_1_E: \
                         case PPME_PROCEXIT_1_X: \
 			  {                     \
-			      m_procFlowPrcr->writeExitEvent(EV); \
+			      m_procEvtPrcr->writeExitEvent(EV); \
 			      break;            \
                           }
 
@@ -152,6 +152,13 @@
                               break;                                   \
                           }
 
+#define SF_RENAME_EXIT(EV)  case PPME_SYSCALL_RENAME_X: \
+                          case PPME_SYSCALL_RENAMEAT_X: \
+                          {       \
+                              m_dfPrcr->handleDataEvent(EV, OP_RENAME); \
+                              break;                                   \
+                          }
+
 
 #define SF_SYMLINK_EXIT(EV)  case PPME_SYSCALL_SYMLINK_X: \
                           case PPME_SYSCALL_SYMLINKAT_X: \
@@ -160,9 +167,17 @@
                                break;                                   \
                           }
 
-#define SF_SETUID_EXIT(EV)  case PPME_SYSCALL_SETUID_X: \
+#define SF_SETUID_ENTER(EV)  case PPME_SYSCALL_SETUID_E: \
+                            case PPME_SYSCALL_SETRESUID_E: \
                           {       \
-                               m_dfPrcr->handleDataEvent(EV, OP_SETUID); \
+                               m_procEvtPrcr->setUID(EV); \
+                               break;                                   \
+                          }
+
+#define SF_SETUID_EXIT(EV)  case PPME_SYSCALL_SETUID_X: \
+                            case PPME_SYSCALL_SETRESUID_X: \
+                          {       \
+                               m_procEvtPrcr->writeSetUIDEvent(EV); \
                                break;                                   \
                           }
 
@@ -178,3 +193,9 @@
                                break;  \
                           }
 #endif
+
+
+#define IS_AT_SC(TYPE) (TYPE == PPME_SYSCALL_SYMLINKAT_X || TYPE == PPME_SYSCALL_RENAMEAT_X || TYPE == PPME_SYSCALL_UNLINKAT_X || TYPE == PPME_SYSCALL_UNLINKAT_2_X || \
+                        TYPE == PPME_SYSCALL_LINKAT_X || TYPE == PPME_SYSCALL_LINKAT_2_X || TYPE == PPME_SYSCALL_MKDIRAT_X)
+
+#define IS_UNLINKAT(TYPE) (TYPE == PPME_SYSCALL_UNLINKAT_X || TYPE == PPME_SYSCALL_UNLINKAT_2_X)

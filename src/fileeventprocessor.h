@@ -1,26 +1,28 @@
-#ifndef _SF_ATOMIC_FILE_FLOW
-#define _SF_ATOMIC_FILE_FLOW
+#ifndef _SF_FILE_EVT
+#define _SF_FILE_EVT
 #include <sinsp.h>
 #include "sysflowwriter.h"
 #include "processcontext.h"
 #include "filecontext.h"
 #include "sysflow/sysflow.hh"
 #include "utils.h"
+#include "syscall_defs.h"
+#include "file_types.h"
 using namespace sysflow;
-namespace atomicflow {
+namespace fileevent {
 
 
-    class AtomicFileFlowProcessor {
+    class FileEventProcessor {
         private:
             process::ProcessContext* m_processCxt;
             SysFlowWriter* m_writer;
             file::FileContext* m_fileCxt;
-            AtomicFileFlow m_atFileFlow;
+            FileEvent m_fileEvt;
             int writeFileEvent(sinsp_evt* ev, OpFlags flag);
             int writeLinkEvent(sinsp_evt* ev, OpFlags flag);
         public:
-            AtomicFileFlowProcessor(SysFlowWriter* writer, process::ProcessContext* procCxt, file::FileContext* fileCxt);
-            virtual ~AtomicFileFlowProcessor();
+            FileEventProcessor(SysFlowWriter* writer, process::ProcessContext* procCxt, file::FileContext* fileCxt);
+            virtual ~FileEventProcessor();
             int handleFileFlowEvent(sinsp_evt* ev, OpFlags flag);
                  
 

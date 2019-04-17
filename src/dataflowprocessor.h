@@ -5,7 +5,7 @@
 #include "op_flags.h"
 #include "networkflowprocessor.h"
 #include "fileflowprocessor.h"
-#include "atfileflowprocessor.h"
+#include "fileeventprocessor.h"
 #include "sysflowwriter.h"
 
 namespace dataflow {
@@ -13,7 +13,7 @@ namespace dataflow {
         private:
            networkflow::NetworkFlowProcessor* m_netflowPrcr;
            fileflow::FileFlowProcessor* m_fileflowPrcr;
-           atomicflow::AtomicFileFlowProcessor* m_atflowPrcr;
+           fileevent::FileEventProcessor* m_fileevtPrcr;
            SysFlowContext*   m_cxt;
            DataFlowSet m_dfSet;
            time_t m_lastCheck;

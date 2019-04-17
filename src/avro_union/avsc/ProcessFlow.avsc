@@ -32,6 +32,12 @@
     "name" : "opFlags",
     "type" : "int"
   }, {
+    "name" : "endTs",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
     "name" : "args",
     "type" : {
       "type" : "array",

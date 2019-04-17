@@ -10,10 +10,11 @@
 enum FileType {
      SF_FILE = 'f',
      SF_DIR = 'd',
-     SF_IPv4 = 4,
-     SF_IPv6 = 6,
+     SF_IPv4 = '4',
+     SF_IPv6 = '6',
      SF_UNIX = 'u',
-     SF_PIPE = 'p'
+     SF_PIPE = 'p',
+     SF_UNK = '?'
 };
 
 

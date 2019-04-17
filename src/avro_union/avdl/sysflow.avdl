@@ -3,13 +3,15 @@ protocol SysFlow {
 import idl "flow/processflow.avdl";
 import idl "flow/networkflow.avdl";
 import idl "flow/fileflow.avdl";
-import idl "flow/atomicfileflow.avdl";
+import idl "event/processevent.avdl";
+import idl "event/networkevent.avdl";
+import idl "event/fileevent.avdl";
 import idl "entity/process.avdl";
 import idl "entity/header.avdl";
 import idl "entity/container.avdl";
 import idl "entity/file.avdl";
 
 record SysFlow {
-   union {sysflow.entity.SFHeader, sysflow.entity.Container, sysflow.entity.Process, sysflow.entity.File, sysflow.flow.ProcessFlow, sysflow.flow.NetworkFlow, sysflow.flow.FileFlow, sysflow.flow.AtomicFileFlow} rec;
+   union {sysflow.entity.SFHeader, sysflow.entity.Container, sysflow.entity.Process, sysflow.entity.File, sysflow.event.ProcessEvent, sysflow.flow.NetworkFlow, sysflow.flow.FileFlow, sysflow.event.FileEvent} rec;
 }
 }

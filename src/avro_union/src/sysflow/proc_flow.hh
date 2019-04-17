@@ -42,6 +42,7 @@ struct ProcessFlow {
     int64_t ts;
     int64_t tid;
     int32_t opFlags;
+    int64_t endTs;
     std::vector<std::string > args;
     int32_t ret;
     ProcessFlow() :
@@ -49,6 +50,7 @@ struct ProcessFlow {
         ts(int64_t()),
         tid(int64_t()),
         opFlags(int32_t()),
+        endTs(int64_t()),
         args(std::vector<std::string >()),
         ret(int32_t())
         { }
@@ -91,6 +93,7 @@ template<> struct codec_traits<sysflow.flow::ProcessFlow> {
         avro::encode(e, v.ts);
         avro::encode(e, v.tid);
         avro::encode(e, v.opFlags);
+        avro::encode(e, v.endTs);
         avro::encode(e, v.args);
         avro::encode(e, v.ret);
     }
@@ -114,9 +117,12 @@ template<> struct codec_traits<sysflow.flow::ProcessFlow> {
                     avro::decode(d, v.opFlags);
                     break;
                 case 4:
-                    avro::decode(d, v.args);
+                    avro::decode(d, v.endTs);
                     break;
                 case 5:
+                    avro::decode(d, v.args);
+                    break;
+                case 6:
                     avro::decode(d, v.ret);
                     break;
                 default:
@@ -128,6 +134,7 @@ template<> struct codec_traits<sysflow.flow::ProcessFlow> {
             avro::decode(d, v.ts);
             avro::decode(d, v.tid);
             avro::decode(d, v.opFlags);
+            avro::decode(d, v.endTs);
             avro::decode(d, v.args);
             avro::decode(d, v.ret);
         }

@@ -55,6 +55,12 @@
       "name" : "opFlags",
       "type" : "int"
     }, {
+      "name" : "endTs",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
       "name" : "args",
       "type" : {
         "type" : "array",
@@ -166,8 +172,8 @@
     } ]
   }, {
     "type" : "record",
-    "name" : "AtomicFileFlow",
-    "namespace" : "sysflow.flow",
+    "name" : "ProcessEvent",
+    "namespace" : "sysflow.event",
     "fields" : [ {
       "name" : "procOID",
       "type" : "sysflow.type.OID"
@@ -184,14 +190,72 @@
       "name" : "opFlags",
       "type" : "int"
     }, {
-      "name" : "flags",
+      "name" : "args",
+      "type" : {
+        "type" : "array",
+        "items" : "string"
+      }
+    }, {
+      "name" : "ret",
+      "type" : "int"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "NetworkEvent",
+    "namespace" : "sysflow.event",
+    "fields" : [ {
+      "name" : "procOID",
+      "type" : "sysflow.type.OID"
+    }, {
+      "name" : "ts",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "tid",
+      "type" : "long"
+    }, {
+      "name" : "opFlags",
+      "type" : "int"
+    }, {
+      "name" : "sip",
+      "type" : "int"
+    }, {
+      "name" : "sport",
+      "type" : "int"
+    }, {
+      "name" : "dip",
+      "type" : "int"
+    }, {
+      "name" : "dport",
+      "type" : "int"
+    }, {
+      "name" : "proto",
+      "type" : "int"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "FileEvent",
+    "namespace" : "sysflow.event",
+    "fields" : [ {
+      "name" : "procOID",
+      "type" : "sysflow.type.OID"
+    }, {
+      "name" : "ts",
+      "type" : {
+        "type" : "long",
+        "logicalType" : "timestamp-millis"
+      }
+    }, {
+      "name" : "tid",
+      "type" : "long"
+    }, {
+      "name" : "opFlags",
       "type" : "int"
     }, {
       "name" : "fileOID",
       "type" : "sysflow.type.FOID"
-    }, {
-      "name" : "fd",
-      "type" : "int"
     }, {
       "name" : "ret",
       "type" : "int"
@@ -308,7 +372,7 @@
     "name" : "SysFlow",
     "fields" : [ {
       "name" : "rec",
-      "type" : [ "sysflow.entity.SFHeader", "sysflow.entity.Container", "sysflow.entity.Process", "sysflow.entity.File", "sysflow.flow.ProcessFlow", "sysflow.flow.NetworkFlow", "sysflow.flow.FileFlow", "sysflow.flow.AtomicFileFlow" ]
+      "type" : [ "sysflow.entity.SFHeader", "sysflow.entity.Container", "sysflow.entity.Process", "sysflow.entity.File", "sysflow.event.ProcessEvent", "sysflow.flow.NetworkFlow", "sysflow.flow.FileFlow", "sysflow.event.FileEvent" ]
     } ]
   } ],
   "messages" : { }

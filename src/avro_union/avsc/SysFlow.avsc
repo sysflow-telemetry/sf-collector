@@ -139,8 +139,8 @@
       } ]
     }, {
       "type" : "record",
-      "name" : "ProcessFlow",
-      "namespace" : "sysflow.flow",
+      "name" : "ProcessEvent",
+      "namespace" : "sysflow.event",
       "fields" : [ {
         "name" : "procOID",
         "type" : "sysflow.type.OID"
@@ -268,8 +268,8 @@
       } ]
     }, {
       "type" : "record",
-      "name" : "AtomicFileFlow",
-      "namespace" : "sysflow.flow",
+      "name" : "FileEvent",
+      "namespace" : "sysflow.event",
       "fields" : [ {
         "name" : "procOID",
         "type" : "sysflow.type.OID"
@@ -286,14 +286,8 @@
         "name" : "opFlags",
         "type" : "int"
       }, {
-        "name" : "flags",
-        "type" : "int"
-      }, {
         "name" : "fileOID",
         "type" : "sysflow.type.FOID"
-      }, {
-        "name" : "fd",
-        "type" : "int"
       }, {
         "name" : "ret",
         "type" : "int"

@@ -14,10 +14,12 @@
 #include <openssl/sha.h>
 #include "boost/any.hpp"
 #include "sysflow/sysflow.hh"
+#include <boost/filesystem.hpp>
 
 typedef boost::array<uint8_t, 20> FOID;
 using namespace std;
 using namespace sysflow;
+namespace fs = boost::filesystem;
 struct NFKey;
 namespace utils {
     string getUserName(SysFlowContext* cxt, uint32_t uid);
@@ -31,6 +33,15 @@ namespace utils {
     OID* getOIDDelKey();
     OID* getOIDEmptyKey();
     void generateFOID(string key, FOID* foid);
+    string getPath(sinsp_evt* ev, string paraName);
+    string getAbsolutePath(sinsp_threadinfo* ti, int64_t dirfd, string fileName);
+    string getAbsolutePath(sinsp_threadinfo* ti, string fileName);
+    int64_t getFD(sinsp_evt* ev, string paraName);
+    inline string getCanonicalPath(string fileName) {
+        fs::path p(fileName);
+        p = weakly_canonical(p);
+        return p.string();
+    }
 
     inline time_t getCurrentTime(SysFlowContext* cxt) {
         if(cxt->isOffline()) {

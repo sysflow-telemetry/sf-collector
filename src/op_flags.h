@@ -31,9 +31,10 @@ enum OpFlags {
      OP_RMDIR = (1 << 14),
      OP_LINK  = (1 << 15),
      OP_UNLINK = (1 << 16), 
-     OP_SYMLINK = (1 << 17)
+     OP_SYMLINK = (1 << 17),
+     OP_RENAME = (1 << 18)
 };
 
-#define IS_ATOMIC_FILE_FLOW(FLAG) (FLAG == OP_MKDIR || FLAG == OP_RMDIR || FLAG == OP_LINK || FLAG == OP_UNLINK || FLAG == OP_SYMLINK) 
+#define IS_ATOMIC_FILE_FLOW(FLAG) (FLAG == OP_MKDIR || FLAG == OP_RMDIR || FLAG == OP_LINK || FLAG == OP_UNLINK || FLAG == OP_SYMLINK || FLAG == OP_RENAME) 
 
 #endif 
