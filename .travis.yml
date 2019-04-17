@@ -6,8 +6,9 @@ services:
 
 before_install:
  - docker build -t sysporter .
- - docker run -it sysporter /bin/hostname
+ - docker run --name build -it sysporter /bin/hostname
  - docker ps -a
+ - docker rm build
 #compiler:
 #- gcc
 #os:
