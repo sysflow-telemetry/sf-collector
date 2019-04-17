@@ -1,15 +1,22 @@
-language: cpp
+language: ruby
 #sudo: required
 dist: trusty
-compiler:
-- gcc
-os:
-- linux
-ruby: 2.2.0
+services:
+ - docker
+
 before_install:
-- echo "before install"
-script:
-- echo "script"
+ - docker build -t sysporter .
+ - docker run -it sysporter /bin/hostname
+ - docker ps -a
+#compiler:
+#- gcc
+#os:
+#- linux
+#ruby: 2.2.0
+#before_install:
+#- echo "before install"
+#script:
+#- echo "script"
 after_success:
 - echo "after success"
 branches:
