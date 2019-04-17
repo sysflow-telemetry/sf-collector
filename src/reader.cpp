@@ -15,7 +15,7 @@
 #include "datatypes.h"
 #include <time.h>
 #define BUFFERSIZE 20
-#include "b64/encode.h"
+//#include "b64/encode.h"
 using namespace std;
 using namespace sysflow;
 
