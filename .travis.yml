@@ -1,0 +1,19 @@
+language: cpp
+#sudo: required
+dist: trusty
+compiler:
+- gcc
+os:
+- linux
+ruby: 2.2.0
+before_install:
+- echo "before install"
+script:
+- echo "script"
+after_success:
+- echo "after success"
+branches:
+  only:
+  - master
+notifications:
+  email: false
