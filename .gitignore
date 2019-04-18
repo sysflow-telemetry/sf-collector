@@ -40,6 +40,8 @@ __pycache__/
 
 # Paths
 avro-cpp-1.8.2
+src/sysporter
+src/sysreader
 
 # others
 *DS_Store
