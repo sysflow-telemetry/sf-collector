@@ -1,3 +1,2 @@
-#tar cvjf sysflow.tar.gz avro_union/ libsysdig/ sysdiginclude/ main.cpp Makefile hashtable.h MurmurHash3.cpp reader.cpp MurmurHash3.h
-#sudo docker build -t sysporter .
+#!/bin/bash
 sudo docker build -t us.icr.io/seccloud/sf-collector .
