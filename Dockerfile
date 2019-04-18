@@ -50,7 +50,6 @@ RUN apt-get update -yq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
 ADD ./libs/avro/avro-cpp-1.8.2.tar.gz  /
-#RUN tar xvf /avro-cpp-1.8.2.tar.gz
 RUN cd /avro-cpp-1.8.2/ && \
     cmake -DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-w" \
           -DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" . && \
