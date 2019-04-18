@@ -48,12 +48,9 @@ RUN apt-get update -yq && apt-get --fix-broken install -yq && apt-get install -y
 COPY ./avro-cpp-1.8.2.tar.gz  /
 RUN tar xvf /avro-cpp-1.8.2.tar.gz
 RUN cd /avro-cpp-1.8.2/ && \
-    cmake -E env CXXFLAGS="-w" cmake -G "Unix Makefiles" . && \
+    cmake -DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-w" \
+          -DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" . && \
     make install
-
-#RUN mkdir -p /sysporter/
-#RUN mkdir -p /include-sysdig/ 
-#RUN mkdir -p /lib-sysdig/ 
 
 COPY  ./src/ /sysporter/
 COPY  ./include-sysdig/ /include-sysdig/
@@ -62,8 +59,8 @@ COPY  ./lib-sysdig/ /lib-sysdig/
 # build sysporter
 RUN cd sysporter/ && make
 RUN cp /lib-sysdig/* /usr/lib/
-#RUN mkdir -p /usr/local/sysflow/bin
-#RUN mkdir -p /usr/local/sysflow/conf
+RUN mkdir -p /usr/local/sysflow/bin
+RUN mkdir -p /usr/local/sysflow/conf
 RUN cp /sysporter/sysporter /usr/local/sysflow/bin
 RUN cp /sysporter/sysreader /usr/local/sysflow/bin
 RUN cp /sysporter/avro_union/avsc/SysFlow.avsc /usr/local/sysflow/conf/
