@@ -14,12 +14,13 @@
 #include <openssl/sha.h>
 #include "boost/any.hpp"
 #include "sysflow/sysflow.hh"
-#include <boost/filesystem.hpp>
+//#include <boost/filesystem.hpp>
+#include <filesystem>
 
 typedef boost::array<uint8_t, 20> FOID;
 using namespace std;
 using namespace sysflow;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 struct NFKey;
 namespace utils {
     string getUserName(SysFlowContext* cxt, uint32_t uid);

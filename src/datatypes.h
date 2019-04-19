@@ -155,8 +155,7 @@ struct MurmurHasher<NFKey> {
 };
 
 struct eqnfkey {
-  bool operator()(const NFKey& n1, const NFKey& n2) const
-  {
+  bool operator()(const NFKey& n1, const NFKey& n2) const {
     return (n1.ip1 == n2.ip1 && n1.ip2 == n2.ip2 && 
            n1.port1 == n2.port1 && n1.port2 == n2.port2);
            //&& n1.oid.hpid == n2.oid.hpid && n1.oid.createTS == n2.oid.createTS);
@@ -164,7 +163,7 @@ struct eqnfkey {
 };
 
 struct eqdfobj {
-  bool operator()(const DataFlowObj* df1, const DataFlowObj* df2) {
+  bool operator()(const DataFlowObj* df1, const DataFlowObj* df2) const {
       return (df1->exportTime < df2->exportTime);  
  }
 
