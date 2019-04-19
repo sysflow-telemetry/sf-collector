@@ -45,6 +45,8 @@ RUN apt-get update -yq && \
         flex \ 
         bison \
         g++ \
+        openssl \
+        libssl-dev \
         libsparsehash-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*

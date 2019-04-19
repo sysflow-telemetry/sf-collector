@@ -1,8 +1,8 @@
 .PHONY: clean
-LDFLAGS= ../libs/sysdig/lib/libsinsp.a ../libs/sysdig/lib/libscap.a -lelf -L../libs/sysdig/lib/ -lz ../libs/sysdig/lib/libjq.a ../libs/sysdig/lib/libb64.a ../libs/sysdig/lib/libcurl.a ../libs/sysdig/lib/libssl.a -lrt  -lanl -L../libs/sysdig/lib -lssl -lcrypto -lpthread -lm -lavrocpp ../libs/sysdig/lib/libtbb.a -lboost_filesystem
+LDFLAGS= ../libs/sysdig/lib/libsinsp.a ../libs/sysdig/lib/libscap.a -lelf -L../libs/sysdig/lib/ -lz ../libs/sysdig/lib/libjq.a ../libs/sysdig/lib/libb64.a ../libs/sysdig/lib/libcurl.a -lrt  -lanl -L../libs/sysdig/lib -lssl -lcrypto -lpthread -lm -lavrocpp ../libs/sysdig/lib/libtbb.a -lboost_filesystem
 LDFLAGS2=-L./../libs/sysdig/lib/ -lpthread -lm -lavrocpp -lb64
 
-CFLAGS= -std=c++17 -Wall -ggdb -O3 -ggdb -I./../libs/sysdig/include -I.. -I./avro/src/ -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I./../libs/sysdig/include/driver/ -I./../libs/sysdig/include/userspace/libsinsp/ -I./../libs/sysdig/include/userspace/libscap/ -I./../libs/sysdig/include/openssl -I/usr/local/include
+CFLAGS= -std=c++17 -Wall -ggdb -O3 -ggdb -I./../libs/sysdig/include -I.. -I./avro/src/ -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I./../libs/sysdig/include/driver/ -I./../libs/sysdig/include/userspace/libsinsp/ -I./../libs/sysdig/include/userspace/libscap/ -I/usr/local/include
 CFLAGS2= -std=c++17 -ggdb -I./avro/src/  -I./../libs/sysdig/include/userspace/libsinsp/ -I./../libs/sysdig/include/userspace/libscap/ -I./../libs/sysdig/include
 
 TARGET=sysporter
