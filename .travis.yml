@@ -9,6 +9,7 @@ before_install:
  - docker run --name build -it sysporter /bin/hostname
  - docker ps -a
  - docker rm build
+ - gem install rake
 #compiler:
 #- gcc
 #os:
