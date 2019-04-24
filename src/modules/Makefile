@@ -2,8 +2,13 @@ SYSDIG_VERSION=0.24.2
 AVRO_VERSION=release-1.8.2
 
 .PHONY: all
-all: sysdig \
+all: update_submodules \
+	 sysdig \
 	 avro
+
+.PHONY: update_submodules
+update_submodules:
+	git submodule update --init --recursive
 
 .PHONY: sysdig
 sysdig: 
