@@ -3,8 +3,4 @@
     url = https://github.com/apache/avro.git
 [submodule "sysdig"]
     path = src/modules/sysdig
-    url = https://github.com/draios/sysdig
-
-[submodule "src/modules/sysdig"]
-	path = src/modules/sysdig
 	url = https://github.com/draios/sysdig.git
