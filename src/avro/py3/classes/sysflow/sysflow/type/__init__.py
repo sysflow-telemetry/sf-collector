@@ -1,3 +1,4 @@
 from ...schema_classes import SchemaClasses
-ActionType = SchemaClasses.sysflow.type.ActionTypeClass
-EventType = SchemaClasses.sysflow.type.EventTypeClass
+ContainerType = SchemaClasses.sysflow.type.ContainerTypeClass
+OID = SchemaClasses.sysflow.type.OIDClass
+SFObjectState = SchemaClasses.sysflow.type.SFObjectStateClass

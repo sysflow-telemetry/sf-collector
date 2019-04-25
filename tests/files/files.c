@@ -9,8 +9,12 @@ int main( int argc, const char* argv[] )
     fclose(fp);
     
     FILE* fp2 = fopen("/tmp/tested_file2.txt", "w+");
-    fprintf(fp, "This is testing file2 for fprintf...\n");
-    fclose(fp);
+    fprintf(fp2, "This is testing file2 for fprintf...\n");
+    fclose(fp2);
+
+    FILE* fp3 = fopen("/tmp/tested_file3.txt", "w+");
+    fprintf(fp3, "This is testing file3 for fprintf...\n");
+    fclose(fp3);
 
     FILE* f = fopen("./tested_file_test.txt", "w+");
     fprintf(f, "This is testing_file_test for fprintf...\n");
@@ -40,6 +44,9 @@ int main( int argc, const char* argv[] )
     res = symlink("/tmp/tested_file2.txt", "./tested_file2.txt");
     printf("The res of the symlink is %d\n", res);
 
+    res = rename("/tmp/tested_file3.txt", "/tmp/tested_file4.txt");
+    printf("The res of the rename is %d\n", res);
+
     res = unlink("/tmp/tested_file.txt");
     printf("The res of the unlink is %d\n", res);
     res = unlink("./tested_file.txt");
@@ -50,6 +57,8 @@ int main( int argc, const char* argv[] )
     printf("The res of the unlink 4 is %d\n", res);
     res = unlink("./tested_file_test.txt");
     printf("The res of the unlink5 is %d\n", res);
+    res = unlink("/tmp/tested_file4.txt");
+    printf("The res of the unlink6 is %d\n", res);
  
 }
 
