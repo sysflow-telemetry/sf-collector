@@ -7,10 +7,17 @@ from avro.io import DatumReader
 class SpecificDatumReader(DatumReader):
     SCHEMA_TYPES = {
         "sysflow.SysFlow": SchemaClasses.sysflow.SysFlowClass,
+        "sysflow.entity.Container": SchemaClasses.sysflow.entity.ContainerClass,
+        "sysflow.entity.File": SchemaClasses.sysflow.entity.FileClass,
         "sysflow.entity.Process": SchemaClasses.sysflow.entity.ProcessClass,
-        "sysflow.flow.ProcessFlow": SchemaClasses.sysflow.flow.ProcessFlowClass,
-        "sysflow.type.ActionType": SchemaClasses.sysflow.type.ActionTypeClass,
-        "sysflow.type.EventType": SchemaClasses.sysflow.type.EventTypeClass,
+        "sysflow.entity.SFHeader": SchemaClasses.sysflow.entity.SFHeaderClass,
+        "sysflow.event.FileEvent": SchemaClasses.sysflow.event.FileEventClass,
+        "sysflow.event.ProcessEvent": SchemaClasses.sysflow.event.ProcessEventClass,
+        "sysflow.flow.FileFlow": SchemaClasses.sysflow.flow.FileFlowClass,
+        "sysflow.flow.NetworkFlow": SchemaClasses.sysflow.flow.NetworkFlowClass,
+        "sysflow.type.ContainerType": SchemaClasses.sysflow.type.ContainerTypeClass,
+        "sysflow.type.OID": SchemaClasses.sysflow.type.OIDClass,
+        "sysflow.type.SFObjectState": SchemaClasses.sysflow.type.SFObjectStateClass,
     }
     def __init__(self, readers_schema=None, **kwargs):
         writers_schema = kwargs.pop("writers_schema", readers_schema)

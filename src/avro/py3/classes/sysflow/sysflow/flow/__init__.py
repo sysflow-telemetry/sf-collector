@@ -1,2 +1,3 @@
 from ...schema_classes import SchemaClasses
-ProcessFlow = SchemaClasses.sysflow.flow.ProcessFlowClass
+FileFlow = SchemaClasses.sysflow.flow.FileFlowClass
+NetworkFlow = SchemaClasses.sysflow.flow.NetworkFlowClass
