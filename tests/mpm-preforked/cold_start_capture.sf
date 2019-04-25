@@ -1,0 +1,395 @@
+Objavro.codecdeflateavro.schema ’{
+    "type": "record",
+    "namespace": "sysflow",
+    "name": "SysFlow",
+    "fields": [
+        {
+            "name": "rec",
+            "type": [
+                {
+                    "type": "record",
+                    "namespace": "sysflow.entity",
+                    "name": "SFHeader",
+                    "fields": [
+                        {
+                            "name": "version",
+                            "type": "long"
+                        },
+                        {
+                            "name": "exporter",
+                            "type": "string"
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.entity",
+                    "name": "Container",
+                    "fields": [
+                        {
+                            "name": "id",
+                            "type": "string"
+                        },
+                        {
+                            "name": "name",
+                            "type": "string"
+                        },
+                        {
+                            "name": "image",
+                            "type": "string"
+                        },
+                        {
+                            "name": "imageid",
+                            "type": "string"
+                        },
+                        {
+                            "name": "type",
+                            "type": {
+                                "type": "enum",
+                                "namespace": "sysflow.type",
+                                "name": "ContainerType",
+                                "symbols": [
+                                    "CT_DOCKER",
+                                    "CT_LXC",
+                                    "CT_LIBVIRT_LXC",
+                                    "CT_MESOS",
+                                    "CT_RKT",
+                                    "CT_CUSTOM"
+                                ]
+                            }
+                        },
+                        {
+                            "name": "privileged",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.entity",
+                    "name": "Process",
+                    "fields": [
+                        {
+                            "name": "state",
+                            "type": {
+                                "type": "enum",
+                                "namespace": "sysflow.type",
+                                "name": "SFObjectState",
+                                "symbols": [
+                                    "CREATED",
+                                    "MODIFIED",
+                                    "REUP"
+                                ]
+                            }
+                        },
+                        {
+                            "name": "oid",
+                            "type": {
+                                "type": "record",
+                                "namespace": "sysflow.type",
+                                "name": "OID",
+                                "fields": [
+                                    {
+                                        "name": "createTS",
+                                        "type": "long"
+                                    },
+                                    {
+                                        "name": "hpid",
+                                        "type": "long"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "poid",
+                            "type": [
+                                "null",
+                                "sysflow.type.OID"
+                            ]
+                        },
+                        {
+                            "name": "ts",
+                            "type": "long"
+                        },
+                        {
+                            "name": "exe",
+                            "type": "string"
+                        },
+                        {
+                            "name": "exeArgs",
+                            "type": "string"
+                        },
+                        {
+                            "name": "uid",
+                            "type": "int"
+                        },
+                        {
+                            "name": "userName",
+                            "type": "string"
+                        },
+                        {
+                            "name": "gid",
+                            "type": "int"
+                        },
+                        {
+                            "name": "groupName",
+                            "type": "string"
+                        },
+                        {
+                            "name": "tty",
+                            "type": "boolean"
+                        },
+                        {
+                            "name": "containerId",
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.entity",
+                    "name": "File",
+                    "fields": [
+                        {
+                            "name": "state",
+                            "type": "sysflow.type.SFObjectState"
+                        },
+                        {
+                            "name": "oid",
+                            "type": {
+                                "type": "fixed",
+                                "namespace": "sysflow.type",
+                                "name": "FOID",
+                                "size": 20
+                            }
+                        },
+                        {
+                            "name": "ts",
+                            "type": "long"
+                        },
+                        {
+                            "name": "restype",
+                            "type": "int"
+                        },
+                        {
+                            "name": "path",
+                            "type": "string"
+                        },
+                        {
+                            "name": "containerId",
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.event",
+                    "name": "ProcessEvent",
+                    "fields": [
+                        {
+                            "name": "procOID",
+                            "type": "sysflow.type.OID"
+                        },
+                        {
+                            "name": "ts",
+                            "type": "long"
+                        },
+                        {
+                            "name": "tid",
+                            "type": "long"
+                        },
+                        {
+                            "name": "opFlags",
+                            "type": "int"
+                        },
+                        {
+                            "name": "args",
+                            "type": {
+                                "type": "array",
+                                "items": "string"
+                            }
+                        },
+                        {
+                            "name": "ret",
+                            "type": "int"
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.flow",
+                    "name": "NetworkFlow",
+                    "fields": [
+                        {
+                            "name": "procOID",
+                            "type": "sysflow.type.OID"
+                        },
+                        {
+                            "name": "ts",
+                            "type": "long"
+                        },
+                        {
+                            "name": "tid",
+                            "type": "long"
+                        },
+                        {
+                            "name": "opFlags",
+                            "type": "int"
+                        },
+                        {
+                            "name": "endTs",
+                            "type": "long"
+                        },
+                        {
+                            "name": "sip",
+                            "type": "int"
+                        },
+                        {
+                            "name": "sport",
+                            "type": "int"
+                        },
+                        {
+                            "name": "dip",
+                            "type": "int"
+                        },
+                        {
+                            "name": "dport",
+                            "type": "int"
+                        },
+                        {
+                            "name": "proto",
+                            "type": "int"
+                        },
+                        {
+                            "name": "numRRecvOps",
+                            "type": "long"
+                        },
+                        {
+                            "name": "numWSendOps",
+                            "type": "long"
+                        },
+                        {
+                            "name": "numRRecvBytes",
+                            "type": "long"
+                        },
+                        {
+                            "name": "numWSendBytes",
+                            "type": "long"
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.flow",
+                    "name": "FileFlow",
+                    "fields": [
+                        {
+                            "name": "procOID",
+                            "type": "sysflow.type.OID"
+                        },
+                        {
+                            "name": "ts",
+                            "type": "long"
+                        },
+                        {
+                            "name": "tid",
+                            "type": "long"
+                        },
+                        {
+                            "name": "opFlags",
+                            "type": "int"
+                        },
+                        {
+                            "name": "openFlags",
+                            "type": "int"
+                        },
+                        {
+                            "name": "endTs",
+                            "type": "long"
+                        },
+                        {
+                            "name": "fileOID",
+                            "type": "sysflow.type.FOID"
+                        },
+                        {
+                            "name": "fd",
+                            "type": "int"
+                        },
+                        {
+                            "name": "numRRecvOps",
+                            "type": "long"
+                        },
+                        {
+                            "name": "numWSendOps",
+                            "type": "long"
+                        },
+                        {
+                            "name": "numRRecvBytes",
+                            "type": "long"
+                        },
+                        {
+                            "name": "numWSendBytes",
+                            "type": "long"
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.event",
+                    "name": "FileEvent",
+                    "fields": [
+                        {
+                            "name": "procOID",
+                            "type": "sysflow.type.OID"
+                        },
+                        {
+                            "name": "ts",
+                            "type": "long"
+                        },
+                        {
+                            "name": "tid",
+                            "type": "long"
+                        },
+                        {
+                            "name": "opFlags",
+                            "type": "int"
+                        },
+                        {
+                            "name": "fileOID",
+                            "type": "sysflow.type.FOID"
+                        },
+                        {
+                            "name": "ret",
+                            "type": "int"
+                        },
+                        {
+                            "name": "newFileOID",
+                            "type": [
+                                "null",
+                                "sysflow.type.FOID"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+ ´“À‘‚=p6–ˆâ,‹‚!≠ò]L[Á«çG“(CZ‘±©¨≥¶JÀ∫·ìã)Ì÷m’RUZ/6Uõ?éá[ÉëÌtÕπòáJ_ÅÑF)qFé«Ä6&#âc6˛¿∆`/∞Ãsœs⁄€«Ô9µO8h
+ò◊ºÔÛ˛œÛ{|Œ1√˜ç£∞J•fæ¿óEb9$PEÚ+t∫j˘o´5∞B≠yñˇ(gÕQIt∞Vß/Ä•\íä˘Â¢2æD¿á≈"ˆ À!æ@`æX íäxÂ‹2©@∆ÉÀ
+ÆòÛe"©òß(g0
+L&É·ŸB'∑[«€~xú£RJ9⁄3Z\)œæÚÿÏÃ_,6[kaçR¢R"0ãWŒ8¢Q´u¯ÔØö¿"◊ì…`Ç–,Œi≠Ü#UVq‰jŸª∞F~å˝K!?¡·Ï≈Û-&	Ñ‰ÑaÀ‘U:â≤
+®`ß
+ÂÔYú˜$éÊtváÿC˙≥TßÆTÌØù8√ƒÙÅˆèüÆÕ÷V(+£ÖÏ*I%¨≠ñ»`V•ZzÜ≈˛÷1πRì…(U€¸å‰∏R]≈Q™KIπa…ÎîïpÈ{e•*e’È˜9©przRHAeB¨€
+!ƒÖπ*ì@BæBÛ!HÄΩ/Ñ<Iô	2RpÖ["ók`≠vø
+Ây+’bÔ∞»f±H4gr;J⁄¡b„ÿ©¬Ê©ÅûÆíÌﬂ#¬ƒ∫ : NK™‘2âä#¡ \Û“	§'‰ˆ+?9ıÊ´?}Û‘Ø~˘ ˛aìXX#ÚÑee⁄ï}Õ	}∏≠C-{µˇ:?Ùπ˙l¸%·Î«¸U´ù[ùŸÇ◊(î*tXY¥eï~ø¥BW© çπÒÉ·∑ø.5Œ≠5}ÔNGÂ©C¸›±Ol˙›lÃ¨ìeb¶™˙’”EòW∞7âËøm8YÎ÷€”K™∏≈ÖåÜØ1ælzΩπÂª…Ùùüá∏gOl3Ó÷D˛î9∏Rbµ≤>Ò1ü'äx‹∑ÛEÅiLÙy√…F˚Gô≥TzûÅ˝≈Åé`Ió‘Ï]œ	9Ù«fÁa/'{
+äòLkA§05ùÈ&÷˝C?ılõXÑE≥3QÈíYˆ˛<ES≤‘©y◊«‡Ê9t„ﬁùÁa Åy∫69<œÁ{éß=◊œ|Ëx÷û„HMÃúâO{Ó∫9Ë†ıGlu‡ÊŸöv–yé∞Û%NóxÁ{ée˙‹¥3˝¨=«À’Kh:j,Ìy-⁄é“zé!cù-‡Êπ6ﬁá“yébòÁ€„&xﬁ»Òú¢‚I´Õ¢T<?jF©®¿".,ÚΩÛãüΩÒ]√˜˝∫SÚ∆sÔ$˘Á^Ìé£ì
+Ò¯9ìöjFÎ£O—lãõ/ﬁB©öÅ®›ÕNuÒÜÔJ5†ÿﬁ‘4òùõ!M√ÍÂ∆˙i0[£`BéÊ ∞öOF4MÜ~§uÊYìENd¢F”dt|fû°%#älNÙÉSòÁâô1ZœQ¬@ÛlnøGxN‰xN\◊î—I∏Ê9ãì~‡zØ8¡¿E∂ù@b7æÚ¿8ÏÃÚ]<·vR°ä7¨Ÿ‘‚†Z›¯"ßa∏Q€’vW∂:≈÷€Ì.*£izíà£c‘E∫~<x4·¢ø~≠ÊÏ![âugähÊV2ÜXˇ˘»E„˙«¥ÿÏÓ-gaO6	â∫`n%„⁄›5f´c
+_‰‘Oﬁ?jõ≥UÛw€,UÚ¯l%ÍC≥§Ÿ≤∏WfÈgk˛∫'{»VR|H¥ÂU'äål^qìPÓÌÎq”£ÏÈjtî#¶^7êË ´NŸºrvh»MïP⁄qÒπÎ&ao¯Îû\g÷› {œ–y0Á•E,¶.¿ÛSwóá*yœÿ´áÑgÛ∂ç6ù$R7{ û€Ñ@?;v˜9/`ßÁø¯"'y<rh´«ÿ±_˚ÿKg«7ÈÙíÿA◊˝^zvÏÀ6/`ßq{û£`gÏ?^Ú«‡≈=Zâ(2–˝o/`g∑´÷$¨ÏåN˚ ;ë¿¥è*!<≤Â£à4÷1°ååsfioö#q÷÷‘1GœŸ˝œsÄ≥hkÁqYÃ´N©åŒëÿi€ßïH"É≠ÉsÄ€÷$!ÅR∞”0|ﬁÿ±/‚ãúÑ»mk&?`Gﬂ=‡ßäå≥”∑lêÿ˘bÏBÄûùûˆm?`«aø !
+vPø%@bg∂Â≠DiÄùù∂QB"úWù≤3~? ÆoOb˜â›uyÏ‘VÊ;∑ENd‹h4º;ò8ª7OeÁl’-H‚lÕj“sv5g#ˆæ àPpñ®ıIú’xÓ”J`wx— ‡ÃÔ	äKË¬≈§KË⁄ÕKÙóPG◊ŸÏ![IÁ'ÌƒÌE≥÷nÆâ‚ÀÅU ›È¢Fëï‰ïE2;hœ"=;>}√"`GÏ]$Æ—yÈ$ë^√ "òñÊ˛ïE™˙‡”“∏§ë¶%∏¢üñ–Ë÷"òñ>[c‘,‰∫¡€æΩ˛1æ»!è<4tcâ¿s·∆Udº(ªSK ˚ù«UQ“6cH|T&A`mˇ0LjZ_Ù/ÑÅ@GûÕr¸˙ A$ä/rv„ODbÀYÇã{#ÎÀƒe<oo‚ﬁ∆2Ë&ﬁx˙ﬁ8“=◊¥íæ‚Õ/ØÆw+y{7:W@[÷;ü∂7≠Ÿ|‹øƒ¯‚VÙ/\¬VTœuGé‚g6ºœ«â3Tﬂ⁄a	5Nı…Ê∑ıtBGﬁ¢…‡QóVËc5˝à‚39¿wÃ.é8woÅ«P∫ÏäœπâÉüπªs|ICõ\£ˇπ‘GÈeÁ]‹{0!Ïn/˚uYÚÄU¯´“À‘‚=p6–ˆâ,

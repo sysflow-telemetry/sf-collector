@@ -1,4 +1,4 @@
-Objavro.codecdeflateavro.schemaŠÆ{
+Objavro.codecdeflateavro.schemaÊÕ{
     "type": "record",
     "namespace": "sysflow",
     "name": "SysFlow",
@@ -189,8 +189,8 @@ Objavro.codecdeflateavro.schemaŠÆ{
                 },
                 {
                     "type": "record",
-                    "namespace": "sysflow.flow",
-                    "name": "ProcessFlow",
+                    "namespace": "sysflow.event",
+                    "name": "ProcessEvent",
                     "fields": [
                         {
                             "name": "procOID",
@@ -306,15 +306,12 @@ Objavro.codecdeflateavro.schemaŠÆ{
                             "type": "int"
                         },
                         {
-                            "name": "flags",
+                            "name": "openFlags",
                             "type": "int"
                         },
                         {
                             "name": "endTs",
-                            "type": [
-                                "null",
-                                "long"
-                            ]
+                            "type": "long"
                         },
                         {
                             "name": "fileOID",
@@ -339,9 +336,40 @@ Objavro.codecdeflateavro.schemaŠÆ{
                         {
                             "name": "numWSendBytes",
                             "type": "long"
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.event",
+                    "name": "FileEvent",
+                    "fields": [
+                        {
+                            "name": "procOID",
+                            "type": "sysflow.type.OID"
                         },
                         {
-                            "name": "newFile",
+                            "name": "ts",
+                            "type": "long"
+                        },
+                        {
+                            "name": "tid",
+                            "type": "long"
+                        },
+                        {
+                            "name": "opFlags",
+                            "type": "int"
+                        },
+                        {
+                            "name": "fileOID",
+                            "type": "sysflow.type.FOID"
+                        },
+                        {
+                            "name": "ret",
+                            "type": "int"
+                        },
+                        {
+                            "name": "newFileOID",
                             "type": [
                                 "null",
                                 "sysflow.type.FOID"
@@ -353,6 +381,11 @@ Objavro.codecdeflateavro.schemaŠÆ{
         }
     ]
 }
- ©Ê•%lu¦Òß‹ƒö(žc¸ÀÏ•‘š““ÏÂÂÀÄÄÀpàÏ±Ë‡þ_š¤­¡Ÿ“™¤_\Y\’š›£tu!,]Ý”ÔâÔ¢ÌÄœÌªT#3Ž¢üüÉÈ 4lÅf&&¸q2ú¥ÅEúÅI™yúÅÅ),º.:¾¬ê jÃ¥‡CÇ‰@@m¸t0)¼`ç)I-ªÌ)3ÀO4uÃ5
-éƒô¤$g0àÐÒ´¨å†–$œZö\†(P\Ÿž~ZfNj#r€TÀ%l 6–ÞðÇLþÛ°èè2XMþ’U}ìLÛ­+s/CaTÐO-IÖÏIÑ+Î×KNLÎHeàWd710š|ÂÇf°±0«ØZÈb–ÃÚý¹ÊT«ØÃÎ^…YeNfñf&º9™y¥ºéy¥ Ádíf›á@6‹105\¼ác3‰¡dµÖ„ÂØþ\OºWmž©§4÷è7óšK§V}‡Y­¡_’[ _’
-Lk)ñ 0Ó+©(ØW²OŠéÓ¹_>6#Ù˜ì€Ö=3©`>rï§åd®Ž)	iþ\ùË·çÀ˜uZèÖ!ìƒ+ƒÙwä/„ÍL}^@ûöq×½Ì¹˜Ó>OHjf¹m–ÝºÓ‹Îœù÷’Uñ 6Â:¸*¨u_6\ó±	².’Žž½q¦ƒ ©Ê•%lu¦Òß‹ƒö
+ Ói(Úªâ0ÁC5ohAùÐÌ*­™yPWÇ‡Ñ(k5º^Ñ?F£1n|L_Ó‡µ›eµŒÄ5ÑµJ·tÓg3.3èCÔBÐE@@ˆŠ ñ /<RˆŠŠ‚
+¬"b¢`Ôh Ä}Ó=ÝLÆÇ(UPÅ0ù}ß÷×¿÷é~Ç˜Jºw™-‡‡;ÍýXšÆ^’Yš%»DØvçõÕª½†ónÙåŽ	"q“Vm"/0&+„Ì°GŠ ÑÆð4ËáÉÊ+,ÆKG)2Í*¼Ì18k2uìh2›M¦êŠÛ/:žøæÖp»`uE»Ür„¤ÿ% ÐÞY d—içÃíÉ‚1G:nïëïÓ†=/ïe6™®-Ö(W¤U°;¬’SüPŽ”z€0‹"´Z÷r®·ödtCùuD§ÃÍÛ°CxŠý‹uiŒÒc¬-1>oCÜÎˆðÀÞÅAf˜€aþVëæÀ5Ûq«#pð²k./Ê–§mó‘JöH-%OqŸMIâå§Ãjw†ø$³wÛ#äyxH¸Ýõ«§;«o~
+IÐœŒ1$EËŒ,@KF–š ã9ÑÆÐ#*Ï’8K0BEà%)Rv¹•è™kqÁÿX|/–€ŒöRŸð^ ðTö7ãÃ(‡xrÏÂ!€ã`ŒÁ@ÃT½úAçÉ°¾ïætÕ©ãèø[ë?Þu«Kê×œÓuë¥¨õƒí(Î.T{-š­ö`Q{À[…(˜«ÛeÎGÃò;BpE14I°œUq…Ìq9þ–Œ×&.>6{pçŠ ´éÓß[}éiÙ²ÃºÇ¡ gLÜs­ÎÊ8ÃÑ@Æ%P6N ,­Ð€¢‚âŒ€7º•E›@
+8àH‘”l£@ÑÀ$xGs¢LÓýûtºzŠw±ii‘ê¾è\PL¿¸ÐšƒË´6*Õ&³éþ‰L‹ßÀ×M™\;¦à£´Þ»ò3ÍOwU¦ïOÖ”	í*uù}Ý<	2O1”­ÉŒòSÕ¹ûOµ¨ƒQê&5²¬é"Õ’=×Ùoç¨ÆÂÕZEH7X’s§Ž”ÿúÓ¤9ï÷ÏL~°»Ççaå#Æ_.<ÝfzH¼Uzºßx,‹Ëê<»œ_|õqïÚškoîÛ\vºè‘)#ø_œ)@1$8–ÅM”Dš&9§=™)Û‹U÷GgUz\ð¶Q©zè¹œÜ±“é`mÎú	eKR~Àƒÿ°ñpß)Ãâ¾È+H¬‚CæI Æ‚²5™Q~ªºñ~ÝÙu0Jí¥'3ûÎó#Õ’4VÓ	éÙ÷£W‰"D§§ áOÓ1ò›ú™rÑ„…ïçÞ1ïÈ¨¤ämçÛNÕ*=‹íö*ïÁ„óî±=¨·zŸZ»·qÖeûÎ·=œÄq˜hã"ˆŠ'ˆK1€RBâ’Å0‚ž’ÅûK|Ÿ=MuùZ•ª‡žÚøì™ý¿O"FØ'-ïº–{oþ_ÁÊ;ÑyÇKÓC¡è1dÚ³ek2£üTõ¹{Õ|ž((µ—žâìÏTKr(£â‚ï³§ð®W‰"D§çã¬¨qÑ[¦ÿyZÚ¦9}t½?ð33Šöÿ·´íô0­Òã¬_]»iNú_rn_—õW€¿—co¦•¶=8#Ã…A›¢À ŽÀ KÈ€kLa%ÜFS¨™«yUq™êž«={‹½mTªz*/Az(0äPþ¯Çç_ÿ*9ÖÌ¯^â¢Ì)ÍuåeéaPô²\õÙƒ²5™Q~ªzùÅòK-ê`”ÚKOaNÅó#µ’$œo‰„ô4-ªÔÚ(BtzÏt›6`æ¯™ÊÐ/vÝT3}ÁÃyñÛ2®´‰–£mð·5zæí~òÉ’¬îÛÝë‡¨é5uHìŽ½;¯´=IÛàzŒ‡Œ¶fy ïxF&EŠ”l‚žò5Eå¾3Wm©·JÕCOêº N¦cë™£·,ýÔY~òûÉA£¯Ÿ^r· ¤¼Uz¼uAÐcÈ´™ek2£üTuIþ¶
+Ÿù¥öÒ³è—ˆTK²ysF…ïÌ•˜—¥µQ„èôl‹x²Ä¼jå½õÿ|’4etÎŽec-	ñ·*ÛLG´JOÐÓ!ëâf¼=>öá”Y³»£®ÍHò°²èa–’y…¤"±€"i	ð"NN IŒ$Af=1qñW}g®Æo•ª‡ž²Ãž=S£-q?_Ü?SšÑã—Ûä+§ò_®9”v5 =°.z™6s¡lMf”ŸªÎKH¼æ3¡Ô^z•½@¤6s%¯¸æ;sÅ%­ÖÚ(Btzn'¼ß?iÊˆJé‹°Ð=Ê–Ã»ÊÍýâOÖVµ[«ôŒŠY”œ¹aÁ¹có/o|÷›S³f(oj¨jzX… E†€;-LË€“ØddL¡%V¦8
+AOñõäjß™+=9Ek£RõÐs§Òó5öö˜¾î‰‘ôõ	ÜË©ûöì_q¤òæÆêÀôØPô2mæBÙšÌ(?M}qåŸù¥öÒs:~Õó#Õ’¤ì\~ÃwæJ:ïU¢ÑéÉ^ü]ØO£†1jÚ@û–qô°9Ã_½ñ]MÛéa[¥ÇVurKU’y@vþÜ¼Â1Á§¬±þké£úšv ‡&dÇX	P<\íP´¼Â`€aZ†k‚PP{.ÃÝSªWãBwû^m£RõÐ“÷5¤ççäÄÊ5U+Æî—3äPjÿˆkQ¿­)ÚzöûÀô°(z™FÊÖdFù©êÄô{·|˜@©½ô¹ö‘jIŒAWK²sTjæ}M‰"D§'mkêäµÙû2Fìò[þK£6üÚ¹«´¶­ôÐÞ*=Xõ¡õñå¯î­®ýé©«áµ³ßÇœ_šPUÛôà¼ R2\÷4ÜiÁ÷pæb`Ã0\yE(ÔÌe¸{é9w§Yk£RõÐ³<Òsóå°û¹i¯TìƒÝŸ}z(X_×°"¶.=žº ö\ºL£ek2£üTuÊÚ”;>L Ô^z®¾@¤ZcÐ½ô4§­Ñ”(BtzB¿ÄR¿½Øs{ßO_¯ª;OxÜeZ·æË±w½#;'0=nq®n—nít²5|5†\~¾jRXè˜>š³>/æœû7®ºÛø°§ˆ¼ xš¢ %18l´ Èü„Çµl6Ü½øiØ£µQ©zðÙ÷-Ä§t<Ã1õõ	AÕXIúäÒøŒsûîxP )R>øøÁ¡ÓøAùšÌ(CmåSzÏ‡
+”Zß³¼@¤¶ëÒ‡ÝËÏ’ÏÊ4%ŠŸ.qd×ÛGî9ó@m•ÆLÊ<Ø	þ	-‰ê| µów=UESÞ¦lÃiDó•/3n"!Ý¶æ'RûÖÅî6Ve­*Æ75WõR¯ÆXX{vƒãBziT™±æWeð&ÒeèåŸ.3Ž)<ùùÊÐ;V]fœ<¨2Ÿ$Ñ{]flksý’Dïpt™qçmèC]f,2ý“D/ót™±/Îõ ôÎÔ¸6}Ùì_Iô
+ÊpÓ¿áð¿6ôa·.3¾´ð§ýµ.3Îýeè?]frûW}Ì¬ËŒówÿ’ báÏÿÓi(Úªâ0ÁC5ohAù
