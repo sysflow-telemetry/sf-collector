@@ -1,7 +1,3 @@
-#-------------------------------
-# SysFlow Makefile
-#-------------------------------
-
 include makefile.manifest.inc
 include makefile.env.inc
 
@@ -20,13 +16,16 @@ CFLAGS2= -std=c++17 -ggdb -I./avro/src/ -I$(SDINCLUDE)/userspace/libsinsp/ -I$(S
 
 .PHONY: install
 install: all
-	#mkdir -p $(PREFIX)/bin
-	#cp TARGET $(PREFIX)/bin/
-	#cp TARGET $(PREFIX)/bin/
+	mkdir -p $(PREFIX)/bin
+	mkdir -p $(PREFIX)/conf
+	cp sysporter $(PREFIX)/bin/
+	cp sysreader $(PREFIX)/bin/
+	cp avro/avsc/SysFlow.avsc $(PREFIX)/conf/
 
 .PHONY: uninstall
 uninstall: 
-	@echo "not implemented"
+	rm -rf $(PREFIX)
+	cd modules && make uninstall
 
 .PHONY: all
 all: modules $(TARGET) $(TARGET2)
