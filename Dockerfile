@@ -22,8 +22,8 @@ RUN apt-get update -yq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
 
-COPY  ./src/ /build/
-RUN cd /build/modules && make modules 
+COPY  ./src/modules /build/
+RUN cd /build && make modules 
 
 #-----------------------
 # Stage: Builder
@@ -106,7 +106,6 @@ FROM ubuntu:16.04 as testing
 
 # dependencies
 RUN apt-get update -yq && \
-    #apt-get --fix-broken install -yq && \
     apt-get upgrade -yq && \
     apt-get install -yqq \
         apt-utils \
@@ -125,14 +124,10 @@ RUN apt-get update -yq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
+COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
+COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 COPY --from=builder /build/avro/py3 /usr/local/sysflow/utils/
 COPY  ./tests/ /usr/local/sysflow/tests/
 
-#RUN cd /usr/local/sysflow/utils/avro/py3 && \
-#    pip3 install -r requirements.txt && \
-#    python3 setup.py
-
-
-
-
-
+RUN cd /usr/local/sysflow/utils && \
+    python3 setup.py install 
