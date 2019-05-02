@@ -102,4 +102,37 @@ CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $WDIR -e $NODE_NAME $FILTER
 #-----------------------
 # Stage: Testing
 #-----------------------
+FROM ubuntu:16.04 as testing
+
+# dependencies
+RUN apt-get update -yq && \
+    #apt-get --fix-broken install -yq && \
+    apt-get upgrade -yq && \
+    apt-get install -yqq \
+        apt-utils \
+        build-essential \
+        libncurses5-dev \
+        libncursesw5-dev \
+        cmake \
+        libboost-all-dev \
+        flex \ 
+        bison \
+        wget \
+        libsparsehash-dev \
+        libelf-dev \
+        python3 \
+        python3-pip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
+
+COPY --from=builder /build/avro/py3 /usr/local/sysflow/utils/
+COPY  ./tests/ /usr/local/sysflow/tests/
+
+#RUN cd /usr/local/sysflow/utils/avro/py3 && \
+#    pip3 install -r requirements.txt && \
+#    python3 setup.py
+
+
+
+
 
