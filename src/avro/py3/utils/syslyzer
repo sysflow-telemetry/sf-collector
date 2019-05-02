@@ -1,5 +1,6 @@
-from reader import SysflowReader
+#!/usr/bin/python3.5
+from sysflow.reader import SFReader
 import sys
-reader = SysflowReader(sys.argv[1])
+reader = SFReader(sys.argv[1])
 for flow in reader:
     print(flow.rec)

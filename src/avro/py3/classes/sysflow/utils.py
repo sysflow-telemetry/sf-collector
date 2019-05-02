@@ -1,4 +1,4 @@
-import opflags
+import sysflow.opflags as opflags
 from datetime import datetime
 import ipaddress
 import socket

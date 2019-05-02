@@ -4,11 +4,12 @@ from setuptools import setup
 
 setup(
     name = 'SysFlow Processing API',
-    version = '0.0.1',    
+    version = '0.1',    
     description = ('Runs workflows for deploying deceptions'),    
     packages=['sysflow'],
     package_data={'sysflow': ['schema.avsc']},
-    install_requires=['avro==1.8.2',
+    install_requires=['avro-python3==1.8.2',
+       'avro-gen==0.3.0',
        'blinker==1.3',
        'chardet==2.3.0',
        'cloud-init==18.2',
