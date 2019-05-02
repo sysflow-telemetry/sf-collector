@@ -6,8 +6,8 @@ TARGET2=sysreader
 
 LDFLAGS= -no-pie $(SDLIB)/libsinsp.a $(SDLIB)/libscap.a $(SDLIB)/libjq.a \
 		 $(SDLIB)/libb64.a $(SDLIB)/libcurl.a $(SDLIB)/libtbb.a -L$(SDLIB)/ \
-		 -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lstdc++fs
-LDFLAGS2=-L$(SDLIB)/ -lpthread -lm -lavrocpp -lb64 -lstdc++fs
+		 -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lstdc++fs -Wl,-rpath=$(SDLIB) -Wl,-rpath=/usr/local/lib
+LDFLAGS2=-L$(SDLIB)/ -lpthread -lm -lavrocpp -lb64 -lstdc++fs -Wl,-rpath=$(SDLIB) -Wl,-rpath=/usr/local/lib
 
 CFLAGS= -no-pie -std=c++17 -Wall -ggdb -O3 -ggdb -I$(SDINCLUDE) -I.. -I./avro/src/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I$(SDINCLUDE)/driver/ \
