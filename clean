@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo docker rmi -f $(sudo docker images -f "dangling=true" -q)
+sudo docker rmi -f $(sudo docker images -a -f "dangling=true" -q)

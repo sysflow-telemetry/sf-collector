@@ -6,8 +6,8 @@ TARGET2=sysreader
 
 LDFLAGS= -no-pie $(SDLIB)/libsinsp.a $(SDLIB)/libscap.a $(SDLIB)/libjq.a \
 		 $(SDLIB)/libb64.a $(SDLIB)/libcurl.a $(SDLIB)/libtbb.a -L$(SDLIB)/ \
-		 -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lstdc++fs
-LDFLAGS2=-L$(SDLIB)/ -lpthread -lm -lavrocpp -lb64 -lstdc++fs
+		 -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lstdc++fs -Wl,-rpath=$(SDLIB) -Wl,-rpath=/usr/local/lib
+LDFLAGS2=-L$(SDLIB)/ -lpthread -lm -lavrocpp -lb64 -lstdc++fs -Wl,-rpath=$(SDLIB) -Wl,-rpath=/usr/local/lib
 
 CFLAGS= -no-pie -std=c++17 -Wall -ggdb -O3 -ggdb -I$(SDINCLUDE) -I.. -I./avro/src/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I$(SDINCLUDE)/driver/ \
@@ -16,11 +16,8 @@ CFLAGS2= -std=c++17 -ggdb -I./avro/src/ -I$(SDINCLUDE)/userspace/libsinsp/ -I$(S
 
 .PHONY: install
 install: all
-	mkdir -p $(PREFIX)/bin
-	mkdir -p $(PREFIX)/conf
-	cp sysporter $(PREFIX)/bin/
-	cp sysreader $(PREFIX)/bin/
-	cp avro/avsc/SysFlow.avsc $(PREFIX)/conf/
+	mkdir -p $(PREFIX)/bin && cp sysporter $(PREFIX)/bin && cp sysreader $(PREFIX)/bin
+	mkdir -p $(PREFIX)/conf && cp avro/avsc/SysFlow.avsc $(PREFIX)/conf
 
 .PHONY: uninstall
 uninstall: 
@@ -28,11 +25,14 @@ uninstall:
 	cd modules && make uninstall
 
 .PHONY: all
-all: modules $(TARGET) $(TARGET2)
+all: modules sysporter
+
+.PHONY: sysporter
+all: $(TARGET) $(TARGET2)
 
 .PHONY: modules
 modules:
-	cd modules && make
+	cd modules && make modules
 
 .PHONY: avro
 avro:
@@ -101,6 +101,7 @@ $(TARGET2): .reader.o .MurmurHash3.o
 .PHONY: clean
 clean:
 	rm -f *.o *.so *.a $(TARGET) $(TARGET2)
+	cd modules && make clean
 
 .PHONY : help
 help:
