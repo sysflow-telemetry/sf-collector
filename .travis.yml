@@ -1,6 +1,6 @@
+os: linux
 dist: xenial
-language: ruby
-#language: generic
+language: generic
 sudo: required
 services:
  - docker
@@ -15,30 +15,23 @@ cache:
    - $HOME/docker
 
 before_install:
- #- sbt clean update
- #- bundle install
  # Load cached docker images
  - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
+
+script:
  # Multi-staged build
+ - make -C src/modules init
  - docker build --target=deps -t deps .
  - docker build -t testing .
- - docker run --name build -it testing /bin/hostname
- - docker ps -a
- - docker rm build
-#compiler:
-#- gcc
-#os:
-#- linux
-#ruby: 2.2.0
-#before_install:
-#- echo "before install"
-#script:
-#- echo "script"
+ - docker run --name sf -it testing /bin/hostname
+ - docker rm sf
+
 after_success:
 - echo "after success"
+
 branches:
   only:
   - master
-  - ci
+
 notifications:
-  email: false
+  email: true
