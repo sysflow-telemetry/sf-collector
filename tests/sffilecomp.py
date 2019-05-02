@@ -1,9 +1,9 @@
-from reader import SysflowReader
+from sysflow.reader import SFReader
 import sys
 #import simplejson as json
 import json
-reader1 = SysflowReader(sys.argv[1])
-reader2 = SysflowReader(sys.argv[2])
+reader1 = SFReader(sys.argv[1])
+reader2 = SFReader(sys.argv[2])
 import sysflow
 import itertools
 import base64
