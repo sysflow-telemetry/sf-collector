@@ -7,7 +7,7 @@ services:
 
 before_cache:
  # Save tagged docker images
- - mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --filter=before='testing' --format '{{.Repository}}:{{.Tag}} {{.ID}}' | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
+ - mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}' | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
 
 cache:
   directories:
@@ -21,7 +21,9 @@ script:
  # Multi-staged build
  - make -C src/modules init
  - docker build --target=deps -t deps .
- - docker build -t testing .
+ - docker build --cache-from=deps -t builder .
+ - docker build --cache-from=builder -t runtime .
+ - docker build --cache-from=runtime -t testing .
  - docker run --name sf -it testing /bin/hostname
  - docker rm sf
 
