@@ -20,11 +20,11 @@ before_install:
 script:
  # Multi-staged build
  - make -C src/modules init
- - docker build --target=deps -t deps .
- - docker build --cache-from=deps -t builder .
- - docker build --cache-from=builder -t runtime .
- - docker build --cache-from=runtime -t testing .
- - docker run --name sf -it testing /bin/hostname
+ - docker build --cache-from sysporter:deps --target deps -t sysporter:deps .
+ - docker build --cache-from sysporter:deps --cache-from sysporter:builder --target builder -t sysporter:builder .
+ - docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --target runtime -t sysporter:runtime .
+ - docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --cache-from sysporter:testing --target testing -t sysporter:testing .
+ - docker run --name sf -it sysporter:testing /bin/hostname
  - docker rm sf
 
 after_success:
