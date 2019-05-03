@@ -15,7 +15,10 @@ CFLAGS= -no-pie -std=c++17 -Wall -ggdb -O3 -ggdb -I$(SDINCLUDE) -I.. -I./avro/sr
 CFLAGS2= -std=c++17 -ggdb -I./avro/src/ -I$(SDINCLUDE)/userspace/libsinsp/ -I$(SDINCLUDE)/userspace/libscap/ -I$(SDINCLUDE)
 
 .PHONY: install
-install: all
+install: all sysporter_install
+
+.PHONY: sysporter_install
+install:
 	mkdir -p $(PREFIX)/bin && cp sysporter $(PREFIX)/bin && cp sysreader $(PREFIX)/bin
 	mkdir -p $(PREFIX)/conf && cp avro/avsc/SysFlow.avsc $(PREFIX)/conf
 

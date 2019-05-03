@@ -15,7 +15,7 @@ RUN apt-get update -yq && \
         bison \
         g++ \
         wget \
-        libsparsehash-dev \
+        #libsparsehash-dev \
         libelf-dev \
         linux-headers-$(uname -r) && \
     apt-get clean && \
@@ -23,7 +23,7 @@ RUN apt-get update -yq && \
 
 COPY  ./src/modules /build/modules
 COPY  ./src/makefile.* /build/
-RUN cd /build/modules && make modules 
+RUN cd /build/modules && make modules && make clean 
 
 #-----------------------
 # Stage: Builder
@@ -42,8 +42,8 @@ RUN apt-get update -yq && \
         make \
         libboost-all-dev \
         g++-8 \
-        libelf-dev \
-        libsparsehash-dev && \ 
+        libelf-dev && \
+        #libsparsehash-dev && \ 
     ln -s /usr/bin/g++-8 /usr/bin/g++ && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
@@ -55,7 +55,10 @@ COPY --from=deps /usr/local/lib/ /usr/local/lib/
 
 # build sysporter
 COPY ./src/ /build/
-RUN cd /build && make sysporter
+RUN cd /build && \
+    make sysporter && \
+    make sysporter_install && \
+    make clean
 
 #-----------------------
 # Stage: Runtime
@@ -79,12 +82,12 @@ ARG wdir=/mnt/data
 ENV WDIR=$wdir
 
 # runtime dependencies
-RUN apt-get update -yq && \
-    apt-get --no-install-recommends --fix-broken install -yq && \
-    apt-get --no-install-recommends install -yqq \
-        libsparsehash-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
+#RUN apt-get update -yq && \
+#    apt-get --no-install-recommends --fix-broken install -yq && \
+#    apt-get --no-install-recommends install -yqq \
+#        libsparsehash-dev && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
 COPY --from=builder /usr/local/include/avro/ /usr/local/include/avro/
 COPY --from=builder /usr/local/include/sysdig/ /usr/local/include/sysdig/
@@ -92,8 +95,9 @@ COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
-COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
-COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
+COPY --from=builder /usr/local/sysflow/ /usr/local/sysflow/
+#COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
+#COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
@@ -119,7 +123,7 @@ RUN apt-get update -yq && \
         flex \ 
         bison \
         wget \
-        libsparsehash-dev \
+        #libsparsehash-dev \
         libelf-dev \
         locales \
         python3 \
@@ -128,8 +132,9 @@ RUN apt-get update -yq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
-COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
-COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
+COPY --from=builder /usr/local/sysflow/ /usr/local/sysflow/
+#COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
+#COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 COPY --from=builder /build/avro/py3 /usr/local/sysflow/utils/
 COPY  ./tests/ /usr/local/sysflow/tests/
 
