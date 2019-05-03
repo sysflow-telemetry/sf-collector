@@ -7,7 +7,6 @@ services:
 
 before_install:
  - curl -sL https://ibm.biz/idt-installer | bash
- - ibmcloud plugin install container-registry -r Bluemix
  - ibmcloud login --apikey ${BX_API_KEY} -r ${BX_REGION}
  - ibmcloud cr login
  - docker pull ${CR_CI}/sysporter:deps || true
