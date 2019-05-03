@@ -21,9 +21,9 @@ RUN apt-get update -yq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
-
-COPY  ./src/modules /build/
-RUN cd /build && make modules 
+COPY  ./src/modules /build/modules
+COPY  ./src/makefile.* /build/
+RUN cd /build/modules && make modules 
 
 #-----------------------
 # Stage: Builder
@@ -104,6 +104,8 @@ CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $WDIR -e $NODE_NAME $FILTER
 #-----------------------
 FROM ubuntu:16.04 as testing
 
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+
 # dependencies
 RUN apt-get update -yq && \
     apt-get upgrade -yq && \
@@ -119,8 +121,10 @@ RUN apt-get update -yq && \
         wget \
         libsparsehash-dev \
         libelf-dev \
+        locales \
         python3 \
         python3-pip && \
+    locale-gen en_US.UTF-8 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
