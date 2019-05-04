@@ -15,7 +15,6 @@ RUN apt-get update -yq && \
         bison \
         g++ \
         wget \
-        #libsparsehash-dev \
         libelf-dev \
         linux-headers-$(uname -r) && \
     apt-get clean && \
@@ -42,8 +41,8 @@ RUN apt-get update -yq && \
         make \
         libboost-all-dev \
         g++-8 \
-        libelf-dev && \
-        #libsparsehash-dev && \ 
+        libelf-dev \
+        libsparsehash-dev && \ 
     ln -s /usr/bin/g++-8 /usr/bin/g++ && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
