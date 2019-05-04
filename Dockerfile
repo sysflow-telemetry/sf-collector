@@ -56,7 +56,6 @@ COPY --from=deps /usr/local/lib/ /usr/local/lib/
 COPY ./src/ /build/
 RUN cd /build && \
     make sysporter && \
-    make sysporter_install && \
     make clean
 
 #-----------------------
@@ -94,9 +93,8 @@ COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
-COPY --from=builder /usr/local/sysflow/ /usr/local/sysflow/
-#COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
-#COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
+COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
+COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
@@ -122,7 +120,6 @@ RUN apt-get update -yq && \
         flex \ 
         bison \
         wget \
-        #libsparsehash-dev \
         libelf-dev \
         locales \
         python3 \
@@ -131,9 +128,8 @@ RUN apt-get update -yq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
-COPY --from=builder /usr/local/sysflow/ /usr/local/sysflow/
-#COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
-#COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
+COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
+COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 COPY --from=builder /build/avro/py3 /usr/local/sysflow/utils/
 COPY  ./tests/ /usr/local/sysflow/tests/
 
