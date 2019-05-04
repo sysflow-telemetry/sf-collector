@@ -1,9 +1,9 @@
 FROM ubuntu:16.04 as deps
 
 # dependencies
-RUN apt-get update -yq && \
-    apt-get --fix-broken install -yq && \
-    apt-get upgrade -yq && \
+RUN apt-get update -yqq && \
+    apt-get --fix-broken install -yqq && \
+    apt-get upgrade -yqq && \
     apt-get install -yqq \
         apt-utils \
         build-essential \
@@ -17,7 +17,7 @@ RUN apt-get update -yq && \
         wget \
         libelf-dev \
         linux-headers-$(uname -r) && \
-    apt-get clean && \
+    apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
 COPY  ./src/modules /build/modules
@@ -30,12 +30,12 @@ RUN cd /build/modules && make -j3 modules && make clean
 FROM ubuntu:16.04 as builder
 
 # dependencies
-RUN apt-get update -yq && \
-    apt-get --fix-broken install -yq && \
-    apt-get upgrade -yq && \
-    apt-get install software-properties-common -yq && \
+RUN apt-get update -yqq && \
+    apt-get --fix-broken install -yqq && \
+    apt-get upgrade -yqq && \
+    apt-get install software-properties-common -yqq && \
     add-apt-repository ppa:jonathonf/gcc -y && \
-    apt-get update && \
+    apt-get update -yqq && \
     apt-get install -yqq \
         apt-utils \
         make \
@@ -44,7 +44,7 @@ RUN apt-get update -yq && \
         libelf-dev \
         libsparsehash-dev && \ 
     ln -s /usr/bin/g++-8 /usr/bin/g++ && \
-    apt-get clean && \
+    apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
 # copy dependencies
@@ -106,8 +106,8 @@ FROM ubuntu:16.04 as testing
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 # dependencies
-RUN apt-get update -yq && \
-    apt-get upgrade -yq && \
+RUN apt-get update -yqq && \
+    apt-get upgrade -yqq && \
     apt-get install -yqq \
         apt-utils \
         build-essential \
@@ -123,7 +123,7 @@ RUN apt-get update -yq && \
         python3 \
         python3-pip && \
     locale-gen en_US.UTF-8 && \
-    apt-get clean && \
+    apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
 COPY --from=builder /build/sysporter /usr/local/sysflow/bin/

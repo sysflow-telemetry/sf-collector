@@ -16,18 +16,18 @@ before_install:
 
 script:
  - make -C src/modules init
- - docker build --cache-from ${CR_CI}/sysporter:deps --target deps -t sysporter:deps .
- - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --target builder -t sysporter:builder .
- - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --target runtime -t sysporter:runtime .
- - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --cache-from ${CR_CI}/sysporter:testing --target testing -t sysporter:testing .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --target deps -t ${CR_CI}/sysporter:deps .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --target builder -t ${CR_CI}/sysporter:builder .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --target runtime -t ${CR_CI}/sysporter:runtime .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --cache-from ${CR_CI}/sysporter:testing --target testing -t ${CR_CI}/sysporter:testing .
  - docker run --name sf -it sysporter:testing /bin/hostname
  - docker rm sf
 
 after_success:
- - docker tag sysporter:deps ${CR_CI}/sysporter:deps && docker push ${CR_CI}/sysporter:deps 
- - docker tag sysporter:builder ${CR_CI}/sysporter:builder && docker push ${CR_CI}/sysporter:builder 
- - docker tag sysporter:runtime ${CR_CI}/sysporter:runtime && docker push ${CR_CI}/sysporter:runtime
- - docker tag sysporter:testing ${CR_CI}/sysporter:testing && docker push ${CR_CI}/sysporter:testing
+ - docker push ${CR_CI}/sysporter:deps 
+ - docker push ${CR_CI}/sysporter:builder 
+ - docker push ${CR_CI}/sysporter:runtime
+ - docker push ${CR_CI}/sysporter:testing
 
 branches:
   only:
