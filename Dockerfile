@@ -22,7 +22,7 @@ RUN apt-get update -yq && \
 
 COPY  ./src/modules /build/modules
 COPY  ./src/makefile.* /build/
-RUN cd /build/modules && make modules && make clean 
+RUN cd /build/modules && make -j3 modules && make clean 
 
 #-----------------------
 # Stage: Builder
@@ -54,9 +54,7 @@ COPY --from=deps /usr/local/lib/ /usr/local/lib/
 
 # build sysporter
 COPY ./src/ /build/
-RUN cd /build && \
-    make sysporter && \
-    make clean
+RUN cd /build && make sysporter
 
 #-----------------------
 # Stage: Runtime
