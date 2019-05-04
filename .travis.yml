@@ -16,10 +16,10 @@ before_install:
 
 script:
  - make -C src/modules init
- - docker build --cache-from sysporter:deps --target deps -t sysporter:deps .
- - docker build --cache-from sysporter:deps --cache-from sysporter:builder --target builder -t sysporter:builder .
- - docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --target runtime -t sysporter:runtime .
- - docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --cache-from sysporter:testing --target testing -t sysporter:testing .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --target deps -t sysporter:deps .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --target builder -t sysporter:builder .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --target runtime -t sysporter:runtime .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --cache-from ${CR_CI}/sysporter:testing --target testing -t sysporter:testing .
  - docker run --name sf -it sysporter:testing /bin/hostname
  - docker rm sf
 
