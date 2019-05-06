@@ -20,7 +20,7 @@ script:
  - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --target builder -t ${CR_CI}/sysporter:builder .
  - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --target runtime -t ${CR_CI}/sysporter:runtime .
  - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --cache-from ${CR_CI}/sysporter:testing --target testing -t ${CR_CI}/sysporter:testing .
- - docker run --rm --name sftests -it -v "$(pwd)/tests:/usr/local/sysflow/tests" ${CR_CI}/sysporter:testing tests/tests.bats
+ - docker run --rm --name sftests -it -v "$(pwd)/tests:/usr/local/sysflow/tests" ${CR_CI}/sysporter:testing -t tests/tests.bats
 
 after_success:
  - docker push ${CR_CI}/sysporter:deps 
