@@ -104,26 +104,14 @@ CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $WDIR -e $NODE_NAME $FILTER
 #-----------------------
 FROM sysdig/sysdig:0.24.2 as testing
 
-#ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
-#ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
-
-ARG tdir=/usr/local/sysflow/tests
-ENV TDIR=$tdir
+ARG wdir=/usr/local/sysflow
+ENV WDIR=$wdir
 
 # dependencies
 RUN apt-get update -yqq && \
     apt-get --no-install-recommends --fix-broken install -yqq && \
     apt-get install -yqq \
         apt-utils \
-#        build-essential \
-#        libncurses5-dev \
-#        libncursesw5-dev \
-#        cmake \
-#        libboost-all-dev \
-#        flex \ 
-#        bison \
-#        wget \
-#        libelf-dev \
         git \
         locales \
         python3 \
@@ -148,5 +136,5 @@ COPY --from=builder /build/avro/py3 /usr/local/sysflow/utils/
 RUN cd /usr/local/sysflow/utils && \
     python3 setup.py install 
 
-WORKDIR /usr/local/sysflow
-ENTRYPOINT ["/bin/sh", "-c"]
+WORKDIR $wdir
+ENTRYPOINT ["/usr/local/bin/bats"]
