@@ -1,3 +1,6 @@
 #!/bin/bash
 make -C src/modules init
-sudo docker build -t sysporter .
+sudo docker build --cache-from sysporter:deps --target deps -t sysporter:deps .
+sudo docker build --cache-from sysporter:deps --cache-from sysporter:builder --target builder -t sysporter:builder .
+sudo docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --target runtime -t sysporter:runtime .
+sudo docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --cache-from sysporter:testing --target testing -t sysporter:testing .
