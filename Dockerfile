@@ -98,27 +98,33 @@ COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 WORKDIR /usr/local/sysflow/bin/
 CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $WDIR -e $NODE_NAME $FILTER $PREFIX
 
+
 #-----------------------
 # Stage: Testing
 #-----------------------
-FROM ubuntu:16.04 as testing
+FROM sysdig/sysdig:0.24.2 as testing
 
-ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+#ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+#ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
+
+ARG tdir=/usr/local/sysflow/tests
+ENV TDIR=$tdir
 
 # dependencies
 RUN apt-get update -yqq && \
-    apt-get upgrade -yqq && \
+    apt-get --no-install-recommends --fix-broken install -yqq && \
     apt-get install -yqq \
         apt-utils \
-        build-essential \
-        libncurses5-dev \
-        libncursesw5-dev \
-        cmake \
-        libboost-all-dev \
-        flex \ 
-        bison \
-        wget \
-        libelf-dev \
+#        build-essential \
+#        libncurses5-dev \
+#        libncursesw5-dev \
+#        cmake \
+#        libboost-all-dev \
+#        flex \ 
+#        bison \
+#        wget \
+#        libelf-dev \
+        git \
         locales \
         python3 \
         python3-pip && \
@@ -126,10 +132,21 @@ RUN apt-get update -yqq && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
+RUN mkdir /bats && git clone https://github.com/bats-core/bats-core.git /bats && \
+    cd /bats && ./install.sh /usr/local && rm -r /bats
+
+COPY --from=builder /usr/local/include/avro/ /usr/local/include/avro/
+COPY --from=builder /usr/local/include/sysdig/ /usr/local/include/sysdig/
+COPY --from=builder /usr/local/lib/ /usr/local/lib/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
+COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
 COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 COPY --from=builder /build/avro/py3 /usr/local/sysflow/utils/
-COPY  ./tests/ /usr/local/sysflow/tests/
 
 RUN cd /usr/local/sysflow/utils && \
     python3 setup.py install 
+
+WORKDIR /usr/local/sysflow
+ENTRYPOINT ["/bin/sh", "-c"]
