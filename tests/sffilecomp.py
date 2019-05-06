@@ -1,14 +1,15 @@
+#!/usr/bin/env python3
 from sysflow.reader import SFReader
 import sys
-#import simplejson as json
 import json
-reader1 = SFReader(sys.argv[1])
-reader2 = SFReader(sys.argv[2])
 import sysflow
 import itertools
 import base64
+
 primitives = (int, str, bool, float, bytes)
 
+reader1 = SFReader(sys.argv[1])
+reader2 = SFReader(sys.argv[2])
 
 def compareAttributes(att1, att2, exit, msgs):
     if type(att1) != type(att2):
@@ -31,7 +32,6 @@ def compareAttributes(att1, att2, exit, msgs):
     #if isinstance(att1, sysflow.schema_classes.SchemaClasses.sysflow.type.OIDClass):
        # print('Instance of OID class')
     elif isinstance(att1, list):
-        #print('Instance of list')
         if len(att1) != len(att2):
             msgs.append('lists are not the same length ' + str(len(att1)) + " " + str(len(att2)))
             return False
