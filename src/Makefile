@@ -3,7 +3,7 @@ include makefile.env.inc
 
 TARGET=sysporter
 TARGET2=sysreader
-GCCVERSIONGTEQ8 := $(shell expr `gcc -dumpversion` \>= 8.0)
+GCCVERSIONGTEQ8 := $(shell expr `g++ -dumpversion | cut -f1 -d.` \>= 8)
 
 LDFLAGS= -no-pie $(SDLIB)/libsinsp.a $(SDLIB)/libscap.a $(SDLIB)/libjq.a \
 		 $(SDLIB)/libb64.a $(SDLIB)/libcurl.a $(SDLIB)/libtbb.a -L$(SDLIB)/ \
