@@ -6,26 +6,26 @@ all: modules sysporter
 
 .PHONY: modules
 modules:
-	make -C modules
+	cd modules && make
 
 .PHONY: sysporter
 sysporter:
-	make -C src
+	cd src && make
 
 .PHONY: install
 install: 
-	make -C modules install
-	make -C src install
+	cd modules && make install
+	cd src && make install
 
 .PHONY: uninstall
 uninstall: 
-	make -C src uninstall
-	make -C modules uninstall
+	cd src && make uninstall
+	cd modules && make uninstall
 
 .PHONY: clean
 clean:
-	make -C src clean
-	make -C modules clean 
+	cd src && make clean
+	cd modules && make clean 
 
 .PHONY : help
 help:

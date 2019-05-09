@@ -5,15 +5,29 @@ TARGET=sysporter
 TARGET2=sysreader
 GCCVERSIONGTEQ8 := $(shell expr `g++ -dumpversion | cut -f1 -d.` \>= 8)
 
-LDFLAGS= -no-pie $(SDLIB)/libsinsp.a $(SDLIB)/libscap.a $(SDLIB)/libjq.a \
-		 $(SDLIB)/libb64.a $(SDLIB)/libcurl.a $(SDLIB)/libtbb.a -L$(SDLIB)/ \
-		 -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -Wl,-rpath=$(SDLIB) -Wl,-rpath=$(SDLIB)
-LDFLAGS2=-L$(SDLIB)/ -lpthread -lm -lavrocpp -lb64 -Wl,-rpath=$(SDLIB) -Wl,-rpath=$(SDLIB)
+LIBLOCALPREFIX=../modules
+SDLOCALLIBPREFIX=$(LIBLOCALPREFIX)/sysdig/build/lib
+SDLOCALINCPREFIX=$(LIBLOCALPREFIX)/sysdig/build/include
+AVRLOCALLIBPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
+AVRLOCALINCPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
 
-CFLAGS= -no-pie -std=c++17 -Wall -ggdb -O3 -ggdb -I$(SDINCLUDE) -I.. -I./avro/src/ \
-		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I$(SDINCLUDE)/driver/ \
-		-I$(SDINCLUDE)/userspace/libsinsp/ -I$(SDINCLUDE)/userspace/libscap/ -I/usr/local/include
-CFLAGS2= -std=c++17 -ggdb -I./avro/src/ -I$(SDINCLUDE)/userspace/libsinsp/ -I$(SDINCLUDE)/userspace/libscap/ -I$(SDINCLUDE)
+LDFLAGS= $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
+	$(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a \
+	-lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp \
+	-L /usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
+	-Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
+
+LDFLAGS2= -lpthread -lm -lavrocpp -lb64 \
+	-L /usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
+	-Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
+
+CFLAGS= -no-pie -std=c++17 -Wall -ggdb -O3 -ggdb -I.. -I./avro/src/ \
+		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
+	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
+		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
+CFLAGS2= -std=c++17 -ggdb -I.. -I./avro/src/ \
+	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
+		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
 
 ifeq "$(GCCVERSIONGTEQ8)" "1"
 	LDFLAGS+= -lstdc++fs
@@ -32,7 +46,8 @@ install: all
 
 .PHONY: uninstall
 uninstall: 
-	rm -rf $(PREFIX)
+	rm -rf $(PREFIX)/bin
+	rm -rf $(PREFIX)/conf
 
 .PHONY: $(TARGET)
 $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .filecontext.o
@@ -58,6 +73,7 @@ $(TARGET2): .reader.o .MurmurHash3.o
 	g++ $(CFLAGS) -o $@ -c $^
 
 .sysflowprocessor.o: sysflowprocessor.cpp
+	CA
 	g++ $(CFLAGS) -o $@ -c $^
 
 .sysflowwriter.o: sysflowwriter.cpp

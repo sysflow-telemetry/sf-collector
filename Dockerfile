@@ -22,7 +22,7 @@ RUN apt-get update -yqq && \
 
 COPY  ./modules /build/modules
 COPY  ./makefile.* /build/
-RUN cd /build/modules && make -j3 modules && make clean 
+RUN cd /build/modules && make -j3 install && make clean 
 
 #-----------------------
 # Stage: Builder
@@ -49,13 +49,15 @@ RUN apt-get update -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
 # copy dependencies
-COPY --from=deps /usr/local/include/avro/ /usr/local/include/avro/
-COPY --from=deps /usr/local/include/sysdig/ /usr/local/include/sysdig/
+#COPY --from=deps /usr/local/include/avro/ /usr/local/include/avro/
+#COPY --from=deps /usr/local/include/sysdig/ /usr/local/include/sysdig/
+#COPY --from=deps /usr/local/lib/ /usr/local/lib/
 COPY --from=deps /usr/local/lib/ /usr/local/lib/
+COPY --from=deps /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 
 # build sysporter
 COPY ./src/ /build/
-RUN cd /build && make sysporter
+RUN cd /build && make
 
 #-----------------------
 # Stage: Runtime
@@ -86,9 +88,10 @@ ENV WDIR=$wdir
 #    apt-get clean && \
 #    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
-COPY --from=builder /usr/local/include/avro/ /usr/local/include/avro/
-COPY --from=builder /usr/local/include/sysdig/ /usr/local/include/sysdig/
+#COPY --from=builder /usr/local/include/avro/ /usr/local/include/avro/
+#COPY --from=builder /usr/local/include/sysdig/ /usr/local/include/sysdig/
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
+COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
@@ -99,7 +102,6 @@ COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
 CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $WDIR -e $NODE_NAME $FILTER $PREFIX
-
 
 #-----------------------
 # Stage: Testing
@@ -125,9 +127,10 @@ RUN apt-get update -yqq && \
 RUN mkdir /bats && git clone https://github.com/bats-core/bats-core.git /bats && \
     cd /bats && ./install.sh /usr/local && rm -r /bats
 
-COPY --from=builder /usr/local/include/avro/ /usr/local/include/avro/
-COPY --from=builder /usr/local/include/sysdig/ /usr/local/include/sysdig/
+#COPY --from=builder /usr/local/include/avro/ /usr/local/include/avro/
+#COPY --from=builder /usr/local/include/sysdig/ /usr/local/include/sysdig/
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
+COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/

@@ -1,3 +1,5 @@
 PREFIX=/usr/local/sysflow
-SDLIB=/usr/local/lib
-SDINCLUDE=/usr/local/include/sysdig
+MODPREFIX=$(PREFIX)/modules
+LIBPREFIX=$(MODPREFIX)/lib
+SDINCPREFIX=$(MODPREFIX)/include/sysdig
+AVRINCPREFIX=$(MODPREFIX)/include/avro
