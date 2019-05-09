@@ -20,8 +20,8 @@ RUN apt-get update -yqq && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
-COPY  ./src/modules /build/modules
-COPY  ./src/makefile.* /build/
+COPY  ./modules /build/modules
+COPY  ./makefile.* /build/
 RUN cd /build/modules && make -j3 modules && make clean 
 
 #-----------------------
@@ -42,6 +42,7 @@ RUN apt-get update -yqq && \
         libboost-all-dev \
         g++-8 \
         libelf-dev \
+        liblog4cxx-dev \
         libsparsehash-dev && \ 
     ln -s /usr/bin/g++-8 /usr/bin/g++ && \
     apt-get clean -yqq && \
@@ -89,6 +90,7 @@ COPY --from=builder /usr/local/include/avro/ /usr/local/include/avro/
 COPY --from=builder /usr/local/include/sysdig/ /usr/local/include/sysdig/
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
