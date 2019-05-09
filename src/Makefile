@@ -73,7 +73,6 @@ $(TARGET2): .reader.o .MurmurHash3.o
 	g++ $(CFLAGS) -o $@ -c $^
 
 .sysflowprocessor.o: sysflowprocessor.cpp
-	CA
 	g++ $(CFLAGS) -o $@ -c $^
 
 .sysflowwriter.o: sysflowwriter.cpp
