@@ -98,6 +98,7 @@ COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
 COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
+COPY --from=builder /build/conf/log4cxx.properties /usr/local/sysflow/conf/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
@@ -134,6 +135,7 @@ COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
 COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 COPY --from=builder /build/avro/py3 /usr/local/sysflow/utils/
