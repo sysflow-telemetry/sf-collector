@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "syscall_defs.h"
 #include "file_types.h"
+#include "logger.h"
 using namespace sysflow;
 namespace fileevent {
 
@@ -20,6 +21,7 @@ namespace fileevent {
             FileEvent m_fileEvt;
             int writeFileEvent(sinsp_evt* ev, OpFlags flag);
             int writeLinkEvent(sinsp_evt* ev, OpFlags flag);
+            static log4cxx::LoggerPtr m_logger;
         public:
             FileEventProcessor(SysFlowWriter* writer, process::ProcessContext* procCxt, file::FileContext* fileCxt);
             virtual ~FileEventProcessor();

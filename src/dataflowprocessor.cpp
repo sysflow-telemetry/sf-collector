@@ -2,6 +2,8 @@
 
 using namespace dataflow;
 
+LoggerPtr DataFlowProcessor::m_logger(Logger::getLogger("sysflow.dataflow"));
+
 DataFlowProcessor::DataFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt, file::FileContext* fileCxt) : m_dfSet() {
     m_cxt = cxt;
     m_netflowPrcr = new networkflow::NetworkFlowProcessor(cxt, writer, processCxt, &m_dfSet);
@@ -31,15 +33,15 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt* ev, OpFlags flag) {
    //}
 
     if(fdinfo == NULL) {
-       cout << "Uh oh!!! Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ErrorCode: " << utils::getSyscallResult(ev) << endl;
-       if(IS_ATOMIC_FILE_FLOW(flag)) {
+       LOG4CXX_DEBUG(m_logger, "Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ErrorCode: " << utils::getSyscallResult(ev));
+       if(IS_FILE_EVT(flag)) {
            return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
        }
        return 1;
     }
     if(fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket()) {
       return m_netflowPrcr->handleNetFlowEvent(ev, flag);
-    } else if(IS_ATOMIC_FILE_FLOW(flag)) {
+    } else if(IS_FILE_EVT(flag)) {
       return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
     } else {
       return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
@@ -64,11 +66,11 @@ int DataFlowProcessor::checkForExpiredRecords() {
      }
      m_lastCheck = now;
      int i = 0;
-     cout << "Checking expired Flows!!!...." << endl;
+     LOG4CXX_DEBUG(m_logger, "Checking expired Flows!!!....");
      for(DataFlowSet::iterator it = m_dfSet.begin(); it != m_dfSet.end(); ) {
-             cout << "Checking flow with exportTime: " << (*it)->exportTime << " Now: " << now << endl;
+             LOG4CXX_DEBUG(m_logger, "Checking flow with exportTime: " << (*it)->exportTime << " Now: " << now );
             if((*it)->exportTime <= now) {
-                 cout << "Exporting flow!!! " << endl; 
+                 LOG4CXX_DEBUG(m_logger, "Exporting flow!!! " );  
                 if(difftime(now, (*it)->lastUpdate) >= m_cxt->getNFExpireInterval()) {
                     if((*it)->isNetworkFlow) {
                          m_netflowPrcr->removeNetworkFlow((*it));

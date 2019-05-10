@@ -1,6 +1,7 @@
 #ifndef  __SF_PROCESSOR_
 #define  __SF_PROCESSOR_
 #include <time.h>
+#include <string>
 #include "syscall_defs.h"
 #include "sysflowcontext.h"
 #include "processcontext.h"
@@ -8,7 +9,7 @@
 #include "containercontext.h"
 #include "processeventprocessor.h"
 #include "dataflowprocessor.h"
-#include <string> 
+#include "logger.h" 
 
 namespace sysflowprocessor {
      class SysFlowProcessor {
@@ -30,6 +31,7 @@ namespace sysflowprocessor {
             dataflow::DataFlowProcessor* m_dfPrcr;
             void clearTables();
             bool checkAndRotateFile();
+            static log4cxx::LoggerPtr m_logger;
      };
 }
 

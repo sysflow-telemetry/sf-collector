@@ -295,6 +295,44 @@
         "name" : "newFileOID",
         "type" : [ "null", "sysflow.type.FOID" ]
       } ]
+    }, {
+      "type" : "record",
+      "name" : "NetworkEvent",
+      "namespace" : "sysflow.event",
+      "fields" : [ {
+        "name" : "procOID",
+        "type" : "sysflow.type.OID"
+      }, {
+        "name" : "ts",
+        "type" : {
+          "type" : "long",
+          "logicalType" : "timestamp-millis"
+        }
+      }, {
+        "name" : "tid",
+        "type" : "long"
+      }, {
+        "name" : "opFlags",
+        "type" : "int"
+      }, {
+        "name" : "sip",
+        "type" : "int"
+      }, {
+        "name" : "sport",
+        "type" : "int"
+      }, {
+        "name" : "dip",
+        "type" : "int"
+      }, {
+        "name" : "dport",
+        "type" : "int"
+      }, {
+        "name" : "proto",
+        "type" : "int"
+      }, {
+        "name" : "ret",
+        "type" : "int"
+      } ]
     } ]
   } ]
 }

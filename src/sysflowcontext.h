@@ -6,6 +6,10 @@
 #include <time.h>
 
 #include <sinsp.h>
+#include <unistd.h>
+#include <cstring>
+#include <cerrno>
+#include "logger.h"
 
 using namespace std;
 class SysFlowContext {
@@ -22,11 +26,13 @@ class SysFlowContext {
         int m_nfExportInterval;
         int m_nfExpireInterval;
         bool m_offline;
+        string m_filter;
+        static log4cxx::LoggerPtr m_logger;
     public:
-        SysFlowContext(bool fCont, int fDur, bool prefix, string oFile, string sFile, string schFile, string exporterID); 
+        SysFlowContext(bool fCont, int fDur, string oFile, string sFile, string schFile, string exporterID, string filter); 
         virtual ~SysFlowContext();
         uint64_t timeStamp;
-
+        string getExporterID();
         inline bool isOffline() {
             return m_offline;
          }
@@ -50,9 +56,6 @@ class SysFlowContext {
         }
         inline const char* getSchemaFile() {
             return m_schemaFile.c_str();
-        }
-        inline string getExporterID() {
-            return m_exporterID;
         }
         inline bool hasPrefix() {
             return m_hasPrefix;

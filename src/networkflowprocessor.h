@@ -8,6 +8,7 @@
 #include "sysflowwriter.h"
 #include "processcontext.h"
 #include "sysflow/sysflow.hh"
+#include "logger.h"
 using namespace sysflow;
 namespace networkflow {
 
@@ -18,10 +19,7 @@ namespace networkflow {
             process::ProcessContext* m_processCxt;
             SysFlowWriter* m_writer;
             DataFlowSet* m_dfSet;
-            //NetworkFlowTable m_netflows;
-            //OIDNetworkTable m_oidnfTable;
-            //OID m_oiddelkey;
-            //OID m_oidemptykey;
+            static log4cxx::LoggerPtr m_logger;
             void canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* key,  uint64_t tid);
             void canonicalizeKey(NetFlowObj* nf, NFKey* key);
             void populateNetFlow(NetFlowObj* nf, OpFlags flag, sinsp_evt* ev, ProcessObj* proc);

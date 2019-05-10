@@ -3,6 +3,8 @@
 
 using namespace fileevent;
 
+LoggerPtr FileEventProcessor::m_logger(Logger::getLogger("sysflow.fileevent"));
+
 
 FileEventProcessor::FileEventProcessor(SysFlowWriter* writer, process::ProcessContext* procCxt, file::FileContext* fileCxt) { 
     m_writer = writer;
@@ -42,7 +44,6 @@ int FileEventProcessor::writeLinkEvent(sinsp_evt* ev, OpFlags flag) {
         if(flag == OP_LINK || flag == OP_RENAME) {
             path1 =  utils::getPath(ev, "oldpath");
             path2 =  utils::getPath(ev, "newpath");
-            cout << "Getting paths: " <<  path1 << " Path2: " << endl;
             if(IS_AT_SC(ev->get_type())) {
                 int64_t olddirfd;
                 int64_t newdirfd;
@@ -60,7 +61,6 @@ int FileEventProcessor::writeLinkEvent(sinsp_evt* ev, OpFlags flag) {
                 path1 = utils::getAbsolutePath(ti, path1);
                 path2 = utils::getAbsolutePath(ti, path2);
             }
-            cout << "PATH2: " << path2 << endl;
         } else if(flag == OP_SYMLINK) {
             path1 =  utils::getPath(ev, "target");
             path2 =  utils::getPath(ev, "linkpath");
@@ -71,9 +71,8 @@ int FileEventProcessor::writeLinkEvent(sinsp_evt* ev, OpFlags flag) {
                 path1 = utils::getAbsolutePath(ti, path1);
                 path2 = utils::getAbsolutePath(ti, path2);
             }
-            cout << "PATH2: " << path2 << endl;
         }
-        cout << ev->get_name() << " path1: " << path1 << " path2: " << path2 << endl;
+        LOG4CXX_DEBUG(m_logger,"Path parameters for ev: " << ev->get_name() << " are " <<  path1 << " Path2: " << path2);
 
         file1 = m_fileCxt->getFile(ev, path1, SF_UNK, SFObjectState::REUP, created);
         file2 = m_fileCxt->getFile(ev, path2, SF_UNK, SFObjectState::CREATED, created);
@@ -87,17 +86,18 @@ int FileEventProcessor::writeLinkEvent(sinsp_evt* ev, OpFlags flag) {
     //m_fileEvt.fd = ev->get_fd_num();
     m_fileEvt.fileOID = file1->file.oid;
     m_fileEvt.newFileOID.set_FOID(file2->file.oid);
+   /*
     for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
-     string name = ev->get_param_name(i);
-     const ppm_param_info* param = ev->get_param_info(i);
-          const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
-         cout << name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo <<   endl;
+        string name = ev->get_param_name(i);
+        const ppm_param_info* param = ev->get_param_info(i);
+        const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
+        LOG4CXX_DEBUG(m_logger, name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo);
      if(param->type == PT_PID) {
         int64_t pid = *(int64_t *)p->m_val;
         cout << pid << endl;
     }
-    }
-    cout << "The Current working Directory of the mkdir event is " << ti->get_cwd() << endl;
+    }*/
+    LOG4CXX_DEBUG(m_logger, "The Current working Directory of the " <<  ev->get_name() << " event is " << ti->get_cwd());
     m_writer->writeFileEvent(&m_fileEvt);
     return 0;
 }
@@ -133,17 +133,17 @@ int FileEventProcessor::writeFileEvent(sinsp_evt* ev, OpFlags flag) {
     //m_fileEvt.fd = ev->get_fd_num();
     m_fileEvt.fileOID = file->file.oid;
     m_fileEvt.newFileOID.set_null();
-    for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
+    /*for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
      string name = ev->get_param_name(i);
      const ppm_param_info* param = ev->get_param_info(i);
           const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
-         cout << name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo <<   endl;
+        LOG4CXX_DEBUG(m_logger, name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo);
      if(param->type == PT_PID) {
         int64_t pid = *(int64_t *)p->m_val;
         cout << pid << endl;
     }
-    }
-    cout << "The Current working Directory of the mkdir event is " << ti->get_cwd() << endl;
+    }*/
+    LOG4CXX_DEBUG(m_logger, "The Current working Directory of the " <<  ev->get_name() << " event is " << ti->get_cwd());
     m_writer->writeFileEvent(&m_fileEvt);
     return 0;
 }

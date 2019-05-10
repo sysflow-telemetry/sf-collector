@@ -175,7 +175,7 @@ class FileObj {
         bool written;
         uint32_t refs;
         string key;
-        File file;
+        sysflow::File file;
         FileObj() : written(false), refs(0) {
         }
 

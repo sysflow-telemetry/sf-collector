@@ -1,6 +1,8 @@
 #include "sysflowprocessor.h"
 using namespace sysflowprocessor;
 
+LoggerPtr SysFlowProcessor::m_logger(Logger::getLogger("sysflow.sysflowprocessor"));
+
 SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
    m_cxt = cxt;
    time_t start = 0;
@@ -35,7 +37,7 @@ bool SysFlowProcessor::checkAndRotateFile()  {
      bool fileRotated = false;
      time_t curTime = time(NULL);
      if(m_writer->isFileExpired(curTime)) {
-         cout << "Container Table: " << m_containerCxt->getSize() <<  " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfPrcr->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
+         LOG4CXX_INFO(m_logger, "Container Table: " << m_containerCxt->getSize() <<  " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfPrcr->getSize() << " Num Records Written: " << m_writer->getNumRecs());
          m_writer->resetFileWriter(curTime);
          clearTables();
          fileRotated = true;
@@ -61,7 +63,7 @@ int SysFlowProcessor::run() {
                                 }
                                 int numExpired = m_dfPrcr->checkForExpiredRecords();
                                 if(numExpired) {
-                                    cout << "Data Flow Records exported: " << numExpired << endl;
+                                    LOG4CXX_INFO(m_logger, "Data Flow Records exported: " << numExpired );
                                 }
 				checkAndRotateFile();
 				continue;
@@ -72,7 +74,7 @@ int SysFlowProcessor::run() {
 			}
 			else if(res != SCAP_SUCCESS)
 			{
-				cerr << "res = " << res << endl;
+				LOG4CXX_ERROR(m_logger, "SCAP processor failed with res = " << res << " and error: " << m_cxt->getInspector()->getlasterr() );
 				throw sinsp_exception(m_cxt->getInspector()->getlasterr().c_str());
 			}
                         m_cxt->timeStamp = ev->get_ts();
@@ -81,7 +83,7 @@ int SysFlowProcessor::run() {
                         }
                         int numExpired = m_dfPrcr->checkForExpiredRecords();
                         if(numExpired) {
-                            cout << "Data Flow Records exported: " << numExpired << endl;
+                            LOG4CXX_INFO(m_logger, "Data Flow Records exported: " << numExpired );
                         }
                         checkAndRotateFile();
                         if(m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
@@ -109,15 +111,15 @@ int SysFlowProcessor::run() {
                           SF_SETUID_EXIT(ev)
                        } 
 		}
-                cout << "Exiting scap loop... shutting down" << endl;
-                cout << "Container Table: " << m_containerCxt->getSize() << " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfPrcr->getSize() << " Num Records Written: " << m_writer->getNumRecs() << endl;
+                LOG4CXX_INFO(m_logger, "Exiting scap loop... shutting down" );
+                LOG4CXX_INFO(m_logger, "Container Table: " << m_containerCxt->getSize() << " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfPrcr->getSize() << " Num Records Written: " << m_writer->getNumRecs() );
 	}
 	catch(sinsp_exception& e)
 	{
-	    cerr << "Sysdig exception " << e.what() << endl;
+	    LOG4CXX_ERROR(m_logger, "Sysdig exception " << e.what());
     	    return 1;
         }catch(avro::Exception& ex) {
-            cout << "Avro Exception! Error: " << ex.what() << endl;
+            LOG4CXX_ERROR(m_logger, "Avro Exception! Error: " << ex.what());
     	    return 1;
         }
 	return 0;

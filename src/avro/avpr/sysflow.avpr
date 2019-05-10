@@ -233,6 +233,9 @@
     }, {
       "name" : "proto",
       "type" : "int"
+    }, {
+      "name" : "ret",
+      "type" : "int"
     } ]
   }, {
     "type" : "record",
@@ -372,7 +375,7 @@
     "name" : "SysFlow",
     "fields" : [ {
       "name" : "rec",
-      "type" : [ "sysflow.entity.SFHeader", "sysflow.entity.Container", "sysflow.entity.Process", "sysflow.entity.File", "sysflow.event.ProcessEvent", "sysflow.flow.NetworkFlow", "sysflow.flow.FileFlow", "sysflow.event.FileEvent" ]
+      "type" : [ "sysflow.entity.SFHeader", "sysflow.entity.Container", "sysflow.entity.Process", "sysflow.entity.File", "sysflow.event.ProcessEvent", "sysflow.flow.NetworkFlow", "sysflow.flow.FileFlow", "sysflow.event.FileEvent", "sysflow.event.NetworkEvent" ]
     } ]
   } ],
   "messages" : { }

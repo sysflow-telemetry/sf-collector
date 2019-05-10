@@ -35,6 +35,6 @@ enum OpFlags {
      OP_RENAME = (1 << 18)
 };
 
-#define IS_ATOMIC_FILE_FLOW(FLAG) (FLAG == OP_MKDIR || FLAG == OP_RMDIR || FLAG == OP_LINK || FLAG == OP_UNLINK || FLAG == OP_SYMLINK || FLAG == OP_RENAME) 
+#define IS_FILE_EVT(FLAG) (FLAG == OP_MKDIR || FLAG == OP_RMDIR || FLAG == OP_LINK || FLAG == OP_UNLINK || FLAG == OP_SYMLINK || FLAG == OP_RENAME) 
 
 #endif 

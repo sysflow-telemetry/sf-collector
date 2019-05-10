@@ -1,6 +1,8 @@
 #include "utils.h"
 #include "sysflowcontext.h"
 #include "datatypes.h"
+#include "logger.h"
+
 static NFKey s_nfdelkey;
 static NFKey s_nfemptykey;
 static bool s_keysinit = false;
@@ -9,6 +11,7 @@ static OID s_oiddelkey;
 static OID s_oidemptykey;
 
 
+static LoggerPtr m_logger(Logger::getLogger("sysflow.utils"));
 
 void initKeys() {
    s_nfdelkey.ip1 = 1;
@@ -61,7 +64,7 @@ OID* utils::getOIDDelKey() {
 
 string utils::getUserName(SysFlowContext* cxt, uint32_t uid)
 {
-    unordered_map<uint32_t, scap_userinfo*>::const_iterator it;
+/*    unordered_map<uint32_t, scap_userinfo*>::const_iterator it;
     if(uid == 0xffffffff)
     {
         return string("");
@@ -73,7 +76,15 @@ string utils::getUserName(SysFlowContext* cxt, uint32_t uid)
         return string("");
     }
 
-    return it->second->name;
+    return it->second->name;*/
+   scap_userinfo* user = cxt->getInspector()->get_user(uid);
+   if(user != NULL) {
+       return user->name;
+   } else {
+      return string("");
+   }
+
+
 }
 
 string utils::getGroupName(SysFlowContext* cxt, uint32_t gid)
@@ -119,7 +130,7 @@ int64_t utils::getSyscallResult(sinsp_evt* ev) {
 		res = *(int64_t *)p->m_val;
                 break;
   	    default:
-               cout << "Clone Syscall result not of type pid!! Type: " << param->type <<  " Name: " << param->name <<  endl;
+               LOG4CXX_WARN(m_logger, "Syscall result not of type pid!! Type: " << param->type <<  " Name: " << param->name);
                break;
         }
       }
@@ -144,7 +155,7 @@ avro::ValidSchema utils::loadSchema(const char* filename)
         std::ifstream ifs(filename);
         avro::compileJsonSchema(ifs, result);
      }catch(avro::Exception& ex) {
-       cout << "Unable to load schema file from " << filename << " Error: " << ex.what() << endl;
+       LOG4CXX_ERROR(m_logger, "Unable to load schema file from " << filename << " Error: " << ex.what());
        throw; 
      }
     return result;
@@ -193,13 +204,11 @@ int64_t utils::getFD(sinsp_evt* ev, string paraName) {
 
 string utils::getAbsolutePath(sinsp_threadinfo* ti, int64_t dirfd, string fileName) {
     fs::path p(fileName);
-    cout << "The path is " << p << " File name " << fileName <<  " relative? " << p.is_relative() << endl;
+    LOG4CXX_DEBUG(m_logger, "getAbsolutePath: The path is " << p << " File name " << fileName <<  " is relative? " << p.is_relative());
     if(fileName.empty() || p.is_relative()) {
-        cout << "getting in here..." << endl;                
         fs::path tmp;
         string cwd = ti->get_cwd(); 
         if(dirfd == PPM_AT_FDCWD) {
-            cout << "Inside PPM_AT_FDCWD..." << endl; 
             if(cwd.empty()) {
                 return p.string();
             }
@@ -209,12 +218,12 @@ string utils::getAbsolutePath(sinsp_threadinfo* ti, int64_t dirfd, string fileNa
             sinsp_fdinfo_t * fdinfo = ti->get_fd(dirfd);
             assert(fdinfo != NULL);
             tmp = fdinfo->m_name;             
-            cout << "Got fddir at... " << tmp << endl;                
+            LOG4CXX_DEBUG(m_logger, "getAbsolutePath: Retrieve fdinfo for fd. Path:  " << tmp);                
         }
         tmp /= fileName;
-        cout << "Before canonicalization: " << tmp << endl;
+        LOG4CXX_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
         p = fs::weakly_canonical(tmp);
-        cout << "The canonicalized file is " << p << endl;               
+        LOG4CXX_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);               
     } else {
         p = fs::weakly_canonical(p);
     }
@@ -224,17 +233,16 @@ string utils::getAbsolutePath(sinsp_threadinfo* ti, int64_t dirfd, string fileNa
 
 string utils::getAbsolutePath(sinsp_threadinfo* ti, string fileName) {
     fs::path p(fileName);
-    cout << "The path is " << p << " File name " << fileName <<  " relative? " << p.is_relative() << endl;
+    LOG4CXX_DEBUG(m_logger, "getAbsolutePath: The path is " << p << " File name " << fileName <<  " is relative? " << p.is_relative());
     if(fileName.empty() || p.is_relative()) {
-        cout << "getting in here..." << endl;                
         fs::path tmp; 
         string cwd = ti->get_cwd();
         if(!cwd.empty()) {
             tmp = cwd;
             tmp /= fileName;
-            cout << "Before canonicalization: " << tmp << endl;
+            LOG4CXX_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
             p = fs::weakly_canonical(tmp);
-            cout << "The canonicalized file is " << p << endl; 
+            LOG4CXX_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);               
         }              
     } else {
         p = fs::weakly_canonical(p);

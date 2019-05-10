@@ -35,13 +35,13 @@ ProcessEvent procevt;
 SysFlow flow;
 SFHeader header;
 Container cont;
-File file;
+sysflow::File file;
 NetworkFlow netflow;
 FileFlow fileflow;
 FileEvent  fileevt;
 
 typedef google::dense_hash_map<OID*, Process*, MurmurHasher<OID*>, eqoidptr> PTable;
-typedef google::dense_hash_map<string, File*, MurmurHasher<string>, eqstr> FTable;
+typedef google::dense_hash_map<string, sysflow::File*, MurmurHasher<string>, eqstr> FTable;
 PTable s_procs;
 FTable s_files;
 
@@ -206,8 +206,8 @@ void printNetFlow(NetworkFlow netflow) {
  }
 }
 
-File* createFile(File file) {
-   File* f = new File();
+sysflow::File* createFile(sysflow::File file) {
+   sysflow::File* f = new sysflow::File();
    f->state = file.state;
    f->ts = file.ts;
    f->restype = file.restype;
@@ -322,7 +322,7 @@ int runEventLoop(string sysFile, string schemaFile) {
               case FILE_:
               {
                   file = flow.rec.get_File();
-                  File* f = createFile(file);
+                  sysflow::File* f = createFile(file);
                   string key(file.oid.begin(), file.oid.end());
                   FTable::iterator it = s_files.find(key);
                   cout << "FILE: " << f->path << " " << f->ts << " " << f->state << " " << (char)f->restype <<  endl;

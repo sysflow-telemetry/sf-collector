@@ -1,6 +1,6 @@
 #!/bin/bash
-java -jar ~/workspace/cscap/thirdparty/avro-tools-1.8.2.jar idl avdl/sysflow.avdl ./avpr/sysflow.avpr
-java -jar ~/workspace/cscap/thirdparty/avro-tools-1.8.2.jar idl2schemata ./avdl/sysflow.avdl avsc/
+java -jar avro-tools/avro-tools-1.8.2.jar idl avdl/sysflow.avdl ./avpr/sysflow.avpr
+java -jar avro-tools/avro-tools-1.8.2.jar idl2schemata ./avdl/sysflow.avdl avsc/
 #ContainerID.avsc  EventType.avsc  OID.avsc  Process.avsc  ProcessFlow.avsc  ProcessFlowType.avsc
 avrogencpp -i ./avsc/ContainerID.avsc  -o ./src/sysflow/container_id.hh -n sysflow.type
 avrogencpp -i ./avsc/EventType.avsc  -o ./src/sysflow/event_type.hh -n sysflow.type

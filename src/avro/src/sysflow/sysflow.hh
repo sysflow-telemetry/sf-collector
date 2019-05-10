@@ -298,6 +298,31 @@ struct FileEvent {
         { }
 };
 
+struct NetworkEvent {
+    OID procOID;
+    int64_t ts;
+    int64_t tid;
+    int32_t opFlags;
+    int32_t sip;
+    int32_t sport;
+    int32_t dip;
+    int32_t dport;
+    int32_t proto;
+    int32_t ret;
+    NetworkEvent() :
+        procOID(OID()),
+        ts(int64_t()),
+        tid(int64_t()),
+        opFlags(int32_t()),
+        sip(int32_t()),
+        sport(int32_t()),
+        dip(int32_t()),
+        dport(int32_t()),
+        proto(int32_t()),
+        ret(int32_t())
+        { }
+};
+
 struct _SysFlow_avsc_Union__4__ {
 private:
     size_t idx_;
@@ -320,6 +345,8 @@ public:
     void set_FileFlow(const FileFlow& v);
     FileEvent get_FileEvent() const;
     void set_FileEvent(const FileEvent& v);
+    NetworkEvent get_NetworkEvent() const;
+    void set_NetworkEvent(const NetworkEvent& v);
     _SysFlow_avsc_Union__4__();
 };
 
@@ -496,6 +523,20 @@ FileEvent _SysFlow_avsc_Union__4__::get_FileEvent() const {
 inline
 void _SysFlow_avsc_Union__4__::set_FileEvent(const FileEvent& v) {
     idx_ = 7;
+    value_ = v;
+}
+
+inline
+NetworkEvent _SysFlow_avsc_Union__4__::get_NetworkEvent() const {
+    if (idx_ != 8) {
+        throw avro::Exception("Invalid type for union");
+    }
+    return boost::any_cast<NetworkEvent >(value_);
+}
+
+inline
+void _SysFlow_avsc_Union__4__::set_NetworkEvent(const NetworkEvent& v) {
+    idx_ = 8;
     value_ = v;
 }
 
@@ -1180,6 +1221,75 @@ template<> struct codec_traits<sysflow::FileEvent> {
     }
 };
 
+template<> struct codec_traits<sysflow::NetworkEvent> {
+    static void encode(Encoder& e, const sysflow::NetworkEvent& v) {
+        avro::encode(e, v.procOID);
+        avro::encode(e, v.ts);
+        avro::encode(e, v.tid);
+        avro::encode(e, v.opFlags);
+        avro::encode(e, v.sip);
+        avro::encode(e, v.sport);
+        avro::encode(e, v.dip);
+        avro::encode(e, v.dport);
+        avro::encode(e, v.proto);
+        avro::encode(e, v.ret);
+    }
+    static void decode(Decoder& d, sysflow::NetworkEvent& v) {
+        if (avro::ResolvingDecoder *rd =
+            dynamic_cast<avro::ResolvingDecoder *>(&d)) {
+            const std::vector<size_t> fo = rd->fieldOrder();
+            for (std::vector<size_t>::const_iterator it = fo.begin();
+                it != fo.end(); ++it) {
+                switch (*it) {
+                case 0:
+                    avro::decode(d, v.procOID);
+                    break;
+                case 1:
+                    avro::decode(d, v.ts);
+                    break;
+                case 2:
+                    avro::decode(d, v.tid);
+                    break;
+                case 3:
+                    avro::decode(d, v.opFlags);
+                    break;
+                case 4:
+                    avro::decode(d, v.sip);
+                    break;
+                case 5:
+                    avro::decode(d, v.sport);
+                    break;
+                case 6:
+                    avro::decode(d, v.dip);
+                    break;
+                case 7:
+                    avro::decode(d, v.dport);
+                    break;
+                case 8:
+                    avro::decode(d, v.proto);
+                    break;
+                case 9:
+                    avro::decode(d, v.ret);
+                    break;
+                default:
+                    break;
+                }
+            }
+        } else {
+            avro::decode(d, v.procOID);
+            avro::decode(d, v.ts);
+            avro::decode(d, v.tid);
+            avro::decode(d, v.opFlags);
+            avro::decode(d, v.sip);
+            avro::decode(d, v.sport);
+            avro::decode(d, v.dip);
+            avro::decode(d, v.dport);
+            avro::decode(d, v.proto);
+            avro::decode(d, v.ret);
+        }
+    }
+};
+
 template<> struct codec_traits<sysflow::_SysFlow_avsc_Union__4__> {
     static void encode(Encoder& e, sysflow::_SysFlow_avsc_Union__4__ v) {
         e.encodeUnionIndex(v.idx());
@@ -1208,11 +1318,14 @@ template<> struct codec_traits<sysflow::_SysFlow_avsc_Union__4__> {
         case 7:
             avro::encode(e, v.get_FileEvent());
             break;
+        case 8:
+            avro::encode(e, v.get_NetworkEvent());
+            break;
         }
     }
     static void decode(Decoder& d, sysflow::_SysFlow_avsc_Union__4__& v) {
         size_t n = d.decodeUnionIndex();
-        if (n >= 8) { throw avro::Exception("Union index too big"); }
+        if (n >= 9) { throw avro::Exception("Union index too big"); }
         switch (n) {
         case 0:
             {
@@ -1268,6 +1381,13 @@ template<> struct codec_traits<sysflow::_SysFlow_avsc_Union__4__> {
                 sysflow::FileEvent vv;
                 avro::decode(d, vv);
                 v.set_FileEvent(vv);
+            }
+            break;
+        case 8:
+            {
+                sysflow::NetworkEvent vv;
+                avro::decode(d, vv);
+                v.set_NetworkEvent(vv);
             }
             break;
         }

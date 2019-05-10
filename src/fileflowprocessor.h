@@ -10,6 +10,7 @@
 #include "filecontext.h"
 #include "sysflow/sysflow.hh"
 #include "file_types.h"
+#include "logger.h"
 using namespace sysflow;
 namespace fileflow {
 
@@ -21,6 +22,7 @@ namespace fileflow {
             SysFlowWriter* m_writer;
             DataFlowSet* m_dfSet;
             file::FileContext* m_fileCxt;
+            static log4cxx::LoggerPtr m_logger;
             void populateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file, string flowkey);
             void updateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev);
             void processExistingFlow(sinsp_evt* ev, ProcessObj* proc, FileObj* file, OpFlags flag, string flowkey, FileFlowObj* ff);

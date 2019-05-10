@@ -13,7 +13,7 @@ AVRLOCALINCPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
 
 LDFLAGS= $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
 	$(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a \
-	-lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp \
+	-lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -llog4cxx \
 	-L /usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	-Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
 
@@ -34,6 +34,7 @@ ifeq "$(GCCVERSIONGTEQ8)" "1"
 else
 	LDFLAGS+= -lboost_filesystem
 	CFLAGS+= -DSYSPORTER_BOOST
+	CFLAGS2+= -DSYSPORTER_BOOST
 endif
 
 .PHONY: all
@@ -107,7 +108,7 @@ $(TARGET2): .reader.o .MurmurHash3.o
 
 .PHONY: clean
 clean:
-	rm -f *.o *.so *.a $(TARGET) $(TARGET2)
+	rm -f .[!.]*.o *.o *.so *.a $(TARGET) $(TARGET2)
 
 .PHONY : help
 help:

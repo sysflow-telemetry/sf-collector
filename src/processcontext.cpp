@@ -1,6 +1,7 @@
 #include "processcontext.h"
 
 using namespace process;
+LoggerPtr ProcessContext::m_logger(Logger::getLogger("sysflow.process"));
 
 ProcessContext::ProcessContext(SysFlowContext* cxt, container::ContainerContext* ccxt, file::FileContext* fileCxt, SysFlowWriter* writer) : m_procs(PROC_TABLE_SIZE) {
     OID* emptyoidkey = utils::getOIDEmptyKey();
@@ -40,7 +41,7 @@ ProcessObj* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_ev
    //std::memcpy(&proc->oid[8], &proc->hpid, sizeof(int32_t));
    //cout << "Wrote OID" << endl;
    p->proc.exe = (mainthread->m_exepath.empty()) ? utils::getAbsolutePath(ti, mainthread->m_exe) : mainthread->m_exepath;
-   cout << "The exepath is " << p->proc.exe <<  " ti: " << ti->get_exepath() << " EXE: " << mainthread->get_exe() << " CWD: " << mainthread->get_cwd() << endl;
+   LOG4CXX_DEBUG(m_logger, "createProcess: The exepath is " << p->proc.exe <<  " ti: " << ti->get_exepath() << " EXE: " << mainthread->get_exe() << " CWD: " << mainthread->get_cwd());
    p->proc.exeArgs.clear();
    int i = 0;
    for(std::vector<string>::iterator it = mainthread->m_args.begin(); it != mainthread->m_args.end(); ++it) {
@@ -81,7 +82,7 @@ void ProcessContext::printAncestors(Process* proc) {
        ProcessTable::iterator p = m_procs.find(&(key));
        if(p != m_procs.end()) {
           poid = p->second->proc.poid;
-          cout << "-->" << p->second->proc.oid.hpid << " " << p->second->proc.oid.createTS << " " << p->second->proc.exe << " " << p->second->proc.exeArgs << endl;
+          LOG4CXX_INFO(m_logger,"-->" << p->second->proc.oid.hpid << " " << p->second->proc.oid.createTS << " " << p->second->proc.exe << " " << p->second->proc.exeArgs);
        }else {
            break;
        }
@@ -140,7 +141,7 @@ ProcessObj* ProcessContext::getProcess(sinsp_evt* ev, SFObjectState state, bool&
       key.createTS = mt->m_clone_ts;
       key.hpid = mt->m_pid;
       created = true;
-      cout << "PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe << endl;
+      LOG4CXX_DEBUG(m_logger, "getProcess: PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe);
       //std::memcpy(&key[0], &mt->m_clone_ts, sizeof(int64_t));
       //std::memcpy(&key[8], &mt->m_pid, sizeof(int32_t));
       ProcessTable::iterator proc = m_procs.find(&key);
@@ -159,7 +160,7 @@ ProcessObj* ProcessContext::getProcess(sinsp_evt* ev, SFObjectState state, bool&
        } else { // must make sure the container is in the sysflow file..
            reupContainer(ev, process);
       }
-      cout << "CREATING PROCESS FOR WRITING: PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe << endl;
+      LOG4CXX_DEBUG(m_logger, "CREATING PROCESS FOR WRITING: PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe);
       processes.push_back(process);
       mt = mt->get_parent_thread();
       while(mt != NULL) {
@@ -169,7 +170,7 @@ ProcessObj* ProcessContext::getProcess(sinsp_evt* ev, SFObjectState state, bool&
           }
 	  key.createTS = mt->m_clone_ts;
 	  key.hpid = mt->m_pid;
-         cout << "PARENT PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe << endl;
+          LOG4CXX_DEBUG(m_logger, "PARENT PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe);
           //std::memcpy(&key[0], &mt->m_clone_ts, sizeof(int64_t));
           //std::memcpy(&key[8], &mt->m_pid, sizeof(int32_t));
          ProcessObj* parent = NULL;
@@ -194,12 +195,11 @@ ProcessObj* ProcessContext::getProcess(sinsp_evt* ev, SFObjectState state, bool&
       }
 
       for(vector<ProcessObj*>::reverse_iterator it = processes.rbegin(); it != processes.rend(); ++it) {
-          cout << "Going to write process " << (*it)->proc.exe << " " << (*it)->proc.oid.hpid << endl;
+          LOG4CXX_DEBUG(m_logger, "Writing process " << (*it)->proc.exe << " " << (*it)->proc.oid.hpid);
           m_procs[&((*it)->proc.oid)] = (*it);
           m_writer->writeProcess(&((*it)->proc));
           (*it)->written = true;
       }
-      cout << "Returning process " << endl;
       return process;
 }
 
@@ -215,7 +215,7 @@ bool ProcessContext::exportProcess(OID* oid) {
     ProcessObj* p = getProcess(oid);
     bool expt = false;
     if(p == NULL) {
-        cout << "Uh oh!!!  Can't find process! for oid: " << oid->hpid << " " << oid->createTS << endl;
+        LOG4CXX_ERROR(m_logger, "Can't find process to export! oid: " << oid->hpid << " " << oid->createTS);
         return expt;
     }
     if(!p->proc.containerId.is_null()) {
@@ -320,7 +320,7 @@ void ProcessContext::writeProcessAndAncestors(ProcessObj* proc) {
         }
     }
       for(vector<ProcessObj*>::reverse_iterator it = processes.rbegin(); it != processes.rend(); ++it) {
-          cout << "Final: Going to write process " << (*it)->proc.exe << " " << (*it)->proc.oid.hpid << endl;
+          LOG4CXX_DEBUG(m_logger, "Final: writing process " << (*it)->proc.exe << " " << (*it)->proc.oid.hpid);
           ProcessObj* proc = (*it);
           if(!proc->proc.containerId.is_null()) {
               m_containerCxt->exportContainer(proc->proc.containerId.get_string());

@@ -2,6 +2,7 @@
 #include "utils.h"
 using namespace networkflow;
 
+LoggerPtr NetworkFlowProcessor::m_logger(Logger::getLogger("sysflow.networkflow"));
 
 NetworkFlowProcessor::NetworkFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt, DataFlowSet* dfSet)  {
     m_cxt = cxt;
@@ -202,17 +203,17 @@ inline void NetworkFlowProcessor::processExistingFlow(sinsp_evt* ev, ProcessObj*
 int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
     sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
     if(fdinfo == NULL) {
-       cout << "Uh oh!!! Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! " << endl;
+       LOG4CXX_DEBUG(m_logger, "Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ");
        return 1;
     }
 
     if(!(fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket())) {
-        cout << "handleNetFlowEvent can only handle ip sockets, not file descriptor of type: " << fdinfo->get_typechar() << ". Ignoring.." << endl;
+        LOG4CXX_ERROR(m_logger, "handleNetFlowEvent can only handle ip sockets, not file descriptor of type: " << fdinfo->get_typechar() << ". Ignoring..");
         return 1;
     }
 
     if(fdinfo->is_ipv6_socket()) {
-        cout << "IPv6 is not supported in the current version of SysFlow.  Ignoring.." << endl;
+        LOG4CXX_WARN(m_logger, "IPv6 is not supported in the current version of SysFlow.  Ignoring..");
         return 1;
     }
     bool created = false;
@@ -230,7 +231,7 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
 
     string ip4tuple = ipv4tuple_to_string(&(fdinfo->m_sockinfo.m_ipv4info), false);
 
-    cout << proc->proc.exe << " " << ip4tuple << " Proto: " << getProtocol(fdinfo->get_l4proto()) << " Server: " << fdinfo->is_role_server() << " Client: " << fdinfo->is_role_client() << " " << ev->get_name() <<  endl;
+    LOG4CXX_DEBUG(m_logger, proc->proc.exe << " " << ip4tuple << " Proto: " << getProtocol(fdinfo->get_l4proto()) << " Server: " << fdinfo->is_role_server() << " Client: " << fdinfo->is_role_client() << " " << ev->get_name());
 
     if(nf == NULL) {
        processNewFlow(ev, proc, flag, key);
@@ -247,19 +248,19 @@ void NetworkFlowProcessor::removeNetworkFlow(ProcessObj* proc, NetFlowObj** nf, 
 }
 
 int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj* proc, int64_t tid) {
-    cout << "CALLING removeANDWRITE" << endl;
+    LOG4CXX_DEBUG(m_logger, "CALLING removeAndWriteNFFromProc");
     int deleted = 0;
     for(NetworkFlowTable::iterator nfi = proc->netflows.begin(); nfi != proc->netflows.end(); nfi++) {
         if(tid == -1 ||  tid == nfi->second->netflow.tid) {
             nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
             nfi->second->netflow.opFlags |= OP_TRUNCATE;
-            cout << "Writing NETFLOW!!" << endl;
+            LOG4CXX_DEBUG(m_logger,"Writing NETFLOW!!");
             m_writer->writeNetFlow(&(nfi->second->netflow));
             NetFlowObj* nfo = nfi->second;
             proc->netflows.erase(nfi);
-            cout << "Set size: " << m_dfSet->size() << endl;
+            LOG4CXX_DEBUG(m_logger, "Set size: " << m_dfSet->size());
             deleted += removeNetworkFlowFromSet(&nfo, true);
-           cout << "After Set size: " << m_dfSet->size() << endl;
+            LOG4CXX_DEBUG(m_logger, "After Set size: " << m_dfSet->size());
         }
     }
     if(tid == -1) {
@@ -276,7 +277,7 @@ int NetworkFlowProcessor::removeNetworkFlowFromSet(NetFlowObj** nfo, bool delete
                 NetFlowObj* foundObj = static_cast<NetFlowObj*>(*iter);
                 //cout << "Found: " << foundObj->netflow.procOID.createTS << " " << foundObj->netflow.procOID.hpid << endl;
                 if(*foundObj == **nfo) {
-                     cout << "Removing element from multiset" << endl;
+                     LOG4CXX_DEBUG(m_logger, "Removing element from multiset.");
                      m_dfSet->erase(iter);
                      if(deleteNetFlow) {
                         delete *nfo;
@@ -289,7 +290,7 @@ int NetworkFlowProcessor::removeNetworkFlowFromSet(NetFlowObj** nfo, bool delete
            }
         }
         if(!found) {
-           cout << "Error: Cannot find Netflow Object in data flow set. Deleting. This should not happen." << endl;
+           LOG4CXX_ERROR(m_logger, "Cannot find Netflow Object in data flow set. Deleting. This should not happen");
            if(deleteNetFlow) {
                delete *nfo;
                nfo = NULL;
@@ -305,10 +306,10 @@ void NetworkFlowProcessor::removeNetworkFlow(DataFlowObj* dfo) {
      //nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
      //m_writer->writeNetFlow(&(nfo->netflow));
      canonicalizeKey(nfo, &key);
-     cout << "Erasing flow!!! " << endl;
+     LOG4CXX_DEBUG(m_logger, "Erasing network flow!!!");
      ProcessObj* proc = m_processCxt->getProcess(&(nfo->netflow.procOID));
      if(proc == NULL) {
-         cout << "Error: Could not find proc " << nfo->netflow.procOID.hpid << " " << nfo->netflow.procOID.createTS << " This shouldn't happen!" << endl;
+         LOG4CXX_ERROR(m_logger, "Could not find proc " << nfo->netflow.procOID.hpid << " " << nfo->netflow.procOID.createTS << " This shouldn't happen!");
      } else {
           removeNetworkFlow(proc, &nfo, &key);
      }
@@ -319,7 +320,7 @@ void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj* dfo, time_t now) {
      nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
      m_processCxt->exportProcess(&(nfo->netflow.procOID));
      m_writer->writeNetFlow(&(nfo->netflow));
-     cout << "Reupping flow!!! " << endl;
+     LOG4CXX_DEBUG(m_logger, "Reupping network flow!!! ");
      nfo->netflow.ts = utils::getSysdigTime(m_cxt);
      nfo->netflow.endTs = 0;
      nfo->netflow.opFlags = 0;

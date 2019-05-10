@@ -17,12 +17,6 @@ SysFlowWriter::~SysFlowWriter() {
 void SysFlowWriter::writeHeader() {
    SFHeader header;
    header.version = 1000;
-   /*char domain[256];
-   memset(domain, 0, 256);
-   if(getdomainname(domain, 256) ) {
-      cout << "Error calling getdomainname for sysflow header. ERROR: " <<  std::strerror(errno) << endl;
-      exit(1); 
-   }*/
   /* const scap_machine_info* mi = inspector->get_machine_info();
    if(mi != NULL) {
        header.exporter = mi->hostname;
@@ -47,14 +41,13 @@ string SysFlowWriter::getFileName(time_t curTime) {
        if(m_cxt->hasPrefix()) {
            ofile = m_cxt->getOutputFile() + "." + std::to_string(curTime);
        } else {
-           ofile = m_cxt->getOutputFile() + "/" + std::to_string(curTime);
+           ofile = m_cxt->getOutputFile() + std::to_string(curTime);
        }
     } else {
         if(m_cxt->hasPrefix()) {
             ofile = m_cxt->getOutputFile();
         } else {
-          cout << "When not using the -G option, a file prefix must be set using -p." << endl;
-          exit(1);
+           ofile = m_cxt->getOutputFile() + std::to_string(curTime);
         }
     }
     return ofile;

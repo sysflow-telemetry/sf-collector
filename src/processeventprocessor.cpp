@@ -1,6 +1,7 @@
 #include "processeventprocessor.h"
 
 using namespace processevent;
+LoggerPtr ProcessEventProcessor::m_logger(Logger::getLogger("sysflow.processevent"));
 ProcessEventProcessor::ProcessEventProcessor(SysFlowWriter* writer, process::ProcessContext* pc, dataflow::DataFlowProcessor* dfPrcr) {
     m_processCxt = pc;
     m_writer = writer;
@@ -44,6 +45,11 @@ void ProcessEventProcessor::writeSetUIDEvent(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     bool created = false;
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
+    if(!created) {
+        m_processCxt->updateProcess(&(proc->proc), ev, SFObjectState::MODIFIED);
+        LOG4CXX_DEBUG(m_logger, "Writing modified process..." << proc->proc.exe);
+        m_writer->writeProcess(&(proc->proc));
+    }
     m_procEvt.opFlags =  OP_SETUID;
     m_procEvt.ts = ev->get_ts();
     m_procEvt.procOID.hpid = proc->proc.oid.hpid;
@@ -52,7 +58,6 @@ void ProcessEventProcessor::writeSetUIDEvent(sinsp_evt* ev) {
     m_procEvt.ret = utils::getSyscallResult(ev);
     m_procEvt.args.clear();
     m_procEvt.args.push_back(m_uid);
-    cout << "WRITING SETUID!!" << endl;
     m_writer->writeProcessEvent(&m_procEvt);
     m_procEvt.args.clear();
 }
@@ -93,7 +98,7 @@ void ProcessEventProcessor::writeExecEvent(sinsp_evt* ev) {
    // do we want to add another process record just to mark it modified at this point?
     if(!created) {
         m_processCxt->updateProcess(&(proc->proc), ev, SFObjectState::MODIFIED);
-        cout << "Writing modified process..." << proc->proc.exe << endl;
+        LOG4CXX_DEBUG(m_logger, "Writing modified process..." << proc->proc.exe);
         m_writer->writeProcess(&(proc->proc));
     }
 

@@ -8,6 +8,7 @@
 #include "filecontext.h"
 #include "utils.h"
 #include "op_flags.h"
+#include "logger.h"
 
 #define PROC_TABLE_SIZE 50000
 using namespace sysflow;
@@ -19,6 +20,7 @@ namespace process {
             container::ContainerContext* m_containerCxt;
             ProcessTable m_procs;
             file::FileContext* m_fileCxt;
+            static log4cxx::LoggerPtr m_logger;
             void writeProcessAndAncestors(ProcessObj* proc); 
             void reupContainer(sinsp_evt* ev, ProcessObj* proc);
         public:

@@ -12,6 +12,6 @@ import idl "entity/container.avdl";
 import idl "entity/file.avdl";
 
 record SysFlow {
-   union {sysflow.entity.SFHeader, sysflow.entity.Container, sysflow.entity.Process, sysflow.entity.File, sysflow.event.ProcessEvent, sysflow.flow.NetworkFlow, sysflow.flow.FileFlow, sysflow.event.FileEvent} rec;
+   union {sysflow.entity.SFHeader, sysflow.entity.Container, sysflow.entity.Process, sysflow.entity.File, sysflow.event.ProcessEvent, sysflow.flow.NetworkFlow, sysflow.flow.FileFlow, sysflow.event.FileEvent, sysflow.event.NetworkEvent} rec;
 }
 }

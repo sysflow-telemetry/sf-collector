@@ -7,7 +7,7 @@
 #include "dataflowprocessor.h"
 #include "utils.h"
 #include <string>
-
+#include "logger.h"
 #define SF_UID "uid"
 using namespace sysflow;
 namespace processevent {
@@ -26,6 +26,7 @@ namespace processevent {
           dataflow::DataFlowProcessor* m_dfPrcr;
           ProcessEvent m_procEvt;
           std::string m_uid;
+          static log4cxx::LoggerPtr m_logger;
    };
 }
 #endif
