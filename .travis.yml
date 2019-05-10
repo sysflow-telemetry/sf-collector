@@ -15,7 +15,7 @@ before_install:
  - docker pull ${CR_CI}/sysporter:testing || true
 
 script:
- - make -C src/modules init
+ - make -C modules init
  - docker build --cache-from ${CR_CI}/sysporter:deps --target deps -t ${CR_CI}/sysporter:deps .
  - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --target builder -t ${CR_CI}/sysporter:builder .
  - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --target runtime -t ${CR_CI}/sysporter:runtime .
