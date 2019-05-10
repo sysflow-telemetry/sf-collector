@@ -4,12 +4,15 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "avro/ValidSchema.hh"
 #include "avro/Compiler.hh"
 #include "avro/DataFile.hh"
 #include "avro/Encoder.hh"
 #include "avro/Decoder.hh"
+#pragma GCC diagnostic pop
 #include <arpa/inet.h>
 #include "op_flags.h"
 #include "datatypes.h"

@@ -4,7 +4,7 @@
 #include "sysflowwriter.h"
 #include "processcontext.h"
 #include "filecontext.h"
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
 #include "utils.h"
 #include "syscall_defs.h"
 #include "file_types.h"

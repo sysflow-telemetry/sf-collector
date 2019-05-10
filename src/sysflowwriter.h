@@ -2,7 +2,7 @@
 #define __SF_WRITER_
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wno-deprecated-declarations"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "avro/ValidSchema.hh"
 #include "avro/Compiler.hh"
 #include "avro/DataFile.hh"
@@ -10,7 +10,7 @@
 #include "avro/Decoder.hh"
 #pragma GCC diagnostic pop
 
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
 #include "sysflowcontext.h"
 #include "utils.h"
 #define COMPRESS_BLOCK_SIZE 80000

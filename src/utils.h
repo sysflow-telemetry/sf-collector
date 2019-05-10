@@ -4,16 +4,19 @@
 #include <fstream>
 #include <sinsp.h>
 #include <string>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "avro/ValidSchema.hh"
 #include "avro/Compiler.hh"
-#include "avro/DataFile.hh"
-#include "avro/Encoder.hh"
-#include "avro/Decoder.hh"
+#pragma GCC diagnostic pop
+//#include "avro/DataFile.hh"
+//#include "avro/Encoder.hh"
+//#include "avro/Decoder.hh"
 #include  <time.h>
 #include "sysflowcontext.h"
 #include <openssl/sha.h>
 #include "boost/any.hpp"
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
 #ifdef SYSPORTER_BOOST
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;

@@ -4,7 +4,7 @@
 #include <string>
 
 #include <sinsp.h>
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
 #include "datatypes.h"

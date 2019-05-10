@@ -1,6 +1,6 @@
 #ifndef _SF_FILE_
 #define _SF_FILE_
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
 #include "datatypes.h"
 #include "sysflowwriter.h"
 #include "containercontext.h"

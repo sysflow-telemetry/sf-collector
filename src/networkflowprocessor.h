@@ -7,7 +7,7 @@
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
 #include "processcontext.h"
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
 #include "logger.h"
 using namespace sysflow;
 namespace networkflow {

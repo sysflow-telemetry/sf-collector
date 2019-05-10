@@ -8,7 +8,7 @@
 #include "sysflowwriter.h"
 #include "processcontext.h"
 #include "filecontext.h"
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
 #include "file_types.h"
 #include "logger.h"
 using namespace sysflow;

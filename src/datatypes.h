@@ -5,7 +5,7 @@
 #include <google/dense_hash_map>
 #include <google/dense_hash_set>
 #include <set>
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
 #include "utils.h"
 
 using namespace std;

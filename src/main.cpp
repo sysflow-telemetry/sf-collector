@@ -61,7 +61,7 @@ static void usage(std::string name)
               << "\t-s schema file\t\tThe sysflow avro schema file (.avsc) used for schema validation (default: /usr/local/sysflow/conf/SysFlow.avsc)\n"
               << "\t-f filter\t\tSysdig style filtering string to filter scap. Must be surrounded by quotes\n"
               << "\t-c\t\t\tSimple, fast filter to allow only container-related events to be dumped\n"
-              << "\t-l log conf file\tLocation of log4cxx properties configuration file. Logged to console if not specified\n"
+              << "\t-l log conf file\tLocation of log4cxx properties configuration file. (default: /usr/local/sysflow/conf/log4cxx.properties)\n"
               << std::endl;
 }
 
@@ -84,7 +84,7 @@ int main( int argc, char** argv )
         int fileDuration = 0;
         string filter = "";
         bool help = false;
-        string logProps =  "";
+        string logProps =  "/usr/local/sysflow/conf/log4cxx.properties";
 
         sigaction(SIGINT, &sigIntHandler, NULL);
 

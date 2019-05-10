@@ -45,11 +45,11 @@ void ProcessEventProcessor::writeSetUIDEvent(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     bool created = false;
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
-    if(!created) {
+/*    if(!created && utils::getSyscallResult(ev) == 0) {
         m_processCxt->updateProcess(&(proc->proc), ev, SFObjectState::MODIFIED);
         LOG4CXX_DEBUG(m_logger, "Writing modified process..." << proc->proc.exe);
         m_writer->writeProcess(&(proc->proc));
-    }
+    }*/
     m_procEvt.opFlags =  OP_SETUID;
     m_procEvt.ts = ev->get_ts();
     m_procEvt.procOID.hpid = proc->proc.oid.hpid;

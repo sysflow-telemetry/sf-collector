@@ -1,7 +1,7 @@
 #ifndef _SF_PROC_EVT_
 #define _SF_PROC_EVT_
 #include <sinsp.h>
-#include "sysflow/sysflow.hh"
+#include "sysflow.h"
 #include "sysflowwriter.h"
 #include "processcontext.h"
 #include "dataflowprocessor.h"
