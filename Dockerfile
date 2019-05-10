@@ -22,7 +22,7 @@ RUN apt-get update -yqq && \
 
 COPY  ./modules /build/modules
 COPY  ./makefile.* /build/
-RUN cd /build/modules && make -j3 install && make clean 
+RUN cd /build/modules && make -j3 install
 
 #-----------------------
 # Stage: Builder
@@ -52,12 +52,13 @@ RUN apt-get update -yqq && \
 #COPY --from=deps /usr/local/include/avro/ /usr/local/include/avro/
 #COPY --from=deps /usr/local/include/sysdig/ /usr/local/include/sysdig/
 #COPY --from=deps /usr/local/lib/ /usr/local/lib/
+COPY --from=deps /build /build/
 COPY --from=deps /usr/local/lib/ /usr/local/lib/
 COPY --from=deps /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 
 # build sysporter
-COPY ./src/ /build/
-RUN cd /build && make
+COPY ./src/ /build/src/
+RUN cd /build/src && make
 
 #-----------------------
 # Stage: Runtime
@@ -96,9 +97,9 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linu
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
-COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
-COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
-COPY --from=builder /build/conf/log4cxx.properties /usr/local/sysflow/conf/
+COPY --from=builder /build/src/sysporter /usr/local/sysflow/bin/
+COPY --from=builder /build/src/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
+COPY --from=builder /build/src/conf/log4cxx.properties /usr/local/sysflow/conf/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
@@ -136,9 +137,9 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linu
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /build/sysporter /usr/local/sysflow/bin/
-COPY --from=builder /build/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
-COPY --from=builder /build/avro/py3 /usr/local/sysflow/utils/
+COPY --from=builder /build/src/sysporter /usr/local/sysflow/bin/
+COPY --from=builder /build/src/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
+COPY --from=builder /build/src/avro/py3 /usr/local/sysflow/utils/
 
 RUN cd /usr/local/sysflow/utils && \
     python3 setup.py install 
