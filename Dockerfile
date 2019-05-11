@@ -49,9 +49,6 @@ RUN apt-get update -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
 # copy dependencies
-#COPY --from=deps /usr/local/include/avro/ /usr/local/include/avro/
-#COPY --from=deps /usr/local/include/sysdig/ /usr/local/include/sysdig/
-#COPY --from=deps /usr/local/lib/ /usr/local/lib/
 COPY --from=deps /build /build/
 COPY --from=deps /usr/local/lib/ /usr/local/lib/
 COPY --from=deps /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
@@ -81,16 +78,6 @@ ENV NODE_NAME=$nodename
 ARG wdir=/mnt/data
 ENV WDIR=$wdir
 
-# runtime dependencies
-#RUN apt-get update -yq && \
-#    apt-get --no-install-recommends --fix-broken install -yq && \
-#    apt-get --no-install-recommends install -yqq \
-#        libsparsehash-dev && \
-#    apt-get clean && \
-#    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
-
-#COPY --from=builder /usr/local/include/avro/ /usr/local/include/avro/
-#COPY --from=builder /usr/local/include/sysdig/ /usr/local/include/sysdig/
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
@@ -129,17 +116,13 @@ RUN apt-get update -yqq && \
 RUN mkdir /bats && git clone https://github.com/bats-core/bats-core.git /bats && \
     cd /bats && ./install.sh /usr/local && rm -r /bats
 
-#COPY --from=builder /usr/local/include/avro/ /usr/local/include/avro/
-#COPY --from=builder /usr/local/include/sysdig/ /usr/local/include/sysdig/
-COPY --from=builder /usr/local/lib/ /usr/local/lib/
-COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
+COPY --from=runtime /usr/local/lib/ /usr/local/lib/
+COPY --from=runtime /usr/local/sysflow /usr/local/sysflow
+COPY --from=builder /build/src/avro/py3 /usr/local/sysflow/utils/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /build/src/sysporter /usr/local/sysflow/bin/
-COPY --from=builder /build/src/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
-COPY --from=builder /build/src/avro/py3 /usr/local/sysflow/utils/
 
 RUN cd /usr/local/sysflow/utils && \
     python3 setup.py install 
