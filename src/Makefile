@@ -38,17 +38,24 @@ else
 endif
 
 .PHONY: all
-all: $(TARGET) $(TARGET2)
+all: version $(TARGET) $(TARGET2)
 
 .PHONY: install
 install: all 
 	mkdir -p $(PREFIX)/bin && cp sysporter $(PREFIX)/bin && cp sysreader $(PREFIX)/bin
-	mkdir -p $(PREFIX)/conf && cp avro/avsc/SysFlow.avsc $(PREFIX)/conf
+	mkdir -p $(PREFIX)/conf && cp avro/avsc/SysFlow.avsc $(PREFIX)/conf && cp conf/log4cxx.properties $(PREFIX)/conf
 
 .PHONY: uninstall
 uninstall: 
 	rm -rf $(PREFIX)/bin
 	rm -rf $(PREFIX)/conf
+
+.PHONY: version
+version:
+	cp sysflow_config.h.in sysflow_config.h
+	sed -i -E "s/SYSFLOW_VERSION/\"$(SYSFLOW_VERSION)\"/" sysflow_config.h
+	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
+
 
 .PHONY: $(TARGET)
 $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .filecontext.o
@@ -108,7 +115,7 @@ $(TARGET2): .reader.o .MurmurHash3.o
 
 .PHONY: clean
 clean:
-	rm -f .[!.]*.o *.o *.so *.a $(TARGET) $(TARGET2)
+	rm -f .[!.]*.o *.o *.so *.a $(TARGET) $(TARGET2) sysflow_config.h
 
 .PHONY : help
 help:

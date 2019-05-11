@@ -22,12 +22,13 @@ RUN apt-get update -yqq && \
 
 COPY  ./modules /build/modules
 COPY  ./makefile.* /build/
-RUN cd /build/modules && make -j3 install
+RUN cd /build/modules && make install
 
 #-----------------------
 # Stage: Builder
 #-----------------------
 FROM ubuntu:16.04 as builder
+ARG TRAVIS_BUILD_NUMBER
 
 # dependencies
 RUN apt-get update -yqq && \
@@ -55,7 +56,7 @@ COPY --from=deps /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 
 # build sysporter
 COPY ./src/ /build/src/
-RUN cd /build/src && make
+RUN cd /build/src && make SYSFLOW_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
 
 #-----------------------
 # Stage: Runtime
@@ -68,9 +69,6 @@ ENV INTERVAL=$interval
 
 ARG filter=
 ENV FILTER=$filter
-
-ARG prefix=
-ENV PREFIX=$prefix
 
 ARG nodename=
 ENV NODE_NAME=$nodename
@@ -90,7 +88,7 @@ COPY --from=builder /build/src/conf/log4cxx.properties /usr/local/sysflow/conf/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
-CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $WDIR -e $NODE_NAME $FILTER $PREFIX
+CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $WDIR -e $NODE_NAME $FILTER
 
 #-----------------------
 # Stage: Testing

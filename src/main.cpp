@@ -11,6 +11,7 @@
 #include <signal.h>
 #include "sysflowprocessor.h"
 #include "logger.h"
+#include "sysflow_config.h"
 
 using namespace std;
 
@@ -62,6 +63,7 @@ static void usage(std::string name)
               << "\t-f filter\t\tSysdig style filtering string to filter scap. Must be surrounded by quotes\n"
               << "\t-c\t\t\tSimple, fast filter to allow only container-related events to be dumped\n"
               << "\t-l log conf file\tLocation of log4cxx properties configuration file. (default: /usr/local/sysflow/conf/log4cxx.properties)\n"
+              << "\t-v\t\t\tPrints the version of " << name << " and exits.\n"
               << std::endl;
 }
 
@@ -89,7 +91,7 @@ int main( int argc, char** argv )
         sigaction(SIGINT, &sigIntHandler, NULL);
 
 
-	while ((c = getopt (argc, argv, "hcr:w:G:s:e:l:")) != -1)
+	while ((c = getopt (argc, argv, "hcr:w:G:s:e:l:v")) != -1)
     	{
 		switch (c)
       		{
@@ -128,6 +130,9 @@ int main( int argc, char** argv )
                         case 'h':
                                help = true;
                                break;
+                        case 'v':
+                               cerr << " Version: " << SF_VERSION << "."  << SF_BUILD << endl;
+                               exit(0);
       			case '?':
         			if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' || optopt == 'G' || optopt == 'l')
           				fprintf (stderr, "Option -%c requires an argument.\n", optopt);
