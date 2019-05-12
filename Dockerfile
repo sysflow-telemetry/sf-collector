@@ -45,7 +45,7 @@ RUN apt-get update -yqq && \
         libelf-dev \
         liblog4cxx-dev \
         libapr1 \
-        libaprutil1
+        libaprutil1 \
         libsparsehash-dev && \ 
     ln -s /usr/bin/g++-8 /usr/bin/g++ && \
     apt-get clean -yqq && \
