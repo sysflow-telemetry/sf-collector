@@ -44,6 +44,8 @@ RUN apt-get update -yqq && \
         g++-8 \
         libelf-dev \
         liblog4cxx-dev \
+        libapr1 \
+        libaprutil1
         libsparsehash-dev && \ 
     ln -s /usr/bin/g++-8 /usr/bin/g++ && \
     apt-get clean -yqq && \
@@ -80,6 +82,7 @@ COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libapr* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /build/src/sysporter /usr/local/sysflow/bin/
@@ -118,9 +121,10 @@ COPY --from=runtime /usr/local/lib/ /usr/local/lib/
 COPY --from=runtime /usr/local/sysflow /usr/local/sysflow
 COPY --from=builder /build/src/avro/py3 /usr/local/sysflow/utils/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libapr* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
 
 RUN cd /usr/local/sysflow/utils && \
     python3 setup.py install 
