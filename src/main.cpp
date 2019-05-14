@@ -91,7 +91,7 @@ int main( int argc, char** argv )
         sigaction(SIGINT, &sigIntHandler, NULL);
 
 
-	while ((c = getopt (argc, argv, "hcr:w:G:s:e:l:v")) != -1)
+	while ((c = getopt (argc, argv, "hcr:w:G:s:e:l:vf:")) != -1)
     	{
 		switch (c)
       		{
