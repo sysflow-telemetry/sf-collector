@@ -20,14 +20,14 @@ def compareAttributes(att1, att2, exit, msgs):
         f1attrs = [a for a in dir(att1) if not (a.startswith('__') or a == '_inner_dict' or a == 'RECORD_SCHEMA' or a == 'fromkeys' or a == 'get' or a == 'items' or a == 'keys' or a == 'pop' or a == 'popitem' or a == 'setdefault' or a == 'update' or a == 'values' or a == 'copy' or a == 'clear') ]
         f2attrs = [a for a in dir(att2) if not (a.startswith('__') or a == '_inner_dict' or a == 'RECORD_SCHEMA' or a == 'fromkeys' or a == 'get' or a == 'items' or a == 'keys' or a == 'pop' or a == 'popitem' or a == 'setdefault' or a == 'update' or a == 'values' or a == 'copy' or a == 'clear') ]
         if len(f1attrs) != len(f2attrs):
-            msgs.append(str(type(att1)) + ' does not have the same number of attributes in each file.')
+            msgs.append(str(type(att1)) + ' does not have the same number of attributes in each file')
             return False
         #print('Instance is a class type' + str(type(att1)))
         for attr in f1attrs:
             a1 = getattr(att1, attr)
             a2 = getattr(att2, attr)
             if(not compareAttributes(a1, a2, exit, msgs)):
-                msgs.append('Attribute: ' + attr + ' does not have matching values.')
+                msgs.append('Attribute: ' + attr + ' does not have matching values')
                 return False
     #if isinstance(att1, sysflow.schema_classes.SchemaClasses.sysflow.type.OIDClass):
        # print('Instance of OID class')
@@ -62,23 +62,23 @@ msgs = []
 recNum = 0
 failures = 0
 
-print('******Beginning file compare test case between files: {} and {}.******'.format(sys.argv[1], sys.argv[2]))
+print('Beginning test cases between files: {} and {}'.format(sys.argv[1], sys.argv[2]))
 
 for flow1, flow2 in itertools.zip_longest(reader1, reader2, fillvalue=None):
     #flow2 = reader2.next();
     if not (flow1 is None or flow2 is None):
          msgs.clear()
          if not compareAttributes(flow1.rec, flow2.rec, exit, msgs):
-             print('[ FAILED ] Record: {} does not match.'.format(recNum))
+             print('[ FAILED ] Record: {} does not match'.format(recNum))
              failures += 1
              for m in msgs:
                  print(m)
          if exit[0] == True:
-             print('[ FAILED ] Stopping Test. Test case failed with {} failures before stopping.'.format(failures))
+             print('[ FAILED ] Stopping Test. Test case failed with {} failures before stopping'.format(failures))
              sys.exit(1)
          recNum += 1
     else:
-        print('[ FAILED ]  Files do not have the same number of records.')
+        print('[ FAILED ]  Files do not have the same number of records')
         failures += 1
 
 #if not reader2.is_EOF():
@@ -86,7 +86,7 @@ for flow1, flow2 in itertools.zip_longest(reader1, reader2, fillvalue=None):
 #    failures += 1
 
 if failures > 0:
-    print('[ FAILED ] Test case failed with {} failures before stopping.'.format(failures));
+    print('[ FAILED ] Test case failed with {} failures before stopping'.format(failures));
     sys.exit(1)
 else:
-    print('[ PASSED ] Test case complete.')
+    print('[ PASSED ] Test case complete')
