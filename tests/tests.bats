@@ -80,7 +80,7 @@ exporter=tests
 @test "Trace comparison on namespace operations" {
   tdir=${TDIR}/namespaces
   tfile=setns
-  run $sysporter -r ${tdir}/${tfile}.scap -w /tmp/ -p ${tfile}.sf -e $exporter > /tmp/${tfile}.log
+  run $sysporter -r ${tdir}/${tfile}.scap -w /tmp/${tfile}.sf -e $exporter > /tmp/${tfile}.log
   run $sfcomp /tmp/${tfile}.sf ${tdir}/${tfile}.sf
   [ ${status} -eq 0 ]
 }
