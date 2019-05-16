@@ -3,7 +3,7 @@
 
 using namespace fileevent;
 
-LoggerPtr FileEventProcessor::m_logger(Logger::getLogger("sysflow.fileevent"));
+//LoggerPtr FileEventProcessor::m_logger(Logger::getLogger("sysflow.fileevent"));
 
 
 FileEventProcessor::FileEventProcessor(SysFlowWriter* writer, process::ProcessContext* procCxt, file::FileContext* fileCxt) { 
@@ -72,7 +72,7 @@ int FileEventProcessor::writeLinkEvent(sinsp_evt* ev, OpFlags flag) {
                 path2 = utils::getAbsolutePath(ti, path2);
             }
         }
-        LOG4CXX_DEBUG(m_logger,"Path parameters for ev: " << ev->get_name() << " are " <<  path1 << " Path2: " << path2);
+        SF_DEBUG(m_logger,"Path parameters for ev: " << ev->get_name() << " are " <<  path1 << " Path2: " << path2);
 
         file1 = m_fileCxt->getFile(ev, path1, SF_UNK, SFObjectState::REUP, created);
         file2 = m_fileCxt->getFile(ev, path2, SF_UNK, SFObjectState::CREATED, created);
@@ -91,13 +91,13 @@ int FileEventProcessor::writeLinkEvent(sinsp_evt* ev, OpFlags flag) {
         string name = ev->get_param_name(i);
         const ppm_param_info* param = ev->get_param_info(i);
         const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
-        LOG4CXX_DEBUG(m_logger, name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo);
+        SF_DEBUG(m_logger, name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo);
      if(param->type == PT_PID) {
         int64_t pid = *(int64_t *)p->m_val;
         cout << pid << endl;
     }
     }*/
-    LOG4CXX_DEBUG(m_logger, "The Current working Directory of the " <<  ev->get_name() << " event is " << ti->get_cwd());
+    SF_DEBUG(m_logger, "The Current working Directory of the " <<  ev->get_name() << " event is " << ti->get_cwd());
     m_writer->writeFileEvent(&m_fileEvt);
     return 0;
 }
@@ -137,13 +137,13 @@ int FileEventProcessor::writeFileEvent(sinsp_evt* ev, OpFlags flag) {
      string name = ev->get_param_name(i);
      const ppm_param_info* param = ev->get_param_info(i);
           const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
-        LOG4CXX_DEBUG(m_logger, name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo);
+        SF_DEBUG(m_logger, name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo);
      if(param->type == PT_PID) {
         int64_t pid = *(int64_t *)p->m_val;
         cout << pid << endl;
     }
     }*/
-    LOG4CXX_DEBUG(m_logger, "The Current working Directory of the " <<  ev->get_name() << " event is " << ti->get_cwd());
+    SF_DEBUG(m_logger, "The Current working Directory of the " <<  ev->get_name() << " event is " << ti->get_cwd());
     m_writer->writeFileEvent(&m_fileEvt);
     return 0;
 }

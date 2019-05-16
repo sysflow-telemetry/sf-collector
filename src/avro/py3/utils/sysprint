@@ -2,19 +2,19 @@
 from sysflow.reader import FlattenedSFReader
 import sys
 import sysflow.utils as utils
-from sysflow.objtypes import ObjectTypes
+from sysflow.objtypes import ObjectTypes, OBJECT_MAP
 
 reader = FlattenedSFReader(sys.argv[1], False)
 
 
 
-print("|{0:50}|{1:5}|{2:5}|{3:9}|{4:26}|{5:26}|{6:5}|{7:45}|{8:8}|{9:8}|{10:45}|{11:10}|".format("Process","PID","TID","Op Flags", "Start Time", "End Time", "Ret", "Resource 1", "NBRead", "NBWrite", "Resource 2", "Cont")) 
+print("|{0:5}|{1:2}|{2:45}|{3:5}|{4:5}|{5:5}|{6:11}|{7:26}|{8:26}|{9:5}|{10:5}|{11:45}|{12:8}|{13:8}|{14:10}|".format("Evt #", "T", "Process","PPID", "PID","TID","Op Flags", "Start Time", "End Time", "FD", "Ret", "Resource", "NOBRead", "NOBWrite", "Cont")) 
 
-
-
+i=0
 for objtype, header, cont, proc, files, evt, flow  in reader:
     exe = proc.exe + ' ' + proc.exeArgs if proc is not None else ''
     pid = proc.oid.hpid if proc is not None else ''
+    ppid = proc.poid.hpid if proc is not None and proc.poid is not None else ''
     #evflow = evt if evt is not None else flow
     evflow = evt or flow
     tid = evflow.tid if evflow is not None else ''
@@ -22,15 +22,23 @@ for objtype, header, cont, proc, files, evt, flow  in reader:
     sTime = utils.getTimeStr(evflow.ts) if evflow is not None else ''
     eTime = utils.getTimeStr(evflow.endTs) if flow is not None else ''
     ret = evflow.ret if evt is not None else ''
-    res1 = ''
+    res = ''
+    fd = ''
     if objtype == ObjectTypes.FILE_FLOW or objtype == ObjectTypes.FILE_EVT:
-        res1 = files[0].path
+        res = files[0].path
     elif objtype == ObjectTypes.NET_FLOW:
-        res1 = utils.getNetFlowStr(flow) 
+        res = utils.getNetFlowStr(flow)
+        fd = flow.fd
+    if objtype == ObjectTypes.FILE_FLOW:
+        fd = flow.fd
+ 
     numBReads = evflow.numRRecvBytes if flow is not None else ''
     numBWrites = evflow.numWSendBytes if flow is not None else ''
+    numOReads = evflow.numRRecvOps if flow is not None else ''
+    numOWrites = evflow.numWSendOps if flow is not None else ''
     
-    res2 = files[1].path if files is not None and files[1] is not None else ''
+    res += "," + files[1].path if files is not None and files[1] is not None else ''
     cont = cont.id if cont is not None else '' 
     #print(f'|{exe:50}|{pid:5}|{tid:5}|{opFlags:8}|{sTime:23}|{eTime:23}|{ret:5}|{res1:45}|{numBReads:8}|{numBWrites:8}|{res2:45}|{cont:10}|')
-    print("|{0:50}|{1:5}|{2:5}|{3:9}|{4:26}|{5:26}|{6:5}|{7:45}|{8:8}|{9:8}|{10:45}|{11:10}|".format(exe, pid, tid, opFlags, sTime, eTime, ret, res1, numBReads, numBWrites, res2, cont))
+    print("|{0:5}|{1:2}|{2:45}|{3:5}|{4:5}|{5:5}|{6:11}|{7:26}|{8:26}|{9:5}|{10:5}|{11:45}|{12:8}|{13:8}|{14:10}|".format(i, OBJECT_MAP.get(objtype,"?"), exe, ppid, pid, tid, opFlags, sTime, eTime, fd, ret, res, str(numOReads) + ":" + str(numBReads), str(numOWrites) + ":" + str(numBWrites), cont))
+    i+=1

@@ -20,7 +20,7 @@ namespace process {
             container::ContainerContext* m_containerCxt;
             ProcessTable m_procs;
             file::FileContext* m_fileCxt;
-            static log4cxx::LoggerPtr m_logger;
+            //static log4cxx::LoggerPtr m_logger;
             void writeProcessAndAncestors(ProcessObj* proc); 
             void reupContainer(sinsp_evt* ev, ProcessObj* proc);
         public:
@@ -36,6 +36,7 @@ namespace process {
             void clearAllProcesses();
             void deleteProcess(ProcessObj** proc);
             bool exportProcess(OID* oid);
+            void printNetworkFlow(ProcessObj* proc);
             inline int getSize() {
                 return m_procs.size();
             }

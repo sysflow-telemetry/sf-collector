@@ -207,6 +207,9 @@
         "name" : "proto",
         "type" : "int"
       }, {
+        "name" : "fd",
+        "type" : "int"
+      }, {
         "name" : "numRRecvOps",
         "type" : "long"
       }, {

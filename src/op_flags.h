@@ -26,13 +26,15 @@ enum OpFlags {
      OP_WRITE_SEND = (1 << 9), 
      OP_CLOSE = (1 << 10), 
      OP_TRUNCATE = (1 << 11),
-     OP_DIGEST = (1 << 12), 
-     OP_MKDIR = (1 << 13),
-     OP_RMDIR = (1 << 14),
-     OP_LINK  = (1 << 15),
-     OP_UNLINK = (1 << 16), 
-     OP_SYMLINK = (1 << 17),
-     OP_RENAME = (1 << 18)
+     OP_SHUTDOWN = (1 << 12),
+     OP_MMAP = (1 << 13),
+     OP_DIGEST = (1 << 14), 
+     OP_MKDIR = (1 << 15),
+     OP_RMDIR = (1 << 16),
+     OP_LINK  = (1 << 17),
+     OP_UNLINK = (1 << 18), 
+     OP_SYMLINK = (1 << 19),
+     OP_RENAME = (1 << 20)
 };
 
 #define IS_FILE_EVT(FLAG) (FLAG == OP_MKDIR || FLAG == OP_RMDIR || FLAG == OP_LINK || FLAG == OP_UNLINK || FLAG == OP_SYMLINK || FLAG == OP_RENAME) 

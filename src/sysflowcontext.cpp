@@ -1,6 +1,6 @@
 #include "sysflowcontext.h"
 
-LoggerPtr SysFlowContext::m_logger(Logger::getLogger("sysflow.sysflowcontext"));
+//LoggerPtr SysFlowContext::m_logger(Logger::getLogger("sysflow.sysflowcontext"));
 
 SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile, string sFile, string schFile, string expID, string filter) : m_filterCont(fCont),  m_fileDuration(fDur),
        m_outputFile(oFile), m_scapFile(sFile), m_schemaFile(schFile), m_exporterID(expID), m_nfExportInterval(30), m_nfExpireInterval(30), m_filter(filter) {
@@ -29,7 +29,7 @@ string SysFlowContext::getExporterID() {
              char host[257];
              memset(host, 0, 257);
              if(gethostname(host, 256) ) {
-                  LOG4CXX_ERROR(m_logger, "Error calling gethostname for sysflow header. Error Code: " <<  std::strerror(errno));
+                  SF_ERROR(m_logger, "Error calling gethostname for sysflow header. Error Code: " <<  std::strerror(errno));
                    exit(1); 
              }
              m_exporterID = host;

@@ -54,14 +54,14 @@ class SchemaClasses(object):
             @property
             def rec(self):
                 """
-                :rtype: SchemaClasses.sysflow.entity.SFHeaderClass | SchemaClasses.sysflow.entity.ContainerClass | SchemaClasses.sysflow.entity.ProcessClass | SchemaClasses.sysflow.entity.FileClass | SchemaClasses.sysflow.event.ProcessEventClass | SchemaClasses.sysflow.flow.NetworkFlowClass | SchemaClasses.sysflow.flow.FileFlowClass | SchemaClasses.sysflow.event.FileEventClass
+                :rtype: SchemaClasses.sysflow.entity.SFHeaderClass | SchemaClasses.sysflow.entity.ContainerClass | SchemaClasses.sysflow.entity.ProcessClass | SchemaClasses.sysflow.entity.FileClass | SchemaClasses.sysflow.event.ProcessEventClass | SchemaClasses.sysflow.flow.NetworkFlowClass | SchemaClasses.sysflow.flow.FileFlowClass | SchemaClasses.sysflow.event.FileEventClass | SchemaClasses.sysflow.event.NetworkEventClass
                 """
                 return self._inner_dict.get('rec')
             
             @rec.setter
             def rec(self, value):
                 #"""
-                #:param SchemaClasses.sysflow.entity.SFHeaderClass | SchemaClasses.sysflow.entity.ContainerClass | SchemaClasses.sysflow.entity.ProcessClass | SchemaClasses.sysflow.entity.FileClass | SchemaClasses.sysflow.event.ProcessEventClass | SchemaClasses.sysflow.flow.NetworkFlowClass | SchemaClasses.sysflow.flow.FileFlowClass | SchemaClasses.sysflow.event.FileEventClass value:
+                #:param SchemaClasses.sysflow.entity.SFHeaderClass | SchemaClasses.sysflow.entity.ContainerClass | SchemaClasses.sysflow.entity.ProcessClass | SchemaClasses.sysflow.entity.FileClass | SchemaClasses.sysflow.event.ProcessEventClass | SchemaClasses.sysflow.flow.NetworkFlowClass | SchemaClasses.sysflow.flow.FileFlowClass | SchemaClasses.sysflow.event.FileEventClass | SchemaClasses.sysflow.event.NetworkEventClass value:
                 #"""
                 self._inner_dict['rec'] = value
             
@@ -672,6 +672,180 @@ class SchemaClasses(object):
                     self._inner_dict['newFileOID'] = value
                 
                 
+            class NetworkEventClass(DictWrapper):
+                
+                """
+                
+                """
+                
+                
+                RECORD_SCHEMA = get_schema_type("sysflow.event.NetworkEvent")
+                
+                
+                def __init__(self, inner_dict=None):
+                    super(SchemaClasses.sysflow.event.NetworkEventClass, self).__init__(inner_dict)
+                    if inner_dict is None:
+                        self.procOID = SchemaClasses.sysflow.type.OIDClass()
+                        self.tid = int()
+                        self.opFlags = int()
+                        self.sip = int()
+                        self.sport = int()
+                        self.dip = int()
+                        self.dport = int()
+                        self.proto = int()
+                        self.ret = int()
+                
+                
+                @property
+                def procOID(self):
+                    """
+                    :rtype: SchemaClasses.sysflow.type.OIDClass
+                    """
+                    return self._inner_dict.get('procOID')
+                
+                @procOID.setter
+                def procOID(self, value):
+                    #"""
+                    #:param SchemaClasses.sysflow.type.OIDClass value:
+                    #"""
+                    self._inner_dict['procOID'] = value
+                
+                
+                @property
+                def ts(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('ts')
+                
+                @ts.setter
+                def ts(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['ts'] = value
+                
+                
+                @property
+                def tid(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('tid')
+                
+                @tid.setter
+                def tid(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['tid'] = value
+                
+                
+                @property
+                def opFlags(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('opFlags')
+                
+                @opFlags.setter
+                def opFlags(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['opFlags'] = value
+                
+                
+                @property
+                def sip(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('sip')
+                
+                @sip.setter
+                def sip(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['sip'] = value
+                
+                
+                @property
+                def sport(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('sport')
+                
+                @sport.setter
+                def sport(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['sport'] = value
+                
+                
+                @property
+                def dip(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('dip')
+                
+                @dip.setter
+                def dip(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['dip'] = value
+                
+                
+                @property
+                def dport(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('dport')
+                
+                @dport.setter
+                def dport(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['dport'] = value
+                
+                
+                @property
+                def proto(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('proto')
+                
+                @proto.setter
+                def proto(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['proto'] = value
+                
+                
+                @property
+                def ret(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('ret')
+                
+                @ret.setter
+                def ret(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['ret'] = value
+                
+                
             class ProcessEventClass(DictWrapper):
                 
                 """
@@ -1011,6 +1185,7 @@ class SchemaClasses(object):
                         self.dip = int()
                         self.dport = int()
                         self.proto = int()
+                        self.fd = int()
                         self.numRRecvOps = int()
                         self.numWSendOps = int()
                         self.numRRecvBytes = int()
@@ -1168,6 +1343,21 @@ class SchemaClasses(object):
                 
                 
                 @property
+                def fd(self):
+                    """
+                    :rtype: int
+                    """
+                    return self._inner_dict.get('fd')
+                
+                @fd.setter
+                def fd(self, value):
+                    #"""
+                    #:param int value:
+                    #"""
+                    self._inner_dict['fd'] = value
+                
+                
+                @property
                 def numRRecvOps(self):
                     """
                     :rtype: int
@@ -1308,6 +1498,7 @@ __SCHEMA_TYPES = {
     'sysflow.entity.Process': SchemaClasses.sysflow.entity.ProcessClass,
     'sysflow.entity.SFHeader': SchemaClasses.sysflow.entity.SFHeaderClass,
     'sysflow.event.FileEvent': SchemaClasses.sysflow.event.FileEventClass,
+    'sysflow.event.NetworkEvent': SchemaClasses.sysflow.event.NetworkEventClass,
     'sysflow.event.ProcessEvent': SchemaClasses.sysflow.event.ProcessEventClass,
     'sysflow.flow.FileFlow': SchemaClasses.sysflow.flow.FileFlowClass,
     'sysflow.flow.NetworkFlow': SchemaClasses.sysflow.flow.NetworkFlowClass,

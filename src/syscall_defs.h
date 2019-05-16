@@ -53,9 +53,14 @@
                         }
 
 #define SF_CLOSE_EXIT(EV)   case PPME_SYSCALL_CLOSE_X: \
-                        case PPME_SOCKET_SHUTDOWN_X: \
 			{                     \
 			    m_dfPrcr->handleDataEvent(EV, OP_CLOSE); \
+			    break;            \
+                        }
+
+#define SF_SHUTDOWN_EXIT(EV) case PPME_SOCKET_SHUTDOWN_X: \
+			{                     \
+			    m_dfPrcr->handleDataEvent(EV, OP_SHUTDOWN); \
 			    break;            \
                         }
 
@@ -192,10 +197,17 @@
                                m_dfPrcr->handleDataEvent(EV, OP_SETNS); \
                                break;  \
                           }
-#endif
+
+#define SF_MMAP_EXIT(EV)  case PPME_SYSCALL_MMAP_X: \
+                          case PPME_SYSCALL_MMAP2_X: \
+                          {       \
+                               m_dfPrcr->handleDataEvent(EV, OP_MMAP); \
+                               break;  \
+                          }
 
 
 #define IS_AT_SC(TYPE) (TYPE == PPME_SYSCALL_SYMLINKAT_X || TYPE == PPME_SYSCALL_RENAMEAT_X || TYPE == PPME_SYSCALL_UNLINKAT_X || TYPE == PPME_SYSCALL_UNLINKAT_2_X || \
                         TYPE == PPME_SYSCALL_LINKAT_X || TYPE == PPME_SYSCALL_LINKAT_2_X || TYPE == PPME_SYSCALL_MKDIRAT_X)
 
 #define IS_UNLINKAT(TYPE) (TYPE == PPME_SYSCALL_UNLINKAT_X || TYPE == PPME_SYSCALL_UNLINKAT_2_X)
+#endif

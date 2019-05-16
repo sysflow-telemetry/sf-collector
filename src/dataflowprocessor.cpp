@@ -2,7 +2,7 @@
 
 using namespace dataflow;
 
-LoggerPtr DataFlowProcessor::m_logger(Logger::getLogger("sysflow.dataflow"));
+//LoggerPtr DataFlowProcessor::m_logger(Logger::getLogger("sysflow.dataflow"));
 
 DataFlowProcessor::DataFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt, file::FileContext* fileCxt) : m_dfSet() {
     m_cxt = cxt;
@@ -33,7 +33,7 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt* ev, OpFlags flag) {
    //}
 
     if(fdinfo == NULL) {
-       LOG4CXX_DEBUG(m_logger, "Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ErrorCode: " << utils::getSyscallResult(ev));
+       SF_DEBUG(m_logger, "Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ErrorCode: " << utils::getSyscallResult(ev));
        if(IS_FILE_EVT(flag)) {
            return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
        }
@@ -66,11 +66,11 @@ int DataFlowProcessor::checkForExpiredRecords() {
      }
      m_lastCheck = now;
      int i = 0;
-     LOG4CXX_DEBUG(m_logger, "Checking expired Flows!!!....");
+     SF_DEBUG(m_logger, "Checking expired Flows!!!....");
      for(DataFlowSet::iterator it = m_dfSet.begin(); it != m_dfSet.end(); ) {
-             LOG4CXX_DEBUG(m_logger, "Checking flow with exportTime: " << (*it)->exportTime << " Now: " << now );
+             SF_DEBUG(m_logger, "Checking flow with exportTime: " << (*it)->exportTime << " Now: " << now );
             if((*it)->exportTime <= now) {
-                 LOG4CXX_DEBUG(m_logger, "Exporting flow!!! " );  
+                 SF_DEBUG(m_logger, "Exporting flow!!! " );  
                 if(difftime(now, (*it)->lastUpdate) >= m_cxt->getNFExpireInterval()) {
                     if((*it)->isNetworkFlow) {
                          m_netflowPrcr->removeNetworkFlow((*it));

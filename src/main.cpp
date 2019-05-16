@@ -67,8 +67,8 @@ static void usage(std::string name)
               << std::endl;
 }
 
-static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("sysflow.main"));
-
+//static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("sysflow.main"));
+#define logger 1
 
 int main( int argc, char** argv )
 {
@@ -158,28 +158,28 @@ int main( int argc, char** argv )
            return 1;
         }
 
-        try
-        {
-            if (!logProps.empty())
+       /* try
+        {*/
+            /*if (!logProps.empty())
             {
                 PropertyConfigurator::configure(logProps.c_str());
             }
             else
             {
                 BasicConfigurator::configure();
-            }
-            LOG4CXX_DEBUG(logger, "Starting sysporter..")
+            }*/
+            SF_DEBUG(logger, "Starting sysporter..");
             SysFlowContext* cxt = new SysFlowContext(filterCont, fileDuration, outputDir, scapFile, schemaFile, exporterID, filter);
             s_prc = new SysFlowProcessor(cxt);
             int ret =  s_prc->run();
             delete s_prc;
             return ret;
  
-        }
+       /* }
         catch(Exception& ex)
         {
             cerr << ex.what() << endl;
             return 1;
-        }
+        }*/
 }
 

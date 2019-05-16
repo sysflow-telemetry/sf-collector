@@ -209,6 +209,7 @@ struct NetworkFlow {
     int32_t dip;
     int32_t dport;
     int32_t proto;
+    int32_t fd;
     int64_t numRRecvOps;
     int64_t numWSendOps;
     int64_t numRRecvBytes;
@@ -224,6 +225,7 @@ struct NetworkFlow {
         dip(int32_t()),
         dport(int32_t()),
         proto(int32_t()),
+        fd(int32_t()),
         numRRecvOps(int64_t()),
         numWSendOps(int64_t()),
         numRRecvBytes(int64_t()),
@@ -980,6 +982,7 @@ template<> struct codec_traits<sysflow::NetworkFlow> {
         avro::encode(e, v.dip);
         avro::encode(e, v.dport);
         avro::encode(e, v.proto);
+        avro::encode(e, v.fd);
         avro::encode(e, v.numRRecvOps);
         avro::encode(e, v.numWSendOps);
         avro::encode(e, v.numRRecvBytes);
@@ -1023,15 +1026,18 @@ template<> struct codec_traits<sysflow::NetworkFlow> {
                     avro::decode(d, v.proto);
                     break;
                 case 10:
-                    avro::decode(d, v.numRRecvOps);
+                    avro::decode(d, v.fd);
                     break;
                 case 11:
-                    avro::decode(d, v.numWSendOps);
+                    avro::decode(d, v.numRRecvOps);
                     break;
                 case 12:
-                    avro::decode(d, v.numRRecvBytes);
+                    avro::decode(d, v.numWSendOps);
                     break;
                 case 13:
+                    avro::decode(d, v.numRRecvBytes);
+                    break;
+                case 14:
                     avro::decode(d, v.numWSendBytes);
                     break;
                 default:
@@ -1049,6 +1055,7 @@ template<> struct codec_traits<sysflow::NetworkFlow> {
             avro::decode(d, v.dip);
             avro::decode(d, v.dport);
             avro::decode(d, v.proto);
+            avro::decode(d, v.fd);
             avro::decode(d, v.numRRecvOps);
             avro::decode(d, v.numWSendOps);
             avro::decode(d, v.numRRecvBytes);

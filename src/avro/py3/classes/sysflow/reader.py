@@ -38,6 +38,13 @@ class FlattenedSFReader(SFReader):
         self.header = None
         self.retEntities = retEntities
 
+    def getProcess(self, oid):
+        key = self.getProcessKey(oid)
+        if key in self.processes:
+            return self.processes[key]
+        else:
+            return None
+
     def getProcessKey(self, oid):
          hpid = oid.hpid
          createTS = oid.createTS

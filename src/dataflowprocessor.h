@@ -18,7 +18,7 @@ namespace dataflow {
             SysFlowContext*   m_cxt;
             DataFlowSet m_dfSet;
             time_t m_lastCheck;
-            static log4cxx::LoggerPtr m_logger;
+            //static log4cxx::LoggerPtr m_logger;
         public:
             inline int getSize() {
                 return m_netflowPrcr->getSize();

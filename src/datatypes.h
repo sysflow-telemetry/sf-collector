@@ -18,6 +18,7 @@ struct NFKey {
    uint16_t port1;
    uint32_t ip2;
    uint16_t port2;
+   uint32_t fd;
 };
 
 class DataFlowObj {
@@ -35,6 +36,7 @@ class DataFlowObj {
 class NetFlowObj : public DataFlowObj {
     public:
        NetworkFlow netflow;
+       //NFKey nfkey;
        bool operator ==(const NetFlowObj& nfo) {
          if(exportTime != nfo.exportTime) {
             return false;
@@ -47,7 +49,8 @@ class NetFlowObj : public DataFlowObj {
             netflow.dip == nfo.netflow.dip &&
             netflow.sport == nfo.netflow.sport &&
             netflow.dport == nfo.netflow.dport &&
-            netflow.ts == nfo.netflow.ts);
+            netflow.proto == nfo.netflow.proto &&
+            netflow.ts == nfo.netflow.ts && netflow.tid == netflow.tid && netflow.fd == netflow.fd);
        // cout << "Result: " << result << endl;
         //return result;
       
@@ -103,6 +106,14 @@ struct MurmurHasher<OID*> {
         return hash;
     }    
 };
+template<> 
+struct MurmurHasher<NFKey*> {
+    size_t operator()(const NFKey* t) const {
+        size_t hash;
+        MurmurHash3_x86_32((void*)t, sizeof(NFKey), 0, &hash);
+        return hash;
+    }    
+};
 
 /*struct eqoid
 {
@@ -153,14 +164,33 @@ struct MurmurHasher<NFKey> {
         return hash;
     }    
 };
-
 struct eqnfkey {
   bool operator()(const NFKey& n1, const NFKey& n2) const {
+    cout << "Comparing " <<  n1.ip1 << " " << n2.ip1 << " "
+         << n1.ip2 << " " << n2.ip2 << " "
+         << n1.port1 << " " << n2.port1 << " "
+         << n1.port2 << " " << n2.port2 << " "
+         << n1.tid << " " << n2.tid << " "
+         << n1.fd << " " << n2.fd << endl;
     return (n1.ip1 == n2.ip1 && n1.ip2 == n2.ip2 && 
-           n1.port1 == n2.port1 && n1.port2 == n2.port2);
+           n1.port1 == n2.port1 && n1.port2 == n2.port2 && n1.tid == n2.tid && n1.fd == n2.fd);
            //&& n1.oid.hpid == n2.oid.hpid && n1.oid.createTS == n2.oid.createTS);
   }
 };
+/*
+struct eqnfkey {
+  bool operator()(const NFKey* n1, const NFKey* n2) const {
+    cout << "Comparing " <<  n1->ip1 << " " << n2->ip1 << " "
+         << n1->ip2 << " " << n2->ip2 << " "
+         << n1->port1 << " " << n2->port1 << " "
+         << n1->port2 << " " << n2->port2 << " "
+         << n1->tid << " " << n2->tid << " "
+         << n1->fd << " " << n2->fd << endl;
+    return (n1->ip1 == n2->ip1 && n1->ip2 == n2->ip2 && 
+           n1->port1 == n2->port1 && n1->port2 == n2->port2 && n1->tid == n2->tid && n1->fd == n2->fd);
+           //&& n1.oid.hpid == n2.oid.hpid && n1.oid.createTS == n2.oid.createTS);
+  }
+};*/
 
 struct eqdfobj {
   bool operator()(const DataFlowObj* df1, const DataFlowObj* df2) const {

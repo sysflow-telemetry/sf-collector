@@ -1,7 +1,7 @@
 #include "processeventprocessor.h"
 
 using namespace processevent;
-LoggerPtr ProcessEventProcessor::m_logger(Logger::getLogger("sysflow.processevent"));
+//LoggerPtr ProcessEventProcessor::m_logger(Logger::getLogger("sysflow.processevent"));
 ProcessEventProcessor::ProcessEventProcessor(SysFlowWriter* writer, process::ProcessContext* pc, dataflow::DataFlowProcessor* dfPrcr) {
     m_processCxt = pc;
     m_writer = writer;
@@ -47,7 +47,7 @@ void ProcessEventProcessor::writeSetUIDEvent(sinsp_evt* ev) {
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
 /*    if(!created && utils::getSyscallResult(ev) == 0) {
         m_processCxt->updateProcess(&(proc->proc), ev, SFObjectState::MODIFIED);
-        LOG4CXX_DEBUG(m_logger, "Writing modified process..." << proc->proc.exe);
+        SF_DEBUG(m_logger, "Writing modified process..." << proc->proc.exe);
         m_writer->writeProcess(&(proc->proc));
     }*/
     m_procEvt.opFlags =  OP_SETUID;
@@ -98,7 +98,7 @@ void ProcessEventProcessor::writeExecEvent(sinsp_evt* ev) {
    // do we want to add another process record just to mark it modified at this point?
     if(!created) {
         m_processCxt->updateProcess(&(proc->proc), ev, SFObjectState::MODIFIED);
-        LOG4CXX_DEBUG(m_logger, "Writing modified process..." << proc->proc.exe);
+        SF_DEBUG(m_logger, "Writing modified process..." << proc->proc.exe);
         m_writer->writeProcess(&(proc->proc));
     }
 

@@ -26,7 +26,7 @@ namespace processevent {
           dataflow::DataFlowProcessor* m_dfPrcr;
           ProcessEvent m_procEvt;
           std::string m_uid;
-          static log4cxx::LoggerPtr m_logger;
+          //static log4cxx::LoggerPtr m_logger;
    };
 }
 #endif

@@ -11,7 +11,7 @@ static OID s_oiddelkey;
 static OID s_oidemptykey;
 
 
-static LoggerPtr m_logger(Logger::getLogger("sysflow.utils"));
+//static LoggerPtr m_logger(Logger::getLogger("sysflow.utils"));
 
 void initKeys() {
    s_nfdelkey.ip1 = 1;
@@ -130,7 +130,7 @@ int64_t utils::getSyscallResult(sinsp_evt* ev) {
 		res = *(int64_t *)p->m_val;
                 break;
   	    default:
-               LOG4CXX_WARN(m_logger, "Syscall result not of type pid!! Type: " << param->type <<  " Name: " << param->name);
+               SF_WARN(m_logger, "Syscall result not of type pid!! Type: " << param->type <<  " Name: " << param->name);
                break;
         }
       }
@@ -155,7 +155,7 @@ avro::ValidSchema utils::loadSchema(const char* filename)
         std::ifstream ifs(filename);
         avro::compileJsonSchema(ifs, result);
      }catch(avro::Exception& ex) {
-       LOG4CXX_ERROR(m_logger, "Unable to load schema file from " << filename << " Error: " << ex.what());
+       SF_ERROR(m_logger, "Unable to load schema file from " << filename << " Error: " << ex.what());
        throw; 
      }
     return result;
@@ -204,7 +204,7 @@ int64_t utils::getFD(sinsp_evt* ev, string paraName) {
 
 string utils::getAbsolutePath(sinsp_threadinfo* ti, int64_t dirfd, string fileName) {
     fs::path p(fileName);
-    LOG4CXX_DEBUG(m_logger, "getAbsolutePath: The path is " << p << " File name " << fileName <<  " is relative? " << p.is_relative());
+    SF_DEBUG(m_logger, "getAbsolutePath: The path is " << p << " File name " << fileName <<  " is relative? " << p.is_relative());
     if(fileName.empty() || p.is_relative()) {
         fs::path tmp;
         string cwd = ti->get_cwd(); 
@@ -218,12 +218,12 @@ string utils::getAbsolutePath(sinsp_threadinfo* ti, int64_t dirfd, string fileNa
             sinsp_fdinfo_t * fdinfo = ti->get_fd(dirfd);
             assert(fdinfo != NULL);
             tmp = fdinfo->m_name;             
-            LOG4CXX_DEBUG(m_logger, "getAbsolutePath: Retrieve fdinfo for fd. Path:  " << tmp);                
+            SF_DEBUG(m_logger, "getAbsolutePath: Retrieve fdinfo for fd. Path:  " << tmp);                
         }
         tmp /= fileName;
-        LOG4CXX_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
+        SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
         p = fs::weakly_canonical(tmp);
-        LOG4CXX_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);               
+        SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);               
     } else {
         p = fs::weakly_canonical(p);
     }
@@ -233,16 +233,16 @@ string utils::getAbsolutePath(sinsp_threadinfo* ti, int64_t dirfd, string fileNa
 
 string utils::getAbsolutePath(sinsp_threadinfo* ti, string fileName) {
     fs::path p(fileName);
-    LOG4CXX_DEBUG(m_logger, "getAbsolutePath: The path is " << p << " File name " << fileName <<  " is relative? " << p.is_relative());
+    SF_DEBUG(m_logger, "getAbsolutePath: The path is " << p << " File name " << fileName <<  " is relative? " << p.is_relative());
     if(fileName.empty() || p.is_relative()) {
         fs::path tmp; 
         string cwd = ti->get_cwd();
         if(!cwd.empty()) {
             tmp = cwd;
             tmp /= fileName;
-            LOG4CXX_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
+            SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
             p = fs::weakly_canonical(tmp);
-            LOG4CXX_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);               
+            SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);               
         }              
     } else {
         p = fs::weakly_canonical(p);

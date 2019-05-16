@@ -12,6 +12,7 @@ class SpecificDatumReader(DatumReader):
         "sysflow.entity.Process": SchemaClasses.sysflow.entity.ProcessClass,
         "sysflow.entity.SFHeader": SchemaClasses.sysflow.entity.SFHeaderClass,
         "sysflow.event.FileEvent": SchemaClasses.sysflow.event.FileEventClass,
+        "sysflow.event.NetworkEvent": SchemaClasses.sysflow.event.NetworkEventClass,
         "sysflow.event.ProcessEvent": SchemaClasses.sysflow.event.ProcessEventClass,
         "sysflow.flow.FileFlow": SchemaClasses.sysflow.flow.FileFlowClass,
         "sysflow.flow.NetworkFlow": SchemaClasses.sysflow.flow.NetworkFlowClass,

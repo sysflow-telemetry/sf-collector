@@ -31,6 +31,8 @@ def getOpFlagsStr(opFlags):
     ops +=  "W" if (opFlags & opflags.OP_WRITE_SEND)  else " ";
     ops +=  "R" if (opFlags & opflags.OP_READ_RECV)  else " ";
     ops +=  "N" if (opFlags & opflags.OP_SETNS)  else " ";
+    ops +=  "M" if (opFlags & opflags.OP_MMAP)  else " ";
+    ops +=  "S" if (opFlags & opflags.OP_SHUTDOWN)  else " ";
     ops +=  "C" if (opFlags & opflags.OP_CLOSE)  else " ";
     ops +=  "T" if (opFlags & opflags.OP_TRUNCATE) else " ";
     ops +=  "D" if (opFlags & opflags.OP_DIGEST)  else " ";
