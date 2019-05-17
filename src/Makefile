@@ -3,8 +3,9 @@ include ../makefile.env.inc
 
 TARGET=sysporter
 TARGET2=sysreader
-GCC=g++-8
-GCCVERSIONGTEQ8 := $(shell expr `$(GCC) -dumpversion | cut -f1 -d.` \>= 8)
+#GCC=g++-8
+CXX=clang
+GCCVERSIONGTEQ8 := $(shell expr `$(CXX) -dumpversion | cut -f1 -d.` \>= 8)
 
 LIBLOCALPREFIX=../modules
 SDLOCALLIBPREFIX=$(LIBLOCALPREFIX)/sysdig/build/lib
@@ -63,59 +64,59 @@ version:
 
 .PHONY: $(TARGET)
 $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .filecontext.o
-	$(GCC) $^ -o $@ $(LDFLAGS)
+	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .PHONY: $(TARGET2)
 $(TARGET2): .reader.o .MurmurHash3.o
-	$(GCC) $^ -o $@ $(LDFLAGS2)
+	$(CXX) $^ -o $@ $(LDFLAGS2)
 
 .main.o: main.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .sysflowfork.o: sysflowfork.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .MurmurHash3.o: MurmurHash3.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .utils.o: utils.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .containercontext.o: containercontext.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .sysflowprocessor.o: sysflowprocessor.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .sysflowwriter.o: sysflowwriter.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .processcontext.o: processcontext.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .processeventprocessor.o: processeventprocessor.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .dataflowprocessor.o: dataflowprocessor.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .networkflowprocessor.o: networkflowprocessor.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .fileflowprocessor.o: fileflowprocessor.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .fileeventprocessor.o: fileeventprocessor.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .sysflowcontext.o: sysflowcontext.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .filecontext.o: filecontext.cpp
-	$(GCC) $(CFLAGS) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .reader.o: reader.cpp
-	$(GCC) $(CFLAGS2) -o $@ -c $^
+	$(CXX) $(CFLAGS2) -o $@ -c $^
 
 .PHONY: clean
 clean:
