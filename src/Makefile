@@ -56,7 +56,6 @@ uninstall:
 
 .PHONY: version
 version:
-	@echo "$(GCCVERSIONGTEQ8)"
 	cp sysflow_config.h.in sysflow_config.h
 	sed -i -E "s/SYSFLOW_VERSION/\"$(SYSFLOW_VERSION)\"/" sysflow_config.h
 	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
