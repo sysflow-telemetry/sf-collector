@@ -3,7 +3,8 @@ include ../makefile.env.inc
 
 TARGET=sysporter
 TARGET2=sysreader
-GCCVERSIONGTEQ8 := $(shell expr `g++ -dumpversion | cut -f1 -d.` \>= 8)
+GCC=g++-8
+GCCVERSIONGTEQ8 := $(shell expr `$(GCC) -dumpversion | cut -f1 -d.` \>= 8)
 
 LIBLOCALPREFIX=../modules
 SDLOCALLIBPREFIX=$(LIBLOCALPREFIX)/sysdig/build/lib
@@ -11,17 +12,17 @@ SDLOCALINCPREFIX=$(LIBLOCALPREFIX)/sysdig/build/include
 AVRLOCALLIBPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
 AVRLOCALINCPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
 
-LDFLAGS= $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
-	$(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a \
-	-lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp \
-	-L /usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
-	-Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
+LIBS= $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
+      $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a \
+      -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp
+LIBS2 = -lstdc++ -lpthread -lm -lavrocpp -lb64
 
-LDFLAGS2= -lpthread -lm -lavrocpp -lb64 \
-	-L /usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
-	-Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
+LDFLAGS= $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
+	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
+LDFLAGS2= $(LIBS2) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
+	  -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
 
-CFLAGS= -no-pie -std=c++17 -Wall -ggdb -I.. -I./avro/src/ \
+CFLAGS= -no-pie -std=c++17 -Wall -g -O0 -I.. -I./avro/src/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
@@ -30,9 +31,11 @@ CFLAGS2= -std=c++17 -ggdb -I.. -I./avro/src/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
 
 ifeq "$(GCCVERSIONGTEQ8)" "1"
-	LDFLAGS+= -lstdc++fs
+	LIBS+= -lstdc++fs
+	LIBS2+= -lstdc++fs
 else
-	LDFLAGS+= -lboost_filesystem
+	LIBS+= -lboost_system -lboost_filesystem
+	LIBS2+= -lboost_system -lboost_filesystem
 	CFLAGS+= -DSYSPORTER_BOOST
 	CFLAGS2+= -DSYSPORTER_BOOST
 endif
@@ -52,6 +55,7 @@ uninstall:
 
 .PHONY: version
 version:
+	@echo "$(GCCVERSIONGTEQ8)"
 	cp sysflow_config.h.in sysflow_config.h
 	sed -i -E "s/SYSFLOW_VERSION/\"$(SYSFLOW_VERSION)\"/" sysflow_config.h
 	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
@@ -59,59 +63,59 @@ version:
 
 .PHONY: $(TARGET)
 $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .filecontext.o
-	g++ $^ -o $@ $(LDFLAGS)
+	$(GCC) $^ -o $@ $(LDFLAGS)
 
 .PHONY: $(TARGET2)
 $(TARGET2): .reader.o .MurmurHash3.o
-	g++ $^ -o $@ $(LDFLAGS2)
+	$(GCC) $^ -o $@ $(LDFLAGS2)
 
 .main.o: main.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .sysflowfork.o: sysflowfork.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .MurmurHash3.o: MurmurHash3.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .utils.o: utils.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .containercontext.o: containercontext.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .sysflowprocessor.o: sysflowprocessor.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .sysflowwriter.o: sysflowwriter.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .processcontext.o: processcontext.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .processeventprocessor.o: processeventprocessor.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .dataflowprocessor.o: dataflowprocessor.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .networkflowprocessor.o: networkflowprocessor.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .fileflowprocessor.o: fileflowprocessor.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .fileeventprocessor.o: fileeventprocessor.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .sysflowcontext.o: sysflowcontext.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .filecontext.o: filecontext.cpp
-	g++ $(CFLAGS) -o $@ -c $^
+	$(GCC) $(CFLAGS) -o $@ -c $^
 
 .reader.o: reader.cpp
-	g++ $(CFLAGS2) -o $@ -c $^
+	$(GCC) $(CFLAGS2) -o $@ -c $^
 
 .PHONY: clean
 clean:
