@@ -2,7 +2,7 @@
 
 using namespace dataflow;
 
-//LoggerPtr DataFlowProcessor::m_logger(Logger::getLogger("sysflow.dataflow"));
+CREATE_LOGGER(DataFlowProcessor, "sysflow.dataflow");
 
 DataFlowProcessor::DataFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt, file::FileContext* fileCxt) : m_dfSet() {
     m_cxt = cxt;

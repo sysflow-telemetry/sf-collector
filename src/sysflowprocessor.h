@@ -21,6 +21,7 @@ namespace sysflowprocessor {
             }
             int run();
         private:
+	    DEFINE_LOGGER();
             bool m_exit;
             SysFlowContext* m_cxt;
             SysFlowWriter* m_writer;

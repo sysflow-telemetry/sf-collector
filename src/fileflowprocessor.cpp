@@ -2,7 +2,7 @@
 #include "utils.h"
 using namespace fileflow;
 
-//LoggerPtr FileFlowProcessor::m_logger(Logger::getLogger("sysflow.fileflow"));
+CREATE_LOGGER(FileFlowProcessor, "sysflow.fileflow");
 
 FileFlowProcessor::FileFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt, DataFlowSet* dfSet, file::FileContext* fileCxt)  {
     m_cxt = cxt;

@@ -1,8 +1,8 @@
 #include "sysflowprocessor.h"
 using namespace sysflowprocessor;
+CREATE_LOGGER(SysFlowProcessor, "sysflow.sysflowprocessor");
 
-//LoggerPtr SysFlowProcessor::m_logger(Logger::getLogger("sysflow.sysflowprocessor"));
-
+//SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false), m_cxt(NULL), m_writer(NULL), m_containerCxt(NULL), m_fileCxt(NULL), m_processCxt(NULL), m_procEvtPrcr(NULL), m_dfPrcr(NULL) {
 SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
    m_cxt = cxt;
    time_t start = 0;
@@ -18,13 +18,13 @@ SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
 }
 
 SysFlowProcessor::~SysFlowProcessor() {
-   delete m_cxt;
-   delete m_processCxt;
    delete m_dfPrcr;
-   delete m_fileCxt;
    delete m_procEvtPrcr;
    delete m_containerCxt;
+   delete m_processCxt;
+   delete m_fileCxt;
    delete m_writer;
+   delete m_cxt;
 }
 
 void SysFlowProcessor::clearTables() {
@@ -46,8 +46,8 @@ bool SysFlowProcessor::checkAndRotateFile()  {
 }
 
 int SysFlowProcessor::run() {
-	int32_t res;
-	sinsp_evt* ev;
+	int32_t res = 0;
+	sinsp_evt* ev = NULL;
 	try
 	{
                 m_writer->initialize();

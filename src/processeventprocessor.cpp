@@ -1,7 +1,7 @@
 #include "processeventprocessor.h"
 
 using namespace processevent;
-//LoggerPtr ProcessEventProcessor::m_logger(Logger::getLogger("sysflow.processevent"));
+CREATE_LOGGER(ProcessEventProcessor, "sysflow.processevent");
 ProcessEventProcessor::ProcessEventProcessor(SysFlowWriter* writer, process::ProcessContext* pc, dataflow::DataFlowProcessor* dfPrcr) {
     m_processCxt = pc;
     m_writer = writer;

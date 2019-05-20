@@ -68,8 +68,7 @@ static void usage(std::string name)
 }
 
 //static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("sysflow.main"));
-#define logger 1
-
+CREATE_MAIN_LOGGER()
 int main( int argc, char** argv )
 {
 	string scapFile = "";
@@ -158,8 +157,8 @@ int main( int argc, char** argv )
            return 1;
         }
 
-       /* try
-        {*/
+        try
+        {
             /*if (!logProps.empty())
             {
                 PropertyConfigurator::configure(logProps.c_str());
@@ -168,6 +167,7 @@ int main( int argc, char** argv )
             {
                 BasicConfigurator::configure();
             }*/
+	    CONFIGURE_LOGGER(logProps);	
             SF_DEBUG(logger, "Starting sysporter..");
             SysFlowContext* cxt = new SysFlowContext(filterCont, fileDuration, outputDir, scapFile, schemaFile, exporterID, filter);
             s_prc = new SysFlowProcessor(cxt);
@@ -175,11 +175,7 @@ int main( int argc, char** argv )
             delete s_prc;
             return ret;
  
-       /* }
-        catch(Exception& ex)
-        {
-            cerr << ex.what() << endl;
-            return 1;
-        }*/
+       }
+       CATCH_LOGGER_EXCEPTION();
 }
 

@@ -4,7 +4,7 @@ include ../makefile.env.inc
 TARGET=sysporter
 TARGET2=sysreader
 #GCC=g++-8
-CXX=clang
+CXX=g++-8
 GCCVERSIONGTEQ8 := $(shell expr `$(CXX) -dumpversion | cut -f1 -d.` \>= 8)
 
 LIBLOCALPREFIX=../modules
@@ -15,7 +15,7 @@ AVRLOCALINCPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
 
 LIBS= $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
       $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a \
-      -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp
+      -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -llog4cxx
 LIBS2 = -lstdc++ -lpthread -lm -lavrocpp -lb64
 
 LDFLAGS= $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \

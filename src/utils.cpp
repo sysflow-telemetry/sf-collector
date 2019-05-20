@@ -9,9 +9,10 @@ static bool s_keysinit = false;
 
 static OID s_oiddelkey;
 static OID s_oidemptykey;
+using namespace utils;
 
 
-//static LoggerPtr m_logger(Logger::getLogger("sysflow.utils"));
+CREATE_LOGGER_2("sysflow.utils");
 
 void initKeys() {
    s_nfdelkey.ip1 = 1;

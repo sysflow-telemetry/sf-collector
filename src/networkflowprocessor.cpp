@@ -2,8 +2,7 @@
 #include "utils.h"
 using namespace networkflow;
 
-//LoggerPtr NetworkFlowProcessor::m_logger(Logger::getLogger("sysflow.networkflow"));
-
+CREATE_LOGGER(NetworkFlowProcessor, "sysflow.networkflow");
 NetworkFlowProcessor::NetworkFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* processCxt, DataFlowSet* dfSet)  {
     m_cxt = cxt;
     m_writer = writer;
@@ -236,13 +235,14 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
     NetFlowObj* nf = NULL;
 
-    m_processCxt->printNetworkFlow(proc);
+    //m_processCxt->printNetworkFlow(proc);
     sinsp_threadinfo* ti = ev->get_thread_info();
-    NFKey key;
+    static NFKey key = NFKey();
     canonicalizeKey(fdinfo, &key, ti->m_tid, ev->get_fd_num());
     SF_DEBUG(m_logger, "Key: " << key.ip1 << " " << key.ip2 << " " << key.port1 << " " << key.port2 << " " << key.tid << " " << key.fd );
     SF_DEBUG(m_logger, "Size of network flow table in process " << proc->netflows.size());
-    NetworkFlowTable::iterator nfi = proc->netflows.find(key);
+    //NetworkFlowTable::iterator nfi;
+    NetworkFlowTable::iterator nfi  = proc->netflows.find(key);
     SF_DEBUG(m_logger, "Key: " << key.ip1 << " " << key.ip2 << " " << key.port1 << " " << key.port2 << " " << key.tid << " " << key.fd );
     //SF_DEBUG(m_logger, "Key: " << s_key.ip1 << " " << s_key.ip2 << " " << s_key.port1 << " " << s_key.port2 << " " << s_key.tid << " " << s_key.fd );
     if(nfi != proc->netflows.end()) {

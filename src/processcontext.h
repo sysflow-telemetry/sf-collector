@@ -20,7 +20,7 @@ namespace process {
             container::ContainerContext* m_containerCxt;
             ProcessTable m_procs;
             file::FileContext* m_fileCxt;
-            //static log4cxx::LoggerPtr m_logger;
+	    DEFINE_LOGGER();
             void writeProcessAndAncestors(ProcessObj* proc); 
             void reupContainer(sinsp_evt* ev, ProcessObj* proc);
         public:

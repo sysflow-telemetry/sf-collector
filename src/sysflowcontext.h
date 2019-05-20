@@ -27,7 +27,7 @@ class SysFlowContext {
         int m_nfExpireInterval;
         bool m_offline;
         string m_filter;
-        //static log4cxx::LoggerPtr m_logger;
+	DEFINE_LOGGER();
     public:
         SysFlowContext(bool fCont, int fDur, string oFile, string sFile, string schFile, string exporterID, string filter); 
         virtual ~SysFlowContext();

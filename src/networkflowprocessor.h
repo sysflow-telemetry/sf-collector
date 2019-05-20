@@ -19,7 +19,7 @@ namespace networkflow {
             process::ProcessContext* m_processCxt;
             SysFlowWriter* m_writer;
             DataFlowSet* m_dfSet;
-            //static log4cxx::LoggerPtr m_logger;
+	    DEFINE_LOGGER();
             void canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* key,  uint64_t tid, uint64_t fd);
             void canonicalizeKey(NetFlowObj* nf, NFKey* key);
             void populateNetFlow(NetFlowObj* nf, OpFlags flag, sinsp_evt* ev, ProcessObj* proc);

@@ -50,7 +50,7 @@ class NetFlowObj : public DataFlowObj {
             netflow.sport == nfo.netflow.sport &&
             netflow.dport == nfo.netflow.dport &&
             netflow.proto == nfo.netflow.proto &&
-            netflow.ts == nfo.netflow.ts && netflow.tid == netflow.tid && netflow.fd == netflow.fd);
+            netflow.ts == nfo.netflow.ts && netflow.tid == nfo.netflow.tid && netflow.fd == nfo.netflow.fd);
        // cout << "Result: " << result << endl;
         //return result;
       
@@ -159,19 +159,19 @@ struct eqstr
 template<> 
 struct MurmurHasher<NFKey> {
     size_t operator()(const NFKey& t) const {
-        size_t hash;
+        size_t hash = 0;
         MurmurHash3_x86_32((void*)&t, sizeof(NFKey), 0, &hash);
         return hash;
     }    
 };
 struct eqnfkey {
   bool operator()(const NFKey& n1, const NFKey& n2) const {
-    cout << "Comparing " <<  n1.ip1 << " " << n2.ip1 << " "
+   /* cout << "Comparing " <<  n1.ip1 << " " << n2.ip1 << " "
          << n1.ip2 << " " << n2.ip2 << " "
          << n1.port1 << " " << n2.port1 << " "
          << n1.port2 << " " << n2.port2 << " "
          << n1.tid << " " << n2.tid << " "
-         << n1.fd << " " << n2.fd << endl;
+         << n1.fd << " " << n2.fd << endl;*/
     return (n1.ip1 == n2.ip1 && n1.ip2 == n2.ip2 && 
            n1.port1 == n2.port1 && n1.port2 == n2.port2 && n1.tid == n2.tid && n1.fd == n2.fd);
            //&& n1.oid.hpid == n2.oid.hpid && n1.oid.createTS == n2.oid.createTS);
@@ -240,7 +240,7 @@ class ProcessObj {
         NetworkFlowTable netflows;
         FileFlowTable    fileflows;
         ProcessSet children;
-        ProcessObj() : written(false) {
+        ProcessObj() : written(false), proc(), netflows(), fileflows(), children() {
             NFKey* emptykey = utils::getNFEmptyKey();
             NFKey* delkey = utils::getNFDelKey();
             OID* emptyoidkey = utils::getOIDEmptyKey();

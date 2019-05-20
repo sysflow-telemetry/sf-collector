@@ -3,8 +3,7 @@
 
 using namespace fileevent;
 
-//LoggerPtr FileEventProcessor::m_logger(Logger::getLogger("sysflow.fileevent"));
-
+CREATE_LOGGER(FileEventProcessor, "sysflow.fileevent");
 
 FileEventProcessor::FileEventProcessor(SysFlowWriter* writer, process::ProcessContext* procCxt, file::FileContext* fileCxt) { 
     m_writer = writer;
