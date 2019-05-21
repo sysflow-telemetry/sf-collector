@@ -1,4 +1,4 @@
-Objavro.codecdeflateavro.schema ’{
+Objavro.codecdeflateavro.schemaòÒ{
     "type": "record",
     "namespace": "sysflow",
     "name": "SysFlow",
@@ -267,6 +267,10 @@ Objavro.codecdeflateavro.schema ’{
                             "type": "int"
                         },
                         {
+                            "name": "fd",
+                            "type": "int"
+                        },
+                        {
                             "name": "numRRecvOps",
                             "type": "long"
                         },
@@ -376,14 +380,60 @@ Objavro.codecdeflateavro.schema ’{
                             ]
                         }
                     ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.event",
+                    "name": "NetworkEvent",
+                    "fields": [
+                        {
+                            "name": "procOID",
+                            "type": "sysflow.type.OID"
+                        },
+                        {
+                            "name": "ts",
+                            "type": "long"
+                        },
+                        {
+                            "name": "tid",
+                            "type": "long"
+                        },
+                        {
+                            "name": "opFlags",
+                            "type": "int"
+                        },
+                        {
+                            "name": "sip",
+                            "type": "int"
+                        },
+                        {
+                            "name": "sport",
+                            "type": "int"
+                        },
+                        {
+                            "name": "dip",
+                            "type": "int"
+                        },
+                        {
+                            "name": "dport",
+                            "type": "int"
+                        },
+                        {
+                            "name": "proto",
+                            "type": "int"
+                        },
+                        {
+                            "name": "ret",
+                            "type": "int"
+                        }
+                    ]
                 }
             ]
         }
     ]
 }
- }ñ@©ÿcÙ»íëhyy‡ﬁVêuïiLAÜßÎ∫V@4˝A‘TDCîvƒ‚ÅDç—ò®¯√?b•të≠K—Ó¢E¢""Ç"≠Q,Üx<HDkºà%j‘xD$hÔ0Bºvv∂”jßi“Œtﬂ˜}æô˝f‹"q¢$“4†( jn‘n⁄WÂö√
-ºôsDâÀ¥x„Ùz4“ÈıN‰Ï|™¿o·tq	@kœ í–∑»a«˚ÜPÄ¬q„ÿl—Œäfﬁ∆äbÜÖ÷/pîß†+òÍB)ŸLOÈzÜÖIú=Gê U&€ÍB±-ÇÖK™òÇ<„Â¬˛7òÉ ∏pI^ªgºœa`”yÅS%†Q>Z(¡óÂ±lbË“UÕmÒÈX=òÌÏ≥Ê∂›.|⁄ı˙4›÷ËXNJcãAÃ2§•¶ep ∆`Ö<Œèÿ1Ø¨Ûöì‚  i√êËƒ´cíè“Fad˚¢7—gß\s◊úÛííî{Ôòi4„ıoÀvË◊Ÿ≤·üinD`lÄ‡±;Êïó7°9)ù°@˛ô\2k˙¸~„ŒO›√G€ÀœV}tÆˆ<´nhG∆õ-+enêeSÀ6¶t-yµ˜dcÖ!™Í∆˜Ñ≠˜›ó{º∆@˚ñ≥ò‡÷$á§VÂU¡™"√
-j£))Q(êƒ–Ø„CW^ÔòÂ)r≠MÔ˙˘‡W¯qwAÖ
-õ˙?,ŒG√2Ö∂èÆæ≤ÕIô∑Ñ°ª#J∑◊/|‘€—˜ƒjM©¥ÁZ;õˆ≈M˜·∞L≈∑£9)S≈yBÛﬁ
-˜ÑíU’ëõÁZì⁄›ÖÁKº∏?í	é}4¨Ú.Æ•ÕIëêñÃÄ÷¡(ﬁlÏŸ˝¬4a˘‰´ıüººı≠· ÚÂÈ⁄x€:ìÖ∑Ép¬ ◊ê2‰ÆÔjóN˙s(··Ë9í√ı˛˘¡”ƒÁEùn5;“åØ¢`R @ /ü[˝îπEYº∑√_IŒd¿¶˝EôıΩâ±ÆØ[ì}9ÕiùÎj°eË^%+îp‚1 )ö?◊ÙO⁄ÚËGxQs˙©læ¶ÏƒÿjKÂô*0⁄ÿ¡
-K‚(RﬂäîÕÄ	·…uüg46.Ú‹üíÚÓÿı≈sl‘”«*1†è„}P¨R†:R˜äØ∏;úÖG|n-qìßº€ÈØ$mú™ºpß∆_IZ∞™,xSÔØ$nò|ˇ˚ø9r«,»1o3◊ÂUÊØoÈ˝QX≤ßYÛbˇπæsß∞HIﬁı5ﬂÙWív†≥åü±Ë-±‚‚Æ»Iz +o	Â5ÿˆ¥ ¸}ñ@©ÿcÙ»íëhyy‡ﬁ
+ ÷∂6äëï/55m^øÓ~mVûc∏¿œUíZ\RÃ¬¬¿ƒƒ¿∞‡Ë‚€˚ÊN—÷–œ…L“/Æ,.IÕMÅ—F∫∫ñÇÆnJjqjQfbNfU™Çë9GQ~~	Ñdd ∂‚3‹8˝“‚"˝‚§Ã<˝‚‚å]8ô@∫pia¿–∞åõ	®	óz&ÖÏ<%©Eï9%pƒe@mÀ∏·⁄ÑÙA:Rã3phÿ't∫Ü$úvÌ˙}ü,Báû~ZfNjqb	#rÄî¿•Ål†&6ñﬁ«L˛€∞ËË2XM˛íU}ÏL€≠œ÷CùaT–O-I÷œI—+Œ◊KNLŒHe‡Wd759L∏∑¬«f»¶fõC¢AYÃr¯Oª?Wôj{x—ÇM0õÏ¿q_aaof¢õìôWZ°õûW
+LYn±Æd±Xì√§I€!|l¶≥114mÓ±4v¸j÷¸Óßp—§çsﬂNéŸw{ﬁ∫”ç'9ÙKrÄ ¥&∆>Áz“ΩjÛL=•πGøô◊\Z¥ˇÃÅ e˙†tõö
+ZΩíä®´`™@Æí‚iY¸¬≈f"ÉÀ3ì
+÷‡#˜~ZNÊÍòíêˆ‡œïø|+µÃÑZ¶Önô¬6∏2∞m},Û∂C¯ÿÃYÁ≈∆ÚH®∑q≠œØküœ}π9Ö;+vNQu÷ΩÌù8≠3FXWµÆkgÑèÕL®u˚∏Î^Ê\ÃÈ	ü'$5≥‹6Àn›ÈEm€z`÷i Ÿb#lÉ´Çyng/ÑèÕHêmAl≥~)e&ôΩhø/†zhÌ;ó«'?≠õ—Wß ˜[f^z|Jf»"∏êE,ÿÃ ¶ZÜWã}îˇO7ø*l]R1Âı›©Òäw;Ó-Çö-•ái0\b06 *?ºﬂç§íª¿*ª∫œ!´ƒn&CYGÓ⁄œ6:S>÷¸≤õ˛a}Í¨›∂SNﬂá:VI#ıÇá´ .Ä-—20a3öç·O‹WÂ™k?¯:v§≠.Õ\0a•ÿºî9ﬁ@-T—√L¡`·J¿6:`K∑LÿÃfcê„ZˆﬁtÛf˜}ó‘b_-9‚iù«tÎ∆O®çÈÿa)\ÿ“Fl…óÅ	õ˘`ÌÁ&∑ÕBhW¿Jã&=öå¨[»AUÓ:ª Y%6CU∂<_ã¨kà¿◊O’¢Æ?+ìÍìñ’Õi»ﬁ˘˘G[OÁnà÷:î¯@d<∞pe∞ôÛﬂé»*±Ö$3√YH5∏ßı
+D'∂\MÄ+©_«n¿-‡``  ÷∂6äëï/55m^øÓ~m

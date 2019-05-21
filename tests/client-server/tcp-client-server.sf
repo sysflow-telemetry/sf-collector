@@ -1,4 +1,4 @@
-Objavro.codecdeflateavro.schemaÊÕ{
+Objavro.codecdeflateavro.schema˜ñ{
     "type": "record",
     "namespace": "sysflow",
     "name": "SysFlow",
@@ -267,6 +267,10 @@ Objavro.codecdeflateavro.schemaÊÕ{
                             "type": "int"
                         },
                         {
+                            "name": "fd",
+                            "type": "int"
+                        },
+                        {
                             "name": "numRRecvOps",
                             "type": "long"
                         },
@@ -376,13 +380,60 @@ Objavro.codecdeflateavro.schemaÊÕ{
                             ]
                         }
                     ]
+                },
+                {
+                    "type": "record",
+                    "namespace": "sysflow.event",
+                    "name": "NetworkEvent",
+                    "fields": [
+                        {
+                            "name": "procOID",
+                            "type": "sysflow.type.OID"
+                        },
+                        {
+                            "name": "ts",
+                            "type": "long"
+                        },
+                        {
+                            "name": "tid",
+                            "type": "long"
+                        },
+                        {
+                            "name": "opFlags",
+                            "type": "int"
+                        },
+                        {
+                            "name": "sip",
+                            "type": "int"
+                        },
+                        {
+                            "name": "sport",
+                            "type": "int"
+                        },
+                        {
+                            "name": "dip",
+                            "type": "int"
+                        },
+                        {
+                            "name": "dport",
+                            "type": "int"
+                        },
+                        {
+                            "name": "proto",
+                            "type": "int"
+                        },
+                        {
+                            "name": "ret",
+                            "type": "int"
+                        }
+                    ]
                 }
             ]
         }
     ]
 }
- iJ…ş¯ÉÉ©¤smÔ2NQ.Ôc¸ÀÏU’Z\RÌÂÂÀÄÄÀ0¥½éæşKûµôK‹‹ôs2“ô‹+‹KRsS`´‘®.„¥ «›’ZœZ”™˜“Y•ª`dÌÀQ”Ÿ_!€¾ab`‚›(6±8)3O¿¸8#…E×CÃ¼& &œ:0t,ê˜WƒK›‚‚Â~ääâL(Ö´¨i	B“XHORbq††×™€ºà:ôô/K-b`C
+ Ö¶6Š‘•/55m^¿î~m.Øc¸ÀÏU’Z\RÌÂÂÀÄÄÀ0¥½éæşKûµôK‹‹ôs2“ô‹+‹KRsS`´‘®.„¥ «›’ZœZ”™˜“Y•ª`dÌÀQ”Ÿ_!€¾ab`‚›(6±8)3O¿¸8#…E×CÃ¼& &œ:0t,ê˜WƒK›‚‚Â~ääâL(Ö´¨i	B“XHORbq††×™€ºà:ôô/K-b`C
 ¸,ÔÃÆÒ¾ã˜É]«É_²ªi»õéõˆ¢3Œ
 ú©%Éú9)zÅùzÉ‰É©< cà*€ì¡&‡¾¶I>6ãØ@6j©ÚÔÉÑ®sşğã¿–ËO
 şXur
-Â&`<š™€Èdmf›à*@6‰59ìÛ2ÂÇfC/(ğÖäƒâhÍª·GÏG›€:ÖäãÒ#¶ 5mBh"G7€q´¡GÉ9™©y%ğ8ª€ËÙ@=< ±g›~ÃÅ@¾äÀg€ƒµ=ø÷¡z‡vµ;?ô¸@úÜ<z®O÷Û}ÿfŞÅAcƒÀŸ, jAÓÆŒ`'ÃU Ù,\ ˜{0õÄ û€Î’ÇûwÍÃ4ƒjPBÅu iJ…ş¯ÉÉ©¤smÔ2NQ
+Â&`<š™€Èdmf›à*@6‰59ìÛ2ÂÇfC/(ğÖäƒâhÍª·GÏG›€:ÖäãÒ#¶ 5mBh"G7€q´¡GÉ9™©y%ğ8ª€ËÙ@=< ±g›~ÃÅ@¾äÀg€ƒµ=ø÷¡z‡vµ;?ô¸@úÜ<z®O÷Û}ÿfŞÅAcƒÀŸ, jAÓÆŒ`7Ã• Ù,\ ¨{0õÄ û€Î’ÇûwÍÃ4„ƒjPBÉu! Ö¶6Š‘•/55m^¿î~m
