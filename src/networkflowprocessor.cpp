@@ -178,31 +178,6 @@ inline void NetworkFlowProcessor::removeAndWriteNetworkFlow(ProcessObj* proc, Ne
 
 
 inline void NetworkFlowProcessor::processExistingFlow(sinsp_evt* ev, ProcessObj* proc, OpFlags flag, NFKey key, NetFlowObj* nf) {
-     //sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
-     /*
-     if(!(nf->netflow.procOID.hpid == proc->oid.hpid  &&
-          nf->netflow.procOID.createTS == proc->oid.createTS)){
-          //DO WE WANT TO ALLOW processes that aren't ancestors of each other to delegate? If not,
-          //what should we do?
-          if(!m_processCxt->isAncestor(&(nf->netflow.procOID), proc)) {
-               cout << "Netflow: " << nf->netflow.sip << " " << nf->netflow.dip << " " << nf->netflow.sport << " " << nf->netflow.dport << " already exists but isn't an ancestor of: " << proc->exe <<  " Writing! " << endl;
-               Process* nfProc = m_processCxt->getProcess(&(nf->netflow.procOID));
-               if(nfProc != NULL) {
-                   cout << "Netflow proc oid: " << nf->netflow.procOID.hpid << " " << nf->netflow.procOID.createTS << " " << nfProc->exe << " " << nfProc->exeArgs << "Netflow proc ancestors: Old proc" <<  endl;
-                   m_processCxt->printAncestors(nfProc);
-                   cout << "Current proc oid: " << proc->oid.hpid << " " << proc->oid.createTS << " " << proc->exe << " " << proc->exeArgs << " Current Process ancestors: Is ROLE SERVER? " << fdinfo->is_role_server() << endl;
-                   m_processCxt->printAncestors(proc);
-              }else {
-                   cout << "Netflow proc oid: " << nf->netflow.procOID.hpid << " " << nf->netflow.procOID.createTS << " " << "Process is NULL" << endl;
-              }
-          } 
-          nf->netflow.opFlags |= OP_NF_DELEGATE;
-          m_writer->writeNetFlow(&(nf->netflow));
-          nf->netflow.opFlags &= ~OP_NF_DELEGATE;
-          nf->netflow.opFlags |= OP_NF_INHERIT;
-          nf->netflow.procOID.createTS = proc->oid.createTS;
-          nf->netflow.procOID.hpid = proc->oid.hpid;
-      }*/
       updateNetFlow(nf, flag, ev);
       if(flag == OP_CLOSE) {
           nf->netflow.endTs = ev->get_ts();
@@ -249,10 +224,10 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
          nf = nfi->second;
     }
 
-    string ip4tuple = ipv4tuple_to_string(&(fdinfo->m_sockinfo.m_ipv4info), false);
-
-    SF_DEBUG(m_logger, proc->proc.exe << " " << ip4tuple << " Proto: " << getProtocol(fdinfo->get_l4proto()) << " Server: " << fdinfo->is_role_server() << " Client: " << fdinfo->is_role_client() << " " << ev->get_name() << " " << proc->proc.oid.hpid << " " << proc->proc.oid.createTS << " " << ti->m_tid << " " << ev->get_fd_num());
-
+    if(IS_DEBUG_ENABLED(m_logger)) {
+        string ip4tuple = ipv4tuple_to_string(&(fdinfo->m_sockinfo.m_ipv4info), false);
+        SF_DEBUG(m_logger, proc->proc.exe << " " << ip4tuple << " Proto: " << getProtocol(fdinfo->get_l4proto()) << " Server: " << fdinfo->is_role_server() << " Client: " << fdinfo->is_role_client() << " " << ev->get_name() << " " << proc->proc.oid.hpid << " " << proc->proc.oid.createTS << " " << ti->m_tid << " " << ev->get_fd_num());
+    }
     if(nf == NULL) {
        SF_DEBUG(m_logger, "Processing as new flow!");
        processNewFlow(ev, proc, flag, key);

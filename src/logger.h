@@ -53,4 +53,6 @@ using namespace log4cxx::helpers;
 #define SF_WARN(logger, message)  LOG4CXX_WARN(logger, message)
 #define SF_INFO(logger, message)  LOG4CXX_INFO(logger, message)
 #define SF_ERROR(logger, message) LOG4CXX_ERROR(logger, message)
+
+#define IS_DEBUG_ENABLED(logger) logger->isDebugEnabled()
 #endif
