@@ -161,11 +161,12 @@ inline void NetworkFlowProcessor::processNewFlow(sinsp_evt* ev, ProcessObj* proc
          proc->netflows[key] = nf;
         //m_netflows[key] = nf;
         m_dfSet->insert(nf);
-     }else {
+    } else {
+        removeAndWriteRelatedFlows(proc, &key, ev->get_ts());	
         nf->netflow.endTs = ev->get_ts();
         m_writer->writeNetFlow(&(nf->netflow));
         delete nf;
-     }
+    }
 }
 
 inline void NetworkFlowProcessor::removeAndWriteNetworkFlow(ProcessObj* proc, NetFlowObj** nf, NFKey* key) {
@@ -180,6 +181,7 @@ inline void NetworkFlowProcessor::removeAndWriteNetworkFlow(ProcessObj* proc, Ne
 inline void NetworkFlowProcessor::processExistingFlow(sinsp_evt* ev, ProcessObj* proc, OpFlags flag, NFKey key, NetFlowObj* nf) {
       updateNetFlow(nf, flag, ev);
       if(flag == OP_CLOSE) {
+	  removeAndWriteRelatedFlows(proc, &key, ev->get_ts());    
           nf->netflow.endTs = ev->get_ts();
           removeAndWriteNetworkFlow(proc, &nf, &key);
       }
@@ -244,12 +246,42 @@ void NetworkFlowProcessor::removeNetworkFlow(ProcessObj* proc, NetFlowObj** nf, 
     nf = NULL;
 }
 
+void NetworkFlowProcessor::removeAndWriteRelatedFlows(ProcessObj* proc, NFKey* key, uint64_t endTs) {
+    vector<NetFlowObj*> nfobjs;
+    for(NetworkFlowTable::iterator nfi = proc->netflows.begin(); nfi != proc->netflows.end(); nfi++) {
+	if(nfi->first.tid != key->tid && nfi->first.ip1 == key->ip1 && nfi->first.port1 == key->port1
+			&& nfi->first.ip2 == key->ip2 && nfi->first.port2 == key->port2 &&
+			nfi->first.fd == key->fd) {
+		if(nfi->second->netflow.opFlags & OP_ACCEPT || nfi->second->netflow.opFlags & OP_CONNECT) {
+		    nfobjs.insert(nfobjs.begin(), nfi->second);
+		} else {
+		    nfobjs.push_back(nfi->second);
+		}
+	     SF_DEBUG(m_logger, "Removing related network flow on thread: " << nfi->first.tid);	    	
+             proc->netflows.erase(nfi);
+	}
+    }
+    for(vector<NetFlowObj*>::iterator it = nfobjs.begin(); it != nfobjs.end(); it++) {
+        (*it)->netflow.endTs = endTs;	    
+        (*it)->netflow.opFlags |= OP_TRUNCATE;	    
+        m_writer->writeNetFlow(&((*it)->netflow));
+        removeNetworkFlowFromSet(&(*it), true); 
+    }
+
+}
+
+
 int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj* proc, int64_t tid) {
     SF_DEBUG(m_logger, "CALLING removeAndWriteNFFromProc");
     int deleted = 0;
     for(NetworkFlowTable::iterator nfi = proc->netflows.begin(); nfi != proc->netflows.end(); nfi++) {
         if(tid == -1 ||  tid == nfi->second->netflow.tid) {
             nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
+            if(tid != -1) {
+		static NFKey k;
+                canonicalizeKey(nfi->second, &k);
+		removeAndWriteRelatedFlows(proc, &k, nfi->second->netflow.endTs);
+	    }
             nfi->second->netflow.opFlags |= OP_TRUNCATE;
             SF_DEBUG(m_logger,"Writing NETFLOW!!");
             m_writer->writeNetFlow(&(nfi->second->netflow));

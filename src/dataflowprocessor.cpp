@@ -36,8 +36,31 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt* ev, OpFlags flag) {
        SF_DEBUG(m_logger, "Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ErrorCode: " << utils::getSyscallResult(ev));
        if(IS_FILE_EVT(flag)) {
            return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
+       }else if(flag == OP_MMAP) {
+           /*sinsp_threadinfo* ti = ev->get_thread_info();	       
+           for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
+               string name = ev->get_param_name(i);
+               const ppm_param_info* param = ev->get_param_info(i);
+               const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
+               SF_DEBUG(m_logger, name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo);
+           }
+	   const sinsp_evt_param* p = ev->get_param_value_raw("fd");
+	   if(p != NULL) {
+               int64_t fd = *(int64_t *)p->m_val;
+	       if(fd > 0) {
+	           fdinfo = ti->get_fd(fd);
+	           bool isfdnull = (fdinfo == NULL);
+	           // string name = fdinfo->m_name;
+		   string name = fdinfo->m_name;
+	           SF_DEBUG(m_logger, " MMAP FD: " << fd << " " << isfdnull << " " << fdinfo->get_typechar() << " " << name );
+	       }
+	   }*/
+           return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
        }
-       return 1;
+       if(fdinfo == NULL) {
+	   SF_DEBUG(m_logger, " Returning 1" );
+           return 1;
+       }
     }
     if(fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket()) {
       return m_netflowPrcr->handleNetFlowEvent(ev, flag);

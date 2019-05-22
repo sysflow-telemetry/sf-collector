@@ -31,6 +31,7 @@ namespace networkflow {
          
             int32_t getProtocol(scap_l4_proto proto);
             int removeNetworkFlowFromSet(NetFlowObj** nfo, bool deleteNetFlow);
+            void removeAndWriteRelatedFlows(ProcessObj* proc, NFKey* key, uint64_t endTs); 
         public:
             NetworkFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer, process::ProcessContext* procCxt, DataFlowSet* dfSet);
             virtual ~NetworkFlowProcessor();

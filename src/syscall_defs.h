@@ -198,8 +198,8 @@
                                break;  \
                           }
 
-#define SF_MMAP_EXIT(EV)  case PPME_SYSCALL_MMAP_X: \
-                          case PPME_SYSCALL_MMAP2_X: \
+#define SF_MMAP_EXIT(EV)  case PPME_SYSCALL_MMAP_E: \
+                          case PPME_SYSCALL_MMAP2_E: \
                           {       \
                                m_dfPrcr->handleDataEvent(EV, OP_MMAP); \
                                break;  \
