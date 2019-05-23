@@ -15,12 +15,15 @@ FileFlowProcessor::FileFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer,
 FileFlowProcessor::~FileFlowProcessor() {
 }
 
-inline void FileFlowProcessor::populateFileFlow(sinsp_fdinfo_t * fdinfo, FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file, string flowkey) {
+inline void FileFlowProcessor::populateFileFlow(/*sinsp_fdinfo_t * fdinfo,*/ FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file, string flowkey) {
    sinsp_threadinfo* ti = ev->get_thread_info();
-   //sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
+   sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
    ff->fileflow.opFlags = flag;
    ff->fileflow.ts = ev->get_ts();
-   ff->fileflow.openFlags = fdinfo->m_openflags;
+   ff->fileflow.openFlags = 0;
+   if(flag == OP_OPEN) {
+       ff->fileflow.openFlags = fdinfo->m_openflags;
+   }
    ff->fileflow.endTs = 0;
    ff->fileflow.procOID.hpid = proc->proc.oid.hpid;
    ff->fileflow.procOID.createTS = proc->proc.oid.createTS;
@@ -60,8 +63,11 @@ void FileFlowProcessor::removeAndWriteRelatedFlows(ProcessObj* proc, FileFlowObj
 
 inline void FileFlowProcessor::updateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev) {
        ff->fileflow.opFlags |= flag;
+       sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
        ff->lastUpdate = utils::getCurrentTime(m_cxt);
-       if(flag == OP_WRITE_SEND) {
+       if(flag == OP_OPEN) {
+	   ff->fileflow.openFlags = fdinfo->m_openflags;
+       }else if(flag == OP_WRITE_SEND) {
            ff->fileflow.numWSendOps++;
            int res = utils::getSyscallResult(ev);
            if(res > 0 ) {
@@ -76,11 +82,11 @@ inline void FileFlowProcessor::updateFileFlow(FileFlowObj* ff, OpFlags flag, sin
        }
 }
 
-inline void FileFlowProcessor::processNewFlow(sinsp_evt* ev, sinsp_fdinfo_t * fdinfo,  ProcessObj* proc, FileObj* file, OpFlags flag, string flowkey) {
+inline void FileFlowProcessor::processNewFlow(sinsp_evt* ev, /*sinsp_fdinfo_t * fdinfo,*/  ProcessObj* proc, FileObj* file, OpFlags flag, string flowkey) {
     FileFlowObj* ff = new FileFlowObj();
     ff->exportTime = utils::getExportTime(m_cxt); 
     ff->lastUpdate = utils::getCurrentTime(m_cxt);
-    populateFileFlow(fdinfo, ff, flag, ev, proc, file, flowkey);
+    populateFileFlow(ff, flag, ev, proc, file, flowkey);
     updateFileFlow(ff, flag, ev);
     if(flag != OP_CLOSE) {
          proc->fileflows[flowkey] = ff;
@@ -185,7 +191,7 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt* ev, OpFlags flag) {
     SF_DEBUG(m_logger, proc->proc.exe << " Name: " <<  fdinfo->m_name << " type: " << fdinfo->get_typechar() <<  " " << file->file.path << " " <<  ev->get_name()); 
 
     if(ff == NULL) {
-       processNewFlow(ev, fdinfo, proc, file, flag, flowkey);
+       processNewFlow(ev, proc, file, flag, flowkey);
     }else {
        processExistingFlow(ev, proc, file, flag, flowkey, ff);
     }
