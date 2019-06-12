@@ -1,6 +1,6 @@
 include ../makefile.manifest.inc
 include ../makefile.env.inc
-
+ 
 .PHONY: all
 all: init \
 	 modules
