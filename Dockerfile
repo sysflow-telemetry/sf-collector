@@ -16,10 +16,9 @@ RUN apt-get update -yqq && \
         g++ \
         wget \
         libelf-dev \
-        linux-headers-$(uname -r) && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
-
+#        linux-headers-$(uname -r) && \
 COPY  ./modules /build/modules
 COPY  ./makefile.* /build/
 RUN cd /build/modules && make install

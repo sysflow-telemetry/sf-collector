@@ -24,7 +24,7 @@ install: modules \
 sysdig/package: 
 	cd sysdig && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(SYSDIG_VERSION)\"/" CMakeLists.txt && \
 	mkdir -p build && cd build && \
-    cmake ../. && make openssl curl b64 jq tbb zlib driver scap sinsp && \
+    cmake ../. && make openssl curl b64 jq tbb zlib scap sinsp && \
 	mkdir -p include && mkdir -p lib && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/*h include/driver && cp ../driver/*h include/driver && \
