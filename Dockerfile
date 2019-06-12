@@ -15,7 +15,7 @@ RUN apt-get update -yqq && \
         bison \
         g++ \
         wget \
-        libelf-dev \
+        libelf-dev && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 #        linux-headers-$(uname -r) && \
