@@ -74,8 +74,8 @@ ENV FILTER=$filter
 ARG nodename=
 ENV NODE_NAME=$nodename
 
-ARG wdir=/mnt/data/
-ENV WDIR=$wdir
+ARG output=/mnt/data/
+ENV OUTPUT=$output
 
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
@@ -92,7 +92,7 @@ COPY --from=builder /build/src/conf/log4cxx.properties /usr/local/sysflow/conf/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
-CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $WDIR -e $NODE_NAME $FILTER
+CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $NODE_NAME $FILTER
 
 #-----------------------
 # Stage: Testing
