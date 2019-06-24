@@ -74,7 +74,7 @@ ENV FILTER=$filter
 ARG nodename=
 ENV NODE_NAME=$nodename
 
-ARG wdir=/mnt/data
+ARG wdir=/mnt/data/
 ENV WDIR=$wdir
 
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
