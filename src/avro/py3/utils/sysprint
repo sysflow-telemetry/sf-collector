@@ -4,7 +4,6 @@ from sysflow.reader import FlattenedSFReader
 import sysflow.utils as utils
 from sysflow.objtypes import ObjectTypes, OBJECT_MAP
 from sysflow.schema_classes import SchemaClasses
-#from sysflow.schema_classes import SchemaClasses.sysflow.type.OIDClass as OID
 from functools import singledispatch
 from enum import Enum
 
@@ -29,15 +28,13 @@ def _handle_dict(d, skip_underscore=False):
                  for k, v in d.items())
     if skip_underscore:
         converted = ((k, v) for k, v in converted if k[:1] != '_')
-    #return {k: v for k, v in converted if v is not _cant_serialize}
-    return {k: v for k, v in converted}
+    return {k: v for k, v in converted if v is not _cant_serialize}
 
 @json_serializable.register(list)
 @json_serializable.register(tuple)
 def _handle_sequence(seq, skip_underscore=False):
     converted = (json_serializable(v, skip_underscore) for v in seq)
-    #return [v for v in converted if v is not _cant_serialize]
-    return [v for v in converted]
+    return [v for v in converted if v is not _cant_serialize]
 
 @json_serializable.register(Enum)
 def _handle_enum_types(value, skip_underscore=False):
