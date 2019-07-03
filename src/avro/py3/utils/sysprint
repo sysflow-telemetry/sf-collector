@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-import sys, os, argparse
+import sys, os, argparse, json
 from sysflow.reader import FlattenedSFReader
 import sysflow.utils as utils
 from sysflow.objtypes import ObjectTypes, OBJECT_MAP
+from sysflow.schema_classes import SchemaClasses
+#from sysflow.schema_classes import SchemaClasses.sysflow.type.OIDClass as OID
 from functools import singledispatch
+from enum import Enum
 
 counter = 0 # counter for sysprint line numbers
 _cant_serialize = object()
@@ -26,13 +29,21 @@ def _handle_dict(d, skip_underscore=False):
                  for k, v in d.items())
     if skip_underscore:
         converted = ((k, v) for k, v in converted if k[:1] != '_')
-    return {k: v for k, v in converted if v is not _cant_serialize}
+    #return {k: v for k, v in converted if v is not _cant_serialize}
+    return {k: v for k, v in converted}
 
 @json_serializable.register(list)
 @json_serializable.register(tuple)
 def _handle_sequence(seq, skip_underscore=False):
     converted = (json_serializable(v, skip_underscore) for v in seq)
-    return [v for v in converted if v is not _cant_serialize]
+    #return [v for v in converted if v is not _cant_serialize]
+    return [v for v in converted]
+
+@json_serializable.register(Enum)
+def _handle_enum_types(value, skip_underscore=False):
+    if isinstance(value, ObjectTypes):
+        return {'type': OBJECT_MAP.get(value,'?')}
+    return value 
 
 @json_serializable.register(int)
 @json_serializable.register(float)
@@ -41,6 +52,10 @@ def _handle_sequence(seq, skip_underscore=False):
 @json_serializable.register(type(None))
 def _handle_default_scalar_types(value, skip_underscore=False):
     return value
+
+@json_serializable.register(SchemaClasses.sysflow.type.OIDClass)
+def _handle_oid_types(value, skip_underscore=False):
+    return {'hpid': str(value.hpid), 'createTS':  str(value.createTS)}
 
 def files(path):  
     """list files in dir path"""
@@ -68,7 +83,8 @@ def sysprint(trace, output):
 
     if output == 'json':
         for r in reader:
-            print(json_serializable(r, skip_underscore=False))    
+            print(json_serializable(r, skip_underscore=False))
+            #print( json.dumps(r, default=lambda o: o.__dict__ if hasattr(o, '__dict__') else None, sort_keys=True))
     elif output == 'str':
         print("|{0:5}|{1:2}|{2:45}|{3:5}|{4:5}|{5:5}|{6:11}|{7:26}|{8:26}|{9:5}|{10:5}|{11:45}|{12:8}|{13:8}|{14:10}|".format("Evt #", "T", "Process","PPID", "PID","TID","Op Flags", "Start Time", "End Time", "FD", "Ret", "Resource", "NOBRead", "NOBWrite", "Cont")) 
 
