@@ -1,58 +1,7 @@
 #!/usr/bin/env python3
-import sys, os, argparse, json
+import sys, os, argparse
 from sysflow.reader import FlattenedSFReader
-import sysflow.utils as utils
-from sysflow.objtypes import ObjectTypes, OBJECT_MAP
-from sysflow.schema_classes import SchemaClasses
-from functools import singledispatch
-from enum import Enum
-
-counter = 0 # counter for sysprint line numbers
-_cant_serialize = object()
-
-@singledispatch
-def json_serializable(object, skip_underscore=False):
-    """Filter a Python object to only include serializable object types
-
-    In dictionaries, keys are converted to strings; if skip_underscore is true
-    then keys starting with an underscore ("_") are skipped.
-
-    """
-    # default handler, called for anything without a specific
-    # type registration.
-    return _cant_serialize
-
-@json_serializable.register(dict)
-def _handle_dict(d, skip_underscore=False):
-    converted = ((str(k), json_serializable(v, skip_underscore))
-                 for k, v in d.items())
-    if skip_underscore:
-        converted = ((k, v) for k, v in converted if k[:1] != '_')
-    return {k: v for k, v in converted if v is not _cant_serialize}
-
-@json_serializable.register(list)
-@json_serializable.register(tuple)
-def _handle_sequence(seq, skip_underscore=False):
-    converted = (json_serializable(v, skip_underscore) for v in seq)
-    return [v for v in converted if v is not _cant_serialize]
-
-@json_serializable.register(Enum)
-def _handle_enum_types(value, skip_underscore=False):
-    if isinstance(value, ObjectTypes):
-        return {'type': OBJECT_MAP.get(value,'?')}
-    return value 
-
-@json_serializable.register(int)
-@json_serializable.register(float)
-@json_serializable.register(str)
-@json_serializable.register(bool)  # redudant, supported as int subclass
-@json_serializable.register(type(None))
-def _handle_default_scalar_types(value, skip_underscore=False):
-    return value
-
-@json_serializable.register(SchemaClasses.sysflow.type.OIDClass)
-def _handle_oid_types(value, skip_underscore=False):
-    return {'hpid': str(value.hpid), 'createTS':  str(value.createTS)}
+from sysflow.formatter import SFFormatter
 
 def files(path):  
     """list files in dir path"""
@@ -64,58 +13,31 @@ def run(args):
     """execute sysprint"""
     for path in args.paths:
         if os.path.isfile(path):
-            sysprint(path, args.output)
+            sysprint(path, args)
         elif os.path.isdir(path):
             traces = [f for f in files(path)]
             traces.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
             for t in traces:
-                sysprint(t, args.output)
+                sysprint(t, args)
         else:
             raise argparse.ArgumentTypeError('existent file or dir path expected.')
            
-def sysprint(trace, output):
+def sysprint(trace, args):
     """print a sysflow file in human-readable format"""
-    global counter
     reader = FlattenedSFReader(trace, False)
-
-    if output == 'json':
-        for r in reader:
-            print(json_serializable(r, skip_underscore=False))
-            #print( json.dumps(r, default=lambda o: o.__dict__ if hasattr(o, '__dict__') else None, sort_keys=True))
-    elif output == 'str':
-        print("|{0:5}|{1:2}|{2:45}|{3:5}|{4:5}|{5:5}|{6:11}|{7:26}|{8:26}|{9:5}|{10:5}|{11:45}|{12:8}|{13:8}|{14:10}|".format("Evt #", "T", "Process","PPID", "PID","TID","Op Flags", "Start Time", "End Time", "FD", "Ret", "Resource", "NOBRead", "NOBWrite", "Cont")) 
-
-        for objtype, header, cont, proc, files, evt, flow  in reader:
-            exe = proc.exe + ' ' + proc.exeArgs if proc is not None else ''
-            pid = proc.oid.hpid if proc is not None else ''
-            ppid = proc.poid.hpid if proc is not None and proc.poid is not None else ''
-            evflow = evt or flow
-            tid = evflow.tid if evflow is not None else ''
-            opFlags = utils.getOpFlagsStr(evflow.opFlags) if evflow is not None else '' 
-            sTime = utils.getTimeStr(evflow.ts) if evflow is not None else ''
-            eTime = utils.getTimeStr(evflow.endTs) if flow is not None else ''
-            ret = evflow.ret if evt is not None else ''
-            res = ''
-            fd = ''
-            if objtype == ObjectTypes.FILE_FLOW or objtype == ObjectTypes.FILE_EVT:
-                res = files[0].path
-            elif objtype == ObjectTypes.NET_FLOW:
-                res = utils.getNetFlowStr(flow)
-                fd = flow.fd
-            if objtype == ObjectTypes.FILE_FLOW:
-                fd = flow.fd
-         
-            numBReads = evflow.numRRecvBytes if flow is not None else ''
-            numBWrites = evflow.numWSendBytes if flow is not None else ''
-            numOReads = evflow.numRRecvOps if flow is not None else ''
-            numOWrites = evflow.numWSendOps if flow is not None else ''
-            
-            res += "," + files[1].path if files is not None and files[1] is not None else ''
-            cont = cont.id if cont is not None else '' 
-            print("|{0:5}|{1:2}|{2:45}|{3:5}|{4:5}|{5:5}|{6:11}|{7:26}|{8:26}|{9:5}|{10:5}|{11:45}|{12:8}|{13:8}|{14:10}|".format(counter, OBJECT_MAP.get(objtype,"?"), exe, ppid, pid, tid, opFlags, sTime, eTime, fd, ret, res, str(numOReads) + ":" + str(numBReads), str(numOWrites) + ":" + str(numBWrites), cont))
-            counter+=1
-    else:
-        raise argparse.ArgumentTypeError('unknown output format.')
+    formatter = SFFormatter(reader)
+    if args.output == 'json':
+        if args.file is not None:
+            formatter.toJsonFile(args.file)
+        else:
+            print(formatter.toJsonStr())
+    elif args.output == 'csv' and args.file is not None:
+            formatter.toCsvFile(args.file)
+    elif args.output == 'str':
+        if args.fields is None:
+            formatter.toStdOut()
+        else:
+            formatter.toStdOut(fields=args.fields.split(','))
 
 if __name__ == '__main__':
     
@@ -124,11 +46,17 @@ if __name__ == '__main__':
         description='sysprint: a human-readable printer for Sysflow captures.'
     )
     parser.add_argument('paths', metavar='path', nargs='+', help='path from where to read trace files')
-    parser.add_argument('-o', '--output', help='output format', choices=['str','json'], default='str')
+    parser.add_argument('-o', '--output', help='output format', choices=['str','json','csv'], default='str')
+    parser.add_argument('-w', '--file', help='output file path', default=None)
+    parser.add_argument('-f', '--fields', help='comma-separated list of sysflow fields to be printed (affects str output only)', default=None)
    
     # parse args and configuration
     args = parser.parse_args()
 
+    # input validation
+    if args.output == 'csv' and args.file is None:
+            raise argparse.ArgumentTypeError('output file path is required for csv output.')
+    
     # run sysprint
     run(args)
     sys.exit(0)

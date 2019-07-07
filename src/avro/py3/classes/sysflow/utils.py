@@ -1,8 +1,6 @@
 import sysflow.opflags as opflags
 from datetime import datetime
-#import ipaddress
-#import socket
-#import struct
+
 NANO_TO_SECS = 1000000000
 TIME_FORMAT = "%m/%d/%YT%H:%M:%S.%f"
 
@@ -45,13 +43,6 @@ def getTimeStr(ts):
     return timeStr
 
 def getNetFlowStr(nf):
-    print(nf.sip)
-    #s = struct.pack('<L', nf.sip)
-    #d = struct.pack('<L', nf.dip)
-    #sip = ipaddress.IPv4Address(socket.htonl(nf.sip))   
-    #dip = ipaddress.IPv4Address(socket.htonl(nf.dip))
-    #sip = ipaddress.IPv4Address(s)   
-    #dip = ipaddress.IPv4Address(d)
     sip = ".".join(map(lambda n: str(nf.sip>>n & 0xFF), [0, 8, 16, 24]))
     dip = ".".join(map(lambda n: str(nf.dip>>n & 0xFF), [0, 8, 16, 24]))
     return str(sip) + ":" + str(nf.sport) + "-" + str(dip) + ":" + str(nf.dport)  

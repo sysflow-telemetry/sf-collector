@@ -7,6 +7,7 @@ from avro import datafile, io
 from sysflow.schema_classes import SCHEMA as SysFlowSchema
 from avro import datafile, io 
 from uuid import UUID
+
 class SFReader(object):
 
     def __init__(self, filename):
@@ -90,6 +91,7 @@ class FlattenedSFReader(SFReader):
             else:
                 procOID = self.getProcessKey(rec.procOID)
                 proc = None
+                pproc = None
                 container = None
                 file1 = None
                 file2 = None
@@ -100,6 +102,7 @@ class FlattenedSFReader(SFReader):
                     print("ERROR: Cannot find process object for record.  This should not happen.") 
                 else:
                     proc = self.processes[procOID]
+                    pproc = self.getProcess(proc.poid) if proc.poid is not None else None
                 if proc is not None:
                     if proc.containerId is not None:
                         if not proc.containerId in self.conts:
@@ -135,4 +138,4 @@ class FlattenedSFReader(SFReader):
                 else:
                     flow = rec
                 files = (file1, file2) if file1 is not None or file2 is not None else None
-                return (objType, self.header, container, proc, files, evt, flow)  
+                return (objType, self.header, container, pproc, proc, files, evt, flow)  
