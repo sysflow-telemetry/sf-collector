@@ -26,18 +26,18 @@ def sysprint(trace, args):
     """print a sysflow file in human-readable format"""
     reader = FlattenedSFReader(trace, False)
     formatter = SFFormatter(reader)
+    fields=args.fields.split(',') if args.fields is not None else None
     if args.output == 'json':
         if args.file is not None:
-            formatter.toJsonFile(args.file)
+            formatter.toJsonFile(args.file, fields=fields)
         else:
-            print(formatter.toJsonStr())
+            print(formatter.toJsonStr(fields=fields))
     elif args.output == 'csv' and args.file is not None:
-            formatter.toCsvFile(args.file)
+            formatter.toCsvFile(args.file, fields=fields)
     elif args.output == 'str':
-        if args.fields is None:
-            formatter.toStdOut()
-        else:
-            formatter.toStdOut(fields=args.fields.split(','))
+        formatter.toStdOut(fields=fields)
+    else:
+        raise argparse.ArgumentTypeError('unknown output type.')
 
 if __name__ == '__main__':
     
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser.add_argument('paths', metavar='path', nargs='+', help='path from where to read trace files')
     parser.add_argument('-o', '--output', help='output format', choices=['str','json','csv'], default='str')
     parser.add_argument('-w', '--file', help='output file path', default=None)
-    parser.add_argument('-f', '--fields', help='comma-separated list of sysflow fields to be printed (affects str output only)', default=None)
+    parser.add_argument('-f', '--fields', help='comma-separated list of sysflow fields to be printed', default=None)
    
     # parse args and configuration
     args = parser.parse_args()

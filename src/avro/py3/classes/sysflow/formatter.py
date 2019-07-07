@@ -56,34 +56,43 @@ class SFFormatter(object):
         self.reader = reader
         self._flat_list = self._flatten()
         
-    def toJsonStr(self):
-        return json.dumps(self._flat_list)
+    def toJsonStr(self, fields=None):
+        data = self._filter(fields)
+        return json.dumps(data)
 
-    def toJsonFile(self, path):
+    def toJsonFile(self, path, fields=None):
+        data = self._filter(fields)
         with open(path, mode='w') as jsonfile:  
-            json.dump(self._flat_list, jsonfile)
+            json.dump(data, jsonfile)
 
-    def toCsvFile(self, path, header=True): 
-        if len(self._flat_list) > 0:
+    def toCsvFile(self, path, fields=None, header=True): 
+        data = self._filter(fields)
+        if len(data) > 0:
             with open(path, mode='w') as csv_file:
-                fieldnames = list(self._flat_list[0].keys()) 
+                fieldnames = list(data[0].keys()) 
                 writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
                 if header:
                     writer.writeheader()
-                for r in self._flat_list:
-                    writer.writerow(r)
+                writer.writerows(data)
+                #for r in self._flat_list:
+                #    writer.writerow(r)
 
     def toStdOut(self, fields=_default_fields, pretty_headers=True, showindex=True):
-        #This line replaces the convoluted nested loop below in Python 3.6> where dict comprehensions are ordered by default.
-        #data = [ { k: d[k] for k in fields } for d in self._flat_list ] if fields is not None else self._flat_list
-        data = []
-        for d in self._flat_list:
-            od = OrderedDict()
-            for k in fields:
-                od[k]=d[k]
-            data.append(od)
+        data = self._filter(_default_fields if fields is None else fields)
         headers = _header_map if pretty_headers else 'keys'
         print(tabulate(data, headers=headers, showindex=showindex, tablefmt='github'))
+
+    def _filter(self, fields):
+        #This line replaces the convoluted nested loop below in Python 3.6> where dict comprehensions are ordered by default.
+        #data = [ { k: d[k] for k in fields } for d in self._flat_list ] if fields is not None else self._flat_list
+        data = [] if fields is not None else self._flat_list
+        if fields is not None: 
+            for d in self._flat_list:
+                od = OrderedDict()
+                for k in fields:
+                    od[k]=d[k]
+                data.append(od)
+        return data
 
     def _flatten(self):
         _flat_list = []
