@@ -31,7 +31,7 @@ def sysprint(trace, args):
         if args.file is not None:
             formatter.toJsonFile(args.file, fields=fields)
         else:
-            print(formatter.toJsonStr(fields=fields))
+            formatter.toJsonStdOut(fields=fields)
     elif args.output == 'csv' and args.file is not None:
             formatter.toCsvFile(args.file, fields=fields)
     elif args.output == 'str':
