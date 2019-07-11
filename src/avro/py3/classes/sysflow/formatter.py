@@ -6,11 +6,14 @@ from tabulate import tabulate
 
 _default_fields = ['flow_type', 'proc_exe', 'proc_args', 'pproc_pid', 'proc_pid', 'proc_tid','op_flags', 'ts', 'end_ts', 'fd', 'ret_code', 'res', 'rcv_r_bytes', 'snd_w_bytes', 'cont_id']
 
-_header_map = { 'flow_type': 'T',
+_header_map = { 'idx': 'Evt #',
+                'flow_type': 'T',
                 'op_flags': 'Op Flags',
                 'ret_code': 'Ret',
                 'ts': 'Start Time', 
+                'ts_uts': 'Start Time', 
                 'end_ts': 'End Time',
+                'end_ts_uts': 'End Time',
                 'proc_pid': 'PID',
                 'proc_tid': 'TID',
                 'proc_uid': 'UID',
@@ -54,71 +57,57 @@ class SFFormatter(object):
 
     def __init__(self, reader):  
         self.reader = reader
-        
+   
+    def applyFuncJson(self, func, fields=None):
+        for r in self.reader:
+            record = self._flatten(*r, fields) 
+            func(json.dumps(record))
+     
     def toJsonStdOut(self, fields=None):
-        for objtype, header, cont, pproc, proc, files, evt, flow in self.reader:
-            record = self._flatten(objtype, header, cont, pproc, proc, files, evt, flow, fields) 
+        for r in self.reader:
+            record = self._flatten(*r, fields) 
             print(json.dumps(record))
 
     def toJsonFile(self, path, fields=None):
         with open(path, mode='w') as jsonfile:
-            for objtype, header, cont, pproc, proc, files, evt, flow in self.reader:
-                record = self._flatten(objtype, header, cont, pproc, proc, files, evt, flow, fields) 
-                json.dump(record, jsonfile)
+            json.dump([self._flatten(*r, fields) for r in self.reader], jsonfile)
 
     def toCsvFile(self, path, fields=None, header=True): 
-        first = True
         with open(path, mode='w') as csv_file:
-            writer = None
-            for objtype, header, cont, pproc, proc, files, evt, flow in self.reader:
-                record = self._flatten(objtype, header, cont, pproc, proc, files, evt, flow, fields) 
-                if first:
+            for idx, r in enumerate(self.reader):
+                record = self._flatten(*r, fields) 
+                if idx == 0:
                   fieldnames = list(record.keys()) 
                   writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-                  first = False
                   if header:
                       writer.writeheader()
                 writer.writerow(record)
-            writer.close()
-                #for r in self._flat_list:
-                #    writer.writerow(r)
 
     def toStdOut(self, fields=_default_fields, pretty_headers=True, showindex=True):
-        f = _default_fields if fields is None else fields
+        fields = _default_fields if fields is None else fields
         headers = _header_map if pretty_headers else 'keys'
         bulkRecs = []
         first = True
-        i = 0
-        for objtype, header, cont, pproc, proc, files, evt, flow in self.reader:
-            record = self._flatten(objtype, header, cont, pproc, proc, files, evt, flow, fields) 
+
+        for idx, r in enumerate(self.reader):
+            record = self._flatten(*r, fields) 
+            if showindex:
+                record['idx'] = idx
+                record.move_to_end('idx', last=False)
             bulkRecs.append(record)
-            i+=1
-            if i == 100:
+            if idx > 0 and idx % 1000 == 0:
                 if first:
-                    print(tabulate(bulkRecs, headers=headers, showindex=showindex, tablefmt='github'))
+                    print(tabulate(bulkRecs, headers=headers, tablefmt='github'))
                     first = False
                 else:
-                    print(tabulate(bulkRecs, showindex=showindex, tablefmt='github'))
-                i = 0
+                    print(tabulate(bulkRecs, tablefmt='github'))
                 bulkRecs = []
 
         if len(bulkRecs) > 0:
            if first: 
-               print(tabulate(bulkRecs, headers=headers, showindex=showindex, tablefmt='github'))
+               print(tabulate(bulkRecs, headers=headers, tablefmt='github'))
            else:
-               print(tabulate(bulkRecs, showindex=showindex, tablefmt='github'))
-
-    def _filter(self, fields):
-        #This line replaces the convoluted nested loop below in Python 3.6> where dict comprehensions are ordered by default.
-        #data = [ { k: d[k] for k in fields } for d in self._flat_list ] if fields is not None else self._flat_list
-        data = [] if fields is not None else self._flat_list
-        if fields is not None: 
-            for d in self._flat_list:
-                od = OrderedDict()
-                for k in fields:
-                    od[k]=d[k]
-                data.append(od)
-        return data
+               print(tabulate(bulkRecs, tablefmt='github'))
 
     def _flatten(self, objtype, header, cont, pproc, proc, files, evt, flow, fields):
         _flat_map = OrderedDict()
@@ -127,7 +116,9 @@ class SFFormatter(object):
         _flat_map['op_flags'] = utils.getOpFlagsStr(evflow.opFlags) if evflow is not None else ''
         _flat_map['ret_code'] = evflow.ret if evt is not None else '' 
         _flat_map['ts'] = utils.getTimeStr(evflow.ts) if evflow is not None else ''
+        _flat_map['ts_uts'] = evflow.ts if evflow is not None else ''
         _flat_map['end_ts'] = utils.getTimeStr(evflow.endTs) if flow is not None else ''
+        _flat_map['end_ts_uts'] = evflow.endTs if flow is not None else ''
         _flat_map['proc_pid'] = proc.oid.hpid if proc is not None else ''
         _flat_map['proc_tid'] = evflow.tid if evflow is not None else ''
         _flat_map['proc_uid'] = proc.uid if proc is not None else ''
@@ -147,33 +138,37 @@ class SFFormatter(object):
         _flat_map['pproc_exe'] = pproc.exe if pproc is not None else ''
         _flat_map['pproc_args'] = pproc.exeArgs if pproc is not None else ''
         _flat_map['pproc_create_ts'] = pproc.oid.createTS if pproc is not None else ''
-        _flat_map['fd'] = flow.fd if objtype == ObjectTypes.FILE_FLOW or objtype == ObjectTypes.NET_FLOW else ''
+        _flat_map['fd'] = flow.fd if flow is not None else ''
         _flat_map['open_flags'] = flow.openFlags if objtype == ObjectTypes.FILE_FLOW else ''
-        if objtype == ObjectTypes.FILE_FLOW or objtype == ObjectTypes.FILE_EVT:
+        
+        if objtype in [ObjectTypes.FILE_FLOW, ObjectTypes.FILE_EVT]:
             _flat_map['res'] = files[0].path if files is not None and files[0] is not None else ''
             _flat_map['res'] += ', ' + files[1].path if files is not None and files[1] is not None else ''
-        elif objtype == ObjectTypes.NET_FLOW:
+        elif objtype in [ObjectTypes.NET_FLOW]:
             _flat_map['res'] = utils.getNetFlowStr(flow)
-            _flat_map['proto'] = evflow.proto
-            _flat_map['sport'] = evflow.sport
-            _flat_map['dport'] = evflow.dport
-            _flat_map['sip'] = evflow.sip
-            _flat_map['dip'] = evflow.dip
         else:
             _flat_map['res'] = ''
-            _flat_map['rcv_r_bytes'] = evflow.numRRecvBytes if flow is not None else ''
-            _flat_map['rcv_r_ops'] = evflow.numRRecvOps if flow is not None else ''
-            _flat_map['snd_w_bytes'] = evflow.numWSendBytes if flow is not None else ''
-            _flat_map['snd_w_ops'] = evflow.numWSendOps if flow is not None else ''
-            _flat_map['cont_id'] = cont.id if cont is not None else ''
-            _flat_map['cont_name'] = cont.name if cont is not None else ''
-            _flat_map['cont_image_id'] = cont.imageid if cont is not None else ''
-            _flat_map['cont_image'] = cont.image if cont is not None else ''
-            _flat_map['cont_type'] = cont.type if cont is not None else ''
-            _flat_map['cont_privileged'] = cont.privileged if cont is not None else ''
+
+        _flat_map['proto'] = evflow.proto if objtype == ObjectTypes.NET_FLOW else ''
+        _flat_map['sport'] = evflow.sport if objtype == ObjectTypes.NET_FLOW else ''
+        _flat_map['dport'] = evflow.dport if objtype == ObjectTypes.NET_FLOW else ''
+        _flat_map['sip'] = evflow.sip if objtype == ObjectTypes.NET_FLOW else ''
+        _flat_map['dip'] = evflow.dip if objtype == ObjectTypes.NET_FLOW else ''
+        _flat_map['rcv_r_bytes'] = flow.numRRecvBytes if flow is not None else ''
+        _flat_map['rcv_r_ops'] = flow.numRRecvOps if flow is not None else ''
+        _flat_map['snd_w_bytes'] = flow.numWSendBytes if flow is not None else ''
+        _flat_map['snd_w_ops'] = flow.numWSendOps if flow is not None else ''
+        _flat_map['cont_id'] = cont.id if cont is not None else ''
+        _flat_map['cont_name'] = cont.name if cont is not None else ''
+        _flat_map['cont_image_id'] = cont.imageid if cont is not None else ''
+        _flat_map['cont_image'] = cont.image if cont is not None else ''
+        _flat_map['cont_type'] = cont.type if cont is not None else ''
+        _flat_map['cont_privileged'] = cont.privileged if cont is not None else ''
+        
         if fields is not None: 
             od = OrderedDict()
             for k in fields:
                 od[k]=_flat_map[k]
             return od
+        
         return _flat_map
