@@ -2,6 +2,8 @@ import sys, os, json, csv
 import sysflow.utils as utils
 from sysflow.objtypes import ObjectTypes, OBJECT_MAP
 from collections import OrderedDict
+import tabulate
+tabulate.PRESERVE_WHITESPACE = True
 from tabulate import tabulate
 
 _default_fields = ['flow_type', 'proc_exe', 'proc_args', 'pproc_pid', 'proc_pid', 'proc_tid','op_flags', 'ts', 'end_ts', 'fd', 'ret_code', 'res', 'rcv_r_bytes', 'snd_w_bytes', 'cont_id']
@@ -53,6 +55,54 @@ _header_map = { 'idx': 'Evt #',
                 'cont_privileged': 'Privileged'
               }
 
+_colwidths = {  'idx': 6,
+                'flow_type': 5,
+                'op_flags': 12,
+                'ret_code': 4,
+                'ts': 26, 
+                'ts_uts': 12, 
+                'end_ts': 26,
+                'end_ts_uts': 12,
+                'proc_pid': 5,
+                'proc_tid': 5,
+                'proc_uid': 5,
+                'proc_user': 8, 
+                'proc_gid': 5,
+                'proc_group': 8,
+                'proc_exe': 30, 
+                'proc_args': 45,
+                'proc_tty': 5,
+                'proc_create_ts': 12,
+                'pproc_pid': 5,
+                'pproc_gid': 5,
+                'pproc_uid': 5,
+                'pproc_group': 8,
+                'pproc_tty': 5, 
+                'pproc_user': 8,
+                'pproc_exe': 30,
+                'pproc_args': 45,
+                'pproc_create_ts': 8,
+                'fd': 5,
+                'open_flags': 5,
+                'res': 30,
+                'proto': 5,
+                'sport': 5,
+                'dport': 5,
+                'sip': 16,
+                'dip': 16, 
+                'rcv_r_bytes': 8,
+                'rcv_r_ops': 8,
+                'snd_w_bytes': 8,
+                'snd_w_ops': 8,
+                'cont_id': 16,
+                'cont_image_id': 16, 
+                'cont_image': 16,
+                'cont_name': 16,
+                'cont_type': 8,
+                'cont_privileged': 5
+              }
+
+
 class SFFormatter(object):
 
     def __init__(self, reader):  
@@ -94,6 +144,10 @@ class SFFormatter(object):
             if showindex:
                 record['idx'] = idx
                 record.move_to_end('idx', last=False)
+            for key, value in record.items():
+                w = _colwidths[key] + 2
+                data = '{0: <{width}}'.format(value, width=w)
+                record[key] = data[:w] + (data[w:] and '..')
             bulkRecs.append(record)
             if idx > 0 and idx % 1000 == 0:
                 if first:
