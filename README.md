@@ -10,7 +10,7 @@ The SysFlow Collector is currently built upon a Sysdig core and requires the Sys
 collect system events and turn them into SysFlow.  As a result, the collector supports Sysdig's powerful
 filtering capabilities.  Please see the build and installation instructions for installing the collector.
 
-[Build, Installation and Usage](BUILD.md)
-[SysFlow APIs and Utilities](API.md)
-[SysFlow Specification](SPEC.md)
-[Apache License](LICENSE.md)
+* [Build, Installation and Usage](BUILD.md)
+* [SysFlow APIs and Utilities](API.md)
+* [SysFlow Specification](SPEC.md)
+* [Apache License](LICENSE.md)
