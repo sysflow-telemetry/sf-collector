@@ -6,6 +6,13 @@ import tabulate
 tabulate.PRESERVE_WHITESPACE = True
 from tabulate import tabulate
 
+"""
+.. module:: sysflow.formatter
+   :synopsis: This module allows SysFlow to be exported in formats other than avro including json, CSV, and pretty print
+.. moduleauthor:: Frederico Araujo, Teryl Taylor
+"""
+
+
 _default_fields = ['flow_type', 'proc_exe', 'proc_args', 'pproc_pid', 'proc_pid', 'proc_tid','op_flags', 'ts', 'end_ts', 'fd', 'ret_code', 'res', 'rcv_r_bytes', 'snd_w_bytes', 'cont_id']
 
 _header_map = { 'idx': 'Evt #',
@@ -84,7 +91,7 @@ _colwidths = {  'idx': 6,
                 'pproc_create_ts': 8,
                 'fd': 5,
                 'open_flags': 5,
-                'res': 30,
+                'res': 45,
                 'proto': 5,
                 'sport': 5,
                 'dport': 5,
@@ -104,25 +111,79 @@ _colwidths = {  'idx': 6,
 
 
 class SFFormatter(object):
+    """
+       **SFFormatter**
 
+       This class takes a `FlattenedSFReader`, and exports SysFlow as either JSON, CSV or Pretty Print .
+       Example Usage::
+
+           reader = FlattenedSFReader(trace, False)
+           formatter = SFFormatter(reader)
+           fields=args.fields.split(',') if args.fields is not None else None
+           if args.output == 'json':
+               if args.file is not None:
+                   formatter.toJsonFile(args.file, fields=fields)
+               else:
+                   formatter.toJsonStdOut(fields=fields)
+           elif args.output == 'csv' and args.file is not None:
+               formatter.toCsvFile(args.file, fields=fields)
+           elif args.output == 'str':
+               formatter.toStdOut(fields=fields)
+       
+       :param reader: A reader representing the sysflow file being read.
+       :type reader: sysflow.reader.FlattenedSFReader
+    """
     def __init__(self, reader):  
         self.reader = reader
    
     def applyFuncJson(self, func, fields=None):
+        """Enables a delegate function to be applied to each JSON record read.
+
+        :param func: delegate function of the form func(str) 
+        :type func: function
+        
+        :param fields: a list of the SysFlow fields to be exported in the JSON.  See 
+                       formatter.py for a list of fields
+        :type fields: list
+        """
         for r in self.reader:
             record = self._flatten(*r, fields) 
             func(json.dumps(record))
      
     def toJsonStdOut(self, fields=None):
+        """Writes SysFlow as JSON to stdout.
+
+        :param fields: a list of the SysFlow fields to be exported in the JSON.  See 
+                       formatter.py for a list of fields
+        :type fields: list
+        """
         for r in self.reader:
             record = self._flatten(*r, fields) 
             print(json.dumps(record))
 
     def toJsonFile(self, path, fields=None):
+        """Writes SysFlow to JSON file.
+
+        :param path: the full path of the output file. 
+        :type path: str
+        
+        :param fields: a list of the SysFlow fields to be exported in the JSON.  See 
+                       formatter.py for a list of fields
+        :type fields: list
+        """
         with open(path, mode='w') as jsonfile:
             json.dump([self._flatten(*r, fields) for r in self.reader], jsonfile)
 
     def toCsvFile(self, path, fields=None, header=True): 
+        """Writes SysFlow to CSV file.
+
+        :param path: the full path of the output file. 
+        :type path: str
+        
+        :param fields: a list of the SysFlow fields to be exported in the JSON.  See 
+                       formatter.py for a list of fields
+        :type fields: list
+        """
         with open(path, mode='w') as csv_file:
             for idx, r in enumerate(self.reader):
                 record = self._flatten(*r, fields) 
@@ -134,6 +195,18 @@ class SFFormatter(object):
                 writer.writerow(record)
 
     def toStdOut(self, fields=_default_fields, pretty_headers=True, showindex=True):
+        """Writes SysFlow as a tabular pretty print form to stdout.
+
+        :param fields: a list of the SysFlow fields to be exported in the JSON.  See 
+                       formatter.py for a list of fields
+        :type fields: list
+        
+        :param pretty_headers: print table headers in pretty format. 
+        :type pretty_headers: bool
+        
+        :param showindex: show record number. 
+        :type showindex: bool
+        """
         fields = _default_fields if fields is None else fields
         headers = _header_map if pretty_headers else 'keys'
         bulkRecs = []

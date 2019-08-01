@@ -1,10 +1,26 @@
 import sysflow.opflags as opflags
 from datetime import datetime
+"""
+.. module:: sysflow.utils
+   :synopsis: Utility functions to help transform attributes into strings. 
+.. moduleauthor:: Teryl Taylor, Frederico Araujo
+"""
 
 NANO_TO_SECS = 1000000000
 TIME_FORMAT = "%m/%d/%YT%H:%M:%S.%f"
 
+
+
 def getOpFlagsStr(opFlags):
+    """
+       Converts a sysflow operations flag bitmap into a string representation.
+       
+       :param opflag: An operations bitmap from a flow or event.
+       :type opflag: int
+        
+       :rtype: str
+       :return: A string representation of the operations bitmap.
+    """
     ops = ""
     ops +=  "MKDIR" if (opFlags & opflags.OP_MKDIR) else "";
     ops +=  "RMDIR" if (opFlags & opflags.OP_RMDIR) else "";
@@ -38,11 +54,29 @@ def getOpFlagsStr(opFlags):
     return ops
 
 def getTimeStr(ts):
+    """
+       Converts a nanosecond ts into a string representation.
+       
+       :param ts: A nanosecond epoch.
+       :type ts: int
+        
+       :rtype: str
+       :return: A string representation of the timestamp in %m/%d/%YT%H:%M:%S.%f format.
+    """
     tStamp = datetime.fromtimestamp(float(float(ts)/NANO_TO_SECS))
     timeStr = tStamp.strftime(TIME_FORMAT)
     return timeStr
 
 def getNetFlowStr(nf):
+    """
+       Converts a NetworkFlow into a string representation.
+       
+       :param nf: a NetworkFlow object.
+       :type nf: sysflow.schema_classes.SchemaClasses.sysflow.flow.NetworkFlowClass
+        
+       :rtype: str
+       :return: A string representation of the NetworkFlow in form (sip:sport-dip:dport).
+    """
     sip = ".".join(map(lambda n: str(nf.sip>>n & 0xFF), [0, 8, 16, 24]))
     dip = ".".join(map(lambda n: str(nf.dip>>n & 0xFF), [0, 8, 16, 24]))
     return str(sip) + ":" + str(nf.sport) + "-" + str(dip) + ":" + str(nf.dport)  

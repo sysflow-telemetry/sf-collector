@@ -8,8 +8,39 @@ from sysflow.schema_classes import SCHEMA as SysFlowSchema
 from avro import datafile, io 
 from uuid import UUID
 
-class SFReader(object):
+"""
+.. module:: sysflow.reader
+   :synopsis: All readers for reading sysflow are defined here.
+.. moduleauthor:: Teryl Taylor, Frederico Araujo
+"""
 
+
+
+
+
+class SFReader(object):
+    """
+       **SFReader**
+
+       This class loads a raw sysflow file, and returns each entity/flow one by one.
+       It is the user's responsibility to link the related objects together through the OID. 
+       This class supports the python iterator design pattern.
+       Example Usage::
+       
+              reader = SFReader("./sysflowfile.sf")
+              for sf in reader:
+                  rec = sf.rec 
+                  if isinstance(rec, sysflow.schema_classes.SchemaClasses.sysflow.entity.SFHeaderClass):
+                     //do something with the header object
+                  elif isinstance(rec, sysflow.schema_classes.SchemaClasses.sysflow.entity.ContainerClass):
+                     //do something with the container object
+                  elif isinstance(rec, sysflow.schema_classes.SchemaClasses.sysflow.entity.ProcessClass):
+                     //do something with the Process object
+                  ....
+       
+       :param filename: the name of the sysflow file to be read.
+       :type filename: str
+    """
     def __init__(self, filename):
         self.filename = filename
         self.fh = open(filename, "rb")
@@ -31,6 +62,59 @@ class SFReader(object):
 
 
 class FlattenedSFReader(SFReader):
+    """
+       **FlattenedSFReader**
+
+       This class loads a raw sysflow file, and links all Entities (header, process, container, files) with
+       the current flow or event in the file.  As a result, the user does not have to manage this information.
+       This class supports the python iterator design pattern.
+       Example Usage::
+
+              reader = FlattenedSFReader("./sysflowfile.sf", False)
+              for objtype, header, cont, proc, files, evt, flow  in reader:
+                  exe = proc.exe + ' ' + proc.exeArgs if proc is not None else ''
+                  pid = proc.oid.hpid if proc is not None else ''
+                  evflow = evt or flow
+                  tid = evflow.tid if evflow is not None else ''
+                  opFlags = utils.getOpFlagsStr(evflow.opFlags) if evflow is not None else '' 
+                  sTime = utils.getTimeStr(evflow.ts) if evflow is not None else ''
+                  eTime = utils.getTimeStr(evflow.endTs) if flow is not None else ''
+                  ret = evflow.ret if evt is not None else ''
+                  res1 = ''
+                  if objtype == ObjectTypes.FILE_FLOW or objtype == ObjectTypes.FILE_EVT:
+                      res1 = files[0].path
+                  elif objtype == ObjectTypes.NET_FLOW:
+                      res1 = utils.getNetFlowStr(flow) 
+                  numBReads = evflow.numRRecvBytes if flow is not None else ''
+                  numBWrites = evflow.numWSendBytes if flow is not None else ''
+    
+                  res2 = files[1].path if files is not None and files[1] is not None else ''
+                  cont = cont.id if cont is not None else '' 
+                  print("|{0:30}|{1:9}|{2:26}|{3:26}|{4:30}|{5:8}|{6:8}|".format(exe, opFlags, sTime, eTime, res1, numBReads, numBWrites))
+
+       :param filename: the name of the sysflow file to be read.
+       :type filename: str
+       :param retEntities: If True, the reader will return entity objects by themselves as they are seen in the sysflow file. 
+                           In this case, all other objects will be set to None
+       :type retEntities: bool
+
+       **Iterator**
+        Reader returns a tuple of objects in the following order:
+
+        **objtype** (:class:`sysflow.objtypes.ObjectTypes`) The type of entity or flow returned.
+ 
+        **header** (:class:`sysflow.entity.SFHeader`) The header entity of the file.
+        
+        **cont** (:class:`sysflow.entity.Container`) The container associated with the flow/evt, or None if no container.
+  
+        **proc** (:class:`sysflow.entity.Process`) The process associated with the flow/evt.
+
+        **files** (tuple of :class:`sysflow.entity.File`) Any files associated with the flow/evt.
+
+        **evt** (:class:`sysflow.event.{ProcessEvent,FileEvent}`) If the record is an event, it will be returned here. Otherwise this variable will be None. objtype will indicate the type of event.
+
+        **flow** (:class:`sysflow.flow.{NetworkFlow,FileFlow}`) If the record is a flow, it will be returned here. Otherwise this variable will be None. objtype will indicate the type of flow.
+    """
     def __init__(self, filename, retEntities=False):
         super().__init__(filename)
         self.processes = dict()
@@ -40,6 +124,14 @@ class FlattenedSFReader(SFReader):
         self.retEntities = retEntities
 
     def getProcess(self, oid):
+        """Returns a Process Object given a process object id.
+
+        :param oid: the object id of the Process Object requested
+        :type oid: sysflow.type.OID
+
+        :rtype: sysflow.entity.Process
+        :return: the desired process object or None if no process object is available.
+        """
         key = self.getProcessKey(oid)
         if key in self.processes:
             return self.processes[key]
