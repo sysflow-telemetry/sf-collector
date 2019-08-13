@@ -8,7 +8,7 @@ from tabulate import tabulate
 
 """
 .. module:: sysflow.formatter
-   :synopsis: This module allows SysFlow to be exported in formats other than avro including json, CSV, and pretty print
+   :synopsis: This module allows SysFlow to be exported in formats other than avro including JSON, CSV, and tabular pretty print
 .. moduleauthor:: Frederico Araujo, Teryl Taylor
 """
 
@@ -18,6 +18,7 @@ _default_fields = ['flow_type', 'proc_exe', 'proc_args', 'pproc_pid', 'proc_pid'
 _header_map = { 'idx': 'Evt #',
                 'flow_type': 'T',
                 'op_flags': 'Op Flags',
+                'op_flags_bitmap': 'Op Flags',
                 'ret_code': 'Ret',
                 'ts': 'Start Time', 
                 'ts_uts': 'Start Time', 
@@ -65,6 +66,7 @@ _header_map = { 'idx': 'Evt #',
 _colwidths = {  'idx': 6,
                 'flow_type': 5,
                 'op_flags': 12,
+                'op_flags_bitmap': 5,
                 'ret_code': 4,
                 'ts': 26, 
                 'ts_uts': 12, 
@@ -292,7 +294,7 @@ class SFFormatter(object):
         _flat_map['cont_type'] = cont.type if cont is not None else ''
         _flat_map['cont_privileged'] = cont.privileged if cont is not None else ''
         
-        if fields is not None: 
+        if fields: 
             od = OrderedDict()
             for k in fields:
                 od[k]=_flat_map[k]
