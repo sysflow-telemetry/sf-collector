@@ -5,6 +5,7 @@ from enum import Enum
    :synopsis: This module represents each entity/flow/event class as a ID, and maps those ids to strings.
 .. moduleauthor:: Teryl Taylor, Frederico Araujo
 """
+
 class ObjectTypes(Enum):
     """
        **ObjectTypes**

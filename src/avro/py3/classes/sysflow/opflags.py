@@ -1,4 +1,3 @@
-
 """
 .. module:: sysflow.opflags
    :synopsis: This module lists all operations currently supported by SysFlow.

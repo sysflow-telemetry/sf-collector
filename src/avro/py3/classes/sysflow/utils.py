@@ -1,5 +1,6 @@
 import sysflow.opflags as opflags
 from datetime import datetime
+
 """
 .. module:: sysflow.utils
    :synopsis: Utility functions to help transform attributes into strings. 
@@ -8,8 +9,6 @@ from datetime import datetime
 
 NANO_TO_SECS = 1000000000
 TIME_FORMAT = "%m/%d/%YT%H:%M:%S.%f"
-
-
 
 def getOpFlagsStr(opFlags):
     """
