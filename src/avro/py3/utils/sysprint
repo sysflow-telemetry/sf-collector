@@ -1,7 +1,25 @@
 #!/usr/bin/env python3
-import sys, os, argparse
+import sys, os, argparse, tempfile
 from sysflow.reader import FlattenedSFReader
 from sysflow.formatter import SFFormatter
+from minio import Minio
+
+"""
+.. module:: sysprint
+   :synopsis: This module implements a command-line tool for printing and convert Sysflow from disk and S3 object stors to formats other than avro including JSON, CSV, and tabular pretty print
+.. moduleauthor:: Frederico Araujo, Teryl Taylor
+"""
+
+def str2bool(v):
+    """argparse facility for boolean type conversions"""
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def files(path):  
     """list files in dir path"""
@@ -11,16 +29,28 @@ def files(path):
 
 def run(args):
     """execute sysprint"""
-    for path in args.paths:
-        if os.path.isfile(path):
-            sysprint(path, args)
-        elif os.path.isdir(path):
-            traces = [f for f in files(path)]
-            traces.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
-            for t in traces:
-                sysprint(t, args)
-        else:
-            raise argparse.ArgumentTypeError('existent file or dir path expected.')
+    if args.input == 'cos':
+        cos = Minio('%s:%s' % (args.cosendpoint, args.cosport), access_key=args.cosaccesskey, secret_key=args.cossecretkey, secure=args.secure)
+        for path in args.paths:
+            if cos.bucket_exists(path):
+                objs = cos.list_objects(path)
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    for obj in objs:
+                        cos.fget_object(obj.bucket_name, obj.object_name, '/{0}/{1}/{2}'.format(tmpdir, obj.bucket_name, obj.object_name))
+                        sysprint('/{0}/{1}/{2}'.format(tmpdir, obj.bucket_name, obj.object_name), args)
+            else:
+                print('Bucket {0} does not exist.'.format(path))
+    elif args.input == 'local':
+        for path in args.paths:
+            if os.path.isfile(path):
+                sysprint(path, args)
+            elif os.path.isdir(path):
+                traces = [f for f in files(path)]
+                traces.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+                for t in traces:
+                    sysprint(t, args)
+            else:
+                print('Existent file or dir path expected.')
            
 def sysprint(trace, args):
     """print a sysflow file in human-readable format"""
@@ -43,15 +73,25 @@ if __name__ == '__main__':
     
     # set command line args
     parser = argparse.ArgumentParser(
-        description='sysprint: a human-readable printer for Sysflow captures.'
+        description='sysprint: a human-readable printer and format converter for Sysflow captures.'
     )
-    parser.add_argument('paths', metavar='path', nargs='+', help='path from where to read trace files')
+    parser.add_argument('paths', metavar='path', nargs='+', help='list of paths or bucket names from where to read trace files')
+    parser.add_argument('-i', '--input', help='input type', choices=['local','cos'], default='local')
     parser.add_argument('-o', '--output', help='output format', choices=['str','json','csv'], default='str')
     parser.add_argument('-w', '--file', help='output file path', default=None)
     parser.add_argument('-f', '--fields', help='comma-separated list of sysflow fields to be printed', default=None)
-   
+    parser.add_argument('-c', '--cosendpoint', help='cos server address from where to read sysflows', default=None) 
+    parser.add_argument('-p', '--cosport', help='cos server port', default=443)
+    parser.add_argument('-a', '--cosaccesskey', help='cos access key', default=None)
+    parser.add_argument('-s', '--cossecretkey', help='cos secret key', default=None)
+    parser.add_argument('-l', '--coslocation', help='target data bucket location', default='us-south')
+    parser.add_argument('--secure', help='indicates if SSL connection', type=str2bool, nargs='?', const=True, default=True)
+  
     # parse args and configuration
     args = parser.parse_args()
+
+    if not os.environ.get('TZ'):
+        os.environ['TZ'] = 'UTC'
 
     # input validation
     if args.output == 'csv' and args.file is None:

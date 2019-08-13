@@ -12,7 +12,6 @@ from tabulate import tabulate
 .. moduleauthor:: Frederico Araujo, Teryl Taylor
 """
 
-
 _default_fields = ['flow_type', 'proc_exe', 'proc_args', 'pproc_pid', 'proc_pid', 'proc_tid','op_flags', 'ts', 'end_ts', 'fd', 'ret_code', 'res', 'rcv_r_bytes', 'snd_w_bytes', 'cont_id']
 
 _header_map = { 'idx': 'Evt #',
