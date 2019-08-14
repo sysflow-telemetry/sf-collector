@@ -4,3 +4,6 @@
 [submodule "sysdig"]
 	path = modules/sysdig
     url = https://github.com/draios/sysdig.git
+[submodule "modules/sysflow"]
+	path = modules/sysflow
+	url = git@github.ibm.com:/sysflow/sf-apis.git

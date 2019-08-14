@@ -1,6 +1,0 @@
-{
-  "type" : "enum",
-  "name" : "ResourceType",
-  "namespace" : "sysflow.type",
-  "symbols" : [ "SF_FILE", "SF_DIRECTORY", "SF_PIPE", "SF_UNIX" ]
-}

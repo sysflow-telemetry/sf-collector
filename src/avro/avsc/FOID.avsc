@@ -1,6 +1,0 @@
-{
-  "type" : "fixed",
-  "name" : "FOID",
-  "namespace" : "sysflow.type",
-  "size" : 20
-}
