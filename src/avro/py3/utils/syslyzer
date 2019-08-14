@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from sysflow.reader import SFReader
-import sys
-reader = SFReader(sys.argv[1])
-for flow in reader:
-    print(flow.rec)

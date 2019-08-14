@@ -87,7 +87,7 @@ COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu
 COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libexpat* /lib/x86_64-linux-gnu/
 COPY --from=builder /build/src/sysporter /usr/local/sysflow/bin/
-COPY --from=builder /build/src/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
+COPY --from=builder /build/modules/sysflow/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 COPY --from=builder /build/src/conf/log4cxx.properties /usr/local/sysflow/conf/
 
 # entrypoint
@@ -120,7 +120,7 @@ RUN mkdir /bats && git clone https://github.com/bats-core/bats-core.git /bats &&
 
 COPY --from=runtime /usr/local/lib/ /usr/local/lib/
 COPY --from=runtime /usr/local/sysflow /usr/local/sysflow
-COPY --from=builder /build/src/avro/py3 /usr/local/sysflow/utils/
+COPY --from=builder /build/modules/sysflow/py3 /usr/local/sysflow/utils/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libapr* /usr/lib/x86_64-linux-gnu/
