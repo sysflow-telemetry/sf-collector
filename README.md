@@ -6,7 +6,7 @@ system call information into a higher order object relational form that models h
 processes and files interact with their environment through process control flow, file, and network
 operations.  Learn more about SysFlow in the SysFlow Specification Document (below).
 
-The SysFlow Collector is currently built upon a [Sysdig][https://github.com/draios/sysdig] core and 
+The SysFlow Collector is currently built upon a [Sysdig](https://github.com/draios/sysdig) core and 
 requires the Sysdig probe to passively collect system events and turn them into SysFlow.  As a result, 
 the collector supports Sysdig's powerful filtering capabilities. Please see the build and installation 
 instructions for installing the collector.
