@@ -1,3 +1,5 @@
+[![Build Status](https://travis.ibm.com/sysflow/sf-collector.svg?token=YCkPxVzn5tW3RuQt9o3y&branch=master)](https://travis.ibm.com/sysflow/sf-collector)
+
 # SysFlow Collector Documentation
 
 The SysFlow Collector monitors and collects system call and event information from hosts
