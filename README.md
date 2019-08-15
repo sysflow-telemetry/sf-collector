@@ -1,6 +1,6 @@
 [![Build Status](https://travis.ibm.com/sysflow/sf-collector.svg?token=YCkPxVzn5tW3RuQt9o3y&branch=master)](https://travis.ibm.com/sysflow/sf-collector)
 
-# SysFlow Collector Documentation
+# SysFlow Collector (probe)
 
 The SysFlow Collector monitors and collects system call and event information from hosts
 and exports them in the SysFlow format using Apache Avro object serialization.  SysFlow lifts
@@ -14,6 +14,5 @@ the collector supports Sysdig's powerful filtering capabilities. Please see the 
 instructions](BUILD.md) for installing the collector.
 
 * [Build, Installation and Usage](BUILD.md)
-* [SysFlow APIs and Utilities](API.md)
 * [SysFlow Specification](SPEC.md)
 * [License](LICENSE.md)
