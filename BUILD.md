@@ -1,6 +1,4 @@
 # Build, Installation and Usage
-[![Build Status](https://travis.ibm.com/sysflow/sf-collector.svg?token=YCkPxVzn5tW3RuQt9o3y&branch=master)](https://travis.ibm.com/sysmon/sf-collector)
-
 
 ## Cloning source
 
