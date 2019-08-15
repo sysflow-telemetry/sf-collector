@@ -1,33 +1,7 @@
+#-----------------------
+# Stage: deps
+#-----------------------
 FROM ubuntu:16.04 as deps
-
-# dependencies
-RUN apt-get update -yqq && \
-    apt-get --fix-broken install -yqq && \
-    apt-get upgrade -yqq && \
-    apt-get install -yqq \
-        apt-utils \
-        build-essential \
-        libncurses5-dev \
-        libncursesw5-dev \
-        cmake \
-        libboost-all-dev \
-        flex \ 
-        bison \
-        g++ \
-        wget \
-        libelf-dev && \
-    apt-get clean -yqq && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
-#        linux-headers-$(uname -r) && \
-COPY  ./modules /build/modules
-COPY  ./makefile.* /build/
-RUN cd /build/modules && make install
-
-#-----------------------
-# Stage: Builder
-#-----------------------
-FROM ubuntu:16.04 as builder
-ARG TRAVIS_BUILD_NUMBER
 
 # dependencies
 RUN apt-get update -yqq && \
@@ -37,10 +11,22 @@ RUN apt-get update -yqq && \
     add-apt-repository ppa:jonathonf/gcc -y && \
     apt-get update -yqq && \
     apt-get install -yqq \
-        apt-utils \
+        patch \
+        base-files \
+        binutils \
+        bzip2 \
+        libdpkg-perl \
+        perl \
         make \
+        xz-utils \
+        libncurses5-dev \
+        libncursesw5-dev \
+        cmake \
         libboost-all-dev \
         g++-8 \
+        flex \ 
+        bison \
+        wget \
         libelf-dev \
         liblog4cxx-dev \
         libapr1 \
@@ -49,6 +35,16 @@ RUN apt-get update -yqq && \
     ln -s /usr/bin/g++-8 /usr/bin/g++ && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
+
+COPY  ./modules /build/modules
+COPY  ./makefile.* /build/
+RUN cd /build/modules && make install
+
+#-----------------------
+# Stage: Builder
+#-----------------------
+FROM deps as builder
+ARG TRAVIS_BUILD_NUMBER
 
 # copy dependencies
 COPY --from=deps /build /build/
@@ -97,7 +93,7 @@ CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $NODE_NAME $FILT
 #-----------------------
 # Stage: Testing
 #-----------------------
-FROM sysdig/sysdig:0.24.2 as testing
+FROM runtime as testing
 
 ARG wdir=/usr/local/sysflow
 ENV WDIR=$wdir
@@ -115,22 +111,13 @@ RUN apt-get update -yqq && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 
-RUN mkdir /bats && git clone https://github.com/bats-core/bats-core.git /bats && \
-    cd /bats && ./install.sh /usr/local && rm -r /bats
-
-COPY --from=runtime /usr/local/lib/ /usr/local/lib/
-COPY --from=runtime /usr/local/sysflow /usr/local/sysflow
 COPY --from=builder /build/modules/sysflow/py3 /usr/local/sysflow/utils/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libapr* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libexpat* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libexpat* /lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 
 RUN cd /usr/local/sysflow/utils && \
     python3 setup.py install 
+
+RUN mkdir /bats && git clone https://github.com/bats-core/bats-core.git /bats && \
+    cd /bats && ./install.sh /usr/local && rm -r /bats
 
 WORKDIR $wdir
 ENTRYPOINT ["/usr/local/bin/bats"]

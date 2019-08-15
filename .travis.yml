@@ -16,10 +16,10 @@ before_install:
 
 script:
  - make -C modules init
- - travis_wait docker build --cache-from ${CR_CI}/sysporter:deps --target deps -t ${CR_CI}/sysporter:deps .
- - travis_wait docker build --build-arg TRAVIS_BUILD_NUMBER --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --target builder -t ${CR_CI}/sysporter:builder .
- - travis_wait docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --target runtime -t ${CR_CI}/sysporter:runtime .
- - travis_wait docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --cache-from ${CR_CI}/sysporter:testing --target testing -t ${CR_CI}/sysporter:testing .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --target deps -t ${CR_CI}/sysporter:deps .
+ - docker build --build-arg TRAVIS_BUILD_NUMBER --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --target builder -t ${CR_CI}/sysporter:builder .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --target runtime -t ${CR_CI}/sysporter:runtime .
+ - docker build --cache-from ${CR_CI}/sysporter:deps --cache-from ${CR_CI}/sysporter:builder --cache-from ${CR_CI}/sysporter:runtime --cache-from ${CR_CI}/sysporter:testing --target testing -t ${CR_CI}/sysporter:testing .
  - docker run --rm --name sftests -it -v "$(pwd)/tests:/usr/local/sysflow/tests" -e quiet=true ${CR_CI}/sysporter:testing -t tests/tests.bats
 
 after_success:
