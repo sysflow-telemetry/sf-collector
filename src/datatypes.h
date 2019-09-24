@@ -1,5 +1,3 @@
-#ifndef __HASHER__
-#define __HASHER__
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,6 +17,8 @@
 * limitations under the License.
 **/
 
+#ifndef __HASHER__
+#define __HASHER__
 
 #include "MurmurHash3.h"
 

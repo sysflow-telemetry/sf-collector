@@ -1,5 +1,3 @@
-#ifndef __SF_SYS_CALL_DEFS
-#define __SF_SYS_CALL_DEFS
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,6 +17,8 @@
 * limitations under the License.
 **/
 
+#ifndef __SF_SYS_CALL_DEFS
+#define __SF_SYS_CALL_DEFS
 
 #define SF_EXECVE_ENTER() case PPME_SYSCALL_EXECVE_8_E: \
                         case PPME_SYSCALL_EXECVE_13_E: \

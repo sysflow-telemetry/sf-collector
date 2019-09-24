@@ -1,5 +1,3 @@
-#ifndef __SF_LOGGER
-#define __SF_LOGGER
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,7 +17,8 @@
 * limitations under the License.
 **/
 
-
+#ifndef __SF_LOGGER
+#define __SF_LOGGER
 #include <iostream>
 
 using namespace std;

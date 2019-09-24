@@ -1,6 +1,3 @@
-#ifndef __SF_FILE_TYPES_
-#define __SF_FILE_TYPES_
-
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -20,13 +17,8 @@
 * limitations under the License.
 **/
 
-/*enum class FileTypes : char {
-     SF_FILE = 'f',
-     SF_IPv4 = 4,
-     SF_IPv6 = 6,
-     SF_UNIX = 'u',
-     SF_PIPE = 'p'
-};*/
+#ifndef __SF_FILE_TYPES_
+#define __SF_FILE_TYPES_
 enum FileType {
      SF_FILE = 'f',
      SF_DIR = 'd',

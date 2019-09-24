@@ -1,6 +1,3 @@
-#ifndef __SF_WRITER_
-#define __SF_WRITER_
-
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,6 +16,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+
+#ifndef __SF_WRITER_
+#define __SF_WRITER_
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

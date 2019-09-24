@@ -1,6 +1,3 @@
-#ifndef _SF_CONTEXT_
-#define _SF_CONTEXT_
-
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -20,6 +17,8 @@
 * limitations under the License.
 **/
 
+#ifndef _SF_CONTEXT_
+#define _SF_CONTEXT_
 #include <string> 
 
 #include <time.h>

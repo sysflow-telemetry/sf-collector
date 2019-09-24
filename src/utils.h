@@ -1,6 +1,3 @@
-#ifndef _SF_UTILS_
-#define _SF_UTILS_
-
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -20,6 +17,8 @@
 * limitations under the License.
 **/
 
+#ifndef _SF_UTILS_
+#define _SF_UTILS_
 #include <fstream>
 #include <sinsp.h>
 #include <string>

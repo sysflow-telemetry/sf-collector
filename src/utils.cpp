@@ -17,7 +17,6 @@
 * limitations under the License.
 **/
 
-
 #include "utils.h"
 #include "sysflowcontext.h"
 #include "datatypes.h"

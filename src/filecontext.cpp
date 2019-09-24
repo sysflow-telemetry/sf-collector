@@ -18,7 +18,6 @@
 * limitations under the License.
 **/
 
-
 using namespace file;
 
 FileContext::FileContext(container::ContainerContext* containerCxt, SysFlowWriter* writer) {

@@ -17,7 +17,6 @@
 * limitations under the License.
 **/
 
-
 #include "fileeventprocessor.h"
 #include <assert.h>
 

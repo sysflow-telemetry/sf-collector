@@ -1,5 +1,3 @@
-#ifndef _SF_DATA_FLOW_
-#define _SF_DATA_FLOW_
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,6 +17,8 @@
 * limitations under the License.
 **/
 
+#ifndef _SF_DATA_FLOW_
+#define _SF_DATA_FLOW_
 #include <sinsp.h>
 #include "sysflowcontext.h"
 #include "op_flags.h"

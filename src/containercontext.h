@@ -1,5 +1,3 @@
-#ifndef _SF_CONT_
-#define _SF_CONT_
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,6 +17,8 @@
 * limitations under the License.
 **/
 
+#ifndef _SF_CONT_
+#define _SF_CONT_
 #include <string>
 
 #include <sinsp.h>

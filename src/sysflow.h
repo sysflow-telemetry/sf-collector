@@ -1,5 +1,3 @@
-#ifndef __SYSFLOW_WRAP
-#define __SYSFLOW_WRAP
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,6 +17,8 @@
 * limitations under the License.
 **/
 
+#ifndef __SYSFLOW_WRAP
+#define __SYSFLOW_WRAP
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "sysflow/sysflow.hh"

@@ -1,5 +1,3 @@
-#ifndef _SF_FILE_
-#define _SF_FILE_
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,7 +17,8 @@
 * limitations under the License.
 **/
 
-
+#ifndef _SF_FILE_
+#define _SF_FILE_
 #include "sysflow.h"
 #include "datatypes.h"
 #include "sysflowwriter.h"

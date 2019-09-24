@@ -1,5 +1,3 @@
-#ifndef _SF_PROC_
-#define _SF_PROC_
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,6 +17,8 @@
 * limitations under the License.
 **/
 
+#ifndef _SF_PROC_
+#define _SF_PROC_
 #include <sinsp.h>
 #include "sysflow.h"
 #include "sysflowcontext.h"

@@ -1,5 +1,3 @@
-#ifndef _SF_PROC_EVT_
-#define _SF_PROC_EVT_
 /** Copyright (C) 2019 IBM Corporation.
 *
 * Authors:
@@ -19,7 +17,8 @@
 * limitations under the License.
 **/
 
-
+#ifndef _SF_PROC_EVT_
+#define _SF_PROC_EVT_
 #include <sinsp.h>
 #include "sysflow.h"
 #include "sysflowwriter.h"

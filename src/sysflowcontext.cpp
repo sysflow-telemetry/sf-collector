@@ -17,7 +17,6 @@
 * limitations under the License.
 **/
 
-
 #include "sysflowcontext.h"
 
 CREATE_LOGGER(SysFlowContext, "sysflow.sysflowcontext");
