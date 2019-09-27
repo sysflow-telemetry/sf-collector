@@ -3,8 +3,8 @@ include ../makefile.env.inc
 
 TARGET=sysporter
 TARGET2=sysreader
-#GCC=g++-8
 CXX=g++-8
+LINT=clang-tidy-9
 GCCVERSIONGTEQ8 := $(shell expr `$(CXX) -dumpversion | cut -f1 -d.` \>= 8)
 
 LIBLOCALPREFIX=../modules
@@ -23,7 +23,7 @@ LDFLAGS= $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AV
 LDFLAGS2= $(LIBS2) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	  -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
 
-CFLAGS= -no-pie -std=c++17 -Wall -ggdb -I.. -I../modules/sysflow/c++/ \
+CFLAGS= -std=c++17 -Wall -ggdb -I.. -I../modules/sysflow/c++/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
@@ -44,6 +44,9 @@ endif
 .PHONY: all
 all: version $(TARGET) $(TARGET2)
 
+.PHONY: lint
+all: $(LINTTARGET)
+
 .PHONY: install
 install: all 
 	mkdir -p $(PREFIX)/bin && cp sysporter $(PREFIX)/bin && cp sysreader $(PREFIX)/bin
@@ -60,7 +63,6 @@ version:
 	sed -i -E "s/SYSFLOW_VERSION/\"$(SYSFLOW_VERSION)\"/" sysflow_config.h
 	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
 
-
 .PHONY: $(TARGET)
 $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .filecontext.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
@@ -68,6 +70,12 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 .PHONY: $(TARGET2)
 $(TARGET2): .reader.o .MurmurHash3.o
 	$(CXX) $^ -o $@ $(LDFLAGS2)
+
+SRCS := $(wildcard *.cpp)
+
+.PHONY: lint
+lint: $(SRCS)
+	$(LINT) -checks=* $^ -- $(CFLAGS)
 
 .main.o: main.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
@@ -101,6 +109,9 @@ $(TARGET2): .reader.o .MurmurHash3.o
 
 .networkflowprocessor.o: networkflowprocessor.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.networkflowprocessor.lint: networkflowprocessor.cpp
+	$(LINT) -checks=* $^ -- $(CFLAGS)
 
 .fileflowprocessor.o: fileflowprocessor.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
