@@ -18,30 +18,12 @@ SRCS := $(wildcard *.cpp)
 LIBS= $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
       $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a \
       -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -llog4cxx
-LIBS2 = -lstdc++ -lpthread -lm -lavrocpp -lb64
-
 LDFLAGS= $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
-LDFLAGS2= $(LIBS2) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
-	  -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
-
-CFLAGS= -std=c++17 -Wall -ggdb -I.. -I../modules/sysflow/c++/ \
+CFLAGS= -std=c++17 -Wall -ggdb -I.. -I../modules/sysflow/c++/ -I../modules/filesystem/include/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
-CFLAGS2= -std=c++17 -ggdb -I.. -I../modules/sysflow/c++/ \
-	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
-		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
-
-ifeq "$(GCCVERSIONGTEQ8)" "1"
-	LIBS+= -lstdc++fs
-	LIBS2+= -lstdc++fs
-else
-	LIBS+= -lboost_system -lboost_filesystem
-	LIBS2+= -lboost_system -lboost_filesystem
-	CFLAGS+= -DSYSPORTER_BOOST
-	CFLAGS2+= -DSYSPORTER_BOOST
-endif
 
 .PHONY: all
 all: version $(TARGET) $(TARGET2)
@@ -68,7 +50,7 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 
 .PHONY: $(TARGET2)
 $(TARGET2): .reader.o .MurmurHash3.o
-	$(CXX) $^ -o $@ $(LDFLAGS2)
+	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .PHONY: lint
 lint: $(SRCS)
@@ -123,7 +105,7 @@ lint: $(SRCS)
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .reader.o: reader.cpp
-	$(CXX) $(CFLAGS2) -o $@ -c $^
+	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .PHONY: clean
 clean:
