@@ -5,7 +5,6 @@ TARGET=sysporter
 TARGET2=sysreader
 CXX=g++-8
 LINT=clang-tidy-9
-GCCVERSIONGTEQ8 := $(shell expr `$(CXX) -dumpversion | cut -f1 -d.` \>= 8)
 
 LIBLOCALPREFIX=../modules
 SDLOCALLIBPREFIX=$(LIBLOCALPREFIX)/sysdig/build/lib
@@ -20,7 +19,7 @@ LIBS= $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBP
       -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -llog4cxx
 LDFLAGS= $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
-CFLAGS= -std=c++17 -Wall -ggdb -I.. -I../modules/sysflow/c++/ -I../modules/filesystem/include/ \
+CFLAGS= -std=c++11 -Wall -ggdb -I.. -I../modules/sysflow/c++/ -I../modules/filesystem/include/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
