@@ -1,25 +1,53 @@
+#!/bin/bash
+#
+# Copyright (C) 2019 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Build environment configuration
 include ../makefile.manifest.inc
 include ../makefile.env.inc
 
-TARGET=sysporter
-TARGET2=sysreader
-CXX=g++-8
-LINT=clang-tidy-9
+# Target configuration
+TARGET = sysporter
+TARGET2 = sysreader
 
-LIBLOCALPREFIX=../modules
-SDLOCALLIBPREFIX=$(LIBLOCALPREFIX)/sysdig/build/lib
-SDLOCALINCPREFIX=$(LIBLOCALPREFIX)/sysdig/build/include
-AVRLOCALLIBPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
-AVRLOCALINCPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
+# Lint options
+LINT = clang-tidy-9
+LINTCHECKS = "-abseil*,-android*,bugprone-*,cert-*,clang-*,cppcoreguidelines-*,google-*,hicpp-*,\
+	     -llvm-header-guard,misc-*,modernize-*,-modernize-use-trailing-return-type,-modernize-loop-convert,\
+	     -modernize-make-unique,-modernize-pass-by-value, performance-*,-readability-*,-readability-convert-member-functions-to-static"
+LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
 
-SRCS := $(wildcard *.cpp)
+# Dir structure configuration
+LIBLOCALPREFIX = ../modules
+SDLOCALLIBPREFIX = $(LIBLOCALPREFIX)/sysdig/build/lib
+SDLOCALINCPREFIX = $(LIBLOCALPREFIX)/sysdig/build/include
+AVRLOCALLIBPREFIX = $(LIBLOCALPREFIX)/avro/lang/c++/build
+AVRLOCALINCPREFIX = $(LIBLOCALPREFIX)/avro/lang/c++/build
 
-LIBS= $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
+# Compiler options 
+CXX = g++-8
+LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
       $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a \
       -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -llog4cxx
-LDFLAGS= $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
+LDFLAGS = $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
-CFLAGS= -std=c++11 -Wall -ggdb -I.. -I../modules/sysflow/c++/ -I../modules/filesystem/include/ \
+CFLAGS = -Wall -ggdb -I.. -I../modules/sysflow/c++/ -I../modules/filesystem/include/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
@@ -37,6 +65,14 @@ uninstall:
 	rm -rf $(PREFIX)/bin
 	rm -rf $(PREFIX)/conf
 
+.PHONY: lint
+lint: $(LINTSRCS)
+	$(LINT) -checks=$(LINTCHECKS) --format-style=llvm --header-filter=./ $^ -- $(CFLAGS)
+
+.PHONY: lintfix
+lintfix: $(LINTSRCS)
+	$(LINT) -checks=$(LINTCHECKS) --format-style=llvm --header-filter=./ --fix $^ -- $(CFLAGS)
+
 .PHONY: version
 version:
 	cp sysflow_config.h.in sysflow_config.h
@@ -50,10 +86,6 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 .PHONY: $(TARGET2)
 $(TARGET2): .reader.o .MurmurHash3.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
-
-.PHONY: lint
-lint: $(SRCS)
-	$(LINT) -checks=* $^ -- $(CFLAGS)
 
 .main.o: main.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
