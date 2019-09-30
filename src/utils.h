@@ -35,6 +35,8 @@
 #include <openssl/sha.h>
 #include "boost/any.hpp"
 #include "sysflow.h"
+#include "ghc/fs_std.hpp"
+/*
 #ifdef SYSPORTER_BOOST
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -42,7 +44,7 @@ namespace fs = boost::filesystem;
 #include <filesystem>
 namespace fs = std::filesystem;
 #endif
-
+*/
 typedef boost::array<uint8_t, 20> FOID;
 using namespace std;
 using namespace sysflow;
