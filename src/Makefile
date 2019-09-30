@@ -13,6 +13,8 @@ SDLOCALINCPREFIX=$(LIBLOCALPREFIX)/sysdig/build/include
 AVRLOCALLIBPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
 AVRLOCALINCPREFIX=$(LIBLOCALPREFIX)/avro/lang/c++/build
 
+SRCS := $(wildcard *.cpp)
+
 LIBS= $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
       $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a \
       -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -llog4cxx
@@ -44,9 +46,6 @@ endif
 .PHONY: all
 all: version $(TARGET) $(TARGET2)
 
-.PHONY: lint
-all: $(LINTTARGET)
-
 .PHONY: install
 install: all 
 	mkdir -p $(PREFIX)/bin && cp sysporter $(PREFIX)/bin && cp sysreader $(PREFIX)/bin
@@ -70,8 +69,6 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 .PHONY: $(TARGET2)
 $(TARGET2): .reader.o .MurmurHash3.o
 	$(CXX) $^ -o $@ $(LDFLAGS2)
-
-SRCS := $(wildcard *.cpp)
 
 .PHONY: lint
 lint: $(SRCS)
