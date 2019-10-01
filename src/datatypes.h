@@ -46,11 +46,8 @@ class DataFlowObj {
       time_t exportTime;
       time_t lastUpdate;
       bool isNetworkFlow;
-      DataFlowObj(bool inf) : exportTime(0), lastUpdate(0), isNetworkFlow(inf) {
-           
-      }
-      
-
+      explicit DataFlowObj(bool inf)
+          : exportTime(0), lastUpdate(0), isNetworkFlow(inf) {}
 };
    
 class NetFlowObj : public DataFlowObj {
@@ -222,23 +219,19 @@ struct eqdfobj {
 
 class FileObj {
     public:
-        bool written;
-        uint32_t refs;
-        string key;
-        sysflow::File file;
-        FileObj() : written(false), refs(0) {
-        }
-
+      bool written{false};
+      uint32_t refs{0};
+      string key;
+      sysflow::File file;
+      FileObj() {}
 };
 
 class ContainerObj {
     public:
-        bool written;
-        uint32_t refs;
-        Container cont;
-        ContainerObj() : written(false), refs(0) {
-        }
-
+      bool written{false};
+      uint32_t refs{0};
+      Container cont;
+      ContainerObj() {}
 };
 
 
@@ -255,22 +248,22 @@ typedef multiset<DataFlowObj*, eqdfobj>  DataFlowSet;
 
 class ProcessObj {
     public:
-        bool written;
-        Process proc;
-        NetworkFlowTable netflows;
-        FileFlowTable    fileflows;
-        ProcessSet children;
-        ProcessObj() : written(false), proc(), netflows(), fileflows(), children() {
-            NFKey* emptykey = utils::getNFEmptyKey();
-            NFKey* delkey = utils::getNFDelKey();
-            OID* emptyoidkey = utils::getOIDEmptyKey();
-            OID* deloidkey = utils::getOIDDelKey();
-            netflows.set_empty_key(*emptykey);
-            netflows.set_deleted_key(*delkey);
-            fileflows.set_empty_key("-2");
-            fileflows.set_deleted_key("-1");
-            children.set_empty_key(*emptyoidkey);
-            children.set_deleted_key(*deloidkey);
+      bool written{false};
+      Process proc;
+      NetworkFlowTable netflows;
+      FileFlowTable fileflows;
+      ProcessSet children;
+      ProcessObj() : proc(), netflows(), fileflows(), children() {
+        NFKey *emptykey = utils::getNFEmptyKey();
+        NFKey *delkey = utils::getNFDelKey();
+        OID *emptyoidkey = utils::getOIDEmptyKey();
+        OID *deloidkey = utils::getOIDDelKey();
+        netflows.set_empty_key(*emptykey);
+        netflows.set_deleted_key(*delkey);
+        fileflows.set_empty_key("-2");
+        fileflows.set_deleted_key("-1");
+        children.set_empty_key(*emptyoidkey);
+        children.set_deleted_key(*deloidkey);
       }
 };
 

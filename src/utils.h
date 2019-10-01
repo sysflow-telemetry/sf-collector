@@ -30,12 +30,12 @@
 //#include "avro/DataFile.hh"
 //#include "avro/Encoder.hh"
 //#include "avro/Decoder.hh"
-#include  <time.h>
-#include "sysflowcontext.h"
-#include <openssl/sha.h>
 #include "boost/any.hpp"
-#include "sysflow.h"
 #include "ghc/fs_std.hpp"
+#include "sysflow.h"
+#include "sysflowcontext.h"
+#include <ctime>
+#include <openssl/sha.h>
 /*
 #ifdef SYSPORTER_BOOST
 #include <boost/filesystem.hpp>
@@ -60,22 +60,23 @@ namespace utils {
     NFKey* getNFEmptyKey();
     OID* getOIDDelKey();
     OID* getOIDEmptyKey();
-    void generateFOID(string key, FOID* foid);
-    string getPath(sinsp_evt* ev, string paraName);
-    string getAbsolutePath(sinsp_threadinfo* ti, int64_t dirfd, string fileName);
-    string getAbsolutePath(sinsp_threadinfo* ti, string fileName);
-    int64_t getFD(sinsp_evt* ev, string paraName);
-    inline string getCanonicalPath(string fileName) {
-        fs::path p(fileName);
-        p = weakly_canonical(p);
-        return p.string();
+    void generateFOID(const string &key, FOID *foid);
+    string getPath(sinsp_evt *ev, const string &paraName);
+    string getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
+                           const string &fileName);
+    string getAbsolutePath(sinsp_threadinfo *ti, const string &fileName);
+    int64_t getFD(sinsp_evt *ev, const string &paraName);
+    inline string getCanonicalPath(const string &fileName) {
+      fs::path p(fileName);
+      p = weakly_canonical(p);
+      return p.string();
     }
 
     inline time_t getCurrentTime(SysFlowContext* cxt) {
         if(cxt->isOffline()) {
             return (cxt->timeStamp)/1000000000;   
-        } 
-        return time(NULL);
+        }
+        return time(nullptr);
      }
     inline uint64_t getSysdigTime(SysFlowContext* cxt) {
         if(cxt->isOffline()) {
@@ -83,5 +84,5 @@ namespace utils {
         } 
         return sinsp_utils::get_current_time_ns();
      }
-}
+     } // namespace utils
 #endif

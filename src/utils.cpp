@@ -49,9 +49,9 @@ void initKeys() {
    s_keysinit = true;
 }
 
-
-void  utils::generateFOID(string key, FOID* foid) {
-    SHA1((const unsigned char*)key.c_str(), key.size(), foid->begin());
+void utils::generateFOID(const string &key, FOID *foid) {
+  SHA1(reinterpret_cast<const unsigned char *>(key.c_str()), key.size(),
+       foid->begin());
 }
 
 NFKey* utils::getNFEmptyKey() {
@@ -98,13 +98,11 @@ string utils::getUserName(SysFlowContext* cxt, uint32_t uid)
 
     return it->second->name;*/
    scap_userinfo* user = cxt->getInspector()->get_user(uid);
-   if(user != NULL) {
-       return user->name;
+   if (user != nullptr) {
+     return user->name;
    } else {
-      return string("");
+     return string("");
    }
-
-
 }
 
 string utils::getGroupName(SysFlowContext* cxt, uint32_t gid)
@@ -148,8 +146,8 @@ int64_t utils::getSyscallResult(sinsp_evt* ev) {
             case PT_FD:
             case PT_INT64:
             case PT_INT32:
-		res = *(int64_t *)p->m_val;
-                break;
+              res = *reinterpret_cast<int64_t *>(p->m_val);
+              break;
   	    default:
                SF_WARN(m_logger, "Syscall result not of type pid!! Type: " << param->type <<  " Name: " << param->name);
                break;
@@ -182,95 +180,95 @@ avro::ValidSchema utils::loadSchema(const char* filename)
     return result;
 }
 
-string  utils::getPath(sinsp_evt* ev, string paraName) {
-    //sinsp_evt_param* param = ev->get_param_value_raw(paraName.c_str());
-    int numParams = ev->get_num_params(); 
-    string path;
-    for(int i = 0; i < numParams; i++) {
-        const ppm_param_info* param = ev->get_param_info(i);
-        string name = ev->get_param_name(i);
-        if(paraName.compare(name) != 0) {
-            continue;
-        } 
-     	const sinsp_evt_param* p = ev->get_param(i);
-        if(param->type == PT_FSPATH || param->type == PT_CHARBUF) {
-            path = string(p->m_val, p->m_len);
-            sanitize_string(path);   
-        }
-        break;
+string utils::getPath(sinsp_evt *ev, const string &paraName) {
+  // sinsp_evt_param* param = ev->get_param_value_raw(paraName.c_str());
+  int numParams = ev->get_num_params();
+  string path;
+  for (int i = 0; i < numParams; i++) {
+    const ppm_param_info *param = ev->get_param_info(i);
+    string name = ev->get_param_name(i);
+    if (paraName.compare(name) != 0) {
+      continue;
     }
-    return path;
+    const sinsp_evt_param *p = ev->get_param(i);
+    if (param->type == PT_FSPATH || param->type == PT_CHARBUF) {
+      path = string(p->m_val, p->m_len);
+      sanitize_string(path);
+    }
+    break;
+  }
+  return path;
 }
 
-int64_t utils::getFD(sinsp_evt* ev, string paraName) {
-    int numParams = ev->get_num_params(); 
-    int64_t fd = -1;
-    for(int i = 0; i < numParams; i++) {
-        const ppm_param_info* param = ev->get_param_info(i);
-        string name = ev->get_param_name(i);
-        if(paraName.compare(name) != 0) {
-            continue;
-        } 
-     	const sinsp_evt_param* p = ev->get_param(i);
-        if(param->type == PT_FD) {
-            assert(p->m_len == sizeof(int64_t));
-            fd = ((int64_t)*(int64_t*)p->m_val);
-        }
-        break;
+int64_t utils::getFD(sinsp_evt *ev, const string &paraName) {
+  int numParams = ev->get_num_params();
+  int64_t fd = -1;
+  for (int i = 0; i < numParams; i++) {
+    const ppm_param_info *param = ev->get_param_info(i);
+    string name = ev->get_param_name(i);
+    if (paraName.compare(name) != 0) {
+      continue;
     }
-    return fd;
+    const sinsp_evt_param *p = ev->get_param(i);
+    if (param->type == PT_FD) {
+      assert(p->m_len == sizeof(int64_t));
+      fd = (*reinterpret_cast<int64_t *>(p->m_val));
+    }
+    break;
+  }
+  return fd;
 }
 
-
-
-string utils::getAbsolutePath(sinsp_threadinfo* ti, int64_t dirfd, string fileName) {
-    fs::path p(fileName);
-    SF_DEBUG(m_logger, "getAbsolutePath: The path is " << p << " File name " << fileName <<  " is relative? " << p.is_relative());
-    if(fileName.empty() || p.is_relative()) {
-        fs::path tmp;
-        string cwd = ti->get_cwd(); 
-        if(dirfd == PPM_AT_FDCWD) {
-            if(cwd.empty()) {
-                return p.string();
-            }
-            tmp = ti->get_cwd();
-        }else {
-            //string dirfd = ev->get_param_value_str("dirfd");
-            sinsp_fdinfo_t * fdinfo = ti->get_fd(dirfd);
-            assert(fdinfo != NULL);
-            tmp = fdinfo->m_name;             
-            SF_DEBUG(m_logger, "getAbsolutePath: Retrieve fdinfo for fd. Path:  " << tmp);                
-        }
-        tmp /= fileName;
-        SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
-        p = fs::weakly_canonical(tmp);
-        SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);               
+string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
+                              const string &fileName) {
+  fs::path p(fileName);
+  SF_DEBUG(m_logger, "getAbsolutePath: The path is "
+                         << p << " File name " << fileName << " is relative? "
+                         << p.is_relative());
+  if (fileName.empty() || p.is_relative()) {
+    fs::path tmp;
+    string cwd = ti->get_cwd();
+    if (dirfd == PPM_AT_FDCWD) {
+      if (cwd.empty()) {
+        return p.string();
+      }
+      tmp = ti->get_cwd();
     } else {
-        p = fs::weakly_canonical(p);
+      // string dirfd = ev->get_param_value_str("dirfd");
+      sinsp_fdinfo_t *fdinfo = ti->get_fd(dirfd);
+      assert(fdinfo != nullptr);
+      tmp = fdinfo->m_name;
+      SF_DEBUG(m_logger,
+               "getAbsolutePath: Retrieve fdinfo for fd. Path:  " << tmp);
     }
-     
-    return p.string();
+    tmp /= fileName;
+    SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
+    p = fs::weakly_canonical(tmp);
+    SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);
+  } else {
+    p = fs::weakly_canonical(p);
+  }
+
+  return p.string();
 }
 
-string utils::getAbsolutePath(sinsp_threadinfo* ti, string fileName) {
-    fs::path p(fileName);
-    SF_DEBUG(m_logger, "getAbsolutePath: The path is " << p << " File name " << fileName <<  " is relative? " << p.is_relative());
-    if(fileName.empty() || p.is_relative()) {
-        fs::path tmp; 
-        string cwd = ti->get_cwd();
-        if(!cwd.empty()) {
-            tmp = cwd;
-            tmp /= fileName;
-            SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
-            p = fs::weakly_canonical(tmp);
-            SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);               
-        }              
-    } else {
-        p = fs::weakly_canonical(p);
+string utils::getAbsolutePath(sinsp_threadinfo *ti, const string &fileName) {
+  fs::path p(fileName);
+  SF_DEBUG(m_logger, "getAbsolutePath: The path is "
+                         << p << " File name " << fileName << " is relative? "
+                         << p.is_relative());
+  if (fileName.empty() || p.is_relative()) {
+    fs::path tmp;
+    string cwd = ti->get_cwd();
+    if (!cwd.empty()) {
+      tmp = cwd;
+      tmp /= fileName;
+      SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
+      p = fs::weakly_canonical(tmp);
+      SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);
     }
-    return p.string();
+  } else {
+    p = fs::weakly_canonical(p);
+  }
+  return p.string();
 }
-
-
-
-

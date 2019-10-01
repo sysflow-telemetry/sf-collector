@@ -63,5 +63,5 @@ namespace networkflow {
             void exportNetworkFlow(DataFlowObj* dfo, time_t now);
          
     };
-}
+    } // namespace networkflow
 #endif

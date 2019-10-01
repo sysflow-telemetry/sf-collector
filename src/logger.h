@@ -35,14 +35,14 @@ using namespace log4cxx::helpers;
 #define CREATE_MAIN_LOGGER() static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("sysflow.main"));
 #define DEFINE_LOGGER() static log4cxx::LoggerPtr m_logger;
 
-#define CONFIGURE_LOGGER(logConfig) do { \
-        if (!logConfig.empty()) { \
-            PropertyConfigurator::configure(logConfig.c_str()); \
-        }  \
-        else  \
-        {     \
-            BasicConfigurator::configure(); \
-        } } while(0)
+#define CONFIGURE_LOGGER(logConfig)                                            \
+  do {                                                                         \
+    if (!(logConfig).empty()) {                                                \
+      PropertyConfigurator::configure((logConfig).c_str());                    \
+    } else {                                                                   \
+      BasicConfigurator::configure();                                          \
+    }                                                                          \
+  } while (0)
 
 #define CATCH_LOGGER_EXCEPTION() \
         catch(Exception& ex)  \

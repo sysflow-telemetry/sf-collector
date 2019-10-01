@@ -29,8 +29,7 @@ NetworkFlowProcessor::NetworkFlowProcessor(SysFlowContext* cxt, SysFlowWriter* w
     m_dfSet = dfSet;
 }
 
-NetworkFlowProcessor::~NetworkFlowProcessor() {
-}
+NetworkFlowProcessor::~NetworkFlowProcessor() = default;
 
 inline int32_t NetworkFlowProcessor::getProtocol(scap_l4_proto proto) {
     int32_t prt = -1;
@@ -171,15 +170,15 @@ inline void NetworkFlowProcessor::updateNetFlow(NetFlowObj* nf, OpFlags flag, si
 }
 
 inline void NetworkFlowProcessor::processNewFlow(sinsp_evt* ev, ProcessObj* proc, OpFlags flag, NFKey key) {
-    NetFlowObj* nf = new NetFlowObj();
-    nf->exportTime = utils::getExportTime(m_cxt); 
-    nf->lastUpdate = utils::getCurrentTime(m_cxt);
-    populateNetFlow(nf, flag, ev, proc);
-    updateNetFlow(nf, flag, ev);
-    if(flag != OP_CLOSE) {
-         proc->netflows[key] = nf;
-        //m_netflows[key] = nf;
-        m_dfSet->insert(nf);
+  auto *nf = new NetFlowObj();
+  nf->exportTime = utils::getExportTime(m_cxt);
+  nf->lastUpdate = utils::getCurrentTime(m_cxt);
+  populateNetFlow(nf, flag, ev, proc);
+  updateNetFlow(nf, flag, ev);
+  if (flag != OP_CLOSE) {
+    proc->netflows[key] = nf;
+    // m_netflows[key] = nf;
+    m_dfSet->insert(nf);
     } else {
         removeAndWriteRelatedFlows(proc, &key, ev->get_ts());	
         nf->netflow.endTs = ev->get_ts();
@@ -211,9 +210,11 @@ inline void NetworkFlowProcessor::processExistingFlow(sinsp_evt* ev, ProcessObj*
 
 int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
     sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
-    if(fdinfo == NULL) {
-       SF_DEBUG(m_logger, "Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ");
-       return 1;
+    if (fdinfo == nullptr) {
+      SF_DEBUG(m_logger,
+               "Event: " << ev->get_name()
+                         << " doesn't have an fdinfo associated with it! ");
+      return 1;
     }
 
     if(!(fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket())) {
@@ -229,7 +230,7 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
     //calling get process is important because it ensures that the process object has been written to the
     //sysflow file.   This is important for long running NetworkFlows that may span across files.
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
-    NetFlowObj* nf = NULL;
+    NetFlowObj *nf = nullptr;
 
     //m_processCxt->printNetworkFlow(proc);
     sinsp_threadinfo* ti = ev->get_thread_info();
@@ -249,12 +250,12 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
         string ip4tuple = ipv4tuple_to_string(&(fdinfo->m_sockinfo.m_ipv4info), false);
         SF_DEBUG(m_logger, proc->proc.exe << " " << ip4tuple << " Proto: " << getProtocol(fdinfo->get_l4proto()) << " Server: " << fdinfo->is_role_server() << " Client: " << fdinfo->is_role_client() << " " << ev->get_name() << " " << proc->proc.oid.hpid << " " << proc->proc.oid.createTS << " " << ti->m_tid << " " << ev->get_fd_num());
     }
-    if(nf == NULL) {
-       SF_DEBUG(m_logger, "Processing as new flow!");
-       processNewFlow(ev, proc, flag, key);
-    }else {
-       SF_DEBUG(m_logger, "Processing as existing flow!");
-       processExistingFlow(ev, proc, flag, key, nf);
+    if (nf == nullptr) {
+      SF_DEBUG(m_logger, "Processing as new flow!");
+      processNewFlow(ev, proc, flag, key);
+    } else {
+      SF_DEBUG(m_logger, "Processing as existing flow!");
+      processExistingFlow(ev, proc, flag, key, nf);
     }
     return 0;
 }
@@ -262,7 +263,7 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
 void NetworkFlowProcessor::removeNetworkFlow(ProcessObj* proc, NetFlowObj** nf, NFKey* key) {
     proc->netflows.erase(*key);
     delete *nf;
-    nf = NULL;
+    nf = nullptr;
 }
 
 void NetworkFlowProcessor::removeAndWriteRelatedFlows(ProcessObj* proc, NFKey* key, uint64_t endTs) {
@@ -280,13 +281,12 @@ void NetworkFlowProcessor::removeAndWriteRelatedFlows(ProcessObj* proc, NFKey* k
              proc->netflows.erase(nfi);
 	}
     }
-    for(vector<NetFlowObj*>::iterator it = nfobjs.begin(); it != nfobjs.end(); it++) {
-        (*it)->netflow.endTs = endTs;	    
-        (*it)->netflow.opFlags |= OP_TRUNCATE;	    
-        m_writer->writeNetFlow(&((*it)->netflow));
-        removeNetworkFlowFromSet(&(*it), true); 
+    for (auto it = nfobjs.begin(); it != nfobjs.end(); it++) {
+      (*it)->netflow.endTs = endTs;
+      (*it)->netflow.opFlags |= OP_TRUNCATE;
+      m_writer->writeNetFlow(&((*it)->netflow));
+      removeNetworkFlowFromSet(&(*it), true);
     }
-
 }
 
 
@@ -320,61 +320,64 @@ int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj* proc, int64_t tid
 int NetworkFlowProcessor::removeNetworkFlowFromSet(NetFlowObj** nfo, bool deleteNetFlow) {
         bool found = false;
         int removed = 0;
-        for(DataFlowSet::iterator iter = m_dfSet->find(*nfo); iter != m_dfSet->end(); iter++) {
-            if((*iter)->isNetworkFlow) {
-                NetFlowObj* foundObj = static_cast<NetFlowObj*>(*iter);
-                //cout << "Found: " << foundObj->netflow.procOID.createTS << " " << foundObj->netflow.procOID.hpid << endl;
-                if(*foundObj == **nfo) {
-                     SF_DEBUG(m_logger, "Removing netflow element from multiset.");
-                     m_dfSet->erase(iter);
-                     if(deleteNetFlow) {
-                        delete *nfo;
-                        nfo = NULL;
-                     }
-                     removed++;
-                     found = true;
-                     break;   
-               }
-           }
+        for (auto iter = m_dfSet->find(*nfo); iter != m_dfSet->end(); iter++) {
+          if ((*iter)->isNetworkFlow) {
+            auto *foundObj = static_cast<NetFlowObj *>(*iter);
+            // cout << "Found: " << foundObj->netflow.procOID.createTS << " " <<
+            // foundObj->netflow.procOID.hpid << endl;
+            if (*foundObj == **nfo) {
+              SF_DEBUG(m_logger, "Removing netflow element from multiset.");
+              m_dfSet->erase(iter);
+              if (deleteNetFlow) {
+                delete *nfo;
+                nfo = nullptr;
+              }
+              removed++;
+              found = true;
+              break;
+            }
+          }
         }
         if(!found) {
            SF_ERROR(m_logger, "Cannot find Netflow Object in data flow set. Deleting. This should not happen");
            if(deleteNetFlow) {
                delete *nfo;
-               nfo = NULL;
+               nfo = nullptr;
            }
         }
         return removed;
 }
 
 void NetworkFlowProcessor::removeNetworkFlow(DataFlowObj* dfo) {
-     NFKey key;
-     NetFlowObj* nfo = static_cast<NetFlowObj*>(dfo);
-     //do we want to write out a netflow that hasn't had any action in an interval?
-     //nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
-     //m_writer->writeNetFlow(&(nfo->netflow));
-     canonicalizeKey(nfo, &key);
-     SF_DEBUG(m_logger, "Erasing network flow!!!");
-     ProcessObj* proc = m_processCxt->getProcess(&(nfo->netflow.procOID));
-     if(proc == NULL) {
-         SF_ERROR(m_logger, "Could not find proc " << nfo->netflow.procOID.hpid << " " << nfo->netflow.procOID.createTS << " This shouldn't happen!");
-     } else {
-          removeNetworkFlow(proc, &nfo, &key);
-     }
+  NFKey key{};
+  auto *nfo = static_cast<NetFlowObj *>(dfo);
+  // do we want to write out a netflow that hasn't had any action in an
+  // interval? nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
+  // m_writer->writeNetFlow(&(nfo->netflow));
+  canonicalizeKey(nfo, &key);
+  SF_DEBUG(m_logger, "Erasing network flow!!!");
+  ProcessObj *proc = m_processCxt->getProcess(&(nfo->netflow.procOID));
+  if (proc == nullptr) {
+    SF_ERROR(m_logger, "Could not find proc " << nfo->netflow.procOID.hpid
+                                              << " "
+                                              << nfo->netflow.procOID.createTS
+                                              << " This shouldn't happen!");
+  } else {
+    removeNetworkFlow(proc, &nfo, &key);
+  }
 }
 
-void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj* dfo, time_t now) {
-     NetFlowObj* nfo = static_cast<NetFlowObj*>(dfo);
-     nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
-     m_processCxt->exportProcess(&(nfo->netflow.procOID));
-     m_writer->writeNetFlow(&(nfo->netflow));
-     SF_DEBUG(m_logger, "Reupping network flow!!! ");
-     nfo->netflow.ts = utils::getSysdigTime(m_cxt);
-     nfo->netflow.endTs = 0;
-     nfo->netflow.opFlags = 0;
-     nfo->netflow.numRRecvOps = 0;
-     nfo->netflow.numWSendOps = 0;
-     nfo->netflow.numRRecvBytes = 0;
-     nfo->netflow.numWSendBytes = 0;
+void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj *dfo, time_t /*now*/) {
+  auto *nfo = static_cast<NetFlowObj *>(dfo);
+  nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
+  m_processCxt->exportProcess(&(nfo->netflow.procOID));
+  m_writer->writeNetFlow(&(nfo->netflow));
+  SF_DEBUG(m_logger, "Reupping network flow!!! ");
+  nfo->netflow.ts = utils::getSysdigTime(m_cxt);
+  nfo->netflow.endTs = 0;
+  nfo->netflow.opFlags = 0;
+  nfo->netflow.numRRecvOps = 0;
+  nfo->netflow.numWSendOps = 0;
+  nfo->netflow.numRRecvBytes = 0;
+  nfo->netflow.numWSendBytes = 0;
 }
-

@@ -30,7 +30,8 @@ TARGET2 = sysreader
 LINT = clang-tidy-9
 LINTCHECKS = "-abseil*,-android*,bugprone-*,cert-*,clang-*,cppcoreguidelines-*,google-*,hicpp-*,\
 	     -llvm-header-guard,misc-*,modernize-*,-modernize-use-trailing-return-type,-modernize-loop-convert,\
-	     -modernize-make-unique,-modernize-pass-by-value, performance-*,-readability-*,-readability-convert-member-functions-to-static"
+	     -modernize-make-unique,-modernize-pass-by-value, performance-*,-readability-*,\
+	     -readability-convert-member-functions-to-static"
 LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
 
 # Dir structure configuration
@@ -67,11 +68,11 @@ uninstall:
 
 .PHONY: lint
 lint: $(LINTSRCS)
-	$(LINT) -checks=$(LINTCHECKS) --format-style=llvm --header-filter=./ $^ -- $(CFLAGS)
+	$(LINT) -checks=$(LINTCHECKS) -header-filter="$(shell pwd)/.*" $^ -- $(CFLAGS)
 
 .PHONY: lintfix
 lintfix: $(LINTSRCS)
-	$(LINT) -checks=$(LINTCHECKS) --format-style=llvm --header-filter=./ --fix $^ -- $(CFLAGS)
+	$(LINT) -checks=$(LINTCHECKS) -format-style=llvm -header-filter="$(shell pwd)/.*" -fix $^ -- $(CFLAGS)
 
 .PHONY: version
 version:
