@@ -1,21 +1,21 @@
 /** Copyright (C) 2019 IBM Corporation.
-*
-* Authors:
-* Frederico Araujo <frederico.araujo@ibm.com>
-* Teryl Taylor <terylt@ibm.com>
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/
+ *
+ * Authors:
+ * Frederico Araujo <frederico.araujo@ibm.com>
+ * Teryl Taylor <terylt@ibm.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 #define __STDC_FORMAT_MACROS
 #include "sysflow.h"
@@ -26,11 +26,11 @@
 #include <unistd.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#include "avro/ValidSchema.hh"
 #include "avro/Compiler.hh"
 #include "avro/DataFile.hh"
-#include "avro/Encoder.hh"
 #include "avro/Decoder.hh"
+#include "avro/Encoder.hh"
+#include "avro/ValidSchema.hh"
 #pragma GCC diagnostic pop
 #include "datatypes.h"
 #include "op_flags.h"
@@ -42,13 +42,13 @@ using namespace std;
 using namespace sysflow;
 
 #define HEADER 0
-#define CONT 1 
+#define CONT 1
 #define PROC 2
 #define FILE_ 3
 #define PROC_EVT 4
 #define NET_FLOW 5
 #define FILE_FLOW 6
-#define FILE_EVT 7 
+#define FILE_EVT 7
 
 #define NANO_TO_SECS 1000000000
 
@@ -60,139 +60,162 @@ Container cont;
 sysflow::File file;
 NetworkFlow netflow;
 FileFlow fileflow;
-FileEvent  fileevt;
+FileEvent fileevt;
 
-typedef google::dense_hash_map<OID*, Process*, MurmurHasher<OID*>, eqoidptr> PTable;
-typedef google::dense_hash_map<string, sysflow::File*, MurmurHasher<string>, eqstr> FTable;
+typedef google::dense_hash_map<OID *, Process *, MurmurHasher<OID *>, eqoidptr>
+    PTable;
+typedef google::dense_hash_map<string, sysflow::File *, MurmurHasher<string>,
+                               eqstr>
+    FTable;
 PTable s_procs;
 FTable s_files;
 
 bool s_quiet = false;
 bool s_keepProcOnExit = false;
 
-const char* Events[] = {"", "CLONE", "EXEC", "",  "EXIT", "" , "" , "" , "SETUID"};
+const char *Events[] = {"", "CLONE", "EXEC", "", "EXIT", "", "", "", "SETUID"};
 
-
-avro::ValidSchema loadSchema(const char* filename)
-{
-    avro::ValidSchema result;
-    try {
-        std::ifstream ifs(filename);
-        avro::compileJsonSchema(ifs, result);
-    }catch(avro::Exception & ex) {
-         cerr << "Unable to load schema from " << filename << endl;
-         exit(1);
-    }
-    return result;
+avro::ValidSchema loadSchema(const char *filename) {
+  avro::ValidSchema result;
+  try {
+    std::ifstream ifs(filename);
+    avro::compileJsonSchema(ifs, result);
+  } catch (avro::Exception &ex) {
+    cerr << "Unable to load schema from " << filename << endl;
+    exit(1);
+  }
+  return result;
 }
 void printFileFlow(FileFlow fileflow) {
-    string opFlags = "";
-    opFlags +=  ((fileflow.opFlags & OP_OPEN) ?  "O" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_ACCEPT) ?  "A" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_CONNECT) ?  "C" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_WRITE_SEND) ?  "W" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_READ_RECV) ?  "R" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_SETNS) ?  "N" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_CLOSE) ?  "C" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
-    opFlags +=  ((fileflow.opFlags & OP_DIGEST) ?  "D" : " ");
+  string opFlags = "";
+  opFlags += ((fileflow.opFlags & OP_OPEN) ? "O" : " ");
+  opFlags += ((fileflow.opFlags & OP_ACCEPT) ? "A" : " ");
+  opFlags += ((fileflow.opFlags & OP_CONNECT) ? "C" : " ");
+  opFlags += ((fileflow.opFlags & OP_WRITE_SEND) ? "W" : " ");
+  opFlags += ((fileflow.opFlags & OP_READ_RECV) ? "R" : " ");
+  opFlags += ((fileflow.opFlags & OP_SETNS) ? "N" : " ");
+  opFlags += ((fileflow.opFlags & OP_CLOSE) ? "C" : " ");
+  opFlags += ((fileflow.opFlags & OP_TRUNCATE) ? "T" : " ");
+  opFlags += ((fileflow.opFlags & OP_DIGEST) ? "D" : " ");
 
-    time_t startTs = (static_cast<time_t>(fileflow.ts / NANO_TO_SECS));
-    //time_t endTs = (!fileflow.endTs.is_null()) ? ((time_t)(fileflow.endTs.get_long()/NANO_TO_SECS)) : 0;
-    time_t endTs = (static_cast<time_t>(fileflow.endTs / NANO_TO_SECS));
-    char startTime[100];
-    char endTime[100];
-    strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
-     strftime(endTime, 99, "%x %X %Z", localtime(&endTs));
+  time_t startTs = (static_cast<time_t>(fileflow.ts / NANO_TO_SECS));
+  // time_t endTs = (!fileflow.endTs.is_null()) ?
+  // ((time_t)(fileflow.endTs.get_long()/NANO_TO_SECS)) : 0;
+  time_t endTs = (static_cast<time_t>(fileflow.endTs / NANO_TO_SECS));
+  char startTime[100];
+  char endTime[100];
+  strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
+  strftime(endTime, 99, "%x %X %Z", localtime(&endTs));
 
-    string key(fileflow.fileOID.begin(), fileflow.fileOID.end());
-    FTable::iterator fi = s_files.find(key);
+  string key(fileflow.fileOID.begin(), fileflow.fileOID.end());
+  FTable::iterator fi = s_files.find(key);
   /*  base64::encoder enc(20);
     char b64encoded[60];
     int len = enc.encode(key.c_str(), key.size(),  b64encoded);
     string b64enc(b64encoded, len);
     len = enc.encode_end(b64encoded);
     b64enc += string(b64encoded, len);*/
-    if(fi == s_files.end()) {
-        cout << "Uh Oh! Can't find process for fileflow!! " << endl;
-        cout << "FILEFLOW " << startTime << " " << endTime << " " <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd << " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << endl;
+  if (fi == s_files.end()) {
+    cout << "Uh Oh! Can't find process for fileflow!! " << endl;
+    cout << "FILEFLOW " << startTime << " " << endTime << " " << opFlags
+         << " TID: " << fileflow.tid << " FD: " << fileflow.fd
+         << " WBytes: " << fileflow.numWSendBytes
+         << " RBytes: " << fileflow.numRRecvBytes
+         << " WOps: " << fileflow.numWSendOps
+         << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid
+         << " " << fileflow.procOID.createTS << endl;
+  }
 
-      }
-
-
-   PTable::iterator it = s_procs.find(&(fileflow.procOID));
-   if(it == s_procs.end()) {
-       cout << "Uh Oh! Can't find process for fileflow!! " << endl;
-       cout << "FILEFLOW " << startTime << " " << endTime << " " <<  opFlags << " TID: " << fileflow.tid << " FD: " << fileflow.fd << " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid << " " << fileflow.procOID.createTS << endl;
+  PTable::iterator it = s_procs.find(&(fileflow.procOID));
+  if (it == s_procs.end()) {
+    cout << "Uh Oh! Can't find process for fileflow!! " << endl;
+    cout << "FILEFLOW " << startTime << " " << endTime << " " << opFlags
+         << " TID: " << fileflow.tid << " FD: " << fileflow.fd
+         << " WBytes: " << fileflow.numWSendBytes
+         << " RBytes: " << fileflow.numRRecvBytes
+         << " WOps: " << fileflow.numWSendOps
+         << " ROps: " << fileflow.numRRecvOps << " " << fileflow.procOID.hpid
+         << " " << fileflow.procOID.createTS << endl;
   } else {
-       string container = "";
-       if(!it->second->containerId.is_null()) {
-                  container = it->second->containerId.get_string();
-       }
-       //cout << netflow.sip << "\t" << netflow.dip << endl;
-       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " Resource: " << fi->second->restype << " PATH: " << fi->second->path << " FD: " << fileflow.fd << " TID: " << fileflow.tid <<  " Open Flags: " << fileflow.openFlags <<  " WBytes: " << fileflow.numWSendBytes << " RBytes: " << fileflow.numRRecvBytes << " WOps: " << fileflow.numWSendOps << " ROps: " << fileflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs <<  endl;
-
- }
+    string container = "";
+    if (!it->second->containerId.is_null()) {
+      container = it->second->containerId.get_string();
+    }
+    // cout << netflow.sip << "\t" << netflow.dip << endl;
+    cout << it->second->exe << " " << container << " " << it->second->oid.hpid
+         << " " << startTime << " " << endTime << " " << opFlags
+         << " Resource: " << fi->second->restype
+         << " PATH: " << fi->second->path << " FD: " << fileflow.fd
+         << " TID: " << fileflow.tid << " Open Flags: " << fileflow.openFlags
+         << " WBytes: " << fileflow.numWSendBytes
+         << " RBytes: " << fileflow.numRRecvBytes
+         << " WOps: " << fileflow.numWSendOps
+         << " ROps: " << fileflow.numRRecvOps << " " << it->second->exe << " "
+         << it->second->exeArgs << endl;
+  }
 }
 
 void printFileEvent(FileEvent fileEvt) {
-    string opFlags = "";
-    opFlags +=  ((fileEvt.opFlags & OP_MKDIR) ?  "MKDIR" : " ");
-    opFlags +=  ((fileEvt.opFlags & OP_RMDIR) ?  "RMDIR" : " ");
-    opFlags +=  ((fileEvt.opFlags & OP_LINK) ?  "LINK" : " ");
-    opFlags +=  ((fileEvt.opFlags & OP_SYMLINK) ?  "SYMLINK" : " ");
-    opFlags +=  ((fileEvt.opFlags & OP_UNLINK) ?  "UNLINK" : " ");
-    opFlags +=  ((fileEvt.opFlags & OP_RENAME) ?  "RENAME" : " ");
-    time_t startTs = (static_cast<time_t>(fileEvt.ts / NANO_TO_SECS));
-    //time_t endTs = (!fileflow.endTs.is_null()) ? ((time_t)(fileflow.endTs.get_long()/NANO_TO_SECS)) : 0;
-    char startTime[100];
-    strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
+  string opFlags = "";
+  opFlags += ((fileEvt.opFlags & OP_MKDIR) ? "MKDIR" : " ");
+  opFlags += ((fileEvt.opFlags & OP_RMDIR) ? "RMDIR" : " ");
+  opFlags += ((fileEvt.opFlags & OP_LINK) ? "LINK" : " ");
+  opFlags += ((fileEvt.opFlags & OP_SYMLINK) ? "SYMLINK" : " ");
+  opFlags += ((fileEvt.opFlags & OP_UNLINK) ? "UNLINK" : " ");
+  opFlags += ((fileEvt.opFlags & OP_RENAME) ? "RENAME" : " ");
+  time_t startTs = (static_cast<time_t>(fileEvt.ts / NANO_TO_SECS));
+  // time_t endTs = (!fileflow.endTs.is_null()) ?
+  // ((time_t)(fileflow.endTs.get_long()/NANO_TO_SECS)) : 0;
+  char startTime[100];
+  strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
 
-    string key(fileEvt.fileOID.begin(), fileEvt.fileOID.end());
-    FTable::iterator fi = s_files.find(key);
+  string key(fileEvt.fileOID.begin(), fileEvt.fileOID.end());
+  FTable::iterator fi = s_files.find(key);
   /*  base64::encoder enc(20);
     char b64encoded[60];
     int len = enc.encode(key.c_str(), key.size(),  b64encoded);
     string b64enc(b64encoded, len);
     len = enc.encode_end(b64encoded);
     b64enc += string(b64encoded, len);*/
-    if(fi == s_files.end()) {
-        cout << "Uh Oh! Can't find file for atfileflow!! " << endl;
-        cout << "FILE_EVT " << startTime << " "  <<  opFlags << " TID: " << fileEvt.tid << " " << fileEvt.procOID.hpid << " " << fileEvt.procOID.createTS << endl;
+  if (fi == s_files.end()) {
+    cout << "Uh Oh! Can't find file for atfileflow!! " << endl;
+    cout << "FILE_EVT " << startTime << " " << opFlags
+         << " TID: " << fileEvt.tid << " " << fileEvt.procOID.hpid << " "
+         << fileEvt.procOID.createTS << endl;
+  }
 
-      }
-   
-
-   PTable::iterator it = s_procs.find(&(fileEvt.procOID));
-   if(it == s_procs.end()) {
-       cout << "Uh Oh! Can't find process for fileflow!! " << endl;
-        cout << "FILE_EVT " << startTime << " "  <<  opFlags << " TID: " << fileEvt.tid <<  " " << fileEvt.procOID.hpid << " " << fileEvt.procOID.createTS << " " << fi->second->restype << " " << fi->second->path << endl;
+  PTable::iterator it = s_procs.find(&(fileEvt.procOID));
+  if (it == s_procs.end()) {
+    cout << "Uh Oh! Can't find process for fileflow!! " << endl;
+    cout << "FILE_EVT " << startTime << " " << opFlags
+         << " TID: " << fileEvt.tid << " " << fileEvt.procOID.hpid << " "
+         << fileEvt.procOID.createTS << " " << fi->second->restype << " "
+         << fi->second->path << endl;
   } else {
-       string container = "";
-       if(!it->second->containerId.is_null()) {
-                  container = it->second->containerId.get_string();
-       }
-       //cout << netflow.sip << "\t" << netflow.dip << endl;
-       cout << it->second->exe << " " << container << " "
-            << it->second->oid.hpid << " " << startTime << " " << opFlags
-            << " Resource: " << static_cast<char>(fi->second->restype)
-            << " PATH: " << fi->second->path << " TID: " << fileEvt.tid << " "
-            << it->second->exe << " " << it->second->exeArgs;
-       if(!fileEvt.newFileOID.is_null()) {
-          FOID newFileOID = fileEvt.newFileOID.get_FOID();
-          string key2(newFileOID.begin(), newFileOID.end());
-          FTable::iterator fi2 = s_files.find(key2);
-          if(fi2 == s_files.end()) {
-              cout << "Uh Oh! Can't find file 2 for atfileflow!! " << endl;
-           }else {
-              cout << " PATH 2: " << fi2->second->path << endl;
-           }
-       } else {
-           cout << endl;
+    string container = "";
+    if (!it->second->containerId.is_null()) {
+      container = it->second->containerId.get_string();
+    }
+    // cout << netflow.sip << "\t" << netflow.dip << endl;
+    cout << it->second->exe << " " << container << " " << it->second->oid.hpid
+         << " " << startTime << " " << opFlags
+         << " Resource: " << static_cast<char>(fi->second->restype)
+         << " PATH: " << fi->second->path << " TID: " << fileEvt.tid << " "
+         << it->second->exe << " " << it->second->exeArgs;
+    if (!fileEvt.newFileOID.is_null()) {
+      FOID newFileOID = fileEvt.newFileOID.get_FOID();
+      string key2(newFileOID.begin(), newFileOID.end());
+      FTable::iterator fi2 = s_files.find(key2);
+      if (fi2 == s_files.end()) {
+        cout << "Uh Oh! Can't find file 2 for atfileflow!! " << endl;
+      } else {
+        cout << " PATH 2: " << fi2->second->path << endl;
       }
- }
+    } else {
+      cout << endl;
+    }
+  }
 }
-
 
 void printNetFlow(NetworkFlow netflow) {
   struct in_addr srcIP {};
@@ -230,14 +253,21 @@ void printNetFlow(NetworkFlow netflow) {
          << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS
          << endl;
   } else {
-       string container = "";
-       if(!it->second->containerId.is_null()) {
-                  container = it->second->containerId.get_string();
-       }
-       //cout << netflow.sip << "\t" << netflow.dip << endl;
-       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime << " " << endTime << " " <<  opFlags << " TID: " << netflow.tid << " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWSendBytes << " RBytes: " << netflow.numRRecvBytes << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps << " " <<  it->second->exe << " " << it->second->exeArgs << endl;
-
- }
+    string container = "";
+    if (!it->second->containerId.is_null()) {
+      container = it->second->containerId.get_string();
+    }
+    // cout << netflow.sip << "\t" << netflow.dip << endl;
+    cout << it->second->exe << " " << container << " " << it->second->oid.hpid
+         << " " << startTime << " " << endTime << " " << opFlags
+         << " TID: " << netflow.tid << " SIP: " << srcIPStr << " "
+         << " DIP: " << dstIPStr << " SPORT: " << netflow.sport
+         << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto
+         << " WBytes: " << netflow.numWSendBytes
+         << " RBytes: " << netflow.numRRecvBytes
+         << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps
+         << " " << it->second->exe << " " << it->second->exeArgs << endl;
+  }
 }
 
 sysflow::File *createFile(const sysflow::File &file) {
@@ -280,18 +310,18 @@ Process *createProcess(const Process &proc) {
   // cout << "Wrote gid/uid " << ti->m_uid << endl;
   p->userName = proc.userName;
   // cout << "Wrote username" << endl;
-    p->groupName = proc.groupName;
-    if(!proc.containerId.is_null()) {
-       p->containerId.set_string(proc.containerId.get_string());
-    }else {
-       p->containerId.set_null();
-    }
-    //cout << "Wrote user/groupnames" << endl;
-    /*if(mainthread->m_clone_ts != 0) {
-       proc->duration = ev->get_ts() - mainthread->m_clone_ts;
-    }*/
-    //proc->childCount = mainthread->m_nchilds;
-    return p;
+  p->groupName = proc.groupName;
+  if (!proc.containerId.is_null()) {
+    p->containerId.set_string(proc.containerId.get_string());
+  } else {
+    p->containerId.set_null();
+  }
+  // cout << "Wrote user/groupnames" << endl;
+  /*if(mainthread->m_clone_ts != 0) {
+     proc->duration = ev->get_ts() - mainthread->m_clone_ts;
+  }*/
+  // proc->childCount = mainthread->m_nchilds;
+  return p;
 }
 
 int runEventLoop(const string &sysFile, const string &schemaFile) {
@@ -444,54 +474,46 @@ int runEventLoop(const string &sysFile, const string &schemaFile) {
   return 0;
 }
 
-int main( int argc, char** argv )
-{
-	string sysFile;
-        string schemaFile = "/usr/local/sysflow/conf/SysFlow.avsc";
-	char c;
-        OID empkey;
-        OID delkey;
-        empkey.hpid = 0; 
-        empkey.createTS = 0; 
-        s_procs.set_empty_key(&empkey);
-        delkey.hpid = 1;
-        delkey.createTS = 1;
-        s_procs.set_deleted_key(&delkey);
-        s_files.set_empty_key("-1");
-        s_files.set_deleted_key("-2");
-	while ((c = getopt (argc, argv, "lr:w:s:qk")) != -1)
-    	{
-		switch (c)
-      		{
-      			case 'r':
-        			sysFile = optarg;
-        			break;
-                        case 's':
-                               schemaFile = optarg;
-                               break;
-                        case 'q':
-                               s_quiet = true;
-                               break;
-                        case 'k':
-                               s_keepProcOnExit = true;
-                               break;
-      			case '?':
-                          if (optopt == 'r' || optopt == 'm') {
-                            fprintf(stderr,
-                                    "Option -%c requires an argument.\n",
-                                    optopt);
-                          } else if (isprint(optopt)) {
-                            fprintf(stderr, "Unknown option `-%c'.\n", optopt);
-                          } else {
-                            fprintf(stderr,
-                                    "Unknown option character `\\x%x'.\n",
-                                    optopt);
-                          }
-                                return 1;
-      			default:
-        			abort ();
-      		}
-	}
-	return runEventLoop(sysFile, schemaFile);
+int main(int argc, char **argv) {
+  string sysFile;
+  string schemaFile = "/usr/local/sysflow/conf/SysFlow.avsc";
+  char c;
+  OID empkey;
+  OID delkey;
+  empkey.hpid = 0;
+  empkey.createTS = 0;
+  s_procs.set_empty_key(&empkey);
+  delkey.hpid = 1;
+  delkey.createTS = 1;
+  s_procs.set_deleted_key(&delkey);
+  s_files.set_empty_key("-1");
+  s_files.set_deleted_key("-2");
+  while ((c = getopt(argc, argv, "lr:w:s:qk")) != -1) {
+    switch (c) {
+    case 'r':
+      sysFile = optarg;
+      break;
+    case 's':
+      schemaFile = optarg;
+      break;
+    case 'q':
+      s_quiet = true;
+      break;
+    case 'k':
+      s_keepProcOnExit = true;
+      break;
+    case '?':
+      if (optopt == 'r' || optopt == 'm') {
+        fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+      } else if (isprint(optopt)) {
+        fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+      } else {
+        fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+      }
+      return 1;
+    default:
+      abort();
+    }
+  }
+  return runEventLoop(sysFile, schemaFile);
 }
-

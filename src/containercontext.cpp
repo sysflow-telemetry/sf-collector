@@ -1,55 +1,56 @@
 /** Copyright (C) 2019 IBM Corporation.
-*
-* Authors:
-* Frederico Araujo <frederico.araujo@ibm.com>
-* Teryl Taylor <terylt@ibm.com>
-* 
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/
+ *
+ * Authors:
+ * Frederico Araujo <frederico.araujo@ibm.com>
+ * Teryl Taylor <terylt@ibm.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 #include "containercontext.h"
 using namespace container;
 
-ContainerContext::ContainerContext(SysFlowContext* cxt, SysFlowWriter* writer) : m_containers(CONT_TABLE_SIZE) {
-    m_cxt = cxt;
-    m_writer = writer;
-    m_containers.set_empty_key("0");
-    m_containers.set_deleted_key("");
+ContainerContext::ContainerContext(SysFlowContext *cxt, SysFlowWriter *writer)
+    : m_containers(CONT_TABLE_SIZE) {
+  m_cxt = cxt;
+  m_writer = writer;
+  m_containers.set_empty_key("0");
+  m_containers.set_deleted_key("");
 }
 
-ContainerContext::~ContainerContext() {
-    clearAllContainers();
-}
+ContainerContext::~ContainerContext() { clearAllContainers(); }
 
-ContainerObj*  ContainerContext::createContainer(sinsp_evt* ev) {
-    sinsp_threadinfo* ti = ev->get_thread_info();
-    
-    if(ti->m_container_id.empty()) {
-      return nullptr;
-    }
+ContainerObj *ContainerContext::createContainer(sinsp_evt *ev) {
+  sinsp_threadinfo *ti = ev->get_thread_info();
 
-    sinsp_container_info* container = m_cxt->getInspector()->m_container_manager.get_container(ti->m_container_id);
-    if (container == nullptr) {
-      return nullptr;
-    }
-    auto *cont = new ContainerObj();
-    cont->cont.name = container->m_name;
-    cont->cont.image = container->m_image + "/" + container->m_imagetag;
-    cont->cont.id = container->m_id;
-    cont->cont.imageid = container->m_imageid;
-    cont->cont.type = static_cast<ContainerType>(container->m_type);
-    cont->cont.privileged = container->m_privileged;
-    return cont;
+  if (ti->m_container_id.empty()) {
+    return nullptr;
+  }
+
+  sinsp_container_info *container =
+      m_cxt->getInspector()->m_container_manager.get_container(
+          ti->m_container_id);
+  if (container == nullptr) {
+    return nullptr;
+  }
+  auto *cont = new ContainerObj();
+  cont->cont.name = container->m_name;
+  cont->cont.image = container->m_image + "/" + container->m_imagetag;
+  cont->cont.id = container->m_id;
+  cont->cont.imageid = container->m_imageid;
+  cont->cont.type = static_cast<ContainerType>(container->m_type);
+  cont->cont.privileged = container->m_privileged;
+  return cont;
 }
 
 ContainerObj *ContainerContext::getContainer(const string &id) {
@@ -83,44 +84,44 @@ int ContainerContext::derefContainer(const string &id) {
   return result;
 }
 
-ContainerObj* ContainerContext::getContainer(sinsp_evt* ev) {
-    sinsp_threadinfo* ti = ev->get_thread_info();
-    
-    if(ti->m_container_id.empty()) {
-      return nullptr;
+ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
+  sinsp_threadinfo *ti = ev->get_thread_info();
+
+  if (ti->m_container_id.empty()) {
+    return nullptr;
+  }
+  ContainerObj *ct = nullptr;
+  ContainerTable::iterator cont = m_containers.find(ti->m_container_id);
+  if (cont != m_containers.end()) {
+    if (cont->second->written) {
+      return cont->second;
     }
-    ContainerObj *ct = nullptr;
-    ContainerTable::iterator cont = m_containers.find(ti->m_container_id);
-    if(cont != m_containers.end()) {
-        if(cont->second->written) {
-            return cont->second;
-        }
-        ct = cont->second;
-    }
-    if (ct == nullptr) {
-      ct = createContainer(ev);
-    }
-    m_containers[ct->cont.id] = ct;
-    m_writer->writeContainer(&(ct->cont));
-    ct->written = true;
-    return ct;
+    ct = cont->second;
+  }
+  if (ct == nullptr) {
+    ct = createContainer(ev);
+  }
+  m_containers[ct->cont.id] = ct;
+  m_writer->writeContainer(&(ct->cont));
+  ct->written = true;
+  return ct;
 }
 
 void ContainerContext::clearContainers() {
-   for(ContainerTable::iterator it = m_containers.begin(); it != m_containers.end(); ++it) {
-       if(it->second->refs == 0) {
-           m_containers.erase(it);
-           delete it->second;
-       }else {
-         it->second->written = false;
-      }
-   }
+  for (ContainerTable::iterator it = m_containers.begin();
+       it != m_containers.end(); ++it) {
+    if (it->second->refs == 0) {
+      m_containers.erase(it);
+      delete it->second;
+    } else {
+      it->second->written = false;
+    }
+  }
 }
 
 void ContainerContext::clearAllContainers() {
-   for(ContainerTable::iterator it = m_containers.begin(); it != m_containers.end(); ++it) {
-        delete it->second;
-   }
+  for (ContainerTable::iterator it = m_containers.begin();
+       it != m_containers.end(); ++it) {
+    delete it->second;
+  }
 }
-
-

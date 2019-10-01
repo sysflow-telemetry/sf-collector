@@ -22,18 +22,18 @@
 
 using namespace file;
 
-FileContext::FileContext(container::ContainerContext* containerCxt, SysFlowWriter* writer) {
-    m_writer = writer;
-    m_containerCxt = containerCxt;
-    m_files.set_empty_key("-1");
-    m_files.set_deleted_key("-2");
+FileContext::FileContext(container::ContainerContext *containerCxt,
+                         SysFlowWriter *writer) {
+  m_writer = writer;
+  m_containerCxt = containerCxt;
+  m_files.set_empty_key("-1");
+  m_files.set_deleted_key("-2");
 }
 
-FileContext::~FileContext() {
-    clearAllFiles();
-}
+FileContext::~FileContext() { clearAllFiles(); }
 
-FileObj* FileContext::createFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, string key) {
+FileObj *FileContext::createFile(sinsp_evt *ev, string path, char typechar,
+                                 SFObjectState state, string key) {
   auto *f = new FileObj();
   f->key = std::move(key);
   f->file.state = state;
@@ -47,11 +47,12 @@ FileObj* FileContext::createFile(sinsp_evt* ev, string path, char typechar, SFOb
   } else {
     f->file.containerId.set_null();
   }
-    return f;
+  return f;
 }
-FileObj* FileContext::getFile(sinsp_evt* ev, SFObjectState state, bool& created) {
-    sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
-    return getFile(ev, fdinfo->m_name, fdinfo->get_typechar(), state, created);
+FileObj *FileContext::getFile(sinsp_evt *ev, SFObjectState state,
+                              bool &created) {
+  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+  return getFile(ev, fdinfo->m_name, fdinfo->get_typechar(), state, created);
 }
 FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,
                               SFObjectState state, bool &created) {
@@ -105,20 +106,19 @@ bool FileContext::exportFile(const string &key) {
 }
 
 void FileContext::clearFiles() {
-   for(FileTable::iterator it = m_files.begin(); it != m_files.end(); ++it) {
-          if(it->second->refs == 0) {
-              FileObj* file = it->second;
-              m_files.erase(it);
-              delete file;
-          } else {
-              it->second->written = false;
-          } 
-   } 
+  for (FileTable::iterator it = m_files.begin(); it != m_files.end(); ++it) {
+    if (it->second->refs == 0) {
+      FileObj *file = it->second;
+      m_files.erase(it);
+      delete file;
+    } else {
+      it->second->written = false;
+    }
+  }
 }
 
 void FileContext::clearAllFiles() {
-   for(FileTable::iterator it = m_files.begin(); it != m_files.end(); ++it) {
-       delete it->second;
-   }
+  for (FileTable::iterator it = m_files.begin(); it != m_files.end(); ++it) {
+    delete it->second;
+  }
 }
-

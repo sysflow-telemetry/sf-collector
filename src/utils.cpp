@@ -1,26 +1,26 @@
 /** Copyright (C) 2019 IBM Corporation.
-*
-* Authors:
-* Frederico Araujo <frederico.araujo@ibm.com>
-* Teryl Taylor <terylt@ibm.com>
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/
+ *
+ * Authors:
+ * Frederico Araujo <frederico.araujo@ibm.com>
+ * Teryl Taylor <terylt@ibm.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 #include "utils.h"
-#include "sysflowcontext.h"
 #include "datatypes.h"
 #include "logger.h"
+#include "sysflowcontext.h"
 
 static NFKey s_nfdelkey;
 static NFKey s_nfemptykey;
@@ -30,23 +30,22 @@ static OID s_oiddelkey;
 static OID s_oidemptykey;
 using namespace utils;
 
-
 CREATE_LOGGER_2("sysflow.utils");
 
 void initKeys() {
-   s_nfdelkey.ip1 = 1;
-   s_nfdelkey.ip2 = 1;
-   s_nfdelkey.port1 = 1;
-   s_nfdelkey.port2 = 1;
-   s_nfemptykey.ip1 = 1;
-   s_nfemptykey.ip2 = 0;
-   s_nfemptykey.port1 = 1;
-   s_nfemptykey.port2 = 1;
-   s_oidemptykey.hpid = 2; 
-   s_oidemptykey.createTS = 2;
-   s_oiddelkey.hpid = 1; 
-   s_oiddelkey.createTS = 1;
-   s_keysinit = true;
+  s_nfdelkey.ip1 = 1;
+  s_nfdelkey.ip2 = 1;
+  s_nfdelkey.port1 = 1;
+  s_nfdelkey.port2 = 1;
+  s_nfemptykey.ip1 = 1;
+  s_nfemptykey.ip2 = 0;
+  s_nfemptykey.port1 = 1;
+  s_nfemptykey.port2 = 1;
+  s_oidemptykey.hpid = 2;
+  s_oidemptykey.createTS = 2;
+  s_oiddelkey.hpid = 1;
+  s_oiddelkey.createTS = 1;
+  s_keysinit = true;
 }
 
 void utils::generateFOID(const string &key, FOID *foid) {
@@ -54,107 +53,101 @@ void utils::generateFOID(const string &key, FOID *foid) {
        foid->begin());
 }
 
-NFKey* utils::getNFEmptyKey() {
-    if(!s_keysinit) {
-         initKeys();
-     }
-     return &s_nfemptykey;
+NFKey *utils::getNFEmptyKey() {
+  if (!s_keysinit) {
+    initKeys();
+  }
+  return &s_nfemptykey;
 }
 
-NFKey* utils::getNFDelKey() {
-    if(!s_keysinit) {
-         initKeys();
-     }
-     return &s_nfdelkey;
+NFKey *utils::getNFDelKey() {
+  if (!s_keysinit) {
+    initKeys();
+  }
+  return &s_nfdelkey;
 }
 
-OID* utils::getOIDEmptyKey() {
-    if(!s_keysinit) {
-         initKeys();
-     }
-     return &s_oidemptykey;
+OID *utils::getOIDEmptyKey() {
+  if (!s_keysinit) {
+    initKeys();
+  }
+  return &s_oidemptykey;
 }
 
-OID* utils::getOIDDelKey() {
-    if(!s_keysinit) {
-         initKeys();
-     }
-     return &s_oiddelkey;
+OID *utils::getOIDDelKey() {
+  if (!s_keysinit) {
+    initKeys();
+  }
+  return &s_oiddelkey;
 }
 
-string utils::getUserName(SysFlowContext* cxt, uint32_t uid)
-{
-   scap_userinfo* user = cxt->getInspector()->get_user(uid);
-   if (user != nullptr) {
-     return user->name;
-   } else {
-     return string("");
-   }
+string utils::getUserName(SysFlowContext *cxt, uint32_t uid) {
+  scap_userinfo *user = cxt->getInspector()->get_user(uid);
+  if (user != nullptr) {
+    return user->name;
+  } else {
+    return string("");
+  }
 }
 
-string utils::getGroupName(SysFlowContext* cxt, uint32_t gid)
-{
-    unordered_map<uint32_t, scap_groupinfo*>::const_iterator it;
-    if(gid == 0xffffffff)
-    {
-        return string("");
+string utils::getGroupName(SysFlowContext *cxt, uint32_t gid) {
+  unordered_map<uint32_t, scap_groupinfo *>::const_iterator it;
+  if (gid == 0xffffffff) {
+    return string("");
+  }
+
+  it = cxt->getInspector()->m_grouplist.find(gid);
+  if (it == cxt->getInspector()->m_grouplist.end()) {
+    return string("");
+  }
+
+  return it->second->name;
+}
+bool utils::isInContainer(sinsp_evt *ev) {
+  sinsp_threadinfo *ti = ev->get_thread_info();
+  return !ti->m_container_id.empty();
+}
+
+time_t utils::getExportTime(SysFlowContext *cxt) {
+  time_t now = utils::getCurrentTime(cxt);
+  struct tm exportTM = *localtime(&now);
+  exportTM.tm_sec += cxt->getNFExportInterval(); // add 30 seconds to the time
+  return mktime(&exportTM);                      // normalize iti
+}
+
+int64_t utils::getSyscallResult(sinsp_evt *ev) {
+  int64_t res = -1;
+  if (ev->get_num_params() >= 1) {
+    const ppm_param_info *param = ev->get_param_info(0);
+    const sinsp_evt_param *p = ev->get_param(0);
+    switch (param->type) {
+    case PT_PID:
+    case PT_ERRNO:
+    case PT_FD:
+    case PT_INT64:
+    case PT_INT32:
+      res = *reinterpret_cast<int64_t *>(p->m_val);
+      break;
+    default:
+      SF_WARN(m_logger, "Syscall result not of type pid!! Type: "
+                            << param->type << " Name: " << param->name);
+      break;
     }
-
-    it = cxt->getInspector()->m_grouplist.find(gid);
-    if(it == cxt->getInspector()->m_grouplist.end())
-    {
-        return string("");
-    }
-
-    return it->second->name;
-}
-bool utils::isInContainer(sinsp_evt* ev) {
-    sinsp_threadinfo* ti = ev->get_thread_info();
-    return !ti->m_container_id.empty();
+  }
+  return res;
 }
 
-
-time_t utils::getExportTime(SysFlowContext* cxt) {
-    time_t now = utils::getCurrentTime(cxt);
-    struct tm exportTM = *localtime( &now);
-    exportTM.tm_sec += cxt->getNFExportInterval();   // add 30 seconds to the time
-    return mktime( &exportTM);      // normalize iti
-}
-
-
-int64_t utils::getSyscallResult(sinsp_evt* ev) {
-      int64_t res = -1;
-      if(ev->get_num_params() >= 1) {
-	 const ppm_param_info* param = ev->get_param_info(0);
-     	 const sinsp_evt_param* p = ev->get_param(0);
-         switch(param->type) {
-            case PT_PID:
-            case PT_ERRNO:
-            case PT_FD:
-            case PT_INT64:
-            case PT_INT32:
-              res = *reinterpret_cast<int64_t *>(p->m_val);
-              break;
-  	    default:
-               SF_WARN(m_logger, "Syscall result not of type pid!! Type: " << param->type <<  " Name: " << param->name);
-               break;
-        }
-      }
-      return res;
-}
-
-
-avro::ValidSchema utils::loadSchema(const char* filename)
-{
-    avro::ValidSchema result;
-    try {
-        std::ifstream ifs(filename);
-        avro::compileJsonSchema(ifs, result);
-     }catch(avro::Exception& ex) {
-       SF_ERROR(m_logger, "Unable to load schema file from " << filename << " Error: " << ex.what());
-       throw; 
-     }
-    return result;
+avro::ValidSchema utils::loadSchema(const char *filename) {
+  avro::ValidSchema result;
+  try {
+    std::ifstream ifs(filename);
+    avro::compileJsonSchema(ifs, result);
+  } catch (avro::Exception &ex) {
+    SF_ERROR(m_logger, "Unable to load schema file from "
+                           << filename << " Error: " << ex.what());
+    throw;
+  }
+  return result;
 }
 
 string utils::getPath(sinsp_evt *ev, const string &paraName) {

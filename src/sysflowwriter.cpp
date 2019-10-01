@@ -1,21 +1,21 @@
 /** Copyright (C) 2019 IBM Corporation.
-*
-* Authors:
-* Frederico Araujo <frederico.araujo@ibm.com>
-* Teryl Taylor <terylt@ibm.com>
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/
+ *
+ * Authors:
+ * Frederico Araujo <frederico.araujo@ibm.com>
+ * Teryl Taylor <terylt@ibm.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 #include "sysflowwriter.h"
 
@@ -34,12 +34,12 @@ SysFlowWriter::~SysFlowWriter() {
 }
 
 void SysFlowWriter::writeHeader() {
-   SFHeader header;
-   header.version = 1000;
-   header.exporter = m_cxt->getExporterID();
-   m_flow.rec.set_SFHeader(header);
-   m_numRecs++;
-   m_dfw->write(m_flow);
+  SFHeader header;
+  header.version = 1000;
+  header.exporter = m_cxt->getExporterID();
+  m_flow.rec.set_SFHeader(header);
+  m_numRecs++;
+  m_dfw->write(m_flow);
 }
 
 int SysFlowWriter::initialize() {
@@ -53,29 +53,31 @@ int SysFlowWriter::initialize() {
 }
 
 string SysFlowWriter::getFileName(time_t curTime) {
-    string ofile;
-    if(m_start > 0) {
-       if(m_cxt->hasPrefix()) {
-           ofile = m_cxt->getOutputFile() + "." + std::to_string(curTime);
-       } else {
-           ofile = m_cxt->getOutputFile() + std::to_string(curTime);
-       }
+  string ofile;
+  if (m_start > 0) {
+    if (m_cxt->hasPrefix()) {
+      ofile = m_cxt->getOutputFile() + "." + std::to_string(curTime);
     } else {
-        if(m_cxt->hasPrefix()) {
-            ofile = m_cxt->getOutputFile();
-        } else {
-           ofile = m_cxt->getOutputFile() + std::to_string(curTime);
-        }
+      ofile = m_cxt->getOutputFile() + std::to_string(curTime);
     }
-    return ofile;
+  } else {
+    if (m_cxt->hasPrefix()) {
+      ofile = m_cxt->getOutputFile();
+    } else {
+      ofile = m_cxt->getOutputFile() + std::to_string(curTime);
+    }
+  }
+  return ofile;
 }
 
 void SysFlowWriter::resetFileWriter(time_t curTime) {
-    string ofile = getFileName(curTime);
-    m_numRecs = 0;
-    m_dfw->close();
-    delete m_dfw; 
-    m_dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), m_sysfSchema, COMPRESS_BLOCK_SIZE, avro::Codec::DEFLATE_CODEC); 
-    m_start = curTime;
-    writeHeader();
+  string ofile = getFileName(curTime);
+  m_numRecs = 0;
+  m_dfw->close();
+  delete m_dfw;
+  m_dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), m_sysfSchema,
+                                            COMPRESS_BLOCK_SIZE,
+                                            avro::Codec::DEFLATE_CODEC);
+  m_start = curTime;
+  writeHeader();
 }
