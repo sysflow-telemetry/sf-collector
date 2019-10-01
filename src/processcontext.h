@@ -30,12 +30,11 @@
 #include <sinsp.h>
 
 #define PROC_TABLE_SIZE 50000
-using namespace sysflow;
 namespace process {
 class ProcessContext {
 private:
-  SysFlowContext *m_cxt;
-  SysFlowWriter *m_writer;
+  context::SysFlowContext *m_cxt;
+  writer::SysFlowWriter *m_writer;
   container::ContainerContext *m_containerCxt;
   ProcessTable m_procs;
   file::FileContext *m_fileCxt;
@@ -44,8 +43,9 @@ private:
   void reupContainer(sinsp_evt *ev, ProcessObj *proc);
 
 public:
-  ProcessContext(SysFlowContext *cxt, container::ContainerContext *ccxt,
-                 file::FileContext *fileCxt, SysFlowWriter *writer);
+  ProcessContext(context::SysFlowContext *cxt,
+                 container::ContainerContext *ccxt, file::FileContext *fileCxt,
+                 writer::SysFlowWriter *writer);
   virtual ~ProcessContext();
   void updateProcess(Process *proc, sinsp_evt *ev, SFObjectState state);
   ProcessObj *createProcess(sinsp_threadinfo *mainthread, sinsp_evt *ev,

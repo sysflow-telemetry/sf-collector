@@ -19,12 +19,13 @@
 
 #include "processcontext.h"
 
-using namespace process;
+using process::ProcessContext;
+
 CREATE_LOGGER(ProcessContext, "sysflow.process");
-ProcessContext::ProcessContext(SysFlowContext *cxt,
+ProcessContext::ProcessContext(context::SysFlowContext *cxt,
                                container::ContainerContext *ccxt,
                                file::FileContext *fileCxt,
-                               SysFlowWriter *writer)
+                               writer::SysFlowWriter *writer)
     : m_procs(PROC_TABLE_SIZE) {
   OID *emptyoidkey = utils::getOIDEmptyKey();
   OID *deloidkey = utils::getOIDDelKey();

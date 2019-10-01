@@ -18,8 +18,9 @@
  **/
 
 #include "sysflowcontext.h"
-
 #include <utility>
+
+using context::SysFlowContext;
 
 CREATE_LOGGER(SysFlowContext, "sysflow.sysflowcontext");
 

@@ -20,11 +20,11 @@
 #include "fileeventprocessor.h"
 #include <cassert>
 
-using namespace fileevent;
+using fileevent::FileEventProcessor;
 
 CREATE_LOGGER(FileEventProcessor, "sysflow.fileevent");
 
-FileEventProcessor::FileEventProcessor(SysFlowWriter *writer,
+FileEventProcessor::FileEventProcessor(writer::SysFlowWriter *writer,
                                        process::ProcessContext *procCxt,
                                        file::FileContext *fileCxt) {
   m_writer = writer;

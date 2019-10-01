@@ -28,14 +28,13 @@
 #include "sysflowwriter.h"
 #include <ctime>
 #include <sinsp.h>
-using namespace sysflow;
-namespace networkflow {
 
+namespace networkflow {
 class NetworkFlowProcessor {
 private:
-  SysFlowContext *m_cxt;
+  context::SysFlowContext *m_cxt;
   process::ProcessContext *m_processCxt;
-  SysFlowWriter *m_writer;
+  writer::SysFlowWriter *m_writer;
   DataFlowSet *m_dfSet;
   DEFINE_LOGGER();
   void canonicalizeKey(sinsp_fdinfo_t *fdinfo, NFKey *key, uint64_t tid,
@@ -54,7 +53,8 @@ private:
   void removeAndWriteRelatedFlows(ProcessObj *proc, NFKey *key, uint64_t endTs);
 
 public:
-  NetworkFlowProcessor(SysFlowContext *cxt, SysFlowWriter *writer,
+  NetworkFlowProcessor(context::SysFlowContext *cxt,
+                       writer::SysFlowWriter *writer,
                        process::ProcessContext *procCxt, DataFlowSet *dfSet);
   virtual ~NetworkFlowProcessor();
   int handleNetFlowEvent(sinsp_evt *ev, OpFlags flag);

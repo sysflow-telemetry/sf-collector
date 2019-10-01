@@ -23,17 +23,20 @@
 #include "datatypes.h"
 #include "sysflow.h"
 #include "sysflowwriter.h"
-using namespace sysflow;
+
+using sysflow::SFObjectState;
+
 namespace file {
 class FileContext {
 private:
-  SysFlowWriter *m_writer;
+  writer::SysFlowWriter *m_writer;
   FileTable m_files;
   container::ContainerContext *m_containerCxt;
   void clearAllFiles();
 
 public:
-  FileContext(container::ContainerContext *containerCxt, SysFlowWriter *writer);
+  FileContext(container::ContainerContext *containerCxt,
+              writer::SysFlowWriter *writer);
   virtual ~FileContext();
   FileObj *getFile(sinsp_evt *ev, SFObjectState state, bool &created);
   FileObj *getFile(sinsp_evt *ev, const string &path, char typechar,

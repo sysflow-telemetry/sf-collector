@@ -29,7 +29,7 @@
 #include <sinsp.h>
 #include <unistd.h>
 
-using namespace std;
+namespace context {
 class SysFlowContext {
 private:
   bool m_filterCont;
@@ -64,5 +64,6 @@ public:
   inline int getFileDuration() { return m_fileDuration; }
   inline bool isFilterContainers() { return m_filterCont; }
 };
+} // namespace context
 
 #endif

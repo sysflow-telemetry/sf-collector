@@ -33,7 +33,7 @@
 namespace sysflowprocessor {
 class SysFlowProcessor {
 public:
-  explicit SysFlowProcessor(SysFlowContext *cxt);
+  explicit SysFlowProcessor(context::SysFlowContext *cxt);
   virtual ~SysFlowProcessor();
   inline void exit() { m_exit = true; }
   int run();
@@ -41,8 +41,8 @@ public:
 private:
   DEFINE_LOGGER();
   bool m_exit;
-  SysFlowContext *m_cxt;
-  SysFlowWriter *m_writer;
+  context::SysFlowContext *m_cxt;
+  writer::SysFlowWriter *m_writer;
   container::ContainerContext *m_containerCxt;
   file::FileContext *m_fileCxt;
   process::ProcessContext *m_processCxt;

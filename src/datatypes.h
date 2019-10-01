@@ -19,17 +19,18 @@
 
 #ifndef __HASHER__
 #define __HASHER__
-
 #include "MurmurHash3.h"
-
 #include "sysflow.h"
 #include "utils.h"
 #include <google/dense_hash_map>
 #include <google/dense_hash_set>
 #include <set>
 
-using namespace std;
-using namespace sysflow;
+using sysflow::Container;
+using sysflow::FileFlow;
+using sysflow::NetworkFlow;
+using sysflow::OID;
+using sysflow::Process;
 
 struct NFKey {
   uint64_t tid;

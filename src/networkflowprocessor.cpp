@@ -19,11 +19,12 @@
 
 #include "networkflowprocessor.h"
 #include "utils.h"
-using namespace networkflow;
+
+using networkflow::NetworkFlowProcessor;
 
 CREATE_LOGGER(NetworkFlowProcessor, "sysflow.networkflow");
-NetworkFlowProcessor::NetworkFlowProcessor(SysFlowContext *cxt,
-                                           SysFlowWriter *writer,
+NetworkFlowProcessor::NetworkFlowProcessor(context::SysFlowContext *cxt,
+                                           writer::SysFlowWriter *writer,
                                            process::ProcessContext *processCxt,
                                            DataFlowSet *dfSet) {
   m_cxt = cxt;

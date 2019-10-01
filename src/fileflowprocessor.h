@@ -30,14 +30,13 @@
 #include "sysflowwriter.h"
 #include <ctime>
 #include <sinsp.h>
-using namespace sysflow;
-namespace fileflow {
 
+namespace fileflow {
 class FileFlowProcessor {
 private:
-  SysFlowContext *m_cxt;
+  context::SysFlowContext *m_cxt;
   process::ProcessContext *m_processCxt;
-  SysFlowWriter *m_writer;
+  writer::SysFlowWriter *m_writer;
   DataFlowSet *m_dfSet;
   file::FileContext *m_fileCxt;
   void populateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev,
@@ -57,7 +56,7 @@ private:
   DEFINE_LOGGER();
 
 public:
-  FileFlowProcessor(SysFlowContext *cxt, SysFlowWriter *writer,
+  FileFlowProcessor(context::SysFlowContext *cxt, writer::SysFlowWriter *writer,
                     process::ProcessContext *procCxt, DataFlowSet *dfSet,
                     file::FileContext *fileCxt);
   virtual ~FileFlowProcessor();

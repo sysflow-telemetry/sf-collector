@@ -19,7 +19,9 @@
 
 #include "sysflowwriter.h"
 
-SysFlowWriter::SysFlowWriter(SysFlowContext *cxt, time_t start)
+using writer::SysFlowWriter;
+
+SysFlowWriter::SysFlowWriter(context::SysFlowContext *cxt, time_t start)
     : m_dfw(nullptr), m_start(start) {
   m_cxt = cxt;
   m_sysfSchema = utils::loadSchema(m_cxt->getSchemaFile());
@@ -34,7 +36,7 @@ SysFlowWriter::~SysFlowWriter() {
 }
 
 void SysFlowWriter::writeHeader() {
-  SFHeader header;
+  sysflow::SFHeader header;
   header.version = 1000;
   header.exporter = m_cxt->getExporterID();
   m_flow.rec.set_SFHeader(header);

@@ -19,10 +19,11 @@
 
 #include "processeventprocessor.h"
 
-using namespace processevent;
+using processevent::ProcessEventProcessor;
+
 CREATE_LOGGER(ProcessEventProcessor, "sysflow.processevent");
 ProcessEventProcessor::ProcessEventProcessor(
-    SysFlowWriter *writer, process::ProcessContext *pc,
+    writer::SysFlowWriter *writer, process::ProcessContext *pc,
     dataflow::DataFlowProcessor *dfPrcr) {
   m_processCxt = pc;
   m_writer = writer;

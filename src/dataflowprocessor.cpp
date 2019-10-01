@@ -19,11 +19,12 @@
 
 #include "dataflowprocessor.h"
 
-using namespace dataflow;
+using dataflow::DataFlowProcessor;
 
 CREATE_LOGGER(DataFlowProcessor, "sysflow.dataflow");
 
-DataFlowProcessor::DataFlowProcessor(SysFlowContext *cxt, SysFlowWriter *writer,
+DataFlowProcessor::DataFlowProcessor(context::SysFlowContext *cxt,
+                                     writer::SysFlowWriter *writer,
                                      process::ProcessContext *processCxt,
                                      file::FileContext *fileCxt)
     : m_dfSet() {

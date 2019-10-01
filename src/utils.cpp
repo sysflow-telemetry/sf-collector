@@ -25,10 +25,8 @@
 static NFKey s_nfdelkey;
 static NFKey s_nfemptykey;
 static bool s_keysinit = false;
-
 static OID s_oiddelkey;
 static OID s_oidemptykey;
-using namespace utils;
 
 CREATE_LOGGER_2("sysflow.utils");
 
@@ -81,7 +79,7 @@ OID *utils::getOIDDelKey() {
   return &s_oiddelkey;
 }
 
-string utils::getUserName(SysFlowContext *cxt, uint32_t uid) {
+string utils::getUserName(context::SysFlowContext *cxt, uint32_t uid) {
   scap_userinfo *user = cxt->getInspector()->get_user(uid);
   if (user != nullptr) {
     return user->name;
@@ -90,7 +88,7 @@ string utils::getUserName(SysFlowContext *cxt, uint32_t uid) {
   }
 }
 
-string utils::getGroupName(SysFlowContext *cxt, uint32_t gid) {
+string utils::getGroupName(context::SysFlowContext *cxt, uint32_t gid) {
   unordered_map<uint32_t, scap_groupinfo *>::const_iterator it;
   if (gid == 0xffffffff) {
     return string("");
@@ -108,7 +106,7 @@ bool utils::isInContainer(sinsp_evt *ev) {
   return !ti->m_container_id.empty();
 }
 
-time_t utils::getExportTime(SysFlowContext *cxt) {
+time_t utils::getExportTime(context::SysFlowContext *cxt) {
   time_t now = utils::getCurrentTime(cxt);
   struct tm exportTM = *localtime(&now);
   exportTM.tm_sec += cxt->getNFExportInterval(); // add 30 seconds to the time

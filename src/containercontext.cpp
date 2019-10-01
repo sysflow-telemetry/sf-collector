@@ -18,9 +18,12 @@
  **/
 
 #include "containercontext.h"
-using namespace container;
 
-ContainerContext::ContainerContext(SysFlowContext *cxt, SysFlowWriter *writer)
+using container::ContainerContext;
+using sysflow::ContainerType;
+
+ContainerContext::ContainerContext(context::SysFlowContext *cxt,
+                                   writer::SysFlowWriter *writer)
     : m_containers(CONT_TABLE_SIZE) {
   m_cxt = cxt;
   m_writer = writer;

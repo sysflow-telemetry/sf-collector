@@ -34,18 +34,18 @@
 #include <ctime>
 #include <openssl/sha.h>
 
+using sysflow::OID;
+
 typedef boost::array<uint8_t, 20> FOID;
-using namespace std;
-using namespace sysflow;
 struct NFKey;
 
 namespace utils {
-string getUserName(SysFlowContext *cxt, uint32_t uid);
-string getGroupName(SysFlowContext *cxt, uint32_t gid);
+string getUserName(context::SysFlowContext *cxt, uint32_t uid);
+string getGroupName(context::SysFlowContext *cxt, uint32_t gid);
 bool isInContainer(sinsp_evt *ev);
 int64_t getSyscallResult(sinsp_evt *ev);
 avro::ValidSchema loadSchema(const char *filename);
-time_t getExportTime(SysFlowContext *cxt);
+time_t getExportTime(context::SysFlowContext *cxt);
 NFKey *getNFDelKey();
 NFKey *getNFEmptyKey();
 OID *getOIDDelKey();
@@ -62,13 +62,13 @@ inline string getCanonicalPath(const string &fileName) {
   return p.string();
 }
 
-inline time_t getCurrentTime(SysFlowContext *cxt) {
+inline time_t getCurrentTime(context::SysFlowContext *cxt) {
   if (cxt->isOffline()) {
     return (cxt->timeStamp) / 1000000000;
   }
   return time(nullptr);
 }
-inline uint64_t getSysdigTime(SysFlowContext *cxt) {
+inline uint64_t getSysdigTime(context::SysFlowContext *cxt) {
   if (cxt->isOffline()) {
     return cxt->timeStamp;
   }

@@ -28,18 +28,17 @@
 #include <sinsp.h>
 
 #define CONT_TABLE_SIZE 100
-using namespace std;
-using namespace sysflow;
+
 namespace container {
 class ContainerContext {
 private:
   ContainerTable m_containers;
-  SysFlowContext *m_cxt;
-  SysFlowWriter *m_writer;
+  context::SysFlowContext *m_cxt;
+  writer::SysFlowWriter *m_writer;
   ContainerObj *createContainer(sinsp_evt *ev);
 
 public:
-  ContainerContext(SysFlowContext *cxt, SysFlowWriter *writer);
+  ContainerContext(context::SysFlowContext *cxt, writer::SysFlowWriter *writer);
   virtual ~ContainerContext();
   ContainerObj *getContainer(sinsp_evt *ev);
   ContainerObj *getContainer(const string &id);

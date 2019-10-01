@@ -32,9 +32,7 @@
 #include <string>
 #include <unistd.h>
 
-using namespace std;
-
-using namespace sysflowprocessor;
+using sysflowprocessor::SysFlowProcessor;
 
 SysFlowProcessor *s_prc = nullptr;
 
@@ -92,7 +90,6 @@ static void usage(const std::string &name) {
       << std::endl;
 }
 
-// static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("sysflow.main"));
 CREATE_MAIN_LOGGER()
 int main(int argc, char **argv) {
   string scapFile = "";
@@ -178,18 +175,11 @@ int main(int argc, char **argv) {
   }
 
   try {
-    /*if (!logProps.empty())
-    {
-        PropertyConfigurator::configure(logProps.c_str());
-    }
-    else
-    {
-        BasicConfigurator::configure();
-    }*/
     CONFIGURE_LOGGER(logProps);
     SF_DEBUG(logger, "Starting sysporter..");
-    auto *cxt = new SysFlowContext(filterCont, fileDuration, outputDir,
-                                   scapFile, schemaFile, exporterID, filter);
+    auto *cxt =
+        new context::SysFlowContext(filterCont, fileDuration, outputDir,
+                                    scapFile, schemaFile, exporterID, filter);
     s_prc = new SysFlowProcessor(cxt);
     int ret = s_prc->run();
     delete s_prc;

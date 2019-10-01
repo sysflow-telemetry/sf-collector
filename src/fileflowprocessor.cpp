@@ -21,11 +21,12 @@
 #include "utils.h"
 #include <utility>
 
-using namespace fileflow;
+using fileflow::FileFlowProcessor;
 
 CREATE_LOGGER(FileFlowProcessor, "sysflow.fileflow");
 
-FileFlowProcessor::FileFlowProcessor(SysFlowContext *cxt, SysFlowWriter *writer,
+FileFlowProcessor::FileFlowProcessor(context::SysFlowContext *cxt,
+                                     writer::SysFlowWriter *writer,
                                      process::ProcessContext *processCxt,
                                      DataFlowSet *dfSet,
                                      file::FileContext *fileCxt) {

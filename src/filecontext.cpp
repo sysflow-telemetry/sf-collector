@@ -20,10 +20,10 @@
 #include "filecontext.h"
 #include <utility>
 
-using namespace file;
+using file::FileContext;
 
 FileContext::FileContext(container::ContainerContext *containerCxt,
-                         SysFlowWriter *writer) {
+                         writer::SysFlowWriter *writer) {
   m_writer = writer;
   m_containerCxt = containerCxt;
   m_files.set_empty_key("-1");

@@ -34,7 +34,7 @@ private:
   networkflow::NetworkFlowProcessor *m_netflowPrcr;
   fileflow::FileFlowProcessor *m_fileflowPrcr;
   fileevent::FileEventProcessor *m_fileevtPrcr;
-  SysFlowContext *m_cxt;
+  context::SysFlowContext *m_cxt;
   DataFlowSet m_dfSet;
   time_t m_lastCheck;
   DEFINE_LOGGER();
@@ -42,7 +42,7 @@ private:
 public:
   inline int getSize() { return m_netflowPrcr->getSize(); }
   int handleDataEvent(sinsp_evt *ev, OpFlags flag);
-  DataFlowProcessor(SysFlowContext *cxt, SysFlowWriter *writer,
+  DataFlowProcessor(context::SysFlowContext *cxt, writer::SysFlowWriter *writer,
                     process::ProcessContext *processCxt,
                     file::FileContext *fileCxt);
   virtual ~DataFlowProcessor();

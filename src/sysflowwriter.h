@@ -33,11 +33,20 @@
 #include "sysflowcontext.h"
 #include "utils.h"
 #define COMPRESS_BLOCK_SIZE 80000
-using namespace sysflow;
 
+using sysflow::Container;
+using sysflow::File;
+using sysflow::FileEvent;
+using sysflow::FileFlow;
+using sysflow::NetworkFlow;
+using sysflow::Process;
+using sysflow::ProcessEvent;
+using sysflow::SysFlow;
+
+namespace writer {
 class SysFlowWriter {
 private:
-  SysFlowContext *m_cxt;
+  context::SysFlowContext *m_cxt;
   SysFlow m_flow;
   int m_numRecs{};
   avro::ValidSchema m_sysfSchema;
@@ -47,7 +56,7 @@ private:
   string getFileName(time_t curTime);
 
 public:
-  SysFlowWriter(SysFlowContext *cxt, time_t start);
+  SysFlowWriter(context::SysFlowContext *cxt, time_t start);
   virtual ~SysFlowWriter();
   inline int getNumRecs() { return m_numRecs; }
   inline void writeContainer(Container *container) {
@@ -98,5 +107,5 @@ public:
   int initialize();
   void resetFileWriter(time_t curTime);
 };
-
+} // namespace writer
 #endif

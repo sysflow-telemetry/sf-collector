@@ -34,7 +34,7 @@ namespace fileevent {
 class FileEventProcessor {
 private:
   process::ProcessContext *m_processCxt;
-  SysFlowWriter *m_writer;
+  writer::SysFlowWriter *m_writer;
   file::FileContext *m_fileCxt;
   FileEvent m_fileEvt;
   int writeFileEvent(sinsp_evt *ev, OpFlags flag);
@@ -42,7 +42,8 @@ private:
   DEFINE_LOGGER();
 
 public:
-  FileEventProcessor(SysFlowWriter *writer, process::ProcessContext *procCxt,
+  FileEventProcessor(writer::SysFlowWriter *writer,
+                     process::ProcessContext *procCxt,
                      file::FileContext *fileCxt);
   virtual ~FileEventProcessor();
   int handleFileFlowEvent(sinsp_evt *ev, OpFlags flag);

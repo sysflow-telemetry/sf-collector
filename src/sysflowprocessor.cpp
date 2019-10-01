@@ -18,16 +18,19 @@
  **/
 
 #include "sysflowprocessor.h"
-using namespace sysflowprocessor;
+
+using sysflowprocessor::SysFlowProcessor;
+
 CREATE_LOGGER(SysFlowProcessor, "sysflow.sysflowprocessor");
 
-SysFlowProcessor::SysFlowProcessor(SysFlowContext *cxt) : m_exit(false) {
+SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
+    : m_exit(false) {
   m_cxt = cxt;
   time_t start = 0;
   if (m_cxt->getFileDuration() > 0) {
     start = time(nullptr);
   }
-  m_writer = new SysFlowWriter(cxt, start);
+  m_writer = new writer::SysFlowWriter(cxt, start);
   m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
   m_fileCxt = new file::FileContext(m_containerCxt, m_writer);
   m_processCxt =

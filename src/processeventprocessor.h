@@ -28,11 +28,12 @@
 #include <sinsp.h>
 #include <string>
 #define SF_UID "uid"
-using namespace sysflow;
+
 namespace processevent {
 class ProcessEventProcessor {
 public:
-  ProcessEventProcessor(SysFlowWriter *writer, process::ProcessContext *pc,
+  ProcessEventProcessor(writer::SysFlowWriter *writer,
+                        process::ProcessContext *pc,
                         dataflow::DataFlowProcessor *dfPrcr);
   virtual ~ProcessEventProcessor();
   void writeCloneEvent(sinsp_evt *ev);
@@ -42,10 +43,10 @@ public:
   void setUID(sinsp_evt *ev);
 
 private:
-  SysFlowWriter *m_writer;
+  writer::SysFlowWriter *m_writer;
   process::ProcessContext *m_processCxt;
   dataflow::DataFlowProcessor *m_dfPrcr;
-  ProcessEvent m_procEvt;
+  sysflow::ProcessEvent m_procEvt;
   std::string m_uid;
   DEFINE_LOGGER();
 };
