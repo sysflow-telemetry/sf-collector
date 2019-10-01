@@ -21,7 +21,6 @@
 using namespace sysflowprocessor;
 CREATE_LOGGER(SysFlowProcessor, "sysflow.sysflowprocessor");
 
-//SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false), m_cxt(NULL), m_writer(NULL), m_containerCxt(NULL), m_fileCxt(NULL), m_processCxt(NULL), m_procEvtPrcr(NULL), m_dfPrcr(NULL) {
 SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
    m_cxt = cxt;
    time_t start = 0;
@@ -70,11 +69,9 @@ int SysFlowProcessor::run() {
         try
 	{
                 m_writer->initialize();
-		//inspector->set_buffer_format(sinsp_evt::PF_NORMAL);
 		while(true) 
 		{
 			res = m_cxt->getInspector()->next(&ev);
-			//cout << "Retrieved a scap event... RES: " << res << endl;
 			if(res == SCAP_TIMEOUT)
 			{
                                 if(m_exit) {

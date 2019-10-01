@@ -47,7 +47,6 @@ namespace networkflow {
             void processNewFlow(sinsp_evt* ev, ProcessObj* proc, OpFlags flag, NFKey key) ;
             void removeAndWriteNetworkFlow(ProcessObj* proc, NetFlowObj** nf, NFKey* key);
             void removeNetworkFlow(ProcessObj* proc, NetFlowObj** nf, NFKey* key);
-         
             int32_t getProtocol(scap_l4_proto proto);
             int removeNetworkFlowFromSet(NetFlowObj** nfo, bool deleteNetFlow);
             void removeAndWriteRelatedFlows(ProcessObj* proc, NFKey* key, uint64_t endTs); 

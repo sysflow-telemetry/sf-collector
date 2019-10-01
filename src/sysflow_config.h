@@ -17,16 +17,8 @@
 * limitations under the License.
 **/
 
-#ifndef __SF_FILE_TYPES_
-#define __SF_FILE_TYPES_
-enum FileType {
-     SF_FILE = 'f',
-     SF_DIR = 'd',
-     SF_IPv4 = '4',
-     SF_IPv6 = '6',
-     SF_UNIX = 'u',
-     SF_PIPE = 'p',
-     SF_UNK = '?'
-};
-
+#ifndef __SYSFLOW_CONFIG
+#define __SYSFLOW_CONFIG
+#define SF_VERSION  "0.1"
+#define SF_BUILD    "1"
 #endif

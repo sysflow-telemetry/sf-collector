@@ -50,24 +50,6 @@ using namespace log4cxx::helpers;
             cerr << ex.what() << endl; \
             return 1;     \
         }
-//static char* m_logger;
-//#define m_logger 1
-/*#define SF_DEBUG(logger, message) do { \
-      cout << "DEBUG: " << message << endl; }while(0)
-#define SF_WARN(logger, message) do { \
-      cout << "WARN: " << message << endl; }while(0)
-#define SF_INFO(logger, message) do { \
-      cout << "INFO: " << message << endl; }while(0)
-#define SF_ERROR(logger, message) do { \
-      cout << "ERROR: " << message << endl; }while(0)*/
-
-/*
-#define SF_DEBUG(logger, message) 0
-#define SF_WARN(logger, message)  0
-#define SF_INFO(logger, message)  0
-#define SF_ERROR(logger, message) 0
-*/
-
 #define SF_DEBUG(logger, message) LOG4CXX_DEBUG(logger, message)
 #define SF_WARN(logger, message)  LOG4CXX_WARN(logger, message)
 #define SF_INFO(logger, message)  LOG4CXX_INFO(logger, message)

@@ -18,9 +18,9 @@
 **/
 
 #include "fileflowprocessor.h"
-
 #include "utils.h"
 #include <utility>
+
 using namespace fileflow;
 
 CREATE_LOGGER(FileFlowProcessor, "sysflow.fileflow");
@@ -35,7 +35,7 @@ FileFlowProcessor::FileFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer,
 
 FileFlowProcessor::~FileFlowProcessor() = default;
 
-inline void FileFlowProcessor::populateFileFlow(/*sinsp_fdinfo_t * fdinfo,*/ FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file, string flowkey) {
+inline void FileFlowProcessor::populateFileFlow(FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file, string flowkey) {
    sinsp_threadinfo* ti = ev->get_thread_info();
    sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
    ff->fileflow.opFlags = flag;
@@ -102,31 +102,26 @@ inline void FileFlowProcessor::updateFileFlow(FileFlowObj* ff, OpFlags flag, sin
        }
 }
 
-inline void FileFlowProcessor::processNewFlow(
-    sinsp_evt *ev, /*sinsp_fdinfo_t * fdinfo,*/ ProcessObj *proc, FileObj *file,
-    OpFlags flag, const string &flowkey) {
-  auto *ff = new FileFlowObj();
-  ff->exportTime = utils::getExportTime(m_cxt);
-  ff->lastUpdate = utils::getCurrentTime(m_cxt);
-  populateFileFlow(ff, flag, ev, proc, file, flowkey);
-  updateFileFlow(ff, flag, ev);
-  if (flag != OP_CLOSE) {
-    proc->fileflows[flowkey] = ff;
-    file->refs++;
-    // m_fileflows[key] = nf;
-    m_dfSet->insert(ff);
-  } else {
-    removeAndWriteRelatedFlows(proc, ff, ev->get_ts());
-    ff->fileflow.endTs = ev->get_ts();
-    m_writer->writeFileFlow(&(ff->fileflow));
-    delete ff;
-  }
+inline void FileFlowProcessor::processNewFlow(sinsp_evt *ev, ProcessObj *proc, FileObj *file, OpFlags flag, const string &flowkey) {
+      auto *ff = new FileFlowObj();
+      ff->exportTime = utils::getExportTime(m_cxt);
+      ff->lastUpdate = utils::getCurrentTime(m_cxt);
+      populateFileFlow(ff, flag, ev, proc, file, flowkey);
+      updateFileFlow(ff, flag, ev);
+      if (flag != OP_CLOSE) {
+        proc->fileflows[flowkey] = ff;
+        file->refs++;
+        m_dfSet->insert(ff);
+      } else {
+        removeAndWriteRelatedFlows(proc, ff, ev->get_ts());
+        ff->fileflow.endTs = ev->get_ts();
+        m_writer->writeFileFlow(&(ff->fileflow));
+        delete ff;
+      }
 }
 
 inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj* proc, FileObj* file,  FileFlowObj** ff, string flowkey) {
     m_writer->writeFileFlow(&((*ff)->fileflow));
-    //m_fileflows.erase(*key);
-    //m_nfSet.erase((*nf));
     removeFileFlowFromSet(ff, false);
     removeFileFlow(proc, file, ff, std::move(flowkey));
 }
@@ -145,43 +140,14 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt* ev, OpFlags flag) {
     sinsp_fdinfo_t * fdinfo =  ev->get_fd_info();
 
     if (fdinfo == nullptr) {
-      /*if(flag == OP_MMAP) {
-          sinsp_threadinfo* ti = ev->get_thread_info();
-          for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
-              string name = ev->get_param_name(i);
-              const ppm_param_info* param = ev->get_param_info(i);
-              const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
-              SF_DEBUG(m_logger, name  << " " <<
-      ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " <<
-      (uint32_t)param->ninfo);
-          }
-          const sinsp_evt_param* p = ev->get_param_value_raw("fd");
-          if(p != NULL) {
-              int64_t fd = *(int64_t *)p->m_val;
-              if(fd > 0) {
-                  fdinfo = ti->get_fd(fd);
-                  if(fdinfo == NULL) {
-                      SF_DEBUG(m_logger, "Event: " << ev->get_name() << "
-      doesn't have an fdinfo associated with it! "); return 1;
-
-                  }
-                  bool isfdnull = (fdinfo == NULL);
-                  // string name = fdinfo->m_name;
-                  string name = fdinfo->m_name;
-                  SF_DEBUG(m_logger, " MMAP FD: " << fd << " " << isfdnull << "
-      " << fdinfo->get_typechar() << " " << name );
-              }
-          }
-      } else {*/
-      SF_DEBUG(m_logger,
+          SF_DEBUG(m_logger,
                "Event: " << ev->get_name()
-                         << " doesn't have an fdinfo associated with it! ");
+                         << " doesn't have a fdinfo associated with it!");
       return 1;
-      //}
     }
 
     if((fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket())) {
-        SF_WARN(m_logger, "handleFileFlowEvent cannot handle ip sockets,  Ignoring..") ;
+        SF_WARN(m_logger, "handleFileFlowEvent cannot handle ip sockets, ignoring...") ;
         return 1;
     }
     char restype = fdinfo->get_typechar();
@@ -197,19 +163,14 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt* ev, OpFlags flag) {
     }
     bool created = false;
     //calling get process is important because it ensures that the process object has been written to the
-    //sysflow file.   This is important for long running NetworkFlows that may span across files.
+    //sysflow file. This is important for long running NetworkFlows that may span across files.
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
     FileFlowObj *ff = nullptr;
     sinsp_threadinfo* ti = ev->get_thread_info();
     string filekey =  ti->m_container_id + fdinfo->m_name;
-    //int i = ti->m_tid;
-    //i = 1;
-   // cout << (*(int64_t*)ti) << endl;
-    //cout << "TID: " << ti->m_tid << " Container id " << ti->m_container_id << " FD name: " << fdinfo->m_name << endl;
     string flowkey = filekey  + std::to_string(ti->m_tid) + std::to_string(ev->get_fd_num());
 
     FileObj* file = m_fileCxt->getFile(ev, SFObjectState::REUP, created);
-
     FileFlowTable::iterator ffi = proc->fileflows.find(flowkey);
     if(ffi != proc->fileflows.end()) {
          ff = ffi->second;
@@ -246,7 +207,7 @@ int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj* proc, int64_t tid) {
 		removeAndWriteRelatedFlows(proc, ffi->second, ffi->second->fileflow.endTs);
 	    }
             ffi->second->fileflow.opFlags |= OP_TRUNCATE;
-            SF_DEBUG(m_logger, "Writing FILEFLOW!!");
+            SF_DEBUG(m_logger, "Writing FILEFLOW!");
             m_writer->writeFileFlow(&(ffi->second->fileflow));
             FileFlowObj* ffo = ffi->second;
             proc->fileflows.erase(ffi);
@@ -275,8 +236,6 @@ int FileFlowProcessor::removeFileFlowFromSet(FileFlowObj** ffo, bool deleteFileF
         for (auto iter = m_dfSet->find(*ffo); iter != m_dfSet->end(); iter++) {
           if (!((*iter)->isNetworkFlow)) {
             auto *foundObj = static_cast<FileFlowObj *>(*iter);
-            // cout << "Found: " << foundObj->fileflow.procOID.createTS << " "
-            // << foundObj->fileflow.procOID.hpid << endl;
             if (*foundObj == **ffo) {
               SF_DEBUG(m_logger, "Removing fileflow element from multiset");
               m_dfSet->erase(iter);
@@ -305,7 +264,7 @@ void FileFlowProcessor::removeFileFlow(DataFlowObj* dfo) {
   // do we want to write out a fileflow that hasn't had any action in an
   // interval? nfo->fileflow.endTs = utils::getSysdigTime(m_cxt);
   // m_writer->writeNetFlow(&(nfo->fileflow));
-  SF_DEBUG(m_logger, "Erasing flow!!! ");
+  SF_DEBUG(m_logger, "Erasing flow");
   ProcessObj *proc = m_processCxt->getProcess(&(ffo->fileflow.procOID));
   if (proc == nullptr) {
     SF_ERROR(m_logger, "Could not find proc " << ffo->fileflow.procOID.hpid
@@ -316,7 +275,7 @@ void FileFlowProcessor::removeFileFlow(DataFlowObj* dfo) {
     FileObj *file = m_fileCxt->getFile(ffo->filekey);
     if (file == nullptr) {
       SF_ERROR(m_logger, "Unable to find file object of key "
-                             << ffo->filekey << ". Shouldn't happen!!");
+                             << ffo->filekey << ". Shouldn't happen!");
     }
     removeFileFlow(proc, file, &ffo, ffo->flowkey);
   }
@@ -328,7 +287,7 @@ void FileFlowProcessor::exportFileFlow(DataFlowObj *dfo, time_t /*now*/) {
   m_processCxt->exportProcess(&(ffo->fileflow.procOID));
   m_fileCxt->exportFile(ffo->filekey);
   m_writer->writeFileFlow(&(ffo->fileflow));
-  SF_DEBUG(m_logger, "Reupping flow!!! ");
+  SF_DEBUG(m_logger, "Reupping flow");
   ffo->fileflow.ts = utils::getSysdigTime(m_cxt);
   ffo->fileflow.endTs = 0;
   ffo->fileflow.opFlags = 0;

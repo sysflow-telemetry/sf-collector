@@ -84,19 +84,6 @@ OID* utils::getOIDDelKey() {
 
 string utils::getUserName(SysFlowContext* cxt, uint32_t uid)
 {
-/*    unordered_map<uint32_t, scap_userinfo*>::const_iterator it;
-    if(uid == 0xffffffff)
-    {
-        return string("");
-    }
-
-    it = cxt->getInspector()->m_userlist.find(uid);
-    if(it == cxt->getInspector()->m_userlist.end())
-    {
-        return string("");
-    }
-
-    return it->second->name;*/
    scap_userinfo* user = cxt->getInspector()->get_user(uid);
    if (user != nullptr) {
      return user->name;
@@ -153,16 +140,6 @@ int64_t utils::getSyscallResult(sinsp_evt* ev) {
                break;
         }
       }
-     /* for(int i = 0; i < ev->get_num_params(); i ++) {
-	 string name = ev->get_param_name(i);
-	 const ppm_param_info* param = ev->get_param_info(i);
-     	 const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
-         cout << name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo <<   endl;
-	 if(param->type == PT_PID) {
-	    int64_t pid = *(int64_t *)p->m_val;
-	    cout << pid << endl;
-         }
-      }*/
       return res;
 }
 
@@ -181,7 +158,6 @@ avro::ValidSchema utils::loadSchema(const char* filename)
 }
 
 string utils::getPath(sinsp_evt *ev, const string &paraName) {
-  // sinsp_evt_param* param = ev->get_param_value_raw(paraName.c_str());
   int numParams = ev->get_num_params();
   string path;
   for (int i = 0; i < numParams; i++) {
@@ -234,7 +210,6 @@ string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
       }
       tmp = ti->get_cwd();
     } else {
-      // string dirfd = ev->get_param_value_str("dirfd");
       sinsp_fdinfo_t *fdinfo = ti->get_fd(dirfd);
       assert(fdinfo != nullptr);
       tmp = fdinfo->m_name;

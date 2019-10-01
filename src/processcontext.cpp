@@ -54,10 +54,6 @@ ProcessObj* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_ev
     poid.hpid = parent->m_pid;
     p->proc.poid.set_OID(poid);
   }
-   //std::memcpy(&proc.oid[0], &proc.ts, sizeof(int64_t));
-   //std::memcpy(&proc->oid[0], &mainthread->m_clone_ts, sizeof(int64_t));
-   //std::memcpy(&proc->oid[8], &proc->hpid, sizeof(int32_t));
-   //cout << "Wrote OID" << endl;
    p->proc.exe = (mainthread->m_exepath.empty()) ? utils::getAbsolutePath(ti, mainthread->m_exe) : mainthread->m_exepath;
    SF_DEBUG(m_logger, "createProcess: The exepath is " << p->proc.exe <<  " ti->exepath: " << ti->get_exepath() << " EXE: " << mainthread->get_exe() << " CWD: " << mainthread->get_cwd());
    p->proc.exeArgs.clear();
@@ -71,12 +67,9 @@ ProcessObj* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_ev
      }
      i++;
    }
-   //cout << "Wrote exe args" << endl;
     p->proc.uid = mainthread->m_uid;
     p->proc.gid = mainthread->m_gid;
-   //cout << "Wrote gid/uid " << ti->m_uid << endl;
     p->proc.userName = utils::getUserName(m_cxt, mainthread->m_uid);
-  // cout << "Wrote username" << endl;
     p->proc.groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
     ContainerObj* cont = m_containerCxt->getContainer(ev);
     if (cont != nullptr) {
@@ -85,11 +78,6 @@ ProcessObj* ProcessContext::createProcess(sinsp_threadinfo* mainthread, sinsp_ev
     } else {
       p->proc.containerId.set_null();
     }
-    //cout << "Wrote user/groupnames" << endl;
-    /*if(mainthread->m_clone_ts != 0) {
-       proc->duration = ev->get_ts() - mainthread->m_clone_ts;
-    }*/
-    //proc->childCount = mainthread->m_nchilds;
     return p;
 }
 
@@ -108,8 +96,6 @@ void ProcessContext::printAncestors(Process* proc) {
    }
 
 }
-
-
 
 bool ProcessContext::isAncestor(OID* oid, Process* proc) {
 
@@ -161,8 +147,6 @@ ProcessObj* ProcessContext::getProcess(sinsp_evt* ev, SFObjectState state, bool&
       key.hpid = mt->m_pid;
       created = true;
       SF_DEBUG(m_logger, "getProcess: PID: " << mt->m_pid << " ts " << mt->m_clone_ts <<  " EXEPATH: " << mt->m_exepath << " EXE: " << mt->m_exe);
-      //std::memcpy(&key[0], &mt->m_clone_ts, sizeof(int64_t));
-      //std::memcpy(&key[8], &mt->m_pid, sizeof(int32_t));
       ProcessTable::iterator proc = m_procs.find(&key);
       ProcessObj *process = nullptr;
       if(proc != m_procs.end()) {
@@ -193,8 +177,6 @@ ProcessObj* ProcessContext::getProcess(sinsp_evt* ev, SFObjectState state, bool&
                                           << mt->m_clone_ts
                                           << " EXEPATH: " << mt->m_exepath
                                           << " EXE: " << mt->m_exe);
-        // std::memcpy(&key[0], &mt->m_clone_ts, sizeof(int64_t));
-        // std::memcpy(&key[8], &mt->m_pid, sizeof(int32_t));
         ProcessObj *parent = nullptr;
         ProcessTable::iterator proc2 = m_procs.find(&key);
         if (proc2 != m_procs.end()) {
@@ -258,7 +240,6 @@ void ProcessContext::updateProcess(Process* proc, sinsp_evt* ev, SFObjectState s
    sinsp_threadinfo* mainthread = ti->get_main_thread();
    proc->state = state;
    proc->ts = ev->get_ts();
-   //proc->exe = mainthread->m_exepath;
    proc->exe = (mainthread->m_exepath.empty()) ? utils::getAbsolutePath(ti, mainthread->m_exe) : mainthread->m_exepath;
    proc->exeArgs.clear();
    int i = 0;
@@ -273,9 +254,7 @@ void ProcessContext::updateProcess(Process* proc, sinsp_evt* ev, SFObjectState s
    }
     proc->uid = mainthread->m_uid;
     proc->gid = mainthread->m_gid;
-   //cout << "Wrote gid/uid " << ti->m_uid << endl;
    proc->userName = utils::getUserName(m_cxt, mainthread->m_uid);
-  // cout << "Wrote username" << endl;
    proc->groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
 
 }
@@ -313,7 +292,6 @@ void ProcessContext::clearProcesses() {
              it->second->written = false;
         }
     }
-    //run again to get rid of any processes who no longer have children
     for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
         if(it->second->netflows.empty() && it->second->fileflows.empty() && it->second->children.empty()) {
                ProcessObj* proc = it->second;
@@ -364,15 +342,10 @@ void ProcessContext::printNetworkFlow(ProcessObj* proc) {
 
 }
 
-
-
-
 void ProcessContext::clearAllProcesses() {
     for(ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
         if(((!it->second->netflows.empty()) || (!it->second->fileflows.empty())) &&
                !it->second->written) {
-            //m_writer->writeProcess(&(it->second->proc));
-            //it->second->written = true;
              writeProcessAndAncestors(it->second);
          }
          for(NetworkFlowTable::iterator nfi = it->second->netflows.begin(); nfi != it->second->netflows.end(); nfi++) {
@@ -395,9 +368,6 @@ void ProcessContext::clearAllProcesses() {
     }
 
 }
-
-
-
 
 void ProcessContext::deleteProcess(ProcessObj** proc) {
     Process::poid_t poid = (*proc)->proc.poid;

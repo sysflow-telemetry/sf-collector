@@ -48,6 +48,5 @@ namespace fileevent {
                  
 
     };
-
     } // namespace fileevent
 #endif

@@ -49,7 +49,6 @@ namespace sysflowprocessor {
             dataflow::DataFlowProcessor* m_dfPrcr;
             void clearTables();
             bool checkAndRotateFile();
-            //static log4cxx::LoggerPtr m_logger;
      };
      } // namespace sysflowprocessor
 

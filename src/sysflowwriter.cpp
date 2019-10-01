@@ -36,10 +36,6 @@ SysFlowWriter::~SysFlowWriter() {
 void SysFlowWriter::writeHeader() {
    SFHeader header;
    header.version = 1000;
-  /* const scap_machine_info* mi = inspector->get_machine_info();
-   if(mi != NULL) {
-       header.exporter = mi->hostname;
-   }*/
    header.exporter = m_cxt->getExporterID();
    m_flow.rec.set_SFHeader(header);
    m_numRecs++;

@@ -53,40 +53,17 @@ inline int32_t NetworkFlowProcessor::getProtocol(scap_l4_proto proto) {
     return prt;
 }
 
-
 inline void NetworkFlowProcessor::canonicalizeKey(sinsp_fdinfo_t* fdinfo, NFKey* key, uint64_t tid, uint64_t fd) {
     uint32_t sip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sip;
     uint32_t dip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dip;
     uint32_t sport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sport;
     uint32_t dport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dport;
-
-    //key->oid.hpid = oid->hpid;
-    //key->oid.createTS = oid->createTS;
-
     key->tid = tid;
     key->fd = fd;
-
-//    if(sip < dip) {
     key->ip1 = sip;
     key->port1 = sport;
     key->ip2 = dip;
     key->port2 = dport;
- /*   } else if(dip < sip) {
-       key->ip1 = dip;
-       key->port1 = dport;
-       key->ip2 = sip;
-       key->port2 = sport;
-    } else if(sport < dport) {
-       key->ip1 = sip;
-       key->port1 = sport;
-       key->ip2 = dip;
-       key->port2 = dport;
-    } else {
-       key->ip1 = dip;
-       key->port1 = dport;
-       key->ip2 = sip;
-       key->port2 = sport;
-    }*/
 }
 
 inline void NetworkFlowProcessor::canonicalizeKey(NetFlowObj* nf, NFKey* key) {
@@ -96,32 +73,11 @@ inline void NetworkFlowProcessor::canonicalizeKey(NetFlowObj* nf, NFKey* key) {
     uint32_t dport = nf->netflow.dport;
     key->tid = nf->netflow.tid;
     key->fd = nf->netflow.fd;
-    //key->oid.hpid = oid->hpid;
-    //key->oid.createTS = oid->createTS;
-
-   // if(sip < dip) {
     key->ip1 = sip;
     key->port1 = sport;
     key->ip2 = dip;
     key->port2 = dport;
-   /* } else if(dip < sip) {
-       key->ip1 = dip;
-       key->port1 = dport;
-       key->ip2 = sip;
-       key->port2 = sport;
-    } else if(sport < dport) {
-       key->ip1 = sip;
-       key->port1 = sport;
-       key->ip2 = dip;
-       key->port2 = dport;
-    } else {
-       key->ip1 = dip;
-       key->port1 = dport;
-       key->ip2 = sip;
-       key->port2 = sport;
-    }*/
 }
-
 
 inline void NetworkFlowProcessor::populateNetFlow(NetFlowObj* nf, OpFlags flag, sinsp_evt* ev, ProcessObj* proc) {
    sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
@@ -142,13 +98,6 @@ inline void NetworkFlowProcessor::populateNetFlow(NetFlowObj* nf, OpFlags flag, 
    nf->netflow.numWSendOps = 0;
    nf->netflow.numRRecvBytes = 0;
    nf->netflow.numWSendBytes = 0;
-   /*nf->nfkey.ip1 = key.ip1;
-   nf->nfkey.ip2 = key.ip2;
-   nf->nfkey.port1 = key.port1;
-   nf->nfkey.port2 = key.port2;
-   nf->nfkey.fd = key.fd;
-   nf->nfkey.tid = key.tid;
-   */
 }
 
 inline void NetworkFlowProcessor::updateNetFlow(NetFlowObj* nf, OpFlags flag, sinsp_evt* ev) {
@@ -160,7 +109,7 @@ inline void NetworkFlowProcessor::updateNetFlow(NetFlowObj* nf, OpFlags flag, si
            if(res > 0 ) {
                nf->netflow.numWSendBytes+= res;
            }
-       }else if(flag == OP_READ_RECV) {
+       } else if(flag == OP_READ_RECV) {
            nf->netflow.numRRecvOps++;
            int res = utils::getSyscallResult(ev);
            if(res > 0 ) {
@@ -177,7 +126,6 @@ inline void NetworkFlowProcessor::processNewFlow(sinsp_evt* ev, ProcessObj* proc
   updateNetFlow(nf, flag, ev);
   if (flag != OP_CLOSE) {
     proc->netflows[key] = nf;
-    // m_netflows[key] = nf;
     m_dfSet->insert(nf);
     } else {
         removeAndWriteRelatedFlows(proc, &key, ev->get_ts());	
@@ -189,12 +137,9 @@ inline void NetworkFlowProcessor::processNewFlow(sinsp_evt* ev, ProcessObj* proc
 
 inline void NetworkFlowProcessor::removeAndWriteNetworkFlow(ProcessObj* proc, NetFlowObj** nf, NFKey* key) {
     m_writer->writeNetFlow(&((*nf)->netflow));
-    //m_netflows.erase(*key);
-    //m_nfSet.erase((*nf));
     removeNetworkFlowFromSet(nf, false);
     removeNetworkFlow(proc, nf, key);
 }
-
 
 inline void NetworkFlowProcessor::processExistingFlow(sinsp_evt* ev, ProcessObj* proc, OpFlags flag, NFKey key, NetFlowObj* nf) {
       updateNetFlow(nf, flag, ev);
@@ -205,43 +150,37 @@ inline void NetworkFlowProcessor::processExistingFlow(sinsp_evt* ev, ProcessObj*
       }
 }
 
-
-//static NFKey key;
-
 int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt* ev, OpFlags flag) {
     sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
     if (fdinfo == nullptr) {
       SF_DEBUG(m_logger,
                "Event: " << ev->get_name()
-                         << " doesn't have an fdinfo associated with it! ");
+                         << " doesn't have an fdinfo associated with it!");
       return 1;
     }
 
     if(!(fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket())) {
-        SF_ERROR(m_logger, "handleNetFlowEvent can only handle ip sockets, not file descriptor of type: " << fdinfo->get_typechar() << ". Ignoring..");
+        SF_ERROR(m_logger, "handleNetFlowEvent can only handle ip sockets, not file descriptor of type: " << fdinfo->get_typechar() << ". Ignoring...");
         return 1;
     }
 
     if(fdinfo->is_ipv6_socket()) {
-        SF_WARN(m_logger, "IPv6 is not supported in the current version of SysFlow.  Ignoring..");
+        SF_WARN(m_logger, "IPv6 is not supported in the current version of SysFlow. Ignoring...");
         return 1;
     }
     bool created = false;
     //calling get process is important because it ensures that the process object has been written to the
-    //sysflow file.   This is important for long running NetworkFlows that may span across files.
+    //sysflow file. This is important for long running NetworkFlows that may span across files.
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
     NetFlowObj *nf = nullptr;
 
-    //m_processCxt->printNetworkFlow(proc);
     sinsp_threadinfo* ti = ev->get_thread_info();
     static NFKey key = NFKey();
     canonicalizeKey(fdinfo, &key, ti->m_tid, ev->get_fd_num());
     SF_DEBUG(m_logger, "Key: " << key.ip1 << " " << key.ip2 << " " << key.port1 << " " << key.port2 << " " << key.tid << " " << key.fd );
     SF_DEBUG(m_logger, "Size of network flow table in process " << proc->netflows.size());
-    //NetworkFlowTable::iterator nfi;
     NetworkFlowTable::iterator nfi  = proc->netflows.find(key);
     SF_DEBUG(m_logger, "Key: " << key.ip1 << " " << key.ip2 << " " << key.port1 << " " << key.port2 << " " << key.tid << " " << key.fd );
-    //SF_DEBUG(m_logger, "Key: " << s_key.ip1 << " " << s_key.ip2 << " " << s_key.port1 << " " << s_key.port2 << " " << s_key.tid << " " << s_key.fd );
     if(nfi != proc->netflows.end()) {
          nf = nfi->second;
     }
@@ -289,7 +228,6 @@ void NetworkFlowProcessor::removeAndWriteRelatedFlows(ProcessObj* proc, NFKey* k
     }
 }
 
-
 int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj* proc, int64_t tid) {
     SF_DEBUG(m_logger, "CALLING removeAndWriteNFFromProc");
     int deleted = 0;
@@ -302,7 +240,7 @@ int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj* proc, int64_t tid
 		removeAndWriteRelatedFlows(proc, &k, nfi->second->netflow.endTs);
 	    }
             nfi->second->netflow.opFlags |= OP_TRUNCATE;
-            SF_DEBUG(m_logger,"Writing NETFLOW!!");
+            SF_DEBUG(m_logger,"Writing NETFLOW!");
             m_writer->writeNetFlow(&(nfi->second->netflow));
             NetFlowObj* nfo = nfi->second;
             proc->netflows.erase(nfi);
@@ -323,8 +261,6 @@ int NetworkFlowProcessor::removeNetworkFlowFromSet(NetFlowObj** nfo, bool delete
         for (auto iter = m_dfSet->find(*nfo); iter != m_dfSet->end(); iter++) {
           if ((*iter)->isNetworkFlow) {
             auto *foundObj = static_cast<NetFlowObj *>(*iter);
-            // cout << "Found: " << foundObj->netflow.procOID.createTS << " " <<
-            // foundObj->netflow.procOID.hpid << endl;
             if (*foundObj == **nfo) {
               SF_DEBUG(m_logger, "Removing netflow element from multiset.");
               m_dfSet->erase(iter);
@@ -355,7 +291,7 @@ void NetworkFlowProcessor::removeNetworkFlow(DataFlowObj* dfo) {
   // interval? nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
   // m_writer->writeNetFlow(&(nfo->netflow));
   canonicalizeKey(nfo, &key);
-  SF_DEBUG(m_logger, "Erasing network flow!!!");
+  SF_DEBUG(m_logger, "Erasing network flow");
   ProcessObj *proc = m_processCxt->getProcess(&(nfo->netflow.procOID));
   if (proc == nullptr) {
     SF_ERROR(m_logger, "Could not find proc " << nfo->netflow.procOID.hpid
@@ -372,7 +308,7 @@ void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj *dfo, time_t /*now*/) {
   nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
   m_processCxt->exportProcess(&(nfo->netflow.procOID));
   m_writer->writeNetFlow(&(nfo->netflow));
-  SF_DEBUG(m_logger, "Reupping network flow!!! ");
+  SF_DEBUG(m_logger, "Reupping network flow");
   nfo->netflow.ts = utils::getSysdigTime(m_cxt);
   nfo->netflow.endTs = 0;
   nfo->netflow.opFlags = 0;

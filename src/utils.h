@@ -27,28 +27,18 @@
 #include "avro/ValidSchema.hh"
 #include "avro/Compiler.hh"
 #pragma GCC diagnostic pop
-//#include "avro/DataFile.hh"
-//#include "avro/Encoder.hh"
-//#include "avro/Decoder.hh"
 #include "boost/any.hpp"
 #include "ghc/fs_std.hpp"
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include <ctime>
 #include <openssl/sha.h>
-/*
-#ifdef SYSPORTER_BOOST
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-#else 
-#include <filesystem>
-namespace fs = std::filesystem;
-#endif
-*/
+
 typedef boost::array<uint8_t, 20> FOID;
 using namespace std;
 using namespace sysflow;
 struct NFKey;
+
 namespace utils {
     string getUserName(SysFlowContext* cxt, uint32_t uid);
     string getGroupName(SysFlowContext* cxt, uint32_t gid);

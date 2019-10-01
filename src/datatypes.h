@@ -30,9 +30,8 @@
 
 using namespace std;
 using namespace sysflow;
-//typedef boost::array<uint8_t, 16> OID;
+
 struct NFKey {
-   //OID oid;
    uint64_t tid;
    uint32_t ip1;
    uint16_t port1;
@@ -53,13 +52,11 @@ class DataFlowObj {
 class NetFlowObj : public DataFlowObj {
     public:
        NetworkFlow netflow;
-       //NFKey nfkey;
        bool operator ==(const NetFlowObj& nfo) {
          if(exportTime != nfo.exportTime) {
             return false;
          }
 
-       //  cout << netflow.procOID.createTS << " " << nfo.netflow.procOID.createTS << " " << netflow.procOID.hpid <<  " " << nfo.netflow.procOID.hpid << endl;
          return (netflow.procOID.createTS == nfo.netflow.procOID.createTS && 
             netflow.procOID.hpid == nfo.netflow.procOID.hpid &&
             netflow.sip == nfo.netflow.sip &&
@@ -68,9 +65,6 @@ class NetFlowObj : public DataFlowObj {
             netflow.dport == nfo.netflow.dport &&
             netflow.proto == nfo.netflow.proto &&
             netflow.ts == nfo.netflow.ts && netflow.tid == nfo.netflow.tid && netflow.fd == nfo.netflow.fd);
-       // cout << "Result: " << result << endl;
-        //return result;
-      
       }
       NetFlowObj() : DataFlowObj(true) {
          
@@ -95,8 +89,6 @@ class FileFlowObj : public DataFlowObj  {
         }
 };
 
-
-
 // simple hash adapter for types without pointers
 template<typename T> 
 struct MurmurHasher {
@@ -107,14 +99,6 @@ struct MurmurHasher {
     }    
 };
 
-/*template<> 
-struct MurmurHasher<OID*> {
-    size_t operator()(const OID* t) const {
-        size_t hash;
-        MurmurHash3_x86_32(t->begin(), t->size(), 0, &hash);
-        return hash;
-    }    
-};*/
 template<> 
 struct MurmurHasher<OID*> {
     size_t operator()(const OID* t) const {
@@ -132,18 +116,10 @@ struct MurmurHasher<NFKey*> {
     }    
 };
 
-/*struct eqoid
-{
-  bool operator()(const OID* s1, const OID* s2) const
-  {
-    return (*s1 == *s2);
-  }
-};*/
 struct eqoidptr
 {
   bool operator()(const OID* s1, const OID* s2) const
   {
-    //cout << s1->hpid << " " << s2->hpid << " " << s1->createTS << " " << s2->createTS << " " << (s1->hpid == s2->hpid && s1->createTS == s2->createTS) << endl;
     return (s1->hpid == s2->hpid && s1->createTS == s2->createTS);
   }
 };
@@ -151,10 +127,10 @@ struct eqoid
 {
   bool operator()(const OID& s1, const OID& s2) const
   {
-    //cout << s1->hpid << " " << s2->hpid << " " << s1->createTS << " " << s2->createTS << " " << (s1->hpid == s2->hpid && s1->createTS == s2->createTS) << endl;
     return (s1.hpid == s2.hpid && s1.createTS == s2.createTS);
   }
 };
+
 // specialization for strings
 template<> 
 struct MurmurHasher<string> {
@@ -181,40 +157,18 @@ struct MurmurHasher<NFKey> {
         return hash;
     }    
 };
+
 struct eqnfkey {
   bool operator()(const NFKey& n1, const NFKey& n2) const {
-   /* cout << "Comparing " <<  n1.ip1 << " " << n2.ip1 << " "
-         << n1.ip2 << " " << n2.ip2 << " "
-         << n1.port1 << " " << n2.port1 << " "
-         << n1.port2 << " " << n2.port2 << " "
-         << n1.tid << " " << n2.tid << " "
-         << n1.fd << " " << n2.fd << endl;*/
     return (n1.ip1 == n2.ip1 && n1.ip2 == n2.ip2 && 
            n1.port1 == n2.port1 && n1.port2 == n2.port2 && n1.tid == n2.tid && n1.fd == n2.fd);
-           //&& n1.oid.hpid == n2.oid.hpid && n1.oid.createTS == n2.oid.createTS);
   }
 };
-/*
-struct eqnfkey {
-  bool operator()(const NFKey* n1, const NFKey* n2) const {
-    cout << "Comparing " <<  n1->ip1 << " " << n2->ip1 << " "
-         << n1->ip2 << " " << n2->ip2 << " "
-         << n1->port1 << " " << n2->port1 << " "
-         << n1->port2 << " " << n2->port2 << " "
-         << n1->tid << " " << n2->tid << " "
-         << n1->fd << " " << n2->fd << endl;
-    return (n1->ip1 == n2->ip1 && n1->ip2 == n2->ip2 && 
-           n1->port1 == n2->port1 && n1->port2 == n2->port2 && n1->tid == n2->tid && n1->fd == n2->fd);
-           //&& n1.oid.hpid == n2.oid.hpid && n1.oid.createTS == n2.oid.createTS);
-  }
-};*/
 
 struct eqdfobj {
   bool operator()(const DataFlowObj* df1, const DataFlowObj* df2) const {
       return (df1->exportTime < df2->exportTime);  
  }
-
-
 };
 
 class FileObj {
@@ -234,16 +188,13 @@ class ContainerObj {
       ContainerObj() {}
 };
 
-
 typedef google::dense_hash_map<int, string> ParameterMapping;
 typedef google::dense_hash_map<string, ContainerObj*, MurmurHasher<string>, eqstr> ContainerTable;
-//typedef google::dense_hash_map<OID*, ProcessFlow*, MurmurHasher<OID*>, eqoid> ProcessFlowTable;
 typedef google::dense_hash_map<NFKey, NetFlowObj*, MurmurHasher<NFKey>, eqnfkey> NetworkFlowTable;
 typedef google::dense_hash_map<string, FileFlowObj*, MurmurHasher<string>, eqstr> FileFlowTable;
 typedef google::dense_hash_map<string, FileObj*, MurmurHasher<string>, eqstr> FileTable;
 typedef google::dense_hash_map<OID, NetworkFlowTable*,MurmurHasher<OID>, eqoid> OIDNetworkTable;
 typedef google::dense_hash_set<OID, MurmurHasher<OID>, eqoid> ProcessSet;
-//typedef multiset<NetFlowObj*, eqnfobj>  NetworkFlowSet;
 typedef multiset<DataFlowObj*, eqdfobj>  DataFlowSet;
 
 class ProcessObj {

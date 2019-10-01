@@ -32,7 +32,6 @@ DataFlowProcessor::DataFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer,
 }
 
 DataFlowProcessor::~DataFlowProcessor() {
-   //clearTables();
    if (m_netflowPrcr != nullptr) {
      delete m_netflowPrcr;
    }
@@ -44,12 +43,8 @@ DataFlowProcessor::~DataFlowProcessor() {
    }
 }
 
-
 int DataFlowProcessor::handleDataEvent(sinsp_evt* ev, OpFlags flag) {
     sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
-   // if(fdinfo == NULL && ev->get_type() == PPME_SYSCALL_SELECT_X) {
-   //   return 0;
-   //}
 
     if (fdinfo == nullptr) {
       SF_DEBUG(
@@ -60,27 +55,6 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt* ev, OpFlags flag) {
       if (IS_FILE_EVT(flag)) {
         return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
       } else if (flag == OP_MMAP) {
-        /*sinsp_threadinfo* ti = ev->get_thread_info();
-        for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
-            string name = ev->get_param_name(i);
-            const ppm_param_info* param = ev->get_param_info(i);
-            const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
-            SF_DEBUG(m_logger, name  << " " <<
-        ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " <<
-        (uint32_t)param->ninfo);
-        }
-        const sinsp_evt_param* p = ev->get_param_value_raw("fd");
-        if(p != NULL) {
-            int64_t fd = *(int64_t *)p->m_val;
-            if(fd > 0) {
-                fdinfo = ti->get_fd(fd);
-                bool isfdnull = (fdinfo == NULL);
-                // string name = fdinfo->m_name;
-                string name = fdinfo->m_name;
-                SF_DEBUG(m_logger, " MMAP FD: " << fd << " " << isfdnull << " "
-        << fdinfo->get_typechar() << " " << name );
-            }
-        }*/
         return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
       }
       if (fdinfo == nullptr) {
@@ -99,26 +73,25 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt* ev, OpFlags flag) {
 }
 
 int DataFlowProcessor::removeAndWriteDFFromProc(ProcessObj* proc, int64_t tid) {
-   int total = m_fileflowPrcr->removeAndWriteFFFromProc(proc, tid);
-   return (total + m_netflowPrcr->removeAndWriteNFFromProc(proc, tid));
+    int total = m_fileflowPrcr->removeAndWriteFFFromProc(proc, tid);
+    return (total + m_netflowPrcr->removeAndWriteNFFromProc(proc, tid));
 }
 
-
 int DataFlowProcessor::checkForExpiredRecords() {
-     time_t now = utils::getCurrentTime(m_cxt);
-     if(m_lastCheck == 0) {
-        m_lastCheck = now;
-        return 0;
-     }
-     if(difftime(now, m_lastCheck) < 1.0) {
-        return 0;
-     }
-     m_lastCheck = now;
-     int i = 0;
-     SF_DEBUG(m_logger, "Checking expired Flows!!!....");
-     for (auto it = m_dfSet.begin(); it != m_dfSet.end();) {
-       SF_DEBUG(m_logger, "Checking flow with exportTime: " << (*it)->exportTime
-                                                            << " Now: " << now);
+    time_t now = utils::getCurrentTime(m_cxt);
+    if(m_lastCheck == 0) {
+       m_lastCheck = now;
+       return 0;
+    }
+    if(difftime(now, m_lastCheck) < 1.0) {
+       return 0;
+    }
+    m_lastCheck = now;
+    int i = 0;
+    SF_DEBUG(m_logger, "Checking expired Flows!!!....");
+    for (auto it = m_dfSet.begin(); it != m_dfSet.end();) {
+      SF_DEBUG(m_logger, "Checking flow with exportTime: " << (*it)->exportTime
+                                                           << " Now: " << now);
        if ((*it)->exportTime <= now) {
          SF_DEBUG(m_logger, "Exporting flow!!! ");
          if (difftime(now, (*it)->lastUpdate) >= m_cxt->getNFExpireInterval()) {
@@ -143,6 +116,6 @@ int DataFlowProcessor::checkForExpiredRecords() {
        } else {
          break;
        }
-     }
-     return i;
+    }
+    return i;
 }

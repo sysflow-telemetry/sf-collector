@@ -1,6 +1,3 @@
-#include "filecontext.h"
-
-#include <utility>
 /** Copyright (C) 2019 IBM Corporation.
  *
  * Authors:
@@ -20,6 +17,9 @@
  * limitations under the License.
  **/
 
+#include "filecontext.h"
+#include <utility>
+
 using namespace file;
 
 FileContext::FileContext(container::ContainerContext* containerCxt, SysFlowWriter* writer) {
@@ -32,7 +32,6 @@ FileContext::FileContext(container::ContainerContext* containerCxt, SysFlowWrite
 FileContext::~FileContext() {
     clearAllFiles();
 }
-
 
 FileObj* FileContext::createFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, string key) {
   auto *f = new FileObj();
@@ -57,7 +56,6 @@ FileObj* FileContext::getFile(sinsp_evt* ev, SFObjectState state, bool& created)
 FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,
                               SFObjectState state, bool &created) {
   sinsp_threadinfo *ti = ev->get_thread_info();
-  // sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
   created = true;
   string key = ti->m_container_id + path;
   FileTable::iterator f = m_files.find(key);

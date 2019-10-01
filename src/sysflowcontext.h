@@ -53,11 +53,8 @@ class SysFlowContext {
       uint64_t timeStamp{};
       string getExporterID();
       inline bool isOffline() { return m_offline; }
-
       inline sinsp *getInspector() { return m_inspector; }
-
       inline int getNFExportInterval() { return m_nfExportInterval; }
-
       inline int getNFExpireInterval() { return m_nfExpireInterval; }
       inline string getOutputFile() { return m_outputFile; }
       inline string getScapFile() { return m_scapFile; }
