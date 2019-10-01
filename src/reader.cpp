@@ -18,12 +18,12 @@
 **/
 
 #define __STDC_FORMAT_MACROS
+#include "sysflow.h"
+#include <cstdio>
 #include <fstream>
-#include <stdio.h>
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include "sysflow.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "avro/ValidSchema.hh"
@@ -32,10 +32,10 @@
 #include "avro/Encoder.hh"
 #include "avro/Decoder.hh"
 #pragma GCC diagnostic pop
-#include <arpa/inet.h>
-#include "op_flags.h"
 #include "datatypes.h"
-#include <time.h>
+#include "op_flags.h"
+#include <arpa/inet.h>
+#include <ctime>
 #define BUFFERSIZE 20
 //#include "b64/encode.h"
 using namespace std;
@@ -97,9 +97,9 @@ void printFileFlow(FileFlow fileflow) {
     opFlags +=  ((fileflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
     opFlags +=  ((fileflow.opFlags & OP_DIGEST) ?  "D" : " ");
 
-    time_t startTs = ((time_t)(fileflow.ts/NANO_TO_SECS));
+    time_t startTs = (static_cast<time_t>(fileflow.ts / NANO_TO_SECS));
     //time_t endTs = (!fileflow.endTs.is_null()) ? ((time_t)(fileflow.endTs.get_long()/NANO_TO_SECS)) : 0;
-    time_t endTs = ((time_t)(fileflow.endTs/NANO_TO_SECS));
+    time_t endTs = (static_cast<time_t>(fileflow.endTs / NANO_TO_SECS));
     char startTime[100];
     char endTime[100];
     strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
@@ -143,7 +143,7 @@ void printFileEvent(FileEvent fileEvt) {
     opFlags +=  ((fileEvt.opFlags & OP_SYMLINK) ?  "SYMLINK" : " ");
     opFlags +=  ((fileEvt.opFlags & OP_UNLINK) ?  "UNLINK" : " ");
     opFlags +=  ((fileEvt.opFlags & OP_RENAME) ?  "RENAME" : " ");
-    time_t startTs = ((time_t)(fileEvt.ts/NANO_TO_SECS));
+    time_t startTs = (static_cast<time_t>(fileEvt.ts / NANO_TO_SECS));
     //time_t endTs = (!fileflow.endTs.is_null()) ? ((time_t)(fileflow.endTs.get_long()/NANO_TO_SECS)) : 0;
     char startTime[100];
     strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
@@ -173,7 +173,11 @@ void printFileEvent(FileEvent fileEvt) {
                   container = it->second->containerId.get_string();
        }
        //cout << netflow.sip << "\t" << netflow.dip << endl;
-       cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " << startTime  << " " <<  opFlags << " Resource: " << (char)fi->second->restype << " PATH: " << fi->second->path <<  " TID: " << fileEvt.tid <<  " " <<  it->second->exe << " " << it->second->exeArgs;
+       cout << it->second->exe << " " << container << " "
+            << it->second->oid.hpid << " " << startTime << " " << opFlags
+            << " Resource: " << static_cast<char>(fi->second->restype)
+            << " PATH: " << fi->second->path << " TID: " << fileEvt.tid << " "
+            << it->second->exe << " " << it->second->exeArgs;
        if(!fileEvt.newFileOID.is_null()) {
           FOID newFileOID = fileEvt.newFileOID.get_FOID();
           string key2(newFileOID.begin(), newFileOID.end());
@@ -191,32 +195,40 @@ void printFileEvent(FileEvent fileEvt) {
 
 
 void printNetFlow(NetworkFlow netflow) {
-    struct in_addr srcIP;
-    struct in_addr dstIP;
-    srcIP.s_addr = netflow.sip;
-    dstIP.s_addr = netflow.dip;
-    string opFlags = "";
-    opFlags +=  ((netflow.opFlags & OP_ACCEPT) ?  "A" : " ");
-    opFlags +=  ((netflow.opFlags & OP_CONNECT) ?  "C" : " ");
-    opFlags +=  ((netflow.opFlags & OP_WRITE_SEND) ?  "S" : " ");
-    opFlags +=  ((netflow.opFlags & OP_READ_RECV) ?  "R" : " ");
-    opFlags +=  ((netflow.opFlags & OP_CLOSE) ?  "C" : " ");
-    opFlags +=  ((netflow.opFlags & OP_TRUNCATE) ?  "T" : " ");
-    opFlags +=  ((netflow.opFlags & OP_DIGEST) ?  "D" : " ");
+  struct in_addr srcIP {};
+  struct in_addr dstIP {};
+  srcIP.s_addr = netflow.sip;
+  dstIP.s_addr = netflow.dip;
+  string opFlags = "";
+  opFlags += ((netflow.opFlags & OP_ACCEPT) ? "A" : " ");
+  opFlags += ((netflow.opFlags & OP_CONNECT) ? "C" : " ");
+  opFlags += ((netflow.opFlags & OP_WRITE_SEND) ? "S" : " ");
+  opFlags += ((netflow.opFlags & OP_READ_RECV) ? "R" : " ");
+  opFlags += ((netflow.opFlags & OP_CLOSE) ? "C" : " ");
+  opFlags += ((netflow.opFlags & OP_TRUNCATE) ? "T" : " ");
+  opFlags += ((netflow.opFlags & OP_DIGEST) ? "D" : " ");
 
-    string srcIPStr = string(inet_ntoa(srcIP));
-    string dstIPStr = string(inet_ntoa(dstIP));
-    time_t startTs = ((time_t)(netflow.ts/NANO_TO_SECS));
-    time_t endTs = ((time_t)(netflow.endTs/NANO_TO_SECS));
-    char startTime[100];
-    char endTime[100];
-    strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
-     strftime(endTime, 99, "%x %X %Z", localtime(&endTs));
+  string srcIPStr = string(inet_ntoa(srcIP));
+  string dstIPStr = string(inet_ntoa(dstIP));
+  time_t startTs = (static_cast<time_t>(netflow.ts / NANO_TO_SECS));
+  time_t endTs = (static_cast<time_t>(netflow.endTs / NANO_TO_SECS));
+  char startTime[100];
+  char endTime[100];
+  strftime(startTime, 99, "%x %X %Z", localtime(&startTs));
+  strftime(endTime, 99, "%x %X %Z", localtime(&endTs));
 
-   PTable::iterator it = s_procs.find(&(netflow.procOID));
-   if(it == s_procs.end()) {
-       cout << "Uh Oh! Can't find process for netflow!! " << endl;
-       cout << "NETFLOW " << startTime << " " << endTime << " " <<  opFlags <<  " TID: " << netflow.tid <<  " SIP: " << srcIPStr << " " << " DIP: " << dstIPStr << " SPORT: " << netflow.sport << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto << " WBytes: " << netflow.numWSendBytes << " RBytes: " << netflow.numRRecvBytes << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS <<  endl;
+  PTable::iterator it = s_procs.find(&(netflow.procOID));
+  if (it == s_procs.end()) {
+    cout << "Uh Oh! Can't find process for netflow!! " << endl;
+    cout << "NETFLOW " << startTime << " " << endTime << " " << opFlags
+         << " TID: " << netflow.tid << " SIP: " << srcIPStr << " "
+         << " DIP: " << dstIPStr << " SPORT: " << netflow.sport
+         << " DPORT: " << netflow.dport << " PROTO: " << netflow.proto
+         << " WBytes: " << netflow.numWSendBytes
+         << " RBytes: " << netflow.numRRecvBytes
+         << " WOps: " << netflow.numWSendOps << " ROps: " << netflow.numRRecvOps
+         << " " << netflow.procOID.hpid << " " << netflow.procOID.createTS
+         << endl;
   } else {
        string container = "";
        if(!it->second->containerId.is_null()) {
@@ -228,48 +240,45 @@ void printNetFlow(NetworkFlow netflow) {
  }
 }
 
-sysflow::File* createFile(sysflow::File file) {
-   sysflow::File* f = new sysflow::File();
-   f->state = file.state;
-   f->ts = file.ts;
-   f->restype = file.restype;
-   f->path = file.path;
-   if(!file.containerId.is_null()) {
-       f->containerId.set_string(file.containerId.get_string());
-    }else {
-       f->containerId.set_null();
-    }
-    return f;
+sysflow::File *createFile(const sysflow::File &file) {
+  auto *f = new sysflow::File();
+  f->state = file.state;
+  f->ts = file.ts;
+  f->restype = file.restype;
+  f->path = file.path;
+  if (!file.containerId.is_null()) {
+    f->containerId.set_string(file.containerId.get_string());
+  } else {
+    f->containerId.set_null();
+  }
+  return f;
 }
 
+Process *createProcess(const Process &proc) {
+  auto *p = new Process();
+  p->state = proc.state;
+  p->ts = proc.ts;
+  p->oid.hpid = proc.oid.hpid;
+  p->oid.createTS = proc.oid.createTS;
 
-Process*  createProcess(Process proc) {
-   Process* p = new Process();
-   p->state = proc.state;
-   p->ts = proc.ts;
-   p->oid.hpid = proc.oid.hpid;
-   p->oid.createTS = proc.oid.createTS;
-
-   if(!proc.poid.is_null()) {
-       OID poid = proc.poid.get_OID();
-       p->poid.set_OID(poid);
-   }
-   p->exe = proc.exe;
-   p->exeArgs = proc.exeArgs;
-   /*int i = 0;
-   for(std::vector<string>::iterator it = mainthread->m_args.begin(); it != mainthread->m_args.end(); ++it) {
-       if (i == 0) {
-           proc->exeArgs += *it;
-       }else {
-           proc->exeArgs +=  " " + *it;
-       }
-       i++;
-   }*/
-   //cout << "Wrote exe args" << endl;
-    p->uid = proc.uid;
-    p->gid = proc.gid;
-   //cout << "Wrote gid/uid " << ti->m_uid << endl;
-   p->userName = proc.userName;
+  if (!proc.poid.is_null()) {
+    OID poid = proc.poid.get_OID();
+    p->poid.set_OID(poid);
+  }
+  p->exe = proc.exe;
+  p->exeArgs = proc.exeArgs;
+  /*int i = 0;
+  for(std::vector<string>::iterator it = mainthread->m_args.begin(); it !=
+  mainthread->m_args.end(); ++it) { if (i == 0) { proc->exeArgs += *it; }else {
+          proc->exeArgs +=  " " + *it;
+      }
+      i++;
+  }*/
+  // cout << "Wrote exe args" << endl;
+  p->uid = proc.uid;
+  p->gid = proc.gid;
+  // cout << "Wrote gid/uid " << ti->m_uid << endl;
+  p->userName = proc.userName;
   // cout << "Wrote username" << endl;
     p->groupName = proc.groupName;
     if(!proc.containerId.is_null()) {
@@ -283,153 +292,157 @@ Process*  createProcess(Process proc) {
     }*/
     //proc->childCount = mainthread->m_nchilds;
     return p;
-
 }
 
-
-
-int runEventLoop(string sysFile, string schemaFile) {
-	int32_t res;
-	cout << "Loading sys file " << sysFile << endl;
-       // avro::EncoderPtr encoder;
-        //avro::EncoderPtr encoder = createEncoder(outputFile);
-        //std::auto_ptr<avro::OutputStream> out = avro::fileOutputStream(outputFile.c_str());
-        //avro::EncoderPtr encoder = avro::binaryEncoder();
-        //encoder->init(*out);
-        avro::ValidSchema sysfSchema = loadSchema(schemaFile.c_str());
-        avro::DataFileReader<SysFlow> dfr(sysFile.c_str(), sysfSchema);
-        int i = 0;
-        while (dfr.read(flow)) {
-            switch(flow.rec.idx()) {
-              case HEADER:
-              {
-                  header = flow.rec.get_SFHeader();
-                  cout << "Version: " << header.version  << " Exporter: " << header.exporter << endl;
-                  break;
-              }
-              case PROC:
-              {
-                 proc = flow.rec.get_Process();
-                 if(!s_quiet) {
-		     cout << "PROC " << proc.oid.hpid << " " << proc.oid.createTS << " " <<   proc.ts << " " << proc.state << " " << proc.exe << " " <<  proc.exeArgs << " " << proc.oid.hpid << " " <<  proc.userName << " " << proc.oid.createTS << " TTY: " << proc.tty;
-                     if(!proc.poid.is_null()) {
-                         cout << " Parent: " << proc.poid.get_OID().hpid << " " << proc.poid.get_OID().createTS;
-                     }
-                     if(!proc.containerId.is_null()) {
-		         cout << " Container ID: " << proc.containerId.get_string() << endl;
-                     }else {
-                         cout << endl;
-                     }
-                 }
-                 PTable::iterator it = s_procs.find(&(proc.oid));
-                 if(it != s_procs.end() && proc.state != SFObjectState::MODIFIED) {
-                     cout << "Uh oh! Process " << it->second->exe << " already in the process table PID: " << it->second->oid.hpid << " Create TS: " << it->second->oid.createTS << endl;
-                 }else {
-                     Process* p = createProcess(proc);
-                     //cout << "Adding process " << proc.oid.hpid << " " << proc.oid.createTS << " to table " << endl;
-                     //cout << "Copied process " << p->oid.hpid << " " << p->oid.createTS << " to table " << endl;
-                     if(it != s_procs.end()) {
-                         Process* oldP = it->second;
-                         s_procs.erase(&(oldP->oid));
-                         delete oldP;
-                     }
-                     s_procs[&(p->oid)] = p;
-                     //cout << "Number procs in hashtable: " << s_procs.size() << endl;
-                 }
-          
-
-                 //cout << string(proc.oid.begin(), proc.oid.end());
-                 break;
-              }
-              case FILE_:
-              {
-                  file = flow.rec.get_File();
-                  sysflow::File* f = createFile(file);
-                  string key(file.oid.begin(), file.oid.end());
-                  FTable::iterator it = s_files.find(key);
-                  cout << "FILE: " << f->path << " " << f->ts << " " << f->state << " " << (char)f->restype <<  endl;
-                  //std::cout.write(&file.oid[0], 20);
-                  if(it != s_files.end()) {
-                      cout << "Uh oh!  File:  " << f->path << " already exists in the sysflow file" << endl;
-                  }
-                  s_files[key] = f;
-                  break;
-              }
-              case PROC_EVT:
-              {
-		procevt = flow.rec.get_ProcessEvent();
-                time_t timestamp = ((time_t)(procevt.ts/NANO_TO_SECS));
-                char times[100];
-                strftime(times, 99, "%x %X %Z", localtime(&timestamp));
-                PTable::iterator it = s_procs.find(&(procevt.procOID));
-                if(it == s_procs.end()) {
-                   cout << "Can't find process for process flow!  shouldn't happen!!" << endl;
-                   cout << "PROC_EVT " << times << " " << " TID: " << procevt.tid << Events[procevt.opFlags] << " " <<  " " << procevt.ret << " OID: " << procevt.procOID.hpid << " " << procevt.procOID.createTS << endl;
-                }  else {
-                   
-                   string container = "";
-                  if(!it->second->containerId.is_null()) {
-                       container = it->second->containerId.get_string();
-                  }
-           
-                   cout << it->second->exe << " " << container << " " << it->second->oid.hpid << " " <<  times << " " << " TID: " << procevt.tid << " " << Events[procevt.opFlags] << " " <<  " " << procevt.ret <<  " " << procevt.procOID.createTS << " " <<  it->second->exe << " " << it->second->exeArgs ;
-                   if(procevt.args.empty()) {
-                       cout << endl;
-                   } else {
-                       cout << " " << procevt.args.back() << endl;
-
-                   }
-
-                }
-               if(!s_keepProcOnExit && procevt.opFlags == OP_EXIT) { // exit
-                   if(it != s_procs.end()) {
-                        if(it->second->oid.hpid == procevt.tid) {
-                            delete it->second;
-                            s_procs.erase(&(procevt.procOID));
-                        }
-                   }
-                }
-
-                break;
-              }
-              case CONT: 
-              {
-                cont = flow.rec.get_Container();
-                if(!s_quiet) {
-		    cout << "CONT Name: " << cont.name << " ID: " << cont.id << " Image: " << cont.image << " Image ID: " << cont.imageid << " Type: " << cont.type << "Privileged:" << cont.privileged << endl;
-                }
-		break;
-              }
-              case NET_FLOW:
-              {
-                  netflow = flow.rec.get_NetworkFlow();
-                  printNetFlow(netflow);
-                  break;
-              }
-              case FILE_FLOW:
-              {
-                  fileflow = flow.rec.get_FileFlow();
-                  printFileFlow(fileflow);
-                  break;
-              }
-              case FILE_EVT:
-              {
-                  fileevt = flow.rec.get_FileEvent();
-                  printFileEvent(fileevt);
-                  break;
-              }
-              default:
-              {
-                cout << "No sysflow union type has object mapping to index " << flow.rec.idx() << endl;
-              }
-            }
-            i++;
+int runEventLoop(const string &sysFile, const string &schemaFile) {
+  cout << "Loading sys file " << sysFile << endl;
+  // avro::EncoderPtr encoder;
+  // avro::EncoderPtr encoder = createEncoder(outputFile);
+  // std::auto_ptr<avro::OutputStream> out =
+  // avro::fileOutputStream(outputFile.c_str()); avro::EncoderPtr encoder =
+  // avro::binaryEncoder(); encoder->init(*out);
+  avro::ValidSchema sysfSchema = loadSchema(schemaFile.c_str());
+  avro::DataFileReader<SysFlow> dfr(sysFile.c_str(), sysfSchema);
+  int i = 0;
+  while (dfr.read(flow)) {
+    switch (flow.rec.idx()) {
+    case HEADER: {
+      header = flow.rec.get_SFHeader();
+      cout << "Version: " << header.version << " Exporter: " << header.exporter
+           << endl;
+      break;
+    }
+    case PROC: {
+      proc = flow.rec.get_Process();
+      if (!s_quiet) {
+        cout << "PROC " << proc.oid.hpid << " " << proc.oid.createTS << " "
+             << proc.ts << " " << proc.state << " " << proc.exe << " "
+             << proc.exeArgs << " " << proc.oid.hpid << " " << proc.userName
+             << " " << proc.oid.createTS << " TTY: " << proc.tty;
+        if (!proc.poid.is_null()) {
+          cout << " Parent: " << proc.poid.get_OID().hpid << " "
+               << proc.poid.get_OID().createTS;
         }
-	cout << "Number of records: " << i << endl;
-	return 0;
+        if (!proc.containerId.is_null()) {
+          cout << " Container ID: " << proc.containerId.get_string() << endl;
+        } else {
+          cout << endl;
+        }
+      }
+      PTable::iterator it = s_procs.find(&(proc.oid));
+      if (it != s_procs.end() && proc.state != SFObjectState::MODIFIED) {
+        cout << "Uh oh! Process " << it->second->exe
+             << " already in the process table PID: " << it->second->oid.hpid
+             << " Create TS: " << it->second->oid.createTS << endl;
+      } else {
+        Process *p = createProcess(proc);
+        // cout << "Adding process " << proc.oid.hpid << " " <<
+        // proc.oid.createTS << " to table " << endl; cout << "Copied process "
+        // << p->oid.hpid << " " << p->oid.createTS << " to table " << endl;
+        if (it != s_procs.end()) {
+          Process *oldP = it->second;
+          s_procs.erase(&(oldP->oid));
+          delete oldP;
+        }
+        s_procs[&(p->oid)] = p;
+        // cout << "Number procs in hashtable: " << s_procs.size() << endl;
+      }
+
+      // cout << string(proc.oid.begin(), proc.oid.end());
+      break;
+    }
+    case FILE_: {
+      file = flow.rec.get_File();
+      sysflow::File *f = createFile(file);
+      string key(file.oid.begin(), file.oid.end());
+      FTable::iterator it = s_files.find(key);
+      cout << "FILE: " << f->path << " " << f->ts << " " << f->state << " "
+           << static_cast<char>(f->restype) << endl;
+      // std::cout.write(&file.oid[0], 20);
+      if (it != s_files.end()) {
+        cout << "Uh oh!  File:  " << f->path
+             << " already exists in the sysflow file" << endl;
+      }
+      s_files[key] = f;
+      break;
+    }
+    case PROC_EVT: {
+      procevt = flow.rec.get_ProcessEvent();
+      time_t timestamp = (static_cast<time_t>(procevt.ts / NANO_TO_SECS));
+      char times[100];
+      strftime(times, 99, "%x %X %Z", localtime(&timestamp));
+      PTable::iterator it = s_procs.find(&(procevt.procOID));
+      if (it == s_procs.end()) {
+        cout << "Can't find process for process flow!  shouldn't happen!!"
+             << endl;
+        cout << "PROC_EVT " << times << " "
+             << " TID: " << procevt.tid << Events[procevt.opFlags] << " "
+             << " " << procevt.ret << " OID: " << procevt.procOID.hpid << " "
+             << procevt.procOID.createTS << endl;
+      } else {
+
+        string container = "";
+        if (!it->second->containerId.is_null()) {
+          container = it->second->containerId.get_string();
+        }
+
+        cout << it->second->exe << " " << container << " "
+             << it->second->oid.hpid << " " << times << " "
+             << " TID: " << procevt.tid << " " << Events[procevt.opFlags] << " "
+             << " " << procevt.ret << " " << procevt.procOID.createTS << " "
+             << it->second->exe << " " << it->second->exeArgs;
+        if (procevt.args.empty()) {
+          cout << endl;
+        } else {
+          cout << " " << procevt.args.back() << endl;
+        }
+      }
+      if (!s_keepProcOnExit && procevt.opFlags == OP_EXIT) { // exit
+        if (it != s_procs.end()) {
+          if (it->second->oid.hpid == procevt.tid) {
+            delete it->second;
+            s_procs.erase(&(procevt.procOID));
+          }
+        }
+      }
+
+      break;
+    }
+    case CONT: {
+      cont = flow.rec.get_Container();
+      if (!s_quiet) {
+        cout << "CONT Name: " << cont.name << " ID: " << cont.id
+             << " Image: " << cont.image << " Image ID: " << cont.imageid
+             << " Type: " << cont.type << "Privileged:" << cont.privileged
+             << endl;
+      }
+      break;
+    }
+    case NET_FLOW: {
+      netflow = flow.rec.get_NetworkFlow();
+      printNetFlow(netflow);
+      break;
+    }
+    case FILE_FLOW: {
+      fileflow = flow.rec.get_FileFlow();
+      printFileFlow(fileflow);
+      break;
+    }
+    case FILE_EVT: {
+      fileevt = flow.rec.get_FileEvent();
+      printFileEvent(fileevt);
+      break;
+    }
+    default: {
+      cout << "No sysflow union type has object mapping to index "
+           << flow.rec.idx() << endl;
+    }
+    }
+    i++;
+  }
+  cout << "Number of records: " << i << endl;
+  return 0;
 }
-
-
 
 int main( int argc, char** argv )
 {
@@ -463,15 +476,18 @@ int main( int argc, char** argv )
                                s_keepProcOnExit = true;
                                break;
       			case '?':
-        			if (optopt == 'r' || optopt == 'm')
-          				fprintf (stderr, "Option -%c requires an argument.\n", optopt);
-        			else if (isprint (optopt))
-          				fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-        			else
-          				fprintf (stderr,
-                   			"Unknown option character `\\x%x'.\n",
-                   			optopt);
-        			return 1;
+                          if (optopt == 'r' || optopt == 'm') {
+                            fprintf(stderr,
+                                    "Option -%c requires an argument.\n",
+                                    optopt);
+                          } else if (isprint(optopt)) {
+                            fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+                          } else {
+                            fprintf(stderr,
+                                    "Unknown option character `\\x%x'.\n",
+                                    optopt);
+                          }
+                                return 1;
       			default:
         			abort ();
       		}

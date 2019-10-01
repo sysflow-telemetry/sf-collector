@@ -19,18 +19,18 @@
 
 #include "sysflowwriter.h"
 
-SysFlowWriter::SysFlowWriter(SysFlowContext* cxt, time_t start) : m_dfw(NULL), m_start(start) {
-   m_cxt = cxt;
-   m_sysfSchema  = utils::loadSchema(m_cxt->getSchemaFile());
-   m_start = start;
+SysFlowWriter::SysFlowWriter(SysFlowContext *cxt, time_t start)
+    : m_dfw(nullptr), m_start(start) {
+  m_cxt = cxt;
+  m_sysfSchema = utils::loadSchema(m_cxt->getSchemaFile());
+  m_start = start;
 }
 
-
 SysFlowWriter::~SysFlowWriter() {
-   if(m_dfw != NULL) {
-      m_dfw->close();
-      delete m_dfw;
-   }
+  if (m_dfw != nullptr) {
+    m_dfw->close();
+    delete m_dfw;
+  }
 }
 
 void SysFlowWriter::writeHeader() {
@@ -47,11 +47,13 @@ void SysFlowWriter::writeHeader() {
 }
 
 int SysFlowWriter::initialize() {
-    time_t curTime = time(NULL);
-    string ofile = getFileName(curTime);
-    m_dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), m_sysfSchema, COMPRESS_BLOCK_SIZE, avro::Codec::DEFLATE_CODEC); 
-    writeHeader();
-    return 0;
+  time_t curTime = time(nullptr);
+  string ofile = getFileName(curTime);
+  m_dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), m_sysfSchema,
+                                            COMPRESS_BLOCK_SIZE,
+                                            avro::Codec::DEFLATE_CODEC);
+  writeHeader();
+  return 0;
 }
 
 string SysFlowWriter::getFileName(time_t curTime) {

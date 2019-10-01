@@ -48,6 +48,6 @@ namespace dataflow {
             int checkForExpiredRecords();
             int removeAndWriteDFFromProc(ProcessObj* proc, int64_t tid);
     };
-}
+    } // namespace dataflow
 
 #endif

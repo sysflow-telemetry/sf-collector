@@ -27,9 +27,7 @@ ProcessEventProcessor::ProcessEventProcessor(SysFlowWriter* writer, process::Pro
     m_dfPrcr = dfPrcr;
 }
 
-ProcessEventProcessor::~ProcessEventProcessor() {
-
-}
+ProcessEventProcessor::~ProcessEventProcessor() = default;
 
 void ProcessEventProcessor::setUID(sinsp_evt* ev) {
 /*    for(uint32_t i = 0; i < ev->get_num_params(); i ++) {

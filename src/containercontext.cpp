@@ -35,63 +35,61 @@ ContainerObj*  ContainerContext::createContainer(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     
     if(ti->m_container_id.empty()) {
-        return NULL;
+      return nullptr;
     }
 
     sinsp_container_info* container = m_cxt->getInspector()->m_container_manager.get_container(ti->m_container_id);
-    if(container == NULL) {
-       return NULL;
+    if (container == nullptr) {
+      return nullptr;
     }
-    ContainerObj* cont = new ContainerObj();
+    auto *cont = new ContainerObj();
     cont->cont.name = container->m_name;
     cont->cont.image = container->m_image + "/" + container->m_imagetag;
     cont->cont.id = container->m_id;
     cont->cont.imageid = container->m_imageid;
-    cont->cont.type = (ContainerType)container->m_type;
+    cont->cont.type = static_cast<ContainerType>(container->m_type);
     cont->cont.privileged = container->m_privileged;
     return cont;
 }
 
-
-ContainerObj* ContainerContext::getContainer(string id) {
-    ContainerTable::iterator cont = m_containers.find(id);
-    if(cont != m_containers.end()) {
-          return cont->second;
-    }
-    return NULL;
+ContainerObj *ContainerContext::getContainer(const string &id) {
+  ContainerTable::iterator cont = m_containers.find(id);
+  if (cont != m_containers.end()) {
+    return cont->second;
+  }
+  return nullptr;
 }
 
-bool ContainerContext::exportContainer(string id) {
-    bool exprt = false;
-    ContainerTable::iterator cont = m_containers.find(id);
-    if(cont != m_containers.end()) {
-        if(!cont->second->written) {
-            m_writer->writeContainer(&(cont->second->cont));
-            cont->second->written = true;
-            exprt = true;
-       }
+bool ContainerContext::exportContainer(const string &id) {
+  bool exprt = false;
+  ContainerTable::iterator cont = m_containers.find(id);
+  if (cont != m_containers.end()) {
+    if (!cont->second->written) {
+      m_writer->writeContainer(&(cont->second->cont));
+      cont->second->written = true;
+      exprt = true;
     }
-    return exprt;
+  }
+  return exprt;
 }
 
-int ContainerContext::derefContainer(string id) {
-    int result = 0;
-    ContainerTable::iterator cont = m_containers.find(id);
-    if(cont != m_containers.end()) {
-          cont->second->refs--;
-          result = cont->second->refs;
-    }
-    return result;
+int ContainerContext::derefContainer(const string &id) {
+  int result = 0;
+  ContainerTable::iterator cont = m_containers.find(id);
+  if (cont != m_containers.end()) {
+    cont->second->refs--;
+    result = cont->second->refs;
+  }
+  return result;
 }
-
 
 ContainerObj* ContainerContext::getContainer(sinsp_evt* ev) {
     sinsp_threadinfo* ti = ev->get_thread_info();
     
     if(ti->m_container_id.empty()) {
-        return NULL;
+      return nullptr;
     }
-    ContainerObj* ct = NULL;
+    ContainerObj *ct = nullptr;
     ContainerTable::iterator cont = m_containers.find(ti->m_container_id);
     if(cont != m_containers.end()) {
         if(cont->second->written) {
@@ -99,8 +97,8 @@ ContainerObj* ContainerContext::getContainer(sinsp_evt* ev) {
         }
         ct = cont->second;
     }
-    if(ct == NULL) {
-        ct = createContainer(ev);
+    if (ct == nullptr) {
+      ct = createContainer(ev);
     }
     m_containers[ct->cont.id] = ct;
     m_writer->writeContainer(&(ct->cont));

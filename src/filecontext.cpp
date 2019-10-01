@@ -1,22 +1,24 @@
 #include "filecontext.h"
+
+#include <utility>
 /** Copyright (C) 2019 IBM Corporation.
-*
-* Authors:
-* Frederico Araujo <frederico.araujo@ibm.com>
-* Teryl Taylor <terylt@ibm.com>
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/
+ *
+ * Authors:
+ * Frederico Araujo <frederico.araujo@ibm.com>
+ * Teryl Taylor <terylt@ibm.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 using namespace file;
 
@@ -33,79 +35,76 @@ FileContext::~FileContext() {
 
 
 FileObj* FileContext::createFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, string key) {
-    FileObj* f = new FileObj();
-    f->key = key; 
-    f->file.state = state;
-    f->file.ts = ev->get_ts();
-    utils::generateFOID(f->key, &(f->file.oid));
-    f->file.path = path;
-    f->file.restype = typechar;
-    ContainerObj* cont = m_containerCxt->getContainer(ev);
-    if(cont != NULL) {
-       f->file.containerId.set_string(cont->cont.id);
-    }else {
-       f->file.containerId.set_null();
-    }
+  auto *f = new FileObj();
+  f->key = std::move(key);
+  f->file.state = state;
+  f->file.ts = ev->get_ts();
+  utils::generateFOID(f->key, &(f->file.oid));
+  f->file.path = std::move(path);
+  f->file.restype = typechar;
+  ContainerObj *cont = m_containerCxt->getContainer(ev);
+  if (cont != nullptr) {
+    f->file.containerId.set_string(cont->cont.id);
+  } else {
+    f->file.containerId.set_null();
+  }
     return f;
 }
 FileObj* FileContext::getFile(sinsp_evt* ev, SFObjectState state, bool& created) {
     sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
     return getFile(ev, fdinfo->m_name, fdinfo->get_typechar(), state, created);
 }
-FileObj* FileContext::getFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, bool& created) {
-    sinsp_threadinfo* ti = ev->get_thread_info();
-    //sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
-    created = true;
-    string key = ti->m_container_id + path;
-    FileTable::iterator f = m_files.find(key);
-    FileObj* file = NULL;
-    if(f != m_files.end()) {
-        created = false;
-        if(f->second->written) {
-            return f->second;
-        }
-        file = f->second;
-        file->file.state = SFObjectState::REUP;
+FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,
+                              SFObjectState state, bool &created) {
+  sinsp_threadinfo *ti = ev->get_thread_info();
+  // sinsp_fdinfo_t * fdinfo = ev->get_fd_info();
+  created = true;
+  string key = ti->m_container_id + path;
+  FileTable::iterator f = m_files.find(key);
+  FileObj *file = nullptr;
+  if (f != m_files.end()) {
+    created = false;
+    if (f->second->written) {
+      return f->second;
     }
-    if(file == NULL) {
-        file = createFile(ev, path, typechar, state, key);
-    }
-    m_files[key] = file;
-    m_writer->writeFile(&(file->file));
-    file->written = true;
-    return file;
+    file = f->second;
+    file->file.state = SFObjectState::REUP;
+  }
+  if (file == nullptr) {
+    file = createFile(ev, path, typechar, state, key);
+  }
+  m_files[key] = file;
+  m_writer->writeFile(&(file->file));
+  file->written = true;
+  return file;
 }
 
-FileObj* FileContext::getFile(string key) {
-    FileTable::iterator f = m_files.find(key);
-    if(f != m_files.end()) {
-        if(!f->second->written) {
-            f->second->file.state = SFObjectState::REUP;
-            m_writer->writeFile(&(f->second->file));
-            f->second->written = true;
-        }
-        return f->second;
+FileObj *FileContext::getFile(const string &key) {
+  FileTable::iterator f = m_files.find(key);
+  if (f != m_files.end()) {
+    if (!f->second->written) {
+      f->second->file.state = SFObjectState::REUP;
+      m_writer->writeFile(&(f->second->file));
+      f->second->written = true;
     }
-    return NULL;
+    return f->second;
+  }
+  return nullptr;
 }
 
-bool FileContext::exportFile(string key) {
-    FileTable::iterator f = m_files.find(key);
-    bool exprt = false;
-    if(f != m_files.end()) {
-        if(!f->second->written) {
-            f->second->file.state = SFObjectState::REUP;
-            m_writer->writeFile(&(f->second->file));
-            f->second->written = true;
-            exprt = true;
-        }
+bool FileContext::exportFile(const string &key) {
+  FileTable::iterator f = m_files.find(key);
+  bool exprt = false;
+  if (f != m_files.end()) {
+    if (!f->second->written) {
+      f->second->file.state = SFObjectState::REUP;
+      m_writer->writeFile(&(f->second->file));
+      f->second->written = true;
+      exprt = true;
     }
-    return exprt;
+  }
+  return exprt;
 }
-
-
-
-
 
 void FileContext::clearFiles() {
    for(FileTable::iterator it = m_files.begin(); it != m_files.end(); ++it) {

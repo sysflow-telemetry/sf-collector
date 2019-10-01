@@ -26,7 +26,7 @@ SysFlowProcessor::SysFlowProcessor(SysFlowContext* cxt) : m_exit(false) {
    m_cxt = cxt;
    time_t start = 0;
    if(m_cxt->getFileDuration() > 0) {
-       start = time(NULL);
+     start = time(nullptr);
    }
    m_writer = new SysFlowWriter(cxt, start);
    m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
@@ -54,7 +54,7 @@ void SysFlowProcessor::clearTables() {
 
 bool SysFlowProcessor::checkAndRotateFile()  {
      bool fileRotated = false;
-     time_t curTime = time(NULL);
+     time_t curTime = time(nullptr);
      if(m_writer->isFileExpired(curTime)) {
          SF_INFO(m_logger, "Container Table: " << m_containerCxt->getSize() <<  " Process Table: " << m_processCxt->getSize() << " NetworkFlow Table: " << m_dfPrcr->getSize() << " Num Records Written: " << m_writer->getNumRecs());
          m_writer->resetFileWriter(curTime);
@@ -66,8 +66,8 @@ bool SysFlowProcessor::checkAndRotateFile()  {
 
 int SysFlowProcessor::run() {
 	int32_t res = 0;
-	sinsp_evt* ev = NULL;
-	try
+        sinsp_evt *ev = nullptr;
+        try
 	{
                 m_writer->initialize();
 		//inspector->set_buffer_format(sinsp_evt::PF_NORMAL);

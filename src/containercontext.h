@@ -41,14 +41,14 @@ namespace container {
           ContainerContext(SysFlowContext* cxt, SysFlowWriter* writer);
           virtual ~ContainerContext();
           ContainerObj* getContainer(sinsp_evt* ev);
-          ContainerObj* getContainer(string id);
-          bool exportContainer(string id);
-          int derefContainer(string id);
+          ContainerObj *getContainer(const string &id);
+          bool exportContainer(const string &id);
+          int derefContainer(const string &id);
           void clearAllContainers();
           void clearContainers();
           inline int getSize() {
               return m_containers.size();
           }
     };
-}
+    } // namespace container
 #endif

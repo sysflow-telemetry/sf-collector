@@ -35,17 +35,16 @@ namespace file {
             FileContext(container::ContainerContext* containerCxt, SysFlowWriter* writer);
             virtual ~FileContext();
             FileObj* getFile(sinsp_evt* ev, SFObjectState state, bool& created);
-            FileObj* getFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, bool& created);
-            FileObj* getFile(string key);
+            FileObj *getFile(sinsp_evt *ev, const string &path, char typechar,
+                             SFObjectState state, bool &created);
+            FileObj *getFile(const string &key);
             FileObj* createFile(sinsp_evt* ev, string path, char typechar, SFObjectState state, string key);
-            bool exportFile(string key);
+            bool exportFile(const string &key);
             void clearFiles();
             inline int getSize() {
                 return m_files.size();
             }
      };
-}
-
-
+     } // namespace file
 
 #endif

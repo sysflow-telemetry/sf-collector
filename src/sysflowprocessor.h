@@ -19,26 +19,24 @@
 
 #ifndef  __SF_PROCESSOR_
 #define  __SF_PROCESSOR_
-#include <time.h>
-#include <string>
+#include "containercontext.h"
+#include "dataflowprocessor.h"
+#include "filecontext.h"
+#include "logger.h"
+#include "processcontext.h"
+#include "processeventprocessor.h"
 #include "syscall_defs.h"
 #include "sysflowcontext.h"
-#include "processcontext.h"
-#include "filecontext.h"
-#include "containercontext.h"
-#include "processeventprocessor.h"
-#include "dataflowprocessor.h"
-#include "logger.h" 
+#include <ctime>
+#include <string>
 
 namespace sysflowprocessor {
      class SysFlowProcessor {
         public:
-            SysFlowProcessor(SysFlowContext* cxt);
-            virtual ~SysFlowProcessor();
-            inline void exit() {
-                m_exit = true;
-            }
-            int run();
+          explicit SysFlowProcessor(SysFlowContext *cxt);
+          virtual ~SysFlowProcessor();
+          inline void exit() { m_exit = true; }
+          int run();
         private:
 	    DEFINE_LOGGER();
             bool m_exit;
@@ -53,6 +51,6 @@ namespace sysflowprocessor {
             bool checkAndRotateFile();
             //static log4cxx::LoggerPtr m_logger;
      };
-}
+     } // namespace sysflowprocessor
 
 #endif 

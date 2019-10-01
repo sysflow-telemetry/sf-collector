@@ -47,5 +47,5 @@ namespace processevent {
           std::string m_uid;
 	  DEFINE_LOGGER();
    };
-}
+   } // namespace processevent
 #endif

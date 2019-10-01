@@ -33,15 +33,15 @@ DataFlowProcessor::DataFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer,
 
 DataFlowProcessor::~DataFlowProcessor() {
    //clearTables();
-    if(m_netflowPrcr != NULL) {
-        delete m_netflowPrcr;
-    }
-    if(m_fileflowPrcr != NULL) {
-        delete m_fileflowPrcr;
-    }
-    if(m_fileevtPrcr != NULL) {
-        delete m_fileevtPrcr;
-    }
+   if (m_netflowPrcr != nullptr) {
+     delete m_netflowPrcr;
+   }
+   if (m_fileflowPrcr != nullptr) {
+     delete m_fileflowPrcr;
+   }
+   if (m_fileevtPrcr != nullptr) {
+     delete m_fileevtPrcr;
+   }
 }
 
 
@@ -51,35 +51,42 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt* ev, OpFlags flag) {
    //   return 0;
    //}
 
-    if(fdinfo == NULL) {
-       SF_DEBUG(m_logger, "Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ErrorCode: " << utils::getSyscallResult(ev));
-       if(IS_FILE_EVT(flag)) {
-           return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
-       }else if(flag == OP_MMAP) {
-           /*sinsp_threadinfo* ti = ev->get_thread_info();	       
-           for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
-               string name = ev->get_param_name(i);
-               const ppm_param_info* param = ev->get_param_info(i);
-               const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
-               SF_DEBUG(m_logger, name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo);
-           }
-	   const sinsp_evt_param* p = ev->get_param_value_raw("fd");
-	   if(p != NULL) {
-               int64_t fd = *(int64_t *)p->m_val;
-	       if(fd > 0) {
-	           fdinfo = ti->get_fd(fd);
-	           bool isfdnull = (fdinfo == NULL);
-	           // string name = fdinfo->m_name;
-		   string name = fdinfo->m_name;
-	           SF_DEBUG(m_logger, " MMAP FD: " << fd << " " << isfdnull << " " << fdinfo->get_typechar() << " " << name );
-	       }
-	   }*/
-           return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
-       }
-       if(fdinfo == NULL) {
-	   SF_DEBUG(m_logger, " Returning 1" );
-           return 1;
-       }
+    if (fdinfo == nullptr) {
+      SF_DEBUG(
+          m_logger,
+          "Event: " << ev->get_name()
+                    << " doesn't have an fdinfo associated with it! ErrorCode: "
+                    << utils::getSyscallResult(ev));
+      if (IS_FILE_EVT(flag)) {
+        return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
+      } else if (flag == OP_MMAP) {
+        /*sinsp_threadinfo* ti = ev->get_thread_info();
+        for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
+            string name = ev->get_param_name(i);
+            const ppm_param_info* param = ev->get_param_info(i);
+            const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
+            SF_DEBUG(m_logger, name  << " " <<
+        ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " <<
+        (uint32_t)param->ninfo);
+        }
+        const sinsp_evt_param* p = ev->get_param_value_raw("fd");
+        if(p != NULL) {
+            int64_t fd = *(int64_t *)p->m_val;
+            if(fd > 0) {
+                fdinfo = ti->get_fd(fd);
+                bool isfdnull = (fdinfo == NULL);
+                // string name = fdinfo->m_name;
+                string name = fdinfo->m_name;
+                SF_DEBUG(m_logger, " MMAP FD: " << fd << " " << isfdnull << " "
+        << fdinfo->get_typechar() << " " << name );
+            }
+        }*/
+        return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
+      }
+      if (fdinfo == nullptr) {
+        SF_DEBUG(m_logger, " Returning 1");
+        return 1;
+      }
     }
     if(fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket()) {
       return m_netflowPrcr->handleNetFlowEvent(ev, flag);
@@ -109,32 +116,33 @@ int DataFlowProcessor::checkForExpiredRecords() {
      m_lastCheck = now;
      int i = 0;
      SF_DEBUG(m_logger, "Checking expired Flows!!!....");
-     for(DataFlowSet::iterator it = m_dfSet.begin(); it != m_dfSet.end(); ) {
-             SF_DEBUG(m_logger, "Checking flow with exportTime: " << (*it)->exportTime << " Now: " << now );
-            if((*it)->exportTime <= now) {
-                 SF_DEBUG(m_logger, "Exporting flow!!! " );  
-                if(difftime(now, (*it)->lastUpdate) >= m_cxt->getNFExpireInterval()) {
-                    if((*it)->isNetworkFlow) {
-                         m_netflowPrcr->removeNetworkFlow((*it));
-                    }else {
-                         m_fileflowPrcr->removeFileFlow((*it));
-                    }
-                    it = m_dfSet.erase(it);
-                } else {
-                    if((*it)->isNetworkFlow) {
-                         m_netflowPrcr->exportNetworkFlow((*it), now);
-                    }else {
-                         m_fileflowPrcr->exportFileFlow((*it), now);
-                    }
-                    DataFlowObj* dfo = (*it);
-                    it = m_dfSet.erase(it);
-                    dfo->exportTime = utils::getExportTime(m_cxt);
-                    m_dfSet.insert(dfo);
-                }
-                i++;
-            }else {
-               break;
-            }
+     for (auto it = m_dfSet.begin(); it != m_dfSet.end();) {
+       SF_DEBUG(m_logger, "Checking flow with exportTime: " << (*it)->exportTime
+                                                            << " Now: " << now);
+       if ((*it)->exportTime <= now) {
+         SF_DEBUG(m_logger, "Exporting flow!!! ");
+         if (difftime(now, (*it)->lastUpdate) >= m_cxt->getNFExpireInterval()) {
+           if ((*it)->isNetworkFlow) {
+             m_netflowPrcr->removeNetworkFlow((*it));
+           } else {
+             m_fileflowPrcr->removeFileFlow((*it));
+           }
+           it = m_dfSet.erase(it);
+         } else {
+           if ((*it)->isNetworkFlow) {
+             m_netflowPrcr->exportNetworkFlow((*it), now);
+           } else {
+             m_fileflowPrcr->exportFileFlow((*it), now);
+           }
+           DataFlowObj *dfo = (*it);
+           it = m_dfSet.erase(it);
+           dfo->exportTime = utils::getExportTime(m_cxt);
+           m_dfSet.insert(dfo);
+         }
+         i++;
+       } else {
+         break;
+       }
      }
      return i;
 }

@@ -39,7 +39,7 @@ class SysFlowWriter {
     private:
         SysFlowContext* m_cxt;
         SysFlow m_flow;
-        int m_numRecs;
+        int m_numRecs{};
         avro::ValidSchema m_sysfSchema;
         avro::DataFileWriter<SysFlow>* m_dfw; 
         void writeHeader();

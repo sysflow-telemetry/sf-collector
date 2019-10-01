@@ -18,7 +18,9 @@
 **/
 
 #include "fileflowprocessor.h"
+
 #include "utils.h"
+#include <utility>
 using namespace fileflow;
 
 CREATE_LOGGER(FileFlowProcessor, "sysflow.fileflow");
@@ -31,8 +33,7 @@ FileFlowProcessor::FileFlowProcessor(SysFlowContext* cxt, SysFlowWriter* writer,
     m_fileCxt = fileCxt;
 }
 
-FileFlowProcessor::~FileFlowProcessor() {
-}
+FileFlowProcessor::~FileFlowProcessor() = default;
 
 inline void FileFlowProcessor::populateFileFlow(/*sinsp_fdinfo_t * fdinfo,*/ FileFlowObj* ff, OpFlags flag, sinsp_evt* ev, ProcessObj* proc, FileObj* file, string flowkey) {
    sinsp_threadinfo* ti = ev->get_thread_info();
@@ -50,7 +51,7 @@ inline void FileFlowProcessor::populateFileFlow(/*sinsp_fdinfo_t * fdinfo,*/ Fil
    ff->fileflow.fd = ev->get_fd_num();
    ff->fileflow.fileOID = file->file.oid;
    ff->filekey = file->key;
-   ff->flowkey = flowkey;
+   ff->flowkey = std::move(flowkey);
    ff->fileflow.numRRecvOps = 0;
    ff->fileflow.numWSendOps = 0;
    ff->fileflow.numRRecvBytes = 0;
@@ -71,11 +72,11 @@ void FileFlowProcessor::removeAndWriteRelatedFlows(ProcessObj* proc, FileFlowObj
              proc->fileflows.erase(ffi);
 	}
     }
-    for(vector<FileFlowObj*>::iterator it = ffobjs.begin(); it != ffobjs.end(); it++) {
-        (*it)->fileflow.endTs = endTs;	    
-        (*it)->fileflow.opFlags |= OP_TRUNCATE;	    
-        m_writer->writeFileFlow(&((*it)->fileflow));
-        removeFileFlowFromSet(&(*it), true); 
+    for (auto it = ffobjs.begin(); it != ffobjs.end(); it++) {
+      (*it)->fileflow.endTs = endTs;
+      (*it)->fileflow.opFlags |= OP_TRUNCATE;
+      m_writer->writeFileFlow(&((*it)->fileflow));
+      removeFileFlowFromSet(&(*it), true);
     }
 }
 
@@ -101,23 +102,25 @@ inline void FileFlowProcessor::updateFileFlow(FileFlowObj* ff, OpFlags flag, sin
        }
 }
 
-inline void FileFlowProcessor::processNewFlow(sinsp_evt* ev, /*sinsp_fdinfo_t * fdinfo,*/  ProcessObj* proc, FileObj* file, OpFlags flag, string flowkey) {
-    FileFlowObj* ff = new FileFlowObj();
-    ff->exportTime = utils::getExportTime(m_cxt); 
-    ff->lastUpdate = utils::getCurrentTime(m_cxt);
-    populateFileFlow(ff, flag, ev, proc, file, flowkey);
-    updateFileFlow(ff, flag, ev);
-    if(flag != OP_CLOSE) {
-         proc->fileflows[flowkey] = ff;
-         file->refs++;
-        //m_fileflows[key] = nf;
-        m_dfSet->insert(ff);
-     }else {
-        removeAndWriteRelatedFlows(proc, ff, ev->get_ts());	
-        ff->fileflow.endTs = ev->get_ts();
-        m_writer->writeFileFlow(&(ff->fileflow));
-        delete ff;
-     }
+inline void FileFlowProcessor::processNewFlow(
+    sinsp_evt *ev, /*sinsp_fdinfo_t * fdinfo,*/ ProcessObj *proc, FileObj *file,
+    OpFlags flag, const string &flowkey) {
+  auto *ff = new FileFlowObj();
+  ff->exportTime = utils::getExportTime(m_cxt);
+  ff->lastUpdate = utils::getCurrentTime(m_cxt);
+  populateFileFlow(ff, flag, ev, proc, file, flowkey);
+  updateFileFlow(ff, flag, ev);
+  if (flag != OP_CLOSE) {
+    proc->fileflows[flowkey] = ff;
+    file->refs++;
+    // m_fileflows[key] = nf;
+    m_dfSet->insert(ff);
+  } else {
+    removeAndWriteRelatedFlows(proc, ff, ev->get_ts());
+    ff->fileflow.endTs = ev->get_ts();
+    m_writer->writeFileFlow(&(ff->fileflow));
+    delete ff;
+  }
 }
 
 inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj* proc, FileObj* file,  FileFlowObj** ff, string flowkey) {
@@ -125,7 +128,7 @@ inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj* proc, FileObj*
     //m_fileflows.erase(*key);
     //m_nfSet.erase((*nf));
     removeFileFlowFromSet(ff, false);
-    removeFileFlow(proc, file, ff, flowkey);
+    removeFileFlow(proc, file, ff, std::move(flowkey));
 }
 
 
@@ -134,43 +137,47 @@ inline void FileFlowProcessor::processExistingFlow(sinsp_evt* ev, ProcessObj* pr
       if(flag == OP_CLOSE) {
           removeAndWriteRelatedFlows(proc, ff, ev->get_ts());	
           ff->fileflow.endTs = ev->get_ts();
-          removeAndWriteFileFlow(proc, file, &ff, flowkey);
+          removeAndWriteFileFlow(proc, file, &ff, std::move(flowkey));
       }
 }
 
 int FileFlowProcessor::handleFileFlowEvent(sinsp_evt* ev, OpFlags flag) {
     sinsp_fdinfo_t * fdinfo =  ev->get_fd_info();
 
+    if (fdinfo == nullptr) {
+      /*if(flag == OP_MMAP) {
+          sinsp_threadinfo* ti = ev->get_thread_info();
+          for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
+              string name = ev->get_param_name(i);
+              const ppm_param_info* param = ev->get_param_info(i);
+              const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
+              SF_DEBUG(m_logger, name  << " " <<
+      ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " <<
+      (uint32_t)param->ninfo);
+          }
+          const sinsp_evt_param* p = ev->get_param_value_raw("fd");
+          if(p != NULL) {
+              int64_t fd = *(int64_t *)p->m_val;
+              if(fd > 0) {
+                  fdinfo = ti->get_fd(fd);
+                  if(fdinfo == NULL) {
+                      SF_DEBUG(m_logger, "Event: " << ev->get_name() << "
+      doesn't have an fdinfo associated with it! "); return 1;
 
-    if(fdinfo == NULL) {
-       /*if(flag == OP_MMAP) {
-           sinsp_threadinfo* ti = ev->get_thread_info();	       
-           for(uint32_t i = 0; i < ev->get_num_params(); i ++) {
-               string name = ev->get_param_name(i);
-               const ppm_param_info* param = ev->get_param_info(i);
-               const sinsp_evt_param* p = ev->get_param_value_raw(name.c_str());
-               SF_DEBUG(m_logger, name  << " " << ev->get_param_value_str(name.c_str()) << " " <<  param->type << " " << (uint32_t)param->ninfo);
-           }
-	   const sinsp_evt_param* p = ev->get_param_value_raw("fd");
-	   if(p != NULL) {
-               int64_t fd = *(int64_t *)p->m_val;
-	       if(fd > 0) {
-	           fdinfo = ti->get_fd(fd);
-		   if(fdinfo == NULL) {
-                       SF_DEBUG(m_logger, "Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ");
-                       return 1;
-
-		   }
-	           bool isfdnull = (fdinfo == NULL);
-	           // string name = fdinfo->m_name;
-		   string name = fdinfo->m_name;
-	           SF_DEBUG(m_logger, " MMAP FD: " << fd << " " << isfdnull << " " << fdinfo->get_typechar() << " " << name );
-	       }
-	   }
-       } else {*/
-       SF_DEBUG(m_logger, "Event: " << ev->get_name() << " doesn't have an fdinfo associated with it! ");
-       return 1;
-       //}
+                  }
+                  bool isfdnull = (fdinfo == NULL);
+                  // string name = fdinfo->m_name;
+                  string name = fdinfo->m_name;
+                  SF_DEBUG(m_logger, " MMAP FD: " << fd << " " << isfdnull << "
+      " << fdinfo->get_typechar() << " " << name );
+              }
+          }
+      } else {*/
+      SF_DEBUG(m_logger,
+               "Event: " << ev->get_name()
+                         << " doesn't have an fdinfo associated with it! ");
+      return 1;
+      //}
     }
 
     if((fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket())) {
@@ -192,7 +199,7 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt* ev, OpFlags flag) {
     //calling get process is important because it ensures that the process object has been written to the
     //sysflow file.   This is important for long running NetworkFlows that may span across files.
     ProcessObj* proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
-    FileFlowObj* ff = NULL;
+    FileFlowObj *ff = nullptr;
     sinsp_threadinfo* ti = ev->get_thread_info();
     string filekey =  ti->m_container_id + fdinfo->m_name;
     //int i = ti->m_tid;
@@ -207,23 +214,25 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt* ev, OpFlags flag) {
     if(ffi != proc->fileflows.end()) {
          ff = ffi->second;
     }
-    SF_DEBUG(m_logger, proc->proc.exe << " Name: " <<  fdinfo->m_name << " type: " << fdinfo->get_typechar() <<  " " << file->file.path << " " <<  ev->get_name()); 
+    SF_DEBUG(m_logger, proc->proc.exe << " Name: " <<  fdinfo->m_name << " type: " << fdinfo->get_typechar() <<  " " << file->file.path << " " <<  ev->get_name());
 
-    if(ff == NULL) {
-       processNewFlow(ev, proc, file, flag, flowkey);
-    }else {
-       processExistingFlow(ev, proc, file, flag, flowkey, ff);
+    if (ff == nullptr) {
+      processNewFlow(ev, proc, file, flag, flowkey);
+    } else {
+      processExistingFlow(ev, proc, file, flag, flowkey, ff);
     }
     return 0;
 }
 
-void FileFlowProcessor::removeFileFlow(ProcessObj* proc, FileObj* file,  FileFlowObj** ff, string flowkey) {
-    proc->fileflows.erase(flowkey);
-    delete *ff;
-    ff = NULL;
-    if(file != NULL) {
-        file->refs--;
-    }
+void FileFlowProcessor::removeFileFlow(ProcessObj *proc, FileObj *file,
+                                       FileFlowObj **ff,
+                                       const string &flowkey) {
+  proc->fileflows.erase(flowkey);
+  delete *ff;
+  ff = nullptr;
+  if (file != nullptr) {
+    file->refs--;
+  }
 }
 
 int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj* proc, int64_t tid) {
@@ -244,10 +253,12 @@ int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj* proc, int64_t tid) {
             SF_DEBUG(m_logger, "Set size: " << m_dfSet->size());
             deleted += removeFileFlowFromSet(&ffo, true);
             SF_DEBUG(m_logger, "After Set size: " << m_dfSet->size());
-            if(file == NULL) {
-                SF_ERROR(m_logger, "File object doesn't exist for fileflow: " << ffi->second->filekey << ". This shouldn't happen.");
-            }else {
-                file->refs--;
+            if (file == nullptr) {
+              SF_ERROR(m_logger, "File object doesn't exist for fileflow: "
+                                     << ffi->second->filekey
+                                     << ". This shouldn't happen.");
+            } else {
+              file->refs--;
             }
         }
 
@@ -261,63 +272,68 @@ int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj* proc, int64_t tid) {
 int FileFlowProcessor::removeFileFlowFromSet(FileFlowObj** ffo, bool deleteFileFlow) {
         bool found = false;
         int removed = 0;
-        for(DataFlowSet::iterator iter = m_dfSet->find(*ffo); iter != m_dfSet->end(); iter++) {
-            if(!((*iter)->isNetworkFlow)) {
-                FileFlowObj* foundObj = static_cast<FileFlowObj*>(*iter);
-                //cout << "Found: " << foundObj->fileflow.procOID.createTS << " " << foundObj->fileflow.procOID.hpid << endl;
-                if(*foundObj == **ffo) {
-                     SF_DEBUG(m_logger, "Removing fileflow element from multiset"); 
-                     m_dfSet->erase(iter);
-                     if(deleteFileFlow) {
-                        delete *ffo;
-                        ffo = NULL;
-                     }
-                     removed++;
-                     found = true;
-                     break;   
-               }
-           }
+        for (auto iter = m_dfSet->find(*ffo); iter != m_dfSet->end(); iter++) {
+          if (!((*iter)->isNetworkFlow)) {
+            auto *foundObj = static_cast<FileFlowObj *>(*iter);
+            // cout << "Found: " << foundObj->fileflow.procOID.createTS << " "
+            // << foundObj->fileflow.procOID.hpid << endl;
+            if (*foundObj == **ffo) {
+              SF_DEBUG(m_logger, "Removing fileflow element from multiset");
+              m_dfSet->erase(iter);
+              if (deleteFileFlow) {
+                delete *ffo;
+                ffo = nullptr;
+              }
+              removed++;
+              found = true;
+              break;
+            }
+          }
         }
         if(!found) {
            SF_ERROR(m_logger, "Cannot find FileFlow Object " << (*ffo)->filekey << " in data flow set. Deleting. This should not happen.");
            if(deleteFileFlow) {
                delete *ffo;
-               ffo = NULL;
+               ffo = nullptr;
            }
         }
         return removed;
 }
 
 void FileFlowProcessor::removeFileFlow(DataFlowObj* dfo) {
-     FileFlowObj* ffo = static_cast<FileFlowObj*>(dfo);
-     //do we want to write out a fileflow that hasn't had any action in an interval?
-     //nfo->fileflow.endTs = utils::getSysdigTime(m_cxt);
-     //m_writer->writeNetFlow(&(nfo->fileflow));
-     SF_DEBUG(m_logger, "Erasing flow!!! ");
-     ProcessObj* proc = m_processCxt->getProcess(&(ffo->fileflow.procOID));
-     if(proc == NULL) {
-         SF_ERROR(m_logger, "Could not find proc " << ffo->fileflow.procOID.hpid << " " << ffo->fileflow.procOID.createTS << " This shouldn't happen!");
-     } else {
-          FileObj* file = m_fileCxt->getFile(ffo->filekey);
-          if(file == NULL) {
-             SF_ERROR(m_logger, "Unable to find file object of key " << ffo->filekey  << ". Shouldn't happen!!");
-          }
-          removeFileFlow(proc, file, &ffo, ffo->flowkey);
-     }
+  auto *ffo = static_cast<FileFlowObj *>(dfo);
+  // do we want to write out a fileflow that hasn't had any action in an
+  // interval? nfo->fileflow.endTs = utils::getSysdigTime(m_cxt);
+  // m_writer->writeNetFlow(&(nfo->fileflow));
+  SF_DEBUG(m_logger, "Erasing flow!!! ");
+  ProcessObj *proc = m_processCxt->getProcess(&(ffo->fileflow.procOID));
+  if (proc == nullptr) {
+    SF_ERROR(m_logger, "Could not find proc " << ffo->fileflow.procOID.hpid
+                                              << " "
+                                              << ffo->fileflow.procOID.createTS
+                                              << " This shouldn't happen!");
+  } else {
+    FileObj *file = m_fileCxt->getFile(ffo->filekey);
+    if (file == nullptr) {
+      SF_ERROR(m_logger, "Unable to find file object of key "
+                             << ffo->filekey << ". Shouldn't happen!!");
+    }
+    removeFileFlow(proc, file, &ffo, ffo->flowkey);
+  }
 }
 
-void FileFlowProcessor::exportFileFlow(DataFlowObj* dfo, time_t now) {
-     FileFlowObj* ffo = static_cast<FileFlowObj*>(dfo);
-     ffo->fileflow.endTs = utils::getSysdigTime(m_cxt);
-     m_processCxt->exportProcess(&(ffo->fileflow.procOID));
-     m_fileCxt->exportFile(ffo->filekey);
-     m_writer->writeFileFlow(&(ffo->fileflow));
-     SF_DEBUG(m_logger, "Reupping flow!!! ");
-     ffo->fileflow.ts = utils::getSysdigTime(m_cxt);
-     ffo->fileflow.endTs = 0;
-     ffo->fileflow.opFlags = 0;
-     ffo->fileflow.numRRecvOps = 0;
-     ffo->fileflow.numWSendOps = 0;
-     ffo->fileflow.numRRecvBytes = 0;
-     ffo->fileflow.numWSendBytes = 0;
+void FileFlowProcessor::exportFileFlow(DataFlowObj *dfo, time_t /*now*/) {
+  auto *ffo = static_cast<FileFlowObj *>(dfo);
+  ffo->fileflow.endTs = utils::getSysdigTime(m_cxt);
+  m_processCxt->exportProcess(&(ffo->fileflow.procOID));
+  m_fileCxt->exportFile(ffo->filekey);
+  m_writer->writeFileFlow(&(ffo->fileflow));
+  SF_DEBUG(m_logger, "Reupping flow!!! ");
+  ffo->fileflow.ts = utils::getSysdigTime(m_cxt);
+  ffo->fileflow.endTs = 0;
+  ffo->fileflow.opFlags = 0;
+  ffo->fileflow.numRRecvOps = 0;
+  ffo->fileflow.numWSendOps = 0;
+  ffo->fileflow.numRRecvBytes = 0;
+  ffo->fileflow.numWSendBytes = 0;
 }
