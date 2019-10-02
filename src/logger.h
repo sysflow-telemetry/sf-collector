@@ -20,8 +20,6 @@
 #ifndef __SF_LOGGER
 #define __SF_LOGGER
 #include <iostream>
-
-using namespace std;
 #include "log4cxx/basicconfigurator.h"
 #include "log4cxx/helpers/exception.h"
 #include "log4cxx/logger.h"

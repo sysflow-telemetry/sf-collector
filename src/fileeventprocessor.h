@@ -28,9 +28,8 @@
 #include "sysflowwriter.h"
 #include "utils.h"
 #include <sinsp.h>
-using namespace sysflow;
-namespace fileevent {
 
+namespace fileevent {
 class FileEventProcessor {
 private:
   process::ProcessContext *m_processCxt;
