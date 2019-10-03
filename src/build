@@ -1,0 +1,3 @@
+#!/bin/bash
+sudo docker run -it --rm --name=lint -v $(pwd)/src:/build/src -v $(pwd)/modules/filesystem:/build/modules/filesystem  us.icr.io/csa-ci/sysporter:builder bash
+

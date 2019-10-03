@@ -460,7 +460,7 @@ int main(int argc, char **argv) {
   s_procs.set_deleted_key(&delkey);
   s_files.set_empty_key("-1");
   s_files.set_deleted_key("-2");
-  while ((c = getopt(argc, argv, "lr:w:s:qk")) != -1) {
+  while ((c = static_cast<char>(getopt(argc, argv, "lr:w:s:qk"))) != -1) {
     switch (c) {
     case 'r':
       sysFile = optarg;

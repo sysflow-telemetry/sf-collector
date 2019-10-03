@@ -28,11 +28,14 @@ TARGET2 = sysreader
 
 # Lint options
 LINT = clang-tidy-9
-LINTCHECKS = "-abseil*,-android*,bugprone-*,cert-*,clang-*,cppcoreguidelines-*,google-*,hicpp-*,\
+LINTCHECKS = "bugprone-*"
+#LINTCHECKS = "-abseil*,-android*,bugprone-*,cert-*,clang-*,cppcoreguidelines-*,google-*,hicpp-*,\
 	     -llvm-header-guard,misc-*,modernize-*,-modernize-use-trailing-return-type,-modernize-loop-convert,\
 	     -modernize-make-unique,-modernize-pass-by-value, performance-*,-readability-*,\
 	     -readability-convert-member-functions-to-static"
-LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
+#LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
+LINTSRCS := main.cpp
+LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration
 LIBLOCALPREFIX = ../modules
@@ -68,7 +71,7 @@ uninstall:
 
 .PHONY: lint
 lint: $(LINTSRCS)
-	$(LINT) -checks=$(LINTCHECKS) -header-filter="$(shell pwd)/.*" $^ -- $(CFLAGS)
+	$(LINT) -checks=$(LINTCHECKS) -header-filter=$(LINTHEADERS) $^ -- $(CFLAGS)
 
 .PHONY: lintfix
 lintfix: $(LINTSRCS)

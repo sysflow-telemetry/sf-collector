@@ -33,7 +33,7 @@ namespace context {
 class SysFlowContext {
 private:
   bool m_filterCont;
-  time_t m_start{};
+  // time_t m_start{};
   int m_fileDuration;
   bool m_hasPrefix;
   string m_outputFile;

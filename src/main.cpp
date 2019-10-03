@@ -52,7 +52,7 @@ int str2int(int &i, char const *s, int base = 0) {
   if (*s == '\0' || *end != '\0') {
     return -1;
   }
-  i = l;
+  i = static_cast<int>(l);
   return 0;
 }
 
@@ -110,7 +110,8 @@ int main(int argc, char **argv) {
 
   sigaction(SIGINT, &sigIntHandler, nullptr);
 
-  while ((c = getopt(argc, argv, "hcr:w:G:s:e:l:vf:")) != -1) {
+  while ((c = static_cast<char>(getopt(argc, argv, "hcr:w:G:s:e:l:vf:"))) !=
+         -1) {
     switch (c) {
     case 'e':
       exporterID = optarg;

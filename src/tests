@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo docker run -it --rm --name=tester -v $(pwd)/src/:/usr/local/sysflow/bin -v $(pwd)/tests/:/usr/local/sysflow/tests --entrypoint=/bin/bash us.icr.io/csa-ci/sysporter:testing

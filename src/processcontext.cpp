@@ -37,11 +37,17 @@ ProcessContext::ProcessContext(context::SysFlowContext *cxt,
   m_fileCxt = fileCxt;
 }
 
-ProcessContext::~ProcessContext() { clearAllProcesses(); }
+ProcessContext::~ProcessContext() {
+  try {
+    clearAllProcesses();
+  } catch (...) {
+    SF_ERROR(m_logger, "Caught exception while clearing all process in process "
+                       "context destructor");
+  }
+}
 
 ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
                                           sinsp_evt *ev, SFObjectState state) {
-
   auto *p = new ProcessObj();
   p->proc.state = state;
   p->proc.ts = ev->get_ts();
