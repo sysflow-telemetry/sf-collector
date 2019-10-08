@@ -20,14 +20,14 @@
 #ifndef __SF_WRITER_
 #define __SF_WRITER_
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+//#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "avro/Compiler.hh"
 #include "avro/DataFile.hh"
 #include "avro/Decoder.hh"
 #include "avro/Encoder.hh"
 #include "avro/ValidSchema.hh"
-#pragma GCC diagnostic pop
+//#pragma GCC diagnostic pop
 
 #include "sysflow.h"
 #include "sysflowcontext.h"

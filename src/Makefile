@@ -45,7 +45,7 @@ AVRLOCALLIBPREFIX = $(LIBLOCALPREFIX)/avro/lang/c++/build
 AVRLOCALINCPREFIX = $(LIBLOCALPREFIX)/avro/lang/c++/build
 
 # Compiler options 
-CXX = g++-8
+CXX = g++
 LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
       $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a \
       -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -llog4cxx

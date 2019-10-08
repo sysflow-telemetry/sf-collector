@@ -27,9 +27,6 @@ FROM ubuntu:16.04 as deps
 RUN apt-get update -yqq && \
     apt-get --fix-broken install -yqq && \
     apt-get upgrade -yqq && \
-    apt-get install software-properties-common -yqq && \
-    add-apt-repository ppa:jonathonf/gcc -y && \
-    apt-get update -yqq && \
     apt-get install -yqq \
         patch \
         base-files \
@@ -43,7 +40,7 @@ RUN apt-get update -yqq && \
         libncursesw5-dev \
         cmake \
         libboost-all-dev \
-        g++-8 \
+        g++ \
         flex \ 
         bison \
         wget \
@@ -52,7 +49,6 @@ RUN apt-get update -yqq && \
         libapr1 \
         libaprutil1 \
         libsparsehash-dev && \ 
-    ln -s /usr/bin/g++-8 /usr/bin/g++ && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 

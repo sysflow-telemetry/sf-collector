@@ -22,12 +22,12 @@
 #include <fstream>
 #include <sinsp.h>
 #include <string>
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+//#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "avro/Compiler.hh"
 #include "avro/ValidSchema.hh"
-#pragma GCC diagnostic pop
-#include "boost/any.hpp"
+//#pragma GCC diagnostic pop
+//#include "boost/any.hpp"
 #include "ghc/fs_std.hpp"
 #include "sysflow.h"
 #include "sysflowcontext.h"
@@ -36,7 +36,7 @@
 
 using sysflow::OID;
 
-typedef boost::array<uint8_t, 20> FOID;
+typedef std::array<uint8_t, 20> FOID;
 struct NFKey;
 
 namespace utils {
