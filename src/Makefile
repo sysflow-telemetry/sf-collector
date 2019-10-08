@@ -58,7 +58,6 @@ CFLAGS = -std=c++11 -Wall -ggdb -I.. -I../modules/sysflow/c++/ -I../modules/file
 
 .PHONY: all
 all: version $(TARGET)
-#all: version $(TARGET) $(TARGET2)
 
 .PHONY: install
 install: all 
