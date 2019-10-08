@@ -24,17 +24,16 @@ include ../makefile.env.inc
 
 # Target configuration
 TARGET = sysporter
-TARGET2 = sysreader
 
 # Lint options
 LINT = clang-tidy-9
 LINTCHECKS = "bugprone-*"
+# To enable more checks, uncomment below
 #LINTCHECKS = "-abseil*,-android*,bugprone-*,cert-*,clang-*,cppcoreguidelines-*,google-*,hicpp-*,\
 	     -llvm-header-guard,misc-*,modernize-*,-modernize-use-trailing-return-type,-modernize-loop-convert,\
 	     -modernize-make-unique,-modernize-pass-by-value, performance-*,-readability-*,\
 	     -readability-convert-member-functions-to-static"
-#LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
-LINTSRCS := main.cpp
+LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
 LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration
@@ -58,11 +57,10 @@ CFLAGS = -std=c++11 -Wall -ggdb -I.. -I../modules/sysflow/c++/ -I../modules/file
 
 .PHONY: all
 all: version $(TARGET)
-#all: version $(TARGET) $(TARGET2)
 
 .PHONY: install
 install: all 
-	mkdir -p $(PREFIX)/bin && cp sysporter $(PREFIX)/bin && cp sysreader $(PREFIX)/bin
+	mkdir -p $(PREFIX)/bin && cp sysporter $(PREFIX)/bin
 	mkdir -p $(PREFIX)/conf && cp avro/avsc/SysFlow.avsc $(PREFIX)/conf && cp conf/log4cxx.properties $(PREFIX)/conf
 
 .PHONY: uninstall
@@ -86,10 +84,6 @@ version:
 
 .PHONY: $(TARGET)
 $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .filecontext.o
-	$(CXX) $^ -o $@ $(LDFLAGS)
-
-.PHONY: $(TARGET2)
-$(TARGET2): .reader.o .MurmurHash3.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .main.o: main.cpp
@@ -140,12 +134,9 @@ $(TARGET2): .reader.o .MurmurHash3.o
 .filecontext.o: filecontext.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
-.reader.o: reader.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
 .PHONY: clean
 clean:
-	rm -f .[!.]*.o *.o *.so *.a $(TARGET) $(TARGET2) sysflow_config.h
+	rm -f .[!.]*.o *.o *.so *.a $(TARGET) sysflow_config.h
 
 .PHONY : help
 help:
