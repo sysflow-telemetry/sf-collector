@@ -57,7 +57,8 @@ CFLAGS = -std=c++11 -Wall -ggdb -I.. -I../modules/sysflow/c++/ -I../modules/file
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
 
 .PHONY: all
-all: version $(TARGET) $(TARGET2)
+all: version $(TARGET)
+#all: version $(TARGET) $(TARGET2)
 
 .PHONY: install
 install: all 
@@ -75,7 +76,7 @@ lint: $(LINTSRCS)
 
 .PHONY: lintfix
 lintfix: $(LINTSRCS)
-	$(LINT) -checks=$(LINTCHECKS) -format-style=llvm -header-filter="$(shell pwd)/.*" -fix $^ -- $(CFLAGS)
+	$(LINT) -checks=$(LINTCHECKS) -format-style=llvm -header-filter=$(LINTHEADERS) -fix $^ -- $(CFLAGS)
 
 .PHONY: version
 version:
