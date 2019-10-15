@@ -14,5 +14,5 @@ the collector supports Sysdig's powerful filtering capabilities. Please see the 
 instructions](BUILD.md) for installing the collector.
 
 * [Build, Installation and Usage](BUILD.md)
-* [SysFlow Specification](SPEC.md)
+* [SysFlow Specification](https://github.ibm.com/sysflow/sf-docs/blob/master/SPEC.md)
 * [License](LICENSE.md)
