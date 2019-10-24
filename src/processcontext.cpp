@@ -331,6 +331,14 @@ void ProcessContext::clearProcesses() {
   }
 }
 
+void ProcessContext::printStats() {
+  SF_INFO(m_logger, "# Containers: " << m_containerCxt->getSize() <<  " # Procs: "  << m_procs.size());
+  for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
+    ProcessObj *proc = it->second;
+    SF_INFO(m_logger, proc->proc.exe << " " << proc->children.size() << " " << proc->netflows.size() << " " << proc->fileflows.size());
+  }
+}
+
 void ProcessContext::writeProcessAndAncestors(ProcessObj *proc) {
   Process::poid_t poid = proc->proc.poid;
   std::vector<ProcessObj *> processes;

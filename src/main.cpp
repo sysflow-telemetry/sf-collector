@@ -62,6 +62,7 @@ static void usage(const std::string &name) {
       << " [-h] [-G <interval>] [-s <schema file>] [-c] [-e <exporterID>] [-r "
          "<scap file>] [-l <log conf file>] -w <file name/dir>\n"
       << "Options:\n"
+      << "\t-d\t\t\tPrint debug stats (not debug logging) of all caches\n"
       << "\t-h\t\t\tShow this help message\n"
       << "\t-w file name/dir\t(required) The file or directory to which "
          "sysflow records are written\n"
@@ -86,6 +87,9 @@ static void usage(const std::string &name) {
          "to be dumped\n"
       << "\t-l log conf file\tLocation of log4cxx properties configuration "
          "file. (default: /usr/local/sysflow/conf/log4cxx.properties)\n"
+      << "\t-p cri path\t\tThe path to the cri socket\n"
+      << "\t-t cri timeout\t\tThe amount of time in ms to wait for cri socket to "
+         " respond\n"
       << "\t-v\t\t\tPrints the version of " << name << " and exits.\n"
       << std::endl;
 }
@@ -104,15 +108,22 @@ int main(int argc, char **argv) {
   sigIntHandler.sa_flags = 0;
   bool filterCont = false;
   int fileDuration = 0;
+  int criTO = 0;
+  string criPath = "";
+  char *criTimeout;
   string filter = "";
   bool help = false;
+  bool stats = false;
   string logProps = "/usr/local/sysflow/conf/log4cxx.properties";
 
   sigaction(SIGINT, &sigIntHandler, nullptr);
 
-  while ((c = static_cast<char>(getopt(argc, argv, "hcr:w:G:s:e:l:vf:"))) !=
+  while ((c = static_cast<char>(getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:d"))) !=
          -1) {
     switch (c) {
+    case 'd':
+      stats = true;
+      break;
     case 'e':
       exporterID = optarg;
       break;
@@ -148,12 +159,26 @@ int main(int argc, char **argv) {
     case 'h':
       help = true;
       break;
+    case 'p':
+      criPath = optarg;
+      break;
+    case 't':
+      criTimeout = optarg;
+      if (str2int(criTO, criTimeout, 10)) {
+        cout << "Unable to parse " << criTimeout << endl;
+        exit(1);
+      }
+      if (criTO < 1) {
+        cout << "CRI timeout must be higher than 0" << endl;
+        exit(1);
+      }
+      break;
     case 'v':
       cerr << " Version: " << SF_VERSION << "." << SF_BUILD << endl;
       exit(0);
     case '?':
       if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' ||
-          optopt == 'G' || optopt == 'l') {
+          optopt == 'G' || optopt == 'l' || optopt == 'p' || optopt == 't' ) {
         fprintf(stderr, "Option -%c requires an argument.\n", optopt);
       } else if (isprint(optopt)) {
         fprintf(stderr, "Unknown option `-%c'.\n", optopt);
@@ -180,7 +205,11 @@ int main(int argc, char **argv) {
     SF_DEBUG(logger, "Starting sysporter..");
     auto *cxt =
         new context::SysFlowContext(filterCont, fileDuration, outputDir,
-                                    scapFile, schemaFile, exporterID, filter);
+                                    scapFile, schemaFile, exporterID, filter, 
+                                    criPath, criTO);
+    if (stats) {
+      cxt->enableStats();
+    }
     s_prc = new SysFlowProcessor(cxt);
     int ret = s_prc->run();
     delete s_prc;

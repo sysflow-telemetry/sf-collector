@@ -30,6 +30,11 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
   if (m_cxt->getFileDuration() > 0) {
     start = time(nullptr);
   }
+  if (m_cxt->isStatsEnabled()) {
+    m_statsTime = time(nullptr);	  
+  } else {
+    m_statsTime = 0;
+  }
   m_writer = new writer::SysFlowWriter(cxt, start);
   m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
   m_fileCxt = new file::FileContext(m_containerCxt, m_writer);
@@ -71,6 +76,13 @@ bool SysFlowProcessor::checkAndRotateFile() {
     clearTables();
     fileRotated = true;
   }
+  if (m_statsTime > 0) {
+    double duration = difftime(curTime, m_statsTime);
+    if (duration >= m_cxt->getStatsInterval()) {
+      m_dfPrcr->printFlowStats();
+      m_statsTime = curTime; 
+    }
+  }
   return fileRotated;
 }
 
@@ -87,7 +99,7 @@ int SysFlowProcessor::run() {
         }
         int numExpired = m_dfPrcr->checkForExpiredRecords();
         if (numExpired) {
-          SF_INFO(m_logger, "Data Flow Records exported: " << numExpired);
+          SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
         }
         checkAndRotateFile();
         continue;
@@ -105,7 +117,7 @@ int SysFlowProcessor::run() {
       }
       int numExpired = m_dfPrcr->checkForExpiredRecords();
       if (numExpired) {
-        SF_INFO(m_logger, "Data Flow Records exported: " << numExpired);
+        SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
       }
       checkAndRotateFile();
       if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {

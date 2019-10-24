@@ -35,6 +35,7 @@ private:
   fileflow::FileFlowProcessor *m_fileflowPrcr;
   fileevent::FileEventProcessor *m_fileevtPrcr;
   context::SysFlowContext *m_cxt;
+  process::ProcessContext *m_procCxt;
   DataFlowSet m_dfSet;
   time_t m_lastCheck;
   DEFINE_LOGGER();
@@ -47,6 +48,7 @@ public:
                     file::FileContext *fileCxt);
   virtual ~DataFlowProcessor();
   int checkForExpiredRecords();
+  void printFlowStats();
   int removeAndWriteDFFromProc(ProcessObj *proc, int64_t tid);
 };
 } // namespace dataflow

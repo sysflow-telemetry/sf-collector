@@ -20,7 +20,7 @@
 
 make -C modules init
 export TRAVIS_BUILD_NUMBER=10
-sudo docker build --cache-from sysporter:deps --target deps -t sysporter:deps .
-sudo docker build --build-arg TRAVIS_BUILD_NUMBER --cache-from sysporter:deps --cache-from sysporter:builder --target builder -t sysporter:builder .
-sudo docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --target runtime -t sysporter:runtime .
-sudo docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --cache-from sysporter:testing --target testing -t sysporter:testing .
+sudo docker build --cache-from sf-a1.9.1-0.26.4:deps --target deps -t sf-a1.9.1-0.26.4:deps .
+sudo docker build --build-arg TRAVIS_BUILD_NUMBER --cache-from sf-a1.9.1-0.26.4:deps --cache-from sf-a1.9.1-0.26.4:builder --target builder -t sf-a1.9.1-0.26.4:builder .
+sudo docker build --cache-from sf-a1.9.1-0.26.4:deps --cache-from sf-a1.9.1-0.26.4:builder --cache-from sf-a1.9.1-0.26.4:runtime --target runtime -t sf-a1.9.1-0.26.4:runtime .
+sudo docker build --cache-from sf-a1.9.1-0.26.4:deps --cache-from sf-a1.9.1-0.26.4:builder --cache-from sf-a1.9.1-0.26.4:runtime --cache-from sf-a1.9.1-0.26.4:testing --target testing -t sf-a1.9.1-0.26.4:testing .

@@ -45,11 +45,16 @@ private:
   int m_nfExpireInterval;
   bool m_offline;
   string m_filter;
+  string m_criPath;
+  int m_criTO;
+  bool m_stats;
+  int m_statsInterval;
   DEFINE_LOGGER();
 
 public:
   SysFlowContext(bool fCont, int fDur, string oFile, const string &sFile,
-                 string schFile, string exporterID, string filter);
+                 string schFile, string exporterID, string filter,
+                 string criPath, int criTO);
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
   string getExporterID();
@@ -63,6 +68,9 @@ public:
   inline bool hasPrefix() { return m_hasPrefix; }
   inline int getFileDuration() { return m_fileDuration; }
   inline bool isFilterContainers() { return m_filterCont; }
+  inline bool isStatsEnabled() { return m_stats; }
+  inline void enableStats() { m_stats = true; }
+  inline int getStatsInterval() { return m_statsInterval;}
 };
 } // namespace context
 

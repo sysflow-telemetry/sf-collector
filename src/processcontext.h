@@ -59,6 +59,7 @@ public:
   void deleteProcess(ProcessObj **proc);
   bool exportProcess(OID *oid);
   void printNetworkFlow(ProcessObj *proc);
+  void printStats();
   inline int getSize() { return m_procs.size(); }
   inline int getNumNetworkFlows() {
     int total = 0;

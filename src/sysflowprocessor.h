@@ -50,6 +50,7 @@ private:
   dataflow::DataFlowProcessor *m_dfPrcr;
   void clearTables();
   bool checkAndRotateFile();
+  time_t m_statsTime;
 };
 } // namespace sysflowprocessor
 

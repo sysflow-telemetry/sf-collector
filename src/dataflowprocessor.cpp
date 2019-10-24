@@ -29,6 +29,7 @@ DataFlowProcessor::DataFlowProcessor(context::SysFlowContext *cxt,
                                      file::FileContext *fileCxt)
     : m_dfSet() {
   m_cxt = cxt;
+  m_procCxt = processCxt;
   m_netflowPrcr =
       new networkflow::NetworkFlowProcessor(cxt, writer, processCxt, &m_dfSet);
   m_fileflowPrcr = new fileflow::FileFlowProcessor(cxt, writer, processCxt,
@@ -82,6 +83,11 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt *ev, OpFlags flag) {
 int DataFlowProcessor::removeAndWriteDFFromProc(ProcessObj *proc, int64_t tid) {
   int total = m_fileflowPrcr->removeAndWriteFFFromProc(proc, tid);
   return (total + m_netflowPrcr->removeAndWriteNFFromProc(proc, tid));
+}
+
+void DataFlowProcessor::printFlowStats() {
+  m_procCxt->printStats();
+  SF_INFO(m_logger, "DF Set: " << m_dfSet.size());
 }
 
 int DataFlowProcessor::checkForExpiredRecords() {

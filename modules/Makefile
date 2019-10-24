@@ -43,24 +43,34 @@ install: modules \
 sysdig/package: 
 	cd sysdig && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(SYSDIG_VERSION)\"/" CMakeLists.txt && \
 	mkdir -p build && cd build && \
-    cmake ../. && make openssl curl b64 jq tbb zlib scap sinsp && \
+    cmake ../. && make tbb grpc c-ares zlib jq curl luajit protobuf b64 openssl scap sinsp && \
 	mkdir -p include && mkdir -p lib && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
-	mkdir -p include/driver && cp driver/*h include/driver && cp ../driver/*h include/driver && \
+	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
 	mkdir -p include/json && cp ../userspace/libsinsp/third-party/jsoncpp/jsoncpp.cpp include/json && \
 	mkdir -p include/json && cp ../userspace/libsinsp/third-party/jsoncpp/json/*.h include/json && \
 	mkdir -p include/userspace/common && cp ../userspace/common/*.h include/userspace/common && \
 	mkdir -p include/userspace/libsinsp && cp ../userspace/libsinsp/*.h include/userspace/libsinsp && \
+	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
 	mkdir -p include/userspace/libscap && cp ../userspace/libscap/*.h include/userspace/libscap && \
 	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
+	cp -r tbb-prefix/src/tbb/include/serial  include/ && \
+	cp -r tbb-prefix/src/tbb/include/tbb include/ && \
+	cp -r protobuf-prefix/src/protobuf/src/google include/ && \
+	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
+	cp tbb-prefix/src/tbb/build/lib_release/libtbbmalloc.a lib/ && \
 	cp userspace/libsinsp/libsinsp.a lib/ && \
 	cp userspace/libscap/libscap.a lib/ && \
+	cp grpc-prefix/src/grpc/libs/opt/*.a lib/ && \
+	cp protobuf-prefix/src/protobuf/src/.libs/* lib/ && \
+	cp c-ares-prefix/src/c-ares/.libs/* lib/ && \
 	cp b64-prefix/src/b64/src/libb64.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
 	cp jq-prefix/src/jq/.libs/libjq.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
 	cp openssl-prefix/src/openssl/libcrypto.so.1.0.0 lib/libcrypto.so && \
 	cp openssl-prefix/src/openssl/libssl.so.1.0.0 lib/libssl.so && \
+	cp protobuf-prefix/src/protobuf/src/.libs/* lib && \
 	cp zlib-prefix/src/zlib/libz.so.1.2.11 lib/libz.so
 
 .PHONY: sysdig/install

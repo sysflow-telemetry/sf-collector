@@ -5,7 +5,7 @@
 # Authors:
 # Frederico Araujo <frederico.araujo@ibm.com>
 # Teryl Taylor <terylt@ibm.com>
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -88,14 +88,15 @@ for flow1, flow2 in itertools.zip_longest(reader1, reader2, fillvalue=None):
     #flow2 = reader2.next();
     if not (flow1 is None or flow2 is None):
          msgs.clear()
+         #print('flow1: {}, flow2: {}'.format(flow1.rec, flow2.rec))
          if not compareAttributes(flow1.rec, flow2.rec, exit, msgs):
              print('[ FAILED ] Record: {} does not match'.format(recNum))
              failures += 1
              for m in msgs:
                  print(m)
-         if exit[0] == True:
-             print('[ FAILED ] Stopping Test. Test case failed with {} failures before stopping'.format(failures))
-             sys.exit(1)
+         #if exit[0] == True:
+         #    print('[ FAILED ] Stopping Test. Test case failed with {} failures before stopping'.format(failures))
+         #    sys.exit(1)
          recNum += 1
     else:
         print('[ FAILED ]  Files do not have the same number of records')

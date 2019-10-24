@@ -21,7 +21,7 @@
 #-----------------------
 # Stage: deps
 #-----------------------
-FROM ubuntu:16.04 as deps
+FROM ubuntu:18.04 as deps
 
 # dependencies
 RUN apt-get update -yqq && \
@@ -47,6 +47,7 @@ RUN apt-get update -yqq && \
         libelf-dev \
         liblog4cxx-dev \
         libapr1 \
+        pkg-config \
         libaprutil1 \
         libsparsehash-dev && \ 
     apt-get clean -yqq && \
@@ -74,14 +75,22 @@ RUN cd /build/src && make SYSFLOW_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysdig/sysdig:0.24.2 as runtime
+FROM sysdig/sysdig:0.26.4 as runtime
 
+RUN apt-get update -yqq && \
+    apt-get --no-install-recommends --fix-broken install -yqq && \
+    apt-get install -yqq  valgrind && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
 # environment variables
 ARG interval=30
 ENV INTERVAL=$interval
 
 ARG filter=
 ENV FILTER=$filter
+
+ARG stats=
+ENV STATS=$stats
 
 ARG nodename=
 ENV NODE_NAME=$nodename
@@ -95,16 +104,22 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linu
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libapr* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libexpat* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
+#COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
+#COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /lib/x86_64-linux-gnu/
+#COPY --from=builder /usr/lib/x86_64-linux-gnu/libcrypto* /lib/x86_64-linux-gnu/
+#COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libexpat* /lib/x86_64-linux-gnu/
 COPY --from=builder /build/src/sysporter /usr/local/sysflow/bin/
 COPY --from=builder /build/modules/sysflow/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
 COPY --from=builder /build/src/conf/log4cxx.properties /usr/local/sysflow/conf/
-
+COPY ./runTimeout /
+RUN ln -s /usr/local/sysflow/modules/lib/libcrypto.so /usr/local/sysflow/modules/lib/libcrypto.so.1.0.0
+RUN ln -s /usr/local/sysflow/modules/lib/libssl.so /usr/local/sysflow/modules/lib/libssl.so.1.0.0
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
-CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $NODE_NAME $FILTER
+#CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $NODE_NAME $FILTER $STATS
+#CMD /usr/bin/valgrind --leak-check=full --show-leak-kinds=all --log-file=/valgrind.log /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $NODE_NAME $FILTER $STATS
+CMD /runTimeout $INTERVAL $OUTPUT $NODE_NAME "$FILTER" $STATS
 
 #-----------------------
 # Stage: Testing
@@ -121,6 +136,7 @@ RUN apt-get update -yqq && \
         apt-utils \
         git \
         locales \
+        valgrind \
         python3 \
         python3-pip && \
     locale-gen en_US.UTF-8 && \
