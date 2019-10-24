@@ -1,0 +1,4 @@
+#!/bin/bash
+timeout 15.0m /usr/bin/valgrind --leak-check=full --show-leak-kinds=all --log-file=/valgrind.log /usr/local/sysflow/bin/sysporter -G $1 -w $2 -e $3 $4 $5
+echo "Sysporter ended.."
+sleep 60.0m
