@@ -68,7 +68,8 @@ git commit -s
 ```
 
 ## Communication
-Please feel free to connect with us on our [Slack channel](https://join.slack.com/t/sysflow-telemetry/shared_invite/enQtODA5OTA3NjE0MTAzLTlkMGJlZDQzYTc3MzhjMzUwNDExNmYyNWY0NWIwODNjYmRhYWEwNGU0ZmFkNGQ2NzVmYjYxMWFjYTM1MzA5YWQ).
+Please feel free to connect with us on our [Slack channel](https://join.slack.com/t/sysflow-telemetry/shared_invite/enQtODA5OTA3NjE0MTAzLTlkMGJlZDQzYTc3MzhjMzUwNDExNmYyNWY0NWIwODNjYmRhYWEwNGU0ZmFkNGQ2NzVmYjYxMWFjYTM1MzA5YWQ) or
+via [email](mailto:sysflow@us.ibm.com). Note that the projects in this repository are not formal products. As a result, the communication channels are to the maintainers and not to a support staff.
 
 ## Setup
 
