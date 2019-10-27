@@ -1,20 +1,22 @@
-# Build, Installation and Usage
+# Installation and Usage
 
-## Cloning source
+## Installing sysporter
 
-The sf-collector project has been tested primarily on ubuntu 16.04 and 18.04.  The project should build and run on other flavors of UNIX and will be tested in the future. Building and running the application inside a docker container is the easiest way to run it, but this document will describe how to build and run the application in both docker and on a linux host.
+### Cloning source
+
+The sf-collector project has been tested primarily on Ubuntu 16.04 and 18.04.  The project will be tested on other flavors of UNIX in the future. This document describes how to build and run the application both inside a docker container and on a linux host. Building and running the application inside a docker container is the easiest way to start. 
 
 To build the project, first pull down the source code, with submodules:
 <br><br>
-<code>git clone git@github.ibm.com:sysmon/sf-collector.git --recursive</code>
+<code>git clone git@github.com:sysflow-telemetry/sf-collector.git --recursive</code>
 
 To checkout submodules on an already cloned repo:
 <br><br>
 <code>git submodule update --init --recursive</code>
 
-## Build Docker container
+### Building a Docker container
 
-To build the docker container: 
+To build a docker container: 
 <br><br>
 <code> cd sf-collector </code>
 <br>
@@ -22,14 +24,13 @@ To build the docker container:
 
 The container is built in stages to enable caching of the intermediate steps of the build.  As a result, the docker container of interest is: <code>sysporter:runtime</code>
 
-## Build directly on host
+### Building directly on a host
 
-First, the dependencies to build sysdig and the avro libraries must be installed:
-
+First, the dependencies to build Sysdig and the Avro libraries must be available:
 
 <code> apt-utils build-essential libncurses5-dev libncursesw5-dev cmake libboost-all-dev flex bison g++ wget libelf-dev</code>
 
-Then install the dependencies for sysporter.  Note, it is recommended that sysporter is built with g++8 or above.  If building with older g++ versions, one must install the libboost filesystem library that supports the <code>weakly_canonical</code> API:
+Then the dependencies for sysporter need to be installed.  Note that it is recommended that sysporter is built with g++8 or above.  When building with older g++ versions, one must install the libboost filesystem library that supports the <code>weakly_canonical</code> API:
 
 <code>apt-utils make libboost-all-dev g++-8 libelf-dev liblog4cxx-dev libapr1 libaprutil1 libsparsehash-dev</code>
 
@@ -61,29 +62,29 @@ Sysporter has the following options:
 |-l &lt;log conf file&gt;|Location of log4cxx properties configuration file. (default: /usr/local/sysflow/conf/log4cxx.properties). Properties file follows log4j format. See conf directory in github for example.  Setting log level to debug is extremely verbose.|
 |-v|Prints the version of ./sysporter and exits.|
  
-### Example Usage
+### Example usage
 
-Convert sysdig scap file to sysflow with export id.   Output will be written to output.sf.  Note that sysporter must be run with root privileges:
+Convert Sysdig scap file to SysFlow file with an export id. The output will be written to `output.sf`.  Note that sysporter must be run with the root privilege:
 
 <code>./sysporter -r input.scap -w ./output.sf  -e host </code>
 
-Trace a system live, and output sysflow to files in a directory which are rotated every 30 seconds. The file names with be an epoch timestamp of when the file was initially written.  Note, trailing slash must be present. The filter ensures that only sysflow from containers is generated.
+Trace a system live, and output SysFlow to files in a directory which are rotated every 30 seconds. The file name will be an epoch timestamp of when the file was initially written.  Note that the trailing slash _must be present_. The example filter ensures that only SysFlow from containers is generated.
 
 <code>./sysporter -G 30 -w ./output/ -e host -f "container.type!=host and container.type=docker" </code>
 
-Trace a system live, and output sysflow to files in a directory which are rotated every 30 seconds. The file names with be an output.<epoch timestamp> where the timestamp is of when the file was initially written.   The filter ensures that only sysflow from containers is generated.
+Trace a system live, and output SysFlow to files in a directory which are rotated every 30 seconds. The file name will be an `output.<epoch timestamp>` where the timestamp is of when the file was initially written. The example filter ensures that only SysFlow from containers is generated.
 
 <code>./sysporter -G 30 -w ./output/output -e host -f "container.type!=host and container.type=docker" </code>
 
-## Running sysporter from the docker container
+### Running sysporter from a Docker container
 
-The easiest way to run sysporter is from the docker container, with host mount for the files.  The following command demonstrates how to run sysporter where files are exported to <code>/mnt/data</code> on the host.
+The easiest way to run sysporter is from a Docker container, with host mount for the files.  The following command demonstrates how to run sysporter where files are exported to <code>/mnt/data</code> on the host.
 
 <code>sudo mkdir -p /mnt/data</code>
 
 <code>sudo docker pull floripa.sl.cloud9.ibm.com/sf-collector:latest</code>
 
-<pre> sudo docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/var/run/docker.sock \
+<pre>sudo docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/var/run/docker.sock \
              -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
              -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
              -e INTERVAL=300 \
@@ -93,4 +94,4 @@ The easiest way to run sysporter is from the docker container, with host mount f
              --rm -i -t  floripa.sl.cloud9.ibm.com/sf-collector
 </pre>
 
-Where INTERVAL corresponds to the value of <code>-G</code> in the sysporter, NODE_NAME corresponds to the value of <code>-e</code>, OUTPUT corresponds to the value of <code>-w</code>, and FILTER represents both the flag (<code>-f</code>) and actual filter of the sysporter (see above).
+where INTERVAL corresponds to the value of <code>-G</code>, NODE_NAME corresponds to the value of <code>-e</code>, OUTPUT corresponds to the value of <code>-w</code>, and FILTER represents both the flag (<code>-f</code>) and the actual filter of sysporter (see above).
