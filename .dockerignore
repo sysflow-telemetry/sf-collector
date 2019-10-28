@@ -1,14 +1,10 @@
 # ignore these files and directories when running docker build
-.git*
+*/.git*
+*/.cache
 .travis*
-build*
+build
 clean
 export
-README*
-BUILD*
-CODE_OF_CONDUCT*
-CONTRIBUTING*
-MAINTAINERS*
-SPEC*
-LICENSE*
 hooks*
+*/*.md
+!README*.md
