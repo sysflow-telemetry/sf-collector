@@ -2,6 +2,21 @@
 
 ## Installing sysporter
 
+### Git Branches
+
+The sf-collector project currently has two branches:  `master` and `0.26.4`.  The master branch is based on Sysdig 0.24.2 and Apache Avro 1.9.1.  It supports host environments, as well as 
+container environments based on Docker runtimes.  It can monitor Kubernetes clusters when combined with the sf-deployments project.  Unfortunately, the master version does not support container
+runtimes based on CRI-O rather than docker.
+
+As a result, we have been developing a version of the collector (branch 0.26.4) based on Sysdig 0.26.4, which does support CRI-O.  To do so, we've added two arguments to the collector:
+```
+-p cri path - The path to the cri-o domain socket.
+-t cri timeout - The amount of time in ms to wait for cri-o socket to respond.
+```
+
+Note, we have not heavily tested the 0.26.4 branch and haven't done tests in a cri-o environment.   One of our main goals over the next few weeks is to test the branch in Openshift, a CRI-O environment
+and to also create Openshit deployment mechanisms. Once we have adequately tested these features, we will roll the branch into the main branch.
+
 ### Cloning source
 
 The sf-collector project has been tested primarily on Ubuntu 16.04 and 18.04.  The project will be tested on other flavors of UNIX in the future. This document describes how to build and run the application both inside a docker container and on a linux host. Building and running the application inside a docker container is the easiest way to start. 
@@ -60,6 +75,8 @@ Sysporter has the following options:
 |-f &lt;filter&gt;| Sysdig style filtering string to filter scap. Must be surrounded by quotes.|
 |-c|Simple, fast filter to allow only container-related events to be dumped.|
 |-l &lt;log conf file&gt;|Location of log4cxx properties configuration file. (default: /usr/local/sysflow/conf/log4cxx.properties). Properties file follows log4j format. See conf directory in github for example.  Setting log level to debug is extremely verbose.|
+|-p &lt;cri path&gt;|The path to the cri-o domain socket (BRANCH 0.26.4 only).|
+|-t &lt;cri timeout&gt;|The amount of time in ms to wait for cri-o socket to respond (BRANCH 0.26.4 only).|
 |-v|Prints the version of ./sysporter and exits.|
  
 ### Example usage
