@@ -1,4 +1,5 @@
-[![Build Status](https://travis.ibm.com/sysflow/sf-collector.svg?token=YCkPxVzn5tW3RuQt9o3y&branch=master)](https://travis.ibm.com/sysflow/sf-collector)
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/sysflowtelemetry/sf-collector)
+[![Documentation Status](https://readthedocs.org/projects/sysflow/badge/?version=latest)](https://sysflow.readthedocs.io/en/latest/?badge=latest)
 
 # SysFlow Collector (probe)
 
