@@ -5,3 +5,10 @@ build*
 clean
 export
 README*
+BUILD*
+CODE_OF_CONDUCT*
+CONTRIBUTING*
+MAINTAINERS*
+SPEC*
+LICENSE*
+hooks*
