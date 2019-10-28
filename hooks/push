@@ -7,20 +7,20 @@ make -C modules init
 
 # Multi-stage build with caching from intermediate stages
 docker build \
-    --cache-from $IMAGE_NAME-deps \
+    --cache-from $DOCKER_REPO:deps \
     --target deps \
-    -t $IMAGE_NAME-deps .
+    -t $DOCKER_REPO:deps .
 
 docker build \
     --build-arg COMMIT=$(git rev-parse --short HEAD) \
-    --cache-from $IMAGE_NAME-deps \
-    --cache-from $IMAGE_NAME-builder \
+    --cache-from $DOCKER_REPO:deps \
+    --cache-from $DOCKER_REPO:builder \
     --target builder \
-    -t $IMAGE_NAME-builder .
+    -t $DOCKER_REPO:builder .
 
 docker build \
-    --cache-from $IMAGE_NAME-deps \
-    --cache-from $IMAGE_NAME-builder \
+    --cache-from $DOCKER_REPO:deps \
+    --cache-from $DOCKER_REPO:builder \
     --cache-from $IMAGE_NAME \
     --target runtime \
     -t $IMAGE_NAME .

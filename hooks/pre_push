@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "[***] Pre-push hook running"
+
+# Caching intermediate targets
+docker push $IMAGE_NAME-deps 
+docker push $IMAGE_NAME-builder 
