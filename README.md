@@ -11,9 +11,8 @@ operations. Learn more about SysFlow in the [SysFlow specification document](SPE
 
 The SysFlow Collector is currently built upon the [Sysdig](https://github.com/draios/sysdig) core and 
 requires the Sysdig probe to passively collect system events and turn them into SysFlow. As a result, 
-the collector supports Sysdig's powerful filtering capabilities. Please see the [build and installation 
-instructions](BUILD.md) for installing the collector.
+the collector supports Sysdig's powerful filtering capabilities. Please see the [Installation and Usage](BUILD.md) for installing the collector.
 
-* [Build, Installation and Usage](BUILD.md)
-* [SysFlow Specification](https://github.ibm.com/sysflow/sf-docs/blob/master/SPEC.md)
+* [Installation and Usage](BUILD.md)
+* [SysFlow specification](SPEC.md)
 * [License](LICENSE.md)
