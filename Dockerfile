@@ -60,7 +60,7 @@ RUN cd /build/modules && make install
 # Stage: Builder
 #-----------------------
 FROM deps as builder
-ARG TRAVIS_BUILD_NUMBER
+ARG BUILD_NUMBER=0
 
 # copy dependencies
 COPY --from=deps /build /build/
@@ -69,7 +69,7 @@ COPY --from=deps /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 
 # build sysporter
 COPY ./src/ /build/src/
-RUN cd /build/src && make SYSFLOW_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
+RUN cd /build/src && make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER
 
 #-----------------------
 # Stage: Runtime
