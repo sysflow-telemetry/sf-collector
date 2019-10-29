@@ -1,6 +1,6 @@
 ## Contributing in general
 
-Our project welcomes external contributions. A good way to familiarize yourself with the codebase and the contribution process is to look for and address issues in the [issue tracker](https://github.com/sysflow-telemetry/sf-collector/issues).
+Our project welcomes external contributions. A good way to familiarize yourself with the codebase and the contribution process is to look for and address issues in the [issue tracker](https://github.com/sysflow-telemetry/sf-docs/issues).
 
 To contribute code or documentation, please submit a [pull request](https://github.com/sysflow-telemetry/sf-collector/pulls); and please quickly [get in touch](#communication) with us before embarking on a more ambitious contribution.
 
@@ -10,13 +10,13 @@ cannot be accepted at all!**
 
 ### Proposing new features
 
-If you would like to implement a new feature, please [raise an issue](https://github.com/sysflow-telemetry/sf-collector/issues)
+If you would like to implement a new feature, please [raise an issue](https://github.com/sysflow-telemetry/sf-docs/issues)
 before sending a pull request so that the proposed feature can be discussed first. This is to avoid
 putting an effort on a feature that the project developers would not be able to accept into the code base.
 
 ### Fixing bugs
 
-If you would like to fix a bug, please [raise an issue](https://github.com/sysflow-telemetry/sf-collector/issues) before sending a
+If you would like to fix a bug, please [raise an issue](https://github.com/sysflow-telemetry/sf-docs/issues) before sending a
 pull request so that the bug fix can be tracked properly.
 
 ### Merge approval
