@@ -36,6 +36,7 @@ apt install patch base-files binutils bzip2 libdpkg-perl perl make xz-utils libn
 
 To build sysporter:
 ```
+cd sf-collector
 make install
 ```
 
