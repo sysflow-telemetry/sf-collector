@@ -5,22 +5,8 @@ echo "[***] Build hook running"
 # Initialize submodules
 make -C modules init
 
-# Multi-stage build with caching from intermediate stages
-docker build \
-    --cache-from $IMAGE_NAME-deps \
-    --target deps \
-    -t $IMAGE_NAME-deps .
-
+# Multi-stage build
 docker build \
     --build-arg BUILD_NUMBER=$(git rev-parse --short HEAD) \
-    --cache-from $IMAGE_NAME-deps \
-    --cache-from $IMAGE_NAME-builder \
-    --target builder \
-    -t $IMAGE_NAME-builder .
-
-docker build \
-    --cache-from $IMAGE_NAME-deps \
-    --cache-from $IMAGE_NAME-builder \
-    --cache-from $IMAGE_NAME \
     --target runtime \
     -t $IMAGE_NAME .

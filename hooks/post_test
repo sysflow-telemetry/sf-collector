@@ -1,6 +1,0 @@
-#!/bin/bash
-
-echo "[***] Post-test hook running"
-
-# Caching testing target
-docker push $IMAGE_NAME-testing 

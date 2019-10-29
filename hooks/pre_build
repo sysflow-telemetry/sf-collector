@@ -1,7 +1,0 @@
-#!/bin/bash
-
-echo "[***] Pre-build hook running"
-
-# Caching intermediate targets
-docker pull $IMAGE_NAME-deps || true
-docker pull $IMAGE_NAME-builder || true
