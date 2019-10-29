@@ -90,7 +90,6 @@ The easiest way to run sysporter is from a Docker container, with host mount for
 ```
 mkdir -p /mnt/data
 docker pull sysflowtelemetry/sf-collector
-
 docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/var/run/docker.sock \
              -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
              -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
