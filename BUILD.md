@@ -8,7 +8,7 @@ The sf-collector project has been tested primarily on Ubuntu 16.04 and 18.04.  T
 
 To build the project, first pull down the source code, with submodules:
 ```
-git clone git@github.com:sysflow-telemetry/sf-collector.git --recursive
+git clone --recursive git@github.com:sysflow-telemetry/sf-collector.git 
 ```
 
 To checkout submodules on an already cloned repo:
@@ -29,18 +29,13 @@ The container is built in stages to enable caching of the intermediate steps of 
 
 ### Building directly on a host
 
-First, the dependencies to build Sysdig and the Avro libraries must be available:
+First, install required dependencies:
 ```
-apt-utils build-essential libncurses5-dev libncursesw5-dev cmake libboost-all-dev flex bison g++ wget libelf-dev
-```
-
-Then the dependencies for sysporter need to be installed. Note that it is recommended that sysporter is built with g++8 or above. When building with older g++ versions, one must install the libboost filesystem library that supports the `weakly_canonical` API:
-```
-apt-utils make libboost-all-dev g++-8 libelf-dev liblog4cxx-dev libapr1 libaprutil1 libsparsehash-dev
+apt install patch base-files binutils bzip2 libdpkg-perl perl make xz-utils libncurses5-dev libncursesw5-dev cmake libboost-all-dev g++  flex bison wget libelf-dev liblog4cxx-dev libapr1 libaprutil1 libsparsehash-dev
 ```
 
+To build sysporter:
 ```
-ln -s /usr/bin/g++-8 /usr/bin/g++
 make install
 ```
 
