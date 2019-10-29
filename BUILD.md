@@ -4,7 +4,7 @@
 
 ### Cloning source
 
-The sf-collector project has been tested primarily on Ubuntu 16.04 and 18.04.  The project will be tested on other flavors of UNIX in the future. This document describes how to build and run the application both inside a docker container and on a linux host. Building and running the application inside a docker container is the easiest way to start. 
+The sf-collector project has been tested primarily on Ubuntu 16.04 and 18.04.  The project will be tested on other flavors of UNIX in the future. This document describes how to build and run the application both inside a docker container and on a linux host. Building and running the application inside a docker container is the easiest way to start. For convenience, skip the build step and pull pre-built images directly from [Docker Hub](https://hub.docker.com/r/sysflowtelemetry/sf-collector).
 
 To build the project, first pull down the source code, with submodules:
 ```
