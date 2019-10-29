@@ -1,11 +1,8 @@
-## Contributing In General
-Our project welcomes external contributions. 
+## Contributing in general
 
-To contribute code or documentation, please submit a [pull request](https://github.com/sysflow-telemetry/sf-collector/pulls).
+Our project welcomes external contributions. A good way to familiarize yourself with the codebase and the contribution process is to look for and address issues in the [issue tracker](https://github.com/sysflow-telemetry/sf-collector/issues).
 
-A good way to familiarize yourself with the codebase and contribution process is
-to look for and tackle low-hanging fruit in the [issue tracker](https://github.com/sysflow-telemetry/sf-collector/issues).
-Before embarking on a more ambitious contribution, please quickly [get in touch](#communication) with us.
+To contribute code or documentation, please submit a [pull request](https://github.com/sysflow-telemetry/sf-collector/pulls); and please quickly [get in touch](#communication) with us before embarking on a more ambitious contribution.
 
 **Note: We appreciate your effort, and want to avoid a situation where a contribution
 requires extensive rework (by you or by us), sits in backlog for a long time, or
@@ -14,14 +11,13 @@ cannot be accepted at all!**
 ### Proposing new features
 
 If you would like to implement a new feature, please [raise an issue](https://github.com/sysflow-telemetry/sf-collector/issues)
-before sending a pull request so the feature can be discussed. This is to avoid
-you wasting your valuable time working on a feature that the project developers
-are not interested in accepting into the code base.
+before sending a pull request so that the proposed feature can be discussed first. This is to avoid
+putting an effort on a feature that the project developers would not be able to accept into the code base.
 
 ### Fixing bugs
 
 If you would like to fix a bug, please [raise an issue](https://github.com/sysflow-telemetry/sf-collector/issues) before sending a
-pull request so it can be tracked.
+pull request so that the bug fix can be tracked properly.
 
 ### Merge approval
 
@@ -29,13 +25,13 @@ The project maintainers use LGTM (Looks Good To Me) in comments on the code
 review to indicate acceptance. A change requires LGTMs from two of the
 maintainers of each component affected.
 
-For a list of the maintainers, see the [MAINTAINERS.md](MAINTAINERS.md) page.
+For a list of the maintainers, please see the [maintainers page](MAINTAINERS.md).
 
 ## Legal
 
 Each source file must include a license header for the Apache
 Software License 2.0. Using the SPDX format is the simplest approach.
-e.g.
+For example,
 
 ```
 /*
@@ -78,12 +74,11 @@ on how to build the application, dependencies, and how to test the collector.
 
 ## Testing
 
-This project is in its infancy and with limited resources we haven't built a large testing framework around the collector.    We do have a set of unit tests that test the coverage of most of the events of interest in `sf-collector/tests`.   
-These tests can be run using the [bats testing framework](https://github.com/bats-core/bats-core).   Directions on how to install bats are in the accompanied link.    To run the tests, run `bats -t tests.bat` from the tests directory.  Note,
-that the tests also rely on python3. Before conducting a pull request, these unit tests should be run.  Note, there is a version of the docker image with a `testing` tag that contains bats and the unit tests.   This might be useful for testing.
-Also, conducting a load test and running the application under valgrind is desirable for pull requests. 
-
+This project is in its infancy and with limited resources we have not built a large testing framework around the collector. We do have a set of unit tests that examine the coverage of most of the events of interest in `sf-collector/tests`.   
+These tests can be run using the [bats testing framework](https://github.com/bats-core/bats-core), and directions on how to install bats are in the accompanied link and the tests rely on Python 3.
+To perform the tests, run `bats -t tests.bat` from the `tests` directory. Before conducting a pull request, these unit tests should be run. Note that there is a version of the docker image with a `testing` tag that contains bats and the unit tests, which can be useful for testing.
+It is also desirable to conduct a load test and run the application under valgrind for pull requests. 
 
 ## Coding style guidelines
-We follow the [LLVM Coding standards](https://llvm.org/docs/CodingStandards.html) in this project.   There is a .clang-format file in the master repo [clang-format](https://github.com/sysflow-telemetry/sf-collector/blob/master/src/.clang-format) that can be used in conjunction with [ClangFormat Tool](https://clang.llvm.org/docs/ClangFormat.html) to automatically format code. For linting,
+We follow the [LLVM coding standards](https://llvm.org/docs/CodingStandards.html) in this project. There is a `.clang-format` file in the master repo [clang-format](https://github.com/sysflow-telemetry/sf-collector/blob/master/src/.clang-format) that can be used in conjunction with [ClangFormat Tool](https://clang.llvm.org/docs/ClangFormat.html) to automatically format code. For linting,
 we use [Clang Tidy Linter](https://clang.llvm.org/extra/clang-tidy/).  This is referenced in the Makefile.
