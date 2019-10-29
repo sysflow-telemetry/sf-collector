@@ -97,7 +97,7 @@ docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/va
              -e NODE_NAME="${NODE}" \
              -e OUTPUT=/mnt/data    \
              -e FILTER="-f \"container.type!=host and container.type=docker and container.name!=sf-collector and not (container.name contains sf-exporter)\"" \
-             --rm -i -t  floripa.sl.cloud9.ibm.com/sf-collector
+             --rm sysflow-telemetry/sf-collector
 ```
 
 where INTERVAL corresponds to the value of `-G`, NODE\_NAME corresponds to the value of `-e`, OUTPUT corresponds to the value of `-w`, and FILTER represents both the flag (`-f`) and the actual filter of sysporter (see above).
