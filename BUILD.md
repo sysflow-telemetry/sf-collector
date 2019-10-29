@@ -16,20 +16,16 @@ To checkout submodules on an already cloned repo:
 git submodule update --init --recursive
 ```
 
-### Building a Docker container
+### Building as Docker container
 
-To build a docker container: 
+To build as docker container: 
 ```
 cd sf-collector
 make -C modules init
-export TRAVIS_BUILD_NUMBER=10
-docker build --cache-from sysporter:deps --target deps -t sysporter:deps .
-docker build --build-arg TRAVIS_BUILD_NUMBER --cache-from sysporter:deps --cache-from sysporter:builder --target builder -t sysporter:builder .
-docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --target runtime -t sysporter:runtime .
-docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --cache-from sysporter:testing --target testing -t sysporter:testing .
+docker build --target runtime -t sysporter .
 ``` 
 
-The container is built in stages to enable caching of the intermediate steps of the build.  As a result, the docker container of interest is: `sysporter:runtime`
+The container is built in stages to enable caching of the intermediate steps of the build and reduce final image sizes. 
 
 ### Building directly on a host
 
@@ -38,7 +34,7 @@ First, the dependencies to build Sysdig and the Avro libraries must be available
 apt-utils build-essential libncurses5-dev libncursesw5-dev cmake libboost-all-dev flex bison g++ wget libelf-dev
 ```
 
-Then the dependencies for sysporter need to be installed.  Note that it is recommended that sysporter is built with g++8 or above. When building with older g++ versions, one must install the libboost filesystem library that supports the `weakly_canonical` API:
+Then the dependencies for sysporter need to be installed. Note that it is recommended that sysporter is built with g++8 or above. When building with older g++ versions, one must install the libboost filesystem library that supports the `weakly_canonical` API:
 ```
 apt-utils make libboost-all-dev g++-8 libelf-dev liblog4cxx-dev libapr1 libaprutil1 libsparsehash-dev
 ```
