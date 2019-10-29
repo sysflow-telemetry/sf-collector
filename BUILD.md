@@ -57,21 +57,18 @@ Sysporter has the following options:
 Usage: sysporter [-h] [-G &lt;interval&gt;] [-s &lt;schema file&gt;] [-c] [-e &lt;exporterID&gt;] [-r &lt;scap file&gt;] [-l &lt;log conf file&gt;] -w &lt;file name/dir&gt;</code>
 
 Options:
-
-| Option| Description|    
-|---------------------|-------------------------------|
-|-h|Show this help message.|
-|-w &lt;file name/dir&gt;|(required) The file or directory to which sysflow records are written. If a directory is specified (using a trailing slash), file name will be an epoch timestamp. If -G is specified, then the file name specified will have an epoch timestamp appended to it.|
-|-e &lt;exporterID&gt;| A globally unique ID representing the host or VM being monitored which is stored in the sysflow dumpfile header.  If -e not set, the hostname of the CURRENT machine is used, which may not be accurate for reading offline scap files.|
-|-G &lt;interval(in secs)&gt;| Rotates the dumpfile specified in -w every interval seconds and appends epoch timestamp to file name.|
-|-r &lt;scap file&gt;|The scap file to be read and dumped as sysflow format at the file specified by -w.  If this option is not specified, a live capture is assumed.|
-|-s &lt;schema file&gt;|The sysflow avro schema file (.avsc) used for schema validation (default: /usr/local/sysflow/conf/SysFlow.avsc)|
-|-f &lt;filter&gt;| Sysdig style filtering string to filter scap. Must be surrounded by quotes.|
-|-c|Simple, fast filter to allow only container-related events to be dumped.|
-|-l &lt;log conf file&gt;|Location of log4cxx properties configuration file. (default: /usr/local/sysflow/conf/log4cxx.properties). Properties file follows log4j format. See conf directory in github for example.  Setting log level to debug is extremely verbose.|
-|-p &lt;cri path&gt;|The path to the cri-o domain socket (BRANCH 0.26.4 only).|
-|-t &lt;cri timeout&gt;|The amount of time in ms to wait for cri-o socket to respond (BRANCH 0.26.4 only).|
-|-v|Prints the version of ./sysporter and exits.|
+  -h                            Show this help message
+  -w file name/dir (required)   The file or directory to which sysflow records are written. If a directory is specified     (using a trailing slash), file name will be an epoch timestamp. If -G is specified, then the file name specified will have an epoch timestamp appended to it
+  -e exporterID                 A globally unique ID representing the host or VM being monitored which is stored in the sysflow dumpfile header. If -e not set, the hostname of the CURRENT machine is used, which may not be accurate for reading offline scap files
+  -G interval (in secs)         Rotates the dumpfile specified in -w every interval seconds and appends epoch timestamp to file name
+  -r scap file                  The scap file to be read and dumped as sysflow format at the file specified by -w. If this option is not specified, a live capture is assumed
+  -s schema file                The sysflow avro schema file (.avsc) used for schema validation (default: /usr/local/sysflow/conf/SysFlow.avsc)
+  -f filter                     Sysdig style filtering string to filter scap. Must be surrounded by quotes
+  -c                            Simple, fast filter to allow only container-related events to be dumped
+  -l log conf file              Location of log4cxx properties configuration file. (default: /usr/local/sysflow/conf/log4cxx.properties). Properties file follows log4j format. See conf directory in github for example.  Setting log level to debug is extremely verbose
+  -p cri-o path                 The path to the cri-o domain socket (BRANCH 0.26.4 only)
+  -t cri-o timeout              The amount of time in ms to wait for cri-o socket to respond (BRANCH 0.26.4 only)
+  -v                            Prints the version of sysporter and exits
 ``` 
 
 ### Example usage
@@ -114,6 +111,6 @@ docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/va
 
 where INTERVAL corresponds to the value of `-G`, NODE\_NAME corresponds to the value of `-e`, OUTPUT corresponds to the value of `-w`, and FILTER represents both the flag (`-f`) and the actual filter of sysporter (see above).
 
-### CRIO-O Support
+### CRI-O support
 
 The sf-collector project currently supports docker and kubernetes deployments (using the helm charts provided in sf-deployments). Container runtimes based on CRI-O is planned for futures releases of the collector.
