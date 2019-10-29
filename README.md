@@ -12,7 +12,7 @@
 	[the SysFlow Community Slack](https://join.slack.com/t/sysflow-telemetry/shared_invite/enQtODA5OTA3NjE0MTAzLTlkMGJlZDQzYTc3MzhjMzUwNDExNmYyNWY0NWIwODNjYmRhYWEwNGU0ZmFkNGQ2NzVmYjYxMWFjYTM1MzA5YWQ)
 
 -	**Where to file issues**:  
-	[the github issue tracker](https://bugs.launchpad.net/cloud-images) (include the `sf-collector` tag)
+	[the github issue tracker](https://github.com/sysflow-telemetry/sf-docs/issues) (include the `sf-collector` tag)
 
 -	**Source code of this image**:  
 	[source repository](https://github.com/sysflow-telemetry/sf-collector) 
