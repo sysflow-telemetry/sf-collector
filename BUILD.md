@@ -85,11 +85,9 @@ sysporter -G 30 -w ./output/output -e host -f "container.type!=host and containe
 
 ### Running sysporter from a Docker container
 
-The easiest way to run sysporter is from a Docker container, with host mount for the files.  The following command demonstrates how to run sysporter where files are exported to `/mnt/data` on the host.
+The easiest way to run the SysFlow collector is from a Docker container, with host mount for the output trace files. The following command shows how to run sf-collector with trace files exported to `/mnt/data` on the host.
 
 ```
-mkdir -p /mnt/data
-docker pull sysflowtelemetry/sf-collector
 docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/var/run/docker.sock \
              -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
              -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
@@ -100,7 +98,7 @@ docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/va
              --rm sysflow-telemetry/sf-collector
 ```
 
-where INTERVAL corresponds to the value of `-G`, NODE\_NAME corresponds to the value of `-e`, OUTPUT corresponds to the value of `-w`, and FILTER represents both the flag (`-f`) and the actual filter of sysporter (see above).
+where INTERVAL denotes the time in seconds before a new trace file is generated, NODE\_NAME sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events.
 
 ### CRI-O support
 
