@@ -2,67 +2,61 @@
 
 ## Installing sysporter
 
-### Git Branches
-
-The sf-collector project currently has two branches:  `master` and `0.26.4`.  The master branch is based on Sysdig 0.24.2 and Apache Avro 1.9.1.  It supports host environments, as well as 
-container environments based on Docker runtimes.  It can monitor Kubernetes clusters when combined with the sf-deployments project.  Unfortunately, the master version does not support container
-runtimes based on CRI-O rather than docker.
-
-As a result, we have been developing a version of the collector (branch 0.26.4) based on Sysdig 0.26.4, which does support CRI-O.  To do so, we've added two arguments to the collector:
-```
--p cri path - The path to the cri-o domain socket.
--t cri timeout - The amount of time in ms to wait for cri-o socket to respond.
-```
-
-Note, we have not heavily tested the 0.26.4 branch and haven't done tests in a cri-o environment.   One of our main goals over the next few weeks is to test the branch in Openshift, a CRI-O environment
-and to also create Openshit deployment mechanisms. Once we have adequately tested these features, we will roll the branch into the main branch.
-
 ### Cloning source
 
 The sf-collector project has been tested primarily on Ubuntu 16.04 and 18.04.  The project will be tested on other flavors of UNIX in the future. This document describes how to build and run the application both inside a docker container and on a linux host. Building and running the application inside a docker container is the easiest way to start. 
 
 To build the project, first pull down the source code, with submodules:
-<br><br>
-<code>git clone git@github.com:sysflow-telemetry/sf-collector.git --recursive</code>
+```
+git clone git@github.com:sysflow-telemetry/sf-collector.git --recursive
+```
 
 To checkout submodules on an already cloned repo:
-<br><br>
-<code>git submodule update --init --recursive</code>
+```
+git submodule update --init --recursive
+```
 
 ### Building a Docker container
 
 To build a docker container: 
-<br><br>
-<code> cd sf-collector </code>
-<br>
-<code> ./build </code>
+```
+cd sf-collector
+make -C modules init
+export TRAVIS_BUILD_NUMBER=10
+docker build --cache-from sysporter:deps --target deps -t sysporter:deps .
+docker build --build-arg TRAVIS_BUILD_NUMBER --cache-from sysporter:deps --cache-from sysporter:builder --target builder -t sysporter:builder .
+docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --target runtime -t sysporter:runtime .
+docker build --cache-from sysporter:deps --cache-from sysporter:builder --cache-from sysporter:runtime --cache-from sysporter:testing --target testing -t sysporter:testing .
+``` 
 
-The container is built in stages to enable caching of the intermediate steps of the build.  As a result, the docker container of interest is: <code>sysporter:runtime</code>
+The container is built in stages to enable caching of the intermediate steps of the build.  As a result, the docker container of interest is: `sysporter:runtime`
 
 ### Building directly on a host
 
 First, the dependencies to build Sysdig and the Avro libraries must be available:
+```
+apt-utils build-essential libncurses5-dev libncursesw5-dev cmake libboost-all-dev flex bison g++ wget libelf-dev
+```
 
-<code> apt-utils build-essential libncurses5-dev libncursesw5-dev cmake libboost-all-dev flex bison g++ wget libelf-dev</code>
+Then the dependencies for sysporter need to be installed.  Note that it is recommended that sysporter is built with g++8 or above. When building with older g++ versions, one must install the libboost filesystem library that supports the `weakly_canonical` API:
+```
+apt-utils make libboost-all-dev g++-8 libelf-dev liblog4cxx-dev libapr1 libaprutil1 libsparsehash-dev
+```
 
-Then the dependencies for sysporter need to be installed.  Note that it is recommended that sysporter is built with g++8 or above.  When building with older g++ versions, one must install the libboost filesystem library that supports the <code>weakly_canonical</code> API:
-
-<code>apt-utils make libboost-all-dev g++-8 libelf-dev liblog4cxx-dev libapr1 libaprutil1 libsparsehash-dev</code>
-
-<code>ln -s /usr/bin/g++-8 /usr/bin/g++</code>
-
-<code>make install</code>
+```
+ln -s /usr/bin/g++-8 /usr/bin/g++
+make install
+```
 
 ## Running sysporter
 
 ### Running sysporter from the command line 
 
 Sysporter has the following options:
-<br><br>
-<code>Usage: ./sysporter [-h] [-G &lt;interval&gt;] [-s &lt;schema file&gt;] [-c] [-e &lt;exporterID&gt;] [-r &lt;scap file&gt;] [-l &lt;log conf file&gt;] -w &lt;file name/dir&gt;</code>
+```
+Usage: sysporter [-h] [-G &lt;interval&gt;] [-s &lt;schema file&gt;] [-c] [-e &lt;exporterID&gt;] [-r &lt;scap file&gt;] [-l &lt;log conf file&gt;] -w &lt;file name/dir&gt;</code>
 
-<code>Options:</code>
-
+Options:
 
 | Option| Description|    
 |---------------------|-------------------------------|
@@ -78,30 +72,37 @@ Sysporter has the following options:
 |-p &lt;cri path&gt;|The path to the cri-o domain socket (BRANCH 0.26.4 only).|
 |-t &lt;cri timeout&gt;|The amount of time in ms to wait for cri-o socket to respond (BRANCH 0.26.4 only).|
 |-v|Prints the version of ./sysporter and exits.|
- 
+``` 
+
 ### Example usage
 
-Convert Sysdig scap file to SysFlow file with an export id. The output will be written to `output.sf`.  Note that sysporter must be run with the root privilege:
+Convert Sysdig scap file to SysFlow file with an export id. The output will be written to `output.sf`.  Note that sysporter must be run with root privilege:
 
-<code>./sysporter -r input.scap -w ./output.sf  -e host </code>
+```
+sysporter -r input.scap -w ./output.sf  -e host
+```
 
 Trace a system live, and output SysFlow to files in a directory which are rotated every 30 seconds. The file name will be an epoch timestamp of when the file was initially written.  Note that the trailing slash _must be present_. The example filter ensures that only SysFlow from containers is generated.
 
-<code>./sysporter -G 30 -w ./output/ -e host -f "container.type!=host and container.type=docker" </code>
+```
+sysporter -G 30 -w ./output/ -e host -f "container.type!=host and container.type=docker"
+```
 
 Trace a system live, and output SysFlow to files in a directory which are rotated every 30 seconds. The file name will be an `output.<epoch timestamp>` where the timestamp is of when the file was initially written. The example filter ensures that only SysFlow from containers is generated.
 
-<code>./sysporter -G 30 -w ./output/output -e host -f "container.type!=host and container.type=docker" </code>
+```
+sysporter -G 30 -w ./output/output -e host -f "container.type!=host and container.type=docker" </code>`
+```
 
 ### Running sysporter from a Docker container
 
-The easiest way to run sysporter is from a Docker container, with host mount for the files.  The following command demonstrates how to run sysporter where files are exported to <code>/mnt/data</code> on the host.
+The easiest way to run sysporter is from a Docker container, with host mount for the files.  The following command demonstrates how to run sysporter where files are exported to `/mnt/data` on the host.
 
-<code>sudo mkdir -p /mnt/data</code>
+```
+mkdir -p /mnt/data
+docker pull sysflowtelemetry/sf-collector
 
-<code>sudo docker pull floripa.sl.cloud9.ibm.com/sf-collector:latest</code>
-
-<pre>sudo docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/var/run/docker.sock \
+docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/var/run/docker.sock \
              -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
              -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
              -e INTERVAL=300 \
@@ -109,6 +110,10 @@ The easiest way to run sysporter is from a Docker container, with host mount for
              -e OUTPUT=/mnt/data    \
              -e FILTER="-f \"container.type!=host and container.type=docker and container.name!=sf-collector and not (container.name contains sf-exporter)\"" \
              --rm -i -t  floripa.sl.cloud9.ibm.com/sf-collector
-</pre>
+```
 
-where INTERVAL corresponds to the value of <code>-G</code>, NODE_NAME corresponds to the value of <code>-e</code>, OUTPUT corresponds to the value of <code>-w</code>, and FILTER represents both the flag (<code>-f</code>) and the actual filter of sysporter (see above).
+where INTERVAL corresponds to the value of `-G`, NODE\_NAME corresponds to the value of `-e`, OUTPUT corresponds to the value of `-w`, and FILTER represents both the flag (`-f`) and the actual filter of sysporter (see above).
+
+### CRIO-O Support
+
+The sf-collector project currently supports docker and kubernetes deployments (using the helm charts provided in sf-deployments). Container runtimes based on CRI-O is planned for futures releases of the collector.
