@@ -34,6 +34,7 @@ the collector supports Sysdig's powerful filtering capabilities. Please check th
 
 # How to use this image
 
+### Starting the collection probe
 The easiest way to run the SysFlow collector is from a Docker container, with host mount for the output trace files. The following command shows how to run sf-collector with trace files exported to `/mnt/data` on the host.
 
 ```
@@ -46,8 +47,19 @@ docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/va
              -e FILTER="-f \"container.type!=host and container.type=docker and container.name!=sf-collector and not (container.name contains sf-exporter)\"" \
              --rm sysflow-telemetry/sf-collector
 ```
-
 where INTERVAL denotes the time in seconds before a new trace file is generated, NODE\_NAME sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events.
+
+### Inspecting collected traces
+A command line utilitiy is provided for inspecting collected traces or concert traces from SysFlow's compact binary format into human-readable JSON or CSV formats. 
+
+```
+docker run -it --rm --name sysprint -v /mnt/data:/mnt/data sysflowtelemetry/sf-exporter sysprint PATH
+```
+where PATH is the path of the trace file or directory containing multiple trace files to be processed. By default, the traces are printed to 
+standard output with a default set of SysFlow attributes. For a complete list of options, run:
+```
+docker run -it --rm --name sysprint -v /mnt/data:/mnt/data sysflowtelemetry/sf-exporter sysprint -h
+```
 
 # License
 
