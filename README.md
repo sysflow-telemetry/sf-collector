@@ -1,8 +1,8 @@
-[![GitHub](https://img.shields.io/github/license/sysflow-telemetry/sf-collector)](https://github.com/sysflow-telemetry/sf-collector/blob/master/LICENSE.md)
 [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/sysflowtelemetry/sf-collector)](https://hub.docker.com/r/sysflowtelemetry/sf-collector/builds)
 [![Docker Pulls](https://img.shields.io/docker/pulls/sysflowtelemetry/sf-collector)](https://hub.docker.com/r/sysflowtelemetry/sf-collector)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/sysflow-telemetry/sf-collector)
 [![Documentation Status](https://readthedocs.org/projects/sysflow/badge/?version=latest)](https://sysflow.readthedocs.io/en/latest/?badge=latest)
+[![GitHub](https://img.shields.io/github/license/sysflow-telemetry/sf-collector)](https://github.com/sysflow-telemetry/sf-collector/blob/master/LICENSE.md)
 
 # Supported tags and respective `Dockerfile` links
 
