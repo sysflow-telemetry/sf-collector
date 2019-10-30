@@ -40,7 +40,7 @@ docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/va
              -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
              -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
              -e INTERVAL=300 \
-             -e NODE_NAME="${NODE}" \
+             -e NODE_NAME=${HOSTNAME} \
              -e OUTPUT=/mnt/data    \
              -e FILTER="-f \"container.type!=host and container.type=docker and container.name!=sf-collector and not (container.name contains sf-exporter)\"" \
              --rm sysflow-telemetry/sf-collector
