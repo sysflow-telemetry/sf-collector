@@ -4,9 +4,9 @@ Our project welcomes external contributions. A good way to familiarize yourself 
 
 To contribute code or documentation, please submit a [pull request](https://github.com/sysflow-telemetry/sf-collector/pulls); and please quickly [get in touch](#communication) with us before embarking on a more ambitious contribution.
 
-**Note: We appreciate your effort, and want to avoid a situation where a contribution
+> **Note:** We appreciate your effort, and want to avoid a situation where a contribution
 requires extensive rework (by you or by us), sits in backlog for a long time, or
-cannot be accepted at all!**
+cannot be accepted at all!
 
 ### Proposing new features
 
@@ -64,6 +64,7 @@ git commit -s
 ```
 
 ## Communication
+
 Please feel free to connect with us on our [Slack channel](https://join.slack.com/t/sysflow-telemetry/shared_invite/enQtODA5OTA3NjE0MTAzLTlkMGJlZDQzYTc3MzhjMzUwNDExNmYyNWY0NWIwODNjYmRhYWEwNGU0ZmFkNGQ2NzVmYjYxMWFjYTM1MzA5YWQ) or
 via [email](mailto:sysflow@us.ibm.com). Note that the projects in this repository are not formal products. As a result, the communication channels are to the maintainers and not to a support staff.
 
@@ -74,10 +75,9 @@ on how to build the application, dependencies, and how to test the collector.
 
 ## Testing
 
-This project is in its infancy and with limited resources we have not built a large testing framework around the collector. We do have a set of unit tests that examine the coverage of most of the events of interest in `sf-collector/tests`.   
-These tests can be run using the [bats testing framework](https://github.com/bats-core/bats-core), and directions on how to install bats are in the accompanied link and the tests rely on Python 3.
-To perform the tests, run `bats -t tests.bat` from the `tests` directory. Before conducting a pull request, these unit tests should be run. Note that there is a version of the docker image with a `testing` tag that contains bats and the unit tests, which can be useful for testing.
-It is also desirable to conduct a load test and run the application under valgrind for pull requests. 
+This project is in its infancy and with limited resources we have not built a large testing framework around the collector. We do have a set of unit and regression tests that examine the coverage of most of the events of interest in `sf-collector/tests`. These tests can be run using the [bats testing framework](https://github.com/bats-core/bats-core), and directions on how to install bats are in the accompanied link.
+
+To perform the tests, run `bats -t tests.bat` from the `tests` directory. Before conducting a pull request, these unit tests should be run. Note that the multi-stage build defines a `testing` target for the docker image that contains bats and the unit tests, which can be useful for testing. It is also desirable to conduct a load test and run the application under valgrind before submitting pull requests. 
 
 ## Coding style guidelines
 We follow the [LLVM coding standards](https://llvm.org/docs/CodingStandards.html) in this project. There is a `.clang-format` file in the master repo [clang-format](https://github.com/sysflow-telemetry/sf-collector/blob/master/src/.clang-format) that can be used in conjunction with [ClangFormat Tool](https://clang.llvm.org/docs/ClangFormat.html) to automatically format code. For linting,
