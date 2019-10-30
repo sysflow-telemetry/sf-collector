@@ -18,8 +18,8 @@
 -	**Where to file issues**:  
 	[the github issue tracker](https://github.com/sysflow-telemetry/sf-docs/issues) (include the `sf-collector` tag)
 
--	**Source code of this image**:  
-	[source repository](https://github.com/sysflow-telemetry/sf-collector) 
+-	**Source of this description**:  
+	[repo's readme](https://github.com/sysflow-telemetry/sf-collector/edit/master/README.md) ([history](https://github.com/sysflow-telemetry/sf-collector/commits/master))
 
 # What is SysFlow?
 
