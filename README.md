@@ -38,7 +38,10 @@ the collector supports Sysdig's powerful filtering capabilities. Please check th
 The easiest way to run the SysFlow collector is from a Docker container, with host mount for the output trace files. The following command shows how to run sf-collector with trace files exported to `/mnt/data` on the host.
 
 ```
-docker run -d --privileged --name sf-collector -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
+docker run -d --privileged --name sf-collector \
+	     -v /var/run/docker.sock:/host/var/run/docker.sock \
+	     -v /dev:/host/dev -v /proc:/host/proc:ro \
+	     -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
              -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
              -e INTERVAL=60 \
              -e EXPORTER_ID=${HOSTNAME} \
