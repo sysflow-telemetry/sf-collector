@@ -83,7 +83,7 @@ ENV INTERVAL=$interval
 ARG filter=""
 ENV FILTER=$filter
 
-ARG exporterid=""
+ARG exporterid="local"
 ENV EXPORTER_ID=$exporterid
 
 ARG output=/mnt/data/
@@ -104,7 +104,7 @@ COPY --from=builder /build/src/conf/log4cxx.properties /usr/local/sysflow/conf/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
-CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $EXPORTER_ID -f "$FILTER"
+CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e "$EXPORTER_ID" -f "$FILTER"
 
 #-----------------------
 # Stage: Testing
