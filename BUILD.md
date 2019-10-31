@@ -46,10 +46,10 @@ make install
 
 Sysporter has the following options:
 ```
-Usage: sysporter [-h] [-G &lt;interval&gt;] [-s &lt;schema file&gt;] [-c] [-e &lt;exporterID&gt;] [-r &lt;scap file&gt;] [-l &lt;log conf file&gt;] -w &lt;file name/dir&gt;</code>
+Usage: sysporter [options] -w <file name/dir>
 
 Options:
-  -h                            Show this help message
+  -h                            Show this help message and exit
   -w file name/dir (required)   The file or directory to which sysflow records are written. If a directory is specified     (using a trailing slash), file name will be an epoch timestamp. If -G is specified, then the file name specified will have an epoch timestamp appended to it
   -e exporterID                 A globally unique ID representing the host or VM being monitored which is stored in the sysflow dumpfile header. If -e not set, the hostname of the CURRENT machine is used, which may not be accurate for reading offline scap files
   -G interval (in secs)         Rotates the dumpfile specified in -w every interval seconds and appends epoch timestamp to file name
@@ -60,7 +60,7 @@ Options:
   -l log conf file              Location of log4cxx properties configuration file. (default: /usr/local/sysflow/conf/log4cxx.properties). Properties file follows log4j format. See conf directory in github for example.  Setting log level to debug is extremely verbose
   -p cri-o path                 The path to the cri-o domain socket (BRANCH 0.26.4 only)
   -t cri-o timeout              The amount of time in ms to wait for cri-o socket to respond (BRANCH 0.26.4 only)
-  -v                            Prints the version of sysporter and exits
+  -v                            Print the version of sysporter and exit
 ``` 
 
 ### Example usage
