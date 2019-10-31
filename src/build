@@ -1,3 +1,0 @@
-#!/bin/bash
-sudo docker run -it --rm --name=lint -v $(pwd)/src:/build/src -v $(pwd)/modules/filesystem:/build/modules/filesystem -v $(pwd)/modules/avro:/build/modules/avro -v $(pwd)/modules/sysflow:/build/modules/sysflow  us.icr.io/csa-ci/sysporter:builder bash
-
