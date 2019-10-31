@@ -80,11 +80,11 @@ FROM sysdig/sysdig:0.24.2 as runtime
 ARG interval=30
 ENV INTERVAL=$interval
 
-ARG filter=
+ARG filter=""
 ENV FILTER=$filter
 
-ARG nodename=
-ENV NODE_NAME=$nodename
+ARG exporterid=""
+ENV EXPORTER_ID=$exporterid
 
 ARG output=/mnt/data/
 ENV OUTPUT=$output
@@ -104,7 +104,7 @@ COPY --from=builder /build/src/conf/log4cxx.properties /usr/local/sysflow/conf/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
-CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $NODE_NAME $FILTER
+CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $EXPORTER_ID -f "$FILTER"
 
 #-----------------------
 # Stage: Testing
