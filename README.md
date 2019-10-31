@@ -52,7 +52,7 @@ docker run -d --privileged --name sf-collector \
 where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events. Note: append `container.type!=host` to FILTER expression to filter host events. 
 
 ### Inspecting collected traces
-A command line utilitiy is provided for inspecting collected traces or concert traces from SysFlow's compact binary format into human-readable JSON or CSV formats. 
+A [command line utilitiy](https://sysflow.readthedocs.io/en/latest/api-utils.html) is provided for inspecting collected traces or concert traces from SysFlow's compact binary format into human-readable JSON or CSV formats. 
 
 ```
 docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint /mnt/data/<trace> 
