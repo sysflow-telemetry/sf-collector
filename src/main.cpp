@@ -59,10 +59,9 @@ int str2int(int &i, char const *s, int base = 0) {
 static void usage(const std::string &name) {
   std::cerr
       << "Usage: " << name
-      << " [-h] [-G <interval>] [-s <schema file>] [-c] [-e <exporterID>] [-r "
-         "<scap file>] [-l <log conf file>] -w <file name/dir>\n"
+      << " [options] -w <file name/dir>\n"
       << "Options:\n"
-      << "\t-h\t\t\tShow this help message\n"
+      << "\t-h\t\t\tShow this help message and exit\n"
       << "\t-w file name/dir\t(required) The file or directory to which "
          "sysflow records are written\n"
       << "\t\t\t\tIf a directory is specified (using a trailing slash), file "
@@ -86,7 +85,7 @@ static void usage(const std::string &name) {
          "to be dumped\n"
       << "\t-l log conf file\tLocation of log4cxx properties configuration "
          "file. (default: /usr/local/sysflow/conf/log4cxx.properties)\n"
-      << "\t-v\t\t\tPrints the version of " << name << " and exits.\n"
+      << "\t-v\t\t\tPrint the version of " << name << " and exit.\n"
       << std::endl;
 }
 
