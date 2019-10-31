@@ -47,7 +47,7 @@ docker run -d --privileged --name sf-collector \
              -e EXPORTER_ID=${HOSTNAME} \
              -e OUTPUT=/mnt/data    \
              -e FILTER="container.name!=sf-collector and container.name!=sf-exporter" \
-             --rm sysflow-telemetry/sf-collector
+             --rm sysflowtelemetry/sf-collector
 ```
 where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events. Note: append `container.type!=host` to FILTER expression to filter host events. 
 
@@ -55,12 +55,12 @@ where INTERVAL denotes the time in seconds before a new trace file is generated,
 A command line utilitiy is provided for inspecting collected traces or concert traces from SysFlow's compact binary format into human-readable JSON or CSV formats. 
 
 ```
-docker run -it --rm --name sysprint -v /mnt/data:/mnt/data sysflowtelemetry/sf-exporter sysprint PATH
+docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint /mnt/data/<trace> 
 ```
-where PATH is the path of the trace file or directory containing multiple trace files to be processed. By default, the traces are printed to 
+where `trace` is the the name of the trace file inside `/mnt/data`. If empty, all files in `/mnt/data` are processed. By default, the traces are printed to 
 standard output with a default set of SysFlow attributes. For a complete list of options, run:
 ```
-docker run -it --rm --name sysprint -v /mnt/data:/mnt/data sysflowtelemetry/sf-exporter sysprint -h
+docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint  -h
 ```
 
 # License
