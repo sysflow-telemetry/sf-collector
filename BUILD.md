@@ -88,17 +88,18 @@ sysporter -G 30 -w ./output/output -e host -f "container.type!=host and containe
 The easiest way to run the SysFlow collector is from a Docker container, with host mount for the output trace files. The following command shows how to run sf-collector with trace files exported to `/mnt/data` on the host.
 
 ```
-docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/var/run/docker.sock \
-             -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
+docker run -d --privileged --name sf-collector \
+	     -v /var/run/docker.sock:/host/var/run/docker.sock \
+	     -v /dev:/host/dev -v /proc:/host/proc:ro \
+	     -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
              -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
-             -e INTERVAL=300 \
-             -e NODE_NAME="${NODE}" \
+             -e INTERVAL=60 \
+             -e EXPORTER_ID=${HOSTNAME} \
              -e OUTPUT=/mnt/data    \
-             -e FILTER="-f \"container.type!=host and container.type=docker and container.name!=sf-collector and not (container.name contains sf-exporter)\"" \
+             -e FILTER="container.name!=sf-collector and container.name!=sf-exporter" \
              --rm sysflow-telemetry/sf-collector
 ```
-
-where INTERVAL denotes the time in seconds before a new trace file is generated, NODE\_NAME sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events.
+where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events. Note: append `container.type!=host` to FILTER expression to filter host events. 
 
 ### CRI-O support
 
