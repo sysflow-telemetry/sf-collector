@@ -64,8 +64,8 @@ The Container entity represents a system or application container such as docker
 | Attribute     | Type           | Description  | Status |
 | ------------- |:-------------:| -----|  ----- |
 | id | string |  Unique string representing the Container Object as provided by docker, LXC, etc. | Implemented (Should we rename to oid?)  |
-| **state**      | enum | state of the process (CREATED, MODIFIED, REUP) | **NOT IMPLEMENTED** Do we want this? |
-| **timestamp (ts)**|  int64 | The timestamp when container object is exported (nanoseconds). | **NOT IMPLEMENTED** Do we want this? |
+| **state**      | enum | state of the process (CREATED, MODIFIED, REUP) | **NOT IMPLEMENTED** |
+| **timestamp (ts)**|  int64 | The timestamp when container object is exported (nanoseconds). | **NOT IMPLEMENTED** |
 | name | string |  Container name as provided by docker, LXC, etc. | Implemented |
 | image | string |  Image name associated with container as provided by docker, LXC, etc. | Implemented |
 | imageID | string |  Image ID associated with container as provided by docker, LXC, etc. | Implemented |
@@ -80,8 +80,8 @@ The process entity represents a running process on the system.  It contains impo
 | Attribute     | Type           | Description  | Status |
 | ------------- |:-------------:| -----|  ----- |
 | state      | enum | state of the process (CREATED, MODIFIED, REUP) | Implemented |
-| **OID:**<br> &nbsp;&nbsp;*host pid*<br>&nbsp;&nbsp;*create ts*| **struct** <br> &nbsp;&nbsp;*int64*<br>&nbsp;&nbsp;*int64*| The Process OID contains the host pid of the project, and creation timestamp. | Implemented |
-| **POID:**<br> &nbsp;&nbsp;*parent host &nbsp;&nbsp;pid*<br>&nbsp;&nbsp;*parent &nbsp;create ts* | **struct** <br> &nbsp;&nbsp;*int64*<br>&nbsp;&nbsp;*int64*| The OID of the parent process can be NULL if not available or if a root process. | Implemented |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The Process OID contains the host pid of the project, and creation timestamp. | Implemented |
+| **POID:**<br> *parent host pid*<br>*parent create ts* | **struct** <br> *int64*<br>*int64*| The OID of the parent process can be NULL if not available or if a root process. | Implemented |
 | timestamp (ts)|  int64 | The timestamp when process object is exported (nanoseconds). | Implemented |
 | exe |  string |  Full path (if available) of the executable used in the process launch. Otherwise, it's the name of the exe. | Implemented |
 | exeArgs |  string |  Concatenated list of args passed on process startup. | Implemented |
@@ -152,7 +152,7 @@ The list of attributes for the Process Event are as follows:
 
 | Attribute     | Type           | Description  | Status |
 | ------------- |:-------------:| -----|  ----- |
-| **OID:**<br> &nbsp;&nbsp;*host pid*<br>&nbsp;&nbsp;*create ts*| **struct** <br> &nbsp;&nbsp;*int64*<br>&nbsp;&nbsp;*int64*| The OID of the process for which the event occurred. | Implemented |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the event occurred. | Implemented |
 | timestamp (ts)|  int64 | The timestamp when the event occurred (nanoseconds). | Implemented |
 | tid |  int64 | The id of the thread associated with the ProcessEvent.  If the running process is single threaded tid == pid | Implemented |
 | opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | Implemented | 
@@ -177,7 +177,7 @@ The list of attributes for the File Event are as follows:
 
 | Attribute     | Type           | Description  | Status |
 | ------------- |:-------------:| -----|  ----- |
-| **OID:**<br> &nbsp;&nbsp;*host pid*<br>&nbsp;&nbsp;*create ts*| **struct** <br> &nbsp;&nbsp;*int64*<br>&nbsp;&nbsp;*int64*| The OID of the process for which the event occurred. | Implemented |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the event occurred. | Implemented |
 | timestamp (ts)|  int64 | The timestamp when the event occurred (nanoseconds). | Implemented |
 | tid |  int64 | The id of the thread associated with the FileEvent.  If the running process is single threaded tid == pid | Implemented |
 | opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | Implemented | 
@@ -215,7 +215,7 @@ The list of attributes for the File Flow are as follows:
 
 | Attribute     | Type           | Description  | Status |
 | ------------- |:-------------:| -----|  ----- |
-| **OID:**<br> &nbsp;&nbsp;*host pid*<br>&nbsp;&nbsp;*create ts*| **struct** <br> &nbsp;&nbsp;*int64*<br>&nbsp;&nbsp;*int64*| The OID of the process for which the flow occurred. | Implemented |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | Implemented |
 | timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | Implemented |
 | tid |  int64 | The id of the thread associated with the flow.  If the running process is single threaded tid == pid | Implemented |
 | opFlags | int64 (bitmap) | The id of one or more syscalls associated with the FileFlow.  See list of Operation Flags for details. | Implemented | 
@@ -245,7 +245,7 @@ The list of attributes for the Network Flow are as follows:
 
 | Attribute     | Type           | Description  | Status |
 | ------------- |:-------------:| -----|  ----- |
-| **OID:**<br> &nbsp;&nbsp;*host pid*<br>&nbsp;&nbsp;*create ts*| **struct** <br> &nbsp;&nbsp;*int64*<br>&nbsp;&nbsp;*int64*| The OID of the process for which the flow occurred. | Implemented |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | Implemented |
 | timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | Implemented |
 | tid |  int64 | The id of the thread associated with the flow.  If the running process is single threaded tid == pid | Implemented |
 | opFlags | int64 (bitmap) | The id of one or more syscalls associated with the flow.  See list of Operation Flags for details. | Implemented | 
@@ -261,4 +261,3 @@ The list of attributes for the Network Flow are as follows:
 | numWSendBytes | int32 | Number of bytes sent during duration of the flow. | Implemented | 
 
 > **NOTE:**  The current implementation of NetworkFlow only supports ipv4.  What's the best way to add in ipv6?
-
