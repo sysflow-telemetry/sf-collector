@@ -45,7 +45,7 @@ docker run -d --privileged --name sf-collector \
              -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
              -e INTERVAL=60 \
              -e EXPORTER_ID=${HOSTNAME} \
-             -e OUTPUT=/mnt/data    \
+             -e OUTPUT=/mnt/data/    \
              -e FILTER="container.name!=sf-collector and container.name!=sf-exporter" \
              --rm sysflowtelemetry/sf-collector
 ```
