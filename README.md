@@ -28,9 +28,9 @@ The SysFlow Telemetry Pipeline is a framework for monitoring cloud workloads and
 
 # About This Image
 
-This image packages the SysFlow Collector, which monitors and collects system call and event information from hosts
+This image packages SysFlow Collector, which monitors and collects system call and event information from hosts
 and exports them in the SysFlow format using Apache Avro object serialization. The SysFlow Collector depends on [Sysdig](https://github.com/draios/sysdig) probe to passively collect system events and turn them into SysFlow. As a result, 
-the collector supports Sysdig's powerful filtering capabilities. Please check the [Installation and Usage](https://sysflow.readthedocs.io/en/latest/build.html) for complete set of options.
+the collector supports Sysdig's powerful filtering capabilities. Please check the [Installation and Usage](https://sysflow.readthedocs.io/en/latest/build.html) for the complete set of options.
 
 # How to use this image
 
@@ -54,7 +54,7 @@ where INTERVAL denotes the time in seconds before a new trace file is generated,
 Instructions for `docker compose` and `helm` deployments are available in [here](https://sysflow.readthedocs.io/en/latest/deploy.html).
 
 ### Inspecting collected traces
-A [command line utilitiy](https://sysflow.readthedocs.io/en/latest/api-utils.html) is provided for inspecting collected traces or concert traces from SysFlow's compact binary format into human-readable JSON or CSV formats. 
+A [command line utilitiy](https://sysflow.readthedocs.io/en/latest/api-utils.html) is provided for inspecting collected traces or convert traces from SysFlow's compact binary format into human-readable JSON or CSV formats. 
 
 ```
 docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint /mnt/data/<trace> 
