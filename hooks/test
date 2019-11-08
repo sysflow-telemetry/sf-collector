@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "[***] Test hook running"
+
+# Run tests
+docker run --rm --name sftests -v "$(pwd)/tests:/usr/local/sysflow/tests" -e quiet=true $IMAGE_NAME-testing -t tests/tests.bats

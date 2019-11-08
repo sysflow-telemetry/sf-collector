@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "[***] Pre-test hook running"
+
+# Build test container
+docker build \
+    --cache-from $IMAGE_NAME \
+    --target testing \
+    -t $IMAGE_NAME-testing .

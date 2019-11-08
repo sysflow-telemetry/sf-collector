@@ -1,5 +1,0 @@
-#!/bin/bash
-wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
-apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main"
-apt update
-apt install clang-9 clang-tidy-9 -y

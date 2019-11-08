@@ -1,2 +1,0 @@
-#!/bin/bash
-sudo docker run -it --rm --name=tester -v $(pwd)/tests/:/usr/local/sysflow/tests --entrypoint=/bin/bash sf-a1.9.1-0.26.4:testing

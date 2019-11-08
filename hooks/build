@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "[***] Build hook running"
+
+# Initialize submodules
+make -C modules init
+
+# Multi-stage build
+docker build \
+    --build-arg BUILD_NUMBER=$(git rev-parse --short HEAD) \
+    --target runtime \
+    -t $IMAGE_NAME .

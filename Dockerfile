@@ -61,7 +61,7 @@ RUN cd /build/modules && make install
 # Stage: Builder
 #-----------------------
 FROM deps as builder
-ARG TRAVIS_BUILD_NUMBER
+ARG BUILD_NUMBER=0
 
 # copy dependencies
 COPY --from=deps /build /build/
@@ -70,7 +70,7 @@ COPY --from=deps /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 
 # build sysporter
 COPY ./src/ /build/src/
-RUN cd /build/src && make SYSFLOW_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
+RUN cd /build/src && make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER
 
 #-----------------------
 # Stage: Runtime
@@ -82,18 +82,19 @@ RUN apt-get update -yqq && \
     apt-get install -yqq  valgrind && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
+
 # environment variables
 ARG interval=30
 ENV INTERVAL=$interval
 
-ARG filter=
+ARG filter=""
 ENV FILTER=$filter
 
 ARG stats=
 ENV STATS=$stats
 
-ARG nodename=
-ENV NODE_NAME=$nodename
+ARG exporterid="local"
+ENV EXPORTER_ID=$exporterid
 
 ARG output=/mnt/data/
 ENV OUTPUT=$output
@@ -104,10 +105,6 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linu
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libapr* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libexpat* /usr/lib/x86_64-linux-gnu/
-#COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.1.0.0/ /lib/x86_64-linux-gnu/
-#COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /lib/x86_64-linux-gnu/
-#COPY --from=builder /usr/lib/x86_64-linux-gnu/libcrypto* /lib/x86_64-linux-gnu/
-#COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libexpat* /lib/x86_64-linux-gnu/
 COPY --from=builder /build/src/sysporter /usr/local/sysflow/bin/
 COPY --from=builder /build/modules/sysflow/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
@@ -115,11 +112,12 @@ COPY --from=builder /build/src/conf/log4cxx.properties /usr/local/sysflow/conf/
 COPY ./runTimeout /
 RUN ln -s /usr/local/sysflow/modules/lib/libcrypto.so /usr/local/sysflow/modules/lib/libcrypto.so.1.0.0
 RUN ln -s /usr/local/sysflow/modules/lib/libssl.so /usr/local/sysflow/modules/lib/libssl.so.1.0.0
+
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
 #CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $NODE_NAME $FILTER $STATS
-#CMD /usr/bin/valgrind --leak-check=full --show-leak-kinds=all --log-file=/valgrind.log /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e $NODE_NAME $FILTER $STATS
-CMD /runTimeout $INTERVAL $OUTPUT $NODE_NAME "$FILTER" $STATS
+#CMD /runTimeout $INTERVAL $OUTPUT $NODE_NAME "$FILTER" $STATS
+CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e "$EXPORTER_ID" -f "$FILTER"
 
 #-----------------------
 # Stage: Testing
