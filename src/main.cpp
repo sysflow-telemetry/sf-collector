@@ -113,15 +113,21 @@ int main(int argc, char **argv) {
   string filter = "";
   bool help = false;
   bool stats = false;
+  bool domainSocket = false;
+  bool writeFile = false;
   string logProps = "/usr/local/sysflow/conf/log4cxx.properties";
 
   sigaction(SIGINT, &sigIntHandler, nullptr);
 
-  while ((c = static_cast<char>(getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:d"))) !=
+  while ((c = static_cast<char>(getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:"))) !=
          -1) {
     switch (c) {
     case 'd':
       stats = true;
+      break;
+    case 'u':
+      domainSocket = true;
+      outputDir = optarg;
       break;
     case 'e':
       exporterID = optarg;
@@ -130,6 +136,7 @@ int main(int argc, char **argv) {
       scapFile = optarg;
       break;
     case 'w':
+      writeFile = true;
       outputDir = optarg;
       break;
     case 'G':
@@ -176,7 +183,7 @@ int main(int argc, char **argv) {
       cerr << " Version: " << SF_VERSION << "." << SF_BUILD << endl;
       exit(0);
     case '?':
-      if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' ||
+      if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' || optopt == 'u' ||
           optopt == 'G' || optopt == 'l' || optopt == 'p' || optopt == 't' ) {
         fprintf(stderr, "Option -%c requires an argument.\n", optopt);
       } else if (isprint(optopt)) {
@@ -198,6 +205,11 @@ int main(int argc, char **argv) {
     usage(argv[0]);
     return 1;
   }
+  if (writeFile && domainSocket) {
+    std::cout << "Cannot set both -w and -u" << endl;
+    usage(argv[0]);
+    return 1;
+  }
 
   try {
     CONFIGURE_LOGGER(logProps);
@@ -208,6 +220,9 @@ int main(int argc, char **argv) {
                                     criPath, criTO);
     if (stats) {
       cxt->enableStats();
+    }
+    if (domainSocket) {
+      cxt->enableDomainSock();
     }
     s_prc = new SysFlowProcessor(cxt);
     int ret = s_prc->run();

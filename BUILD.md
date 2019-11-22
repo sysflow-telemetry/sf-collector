@@ -60,6 +60,7 @@ Options:
   -l log conf file              Location of log4cxx properties configuration file. (default: /usr/local/sysflow/conf/log4cxx.properties). Properties file follows log4j format. See conf directory in github for example.  Setting log level to debug is extremely verbose
   -p cri-o path                 The path to the cri-o domain socket (BRANCH 0.26.4 only)
   -t cri-o timeout              The amount of time in ms to wait for cri-o socket to respond (BRANCH 0.26.4 only)
+  -u domain socket file         Outputs SysFlow to a unix domain socket rather than to a file
   -v                            Print the version of sysporter and exit
 ``` 
 

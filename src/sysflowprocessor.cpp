@@ -35,7 +35,11 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
   } else {
     m_statsTime = 0;
   }
-  m_writer = new writer::SysFlowWriter(cxt, start);
+  if (!m_cxt->isDomainSock()) {
+    m_writer = new writer::SFFileWriter(cxt, start);
+  } else {
+    m_writer = new writer::SFSocketWriter(cxt, start);
+  }
   m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
   m_fileCxt = new file::FileContext(m_containerCxt, m_writer);
   m_processCxt =
@@ -65,14 +69,14 @@ void SysFlowProcessor::clearTables() {
 bool SysFlowProcessor::checkAndRotateFile() {
   bool fileRotated = false;
   time_t curTime = time(nullptr);
-  if (m_writer->isFileExpired(curTime)) {
+  if (m_writer->isExpired(curTime)) {
     SF_INFO(m_logger,
             "Container Table: " << m_containerCxt->getSize()
                                 << " Process Table: " << m_processCxt->getSize()
                                 << " NetworkFlow Table: " << m_dfPrcr->getSize()
                                 << " Num Records Written: "
                                 << m_writer->getNumRecs());
-    m_writer->resetFileWriter(curTime);
+    m_writer->reset(curTime);
     clearTables();
     fileRotated = true;
   }

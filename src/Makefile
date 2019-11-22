@@ -83,7 +83,7 @@ version:
 	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
 
 .PHONY: $(TARGET)
-$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .filecontext.o
+$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .filecontext.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .main.o: main.cpp
@@ -105,6 +105,12 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .sysflowwriter.o: sysflowwriter.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sffilewriter.o: sffilewriter.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sfsockwriter.o: sfsockwriter.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .processcontext.o: processcontext.cpp

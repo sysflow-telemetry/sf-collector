@@ -32,7 +32,8 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
       m_scapFile(sFile), m_schemaFile(std::move(schFile)),
       m_exporterID(std::move(expID)), m_nfExportInterval(30),
       m_nfExpireInterval(30), m_filter(std::move(filter)), 
-      m_criPath(std::move(criPath)), m_criTO(criTO), m_stats(false), m_statsInterval(30) {
+      m_criPath(std::move(criPath)), m_criTO(criTO), m_stats(false), 
+      m_statsInterval(30), m_domainSock(false) {
   m_inspector = new sinsp();
   m_inspector->set_hostname_and_port_resolution_mode(false);
   if (!m_filter.empty()) {

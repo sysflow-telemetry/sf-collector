@@ -22,18 +22,11 @@
 using writer::SysFlowWriter;
 
 SysFlowWriter::SysFlowWriter(context::SysFlowContext *cxt, time_t start)
-    : m_dfw(nullptr), m_start(start) {
+    : m_start(start) {
   m_cxt = cxt;
-  m_sysfSchema = utils::loadSchema(m_cxt->getSchemaFile());
   m_start = start;
 }
 
-SysFlowWriter::~SysFlowWriter() {
-  if (m_dfw != nullptr) {
-    m_dfw->close();
-    delete m_dfw;
-  }
-}
 
 void SysFlowWriter::writeHeader() {
   sysflow::SFHeader header;
@@ -41,45 +34,5 @@ void SysFlowWriter::writeHeader() {
   header.exporter = m_cxt->getExporterID();
   m_flow.rec.set_SFHeader(header);
   m_numRecs++;
-  m_dfw->write(m_flow);
-}
-
-int SysFlowWriter::initialize() {
-  time_t curTime = time(nullptr);
-  string ofile = getFileName(curTime);
-  m_dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), m_sysfSchema,
-                                            COMPRESS_BLOCK_SIZE,
-                                            avro::Codec::DEFLATE_CODEC);
-  writeHeader();
-  return 0;
-}
-
-string SysFlowWriter::getFileName(time_t curTime) {
-  string ofile;
-  if (m_start > 0) {
-    if (m_cxt->hasPrefix()) {
-      ofile = m_cxt->getOutputFile() + "." + std::to_string(curTime);
-    } else {
-      ofile = m_cxt->getOutputFile() + std::to_string(curTime);
-    }
-  } else {
-    if (m_cxt->hasPrefix()) {
-      ofile = m_cxt->getOutputFile();
-    } else {
-      ofile = m_cxt->getOutputFile() + std::to_string(curTime);
-    }
-  }
-  return ofile;
-}
-
-void SysFlowWriter::resetFileWriter(time_t curTime) {
-  string ofile = getFileName(curTime);
-  m_numRecs = 0;
-  m_dfw->close();
-  delete m_dfw;
-  m_dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), m_sysfSchema,
-                                            COMPRESS_BLOCK_SIZE,
-                                            avro::Codec::DEFLATE_CODEC);
-  m_start = curTime;
-  writeHeader();
+  write(&m_flow);
 }

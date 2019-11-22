@@ -49,6 +49,7 @@ private:
   int m_criTO;
   bool m_stats;
   int m_statsInterval;
+  bool m_domainSock;
   DEFINE_LOGGER();
 
 public:
@@ -70,6 +71,8 @@ public:
   inline bool isFilterContainers() { return m_filterCont; }
   inline bool isStatsEnabled() { return m_stats; }
   inline void enableStats() { m_stats = true; }
+  inline bool isDomainSock() { return m_domainSock; }
+  inline void enableDomainSock() { m_domainSock = true; }
   inline int getStatsInterval() { return m_statsInterval;}
 };
 } // namespace context
