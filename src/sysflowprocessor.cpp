@@ -28,10 +28,10 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
   m_cxt = cxt;
   time_t start = 0;
   if (m_cxt->getFileDuration() > 0) {
-    start = time(nullptr);
+    start = utils::getCurrentTime(m_cxt);
   }
   if (m_cxt->isStatsEnabled()) {
-    m_statsTime = time(nullptr);	  
+    m_statsTime = utils::getCurrentTime(m_cxt);
   } else {
     m_statsTime = 0;
   }
@@ -68,7 +68,7 @@ void SysFlowProcessor::clearTables() {
 
 bool SysFlowProcessor::checkAndRotateFile() {
   bool fileRotated = false;
-  time_t curTime = time(nullptr);
+  time_t curTime = utils::getCurrentTime(m_cxt);
   if (m_writer->isExpired(curTime)) {
     SF_INFO(m_logger,
             "Container Table: " << m_containerCxt->getSize()
@@ -84,7 +84,7 @@ bool SysFlowProcessor::checkAndRotateFile() {
     double duration = difftime(curTime, m_statsTime);
     if (duration >= m_cxt->getStatsInterval()) {
       m_dfPrcr->printFlowStats();
-      m_statsTime = curTime; 
+      m_statsTime = curTime;
     }
   }
   return fileRotated;
@@ -105,6 +105,7 @@ int SysFlowProcessor::run() {
         if (numExpired) {
           SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
         }
+        m_processCxt->checkForDeletion();
         checkAndRotateFile();
         continue;
       } else if (res == SCAP_EOF) {
@@ -123,6 +124,7 @@ int SysFlowProcessor::run() {
       if (numExpired) {
         SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
       }
+      m_processCxt->checkForDeletion();
       checkAndRotateFile();
       if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
         continue;

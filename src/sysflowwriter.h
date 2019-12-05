@@ -40,7 +40,7 @@ protected:
   int m_numRecs{};
   void writeHeader();
   time_t m_start;
-  virtual void write(SysFlow* flow) = 0;
+  virtual void write(SysFlow *flow) = 0;
 
 public:
   SysFlowWriter(context::SysFlowContext *cxt, time_t start);

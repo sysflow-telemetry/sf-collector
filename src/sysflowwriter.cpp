@@ -27,7 +27,6 @@ SysFlowWriter::SysFlowWriter(context::SysFlowContext *cxt, time_t start)
   m_start = start;
 }
 
-
 void SysFlowWriter::writeHeader() {
   sysflow::SFHeader header;
   header.version = 1000;

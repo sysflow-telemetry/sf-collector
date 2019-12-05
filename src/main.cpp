@@ -58,8 +58,7 @@ int str2int(int &i, char const *s, int base = 0) {
 
 static void usage(const std::string &name) {
   std::cerr
-      << "Usage: " << name
-      << " [options] -w <file name/dir>\n"
+      << "Usage: " << name << " [options] -w <file name/dir>\n"
       << "Options:\n"
       << "\t-h\t\t\tShow this help message and exit\n"
       << "\t-w file name/dir\t(required) The file or directory to which "
@@ -86,7 +85,8 @@ static void usage(const std::string &name) {
       << "\t-l log conf file\tLocation of log4cxx properties configuration "
          "file. (default: /usr/local/sysflow/conf/log4cxx.properties)\n"
       << "\t-p cri path\t\tThe path to the cri socket\n"
-      << "\t-t cri timeout\t\tThe amount of time in ms to wait for cri socket to "
+      << "\t-t cri timeout\t\tThe amount of time in ms to wait for cri socket "
+         "to "
          " respond\n"
       << "\t-d\t\t\tPrint debug stats (not debug logging) of all caches\n"
       << "\t-v\t\t\tPrint the version of " << name << " and exit.\n"
@@ -119,8 +119,8 @@ int main(int argc, char **argv) {
 
   sigaction(SIGINT, &sigIntHandler, nullptr);
 
-  while ((c = static_cast<char>(getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:"))) !=
-         -1) {
+  while ((c = static_cast<char>(
+              getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:"))) != -1) {
     switch (c) {
     case 'd':
       stats = true;
@@ -183,8 +183,9 @@ int main(int argc, char **argv) {
       cerr << " Version: " << SF_VERSION << "." << SF_BUILD << endl;
       exit(0);
     case '?':
-      if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' || optopt == 'u' ||
-          optopt == 'G' || optopt == 'l' || optopt == 'p' || optopt == 't' ) {
+      if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' ||
+          optopt == 'u' || optopt == 'G' || optopt == 'l' || optopt == 'p' ||
+          optopt == 't') {
         fprintf(stderr, "Option -%c requires an argument.\n", optopt);
       } else if (isprint(optopt)) {
         fprintf(stderr, "Unknown option `-%c'.\n", optopt);
@@ -214,10 +215,9 @@ int main(int argc, char **argv) {
   try {
     CONFIGURE_LOGGER(logProps);
     SF_DEBUG(logger, "Starting sysporter..");
-    auto *cxt =
-        new context::SysFlowContext(filterCont, fileDuration, outputDir,
-                                    scapFile, schemaFile, exporterID, filter, 
-                                    criPath, criTO);
+    auto *cxt = new context::SysFlowContext(filterCont, fileDuration, outputDir,
+                                            scapFile, schemaFile, exporterID,
+                                            filter, criPath, criTO);
     if (stats) {
       cxt->enableStats();
     }

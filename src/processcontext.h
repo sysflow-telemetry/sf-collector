@@ -30,6 +30,7 @@
 #include <sinsp.h>
 
 #define PROC_TABLE_SIZE 50000
+#define PROC_DEL_EXPIRED 1.0
 namespace process {
 class ProcessContext {
 private:
@@ -38,6 +39,8 @@ private:
   container::ContainerContext *m_containerCxt;
   ProcessTable m_procs;
   file::FileContext *m_fileCxt;
+  OIDQueue m_delProcQue;
+  time_t m_delProcTime;
   DEFINE_LOGGER();
   void writeProcessAndAncestors(ProcessObj *proc);
   void reupContainer(sinsp_evt *ev, ProcessObj *proc);
@@ -52,11 +55,13 @@ public:
                             SFObjectState state);
   ProcessObj *getProcess(sinsp_evt *ev, SFObjectState state, bool &created);
   ProcessObj *getProcess(OID *oid);
+  ProcessObj *getProcess(int64_t pid);
   void printAncestors(Process *proc);
   bool isAncestor(OID *oid, Process *proc);
   void clearProcesses();
   void clearAllProcesses();
   void deleteProcess(ProcessObj **proc);
+  void markForDeletion(ProcessObj **proc);
   bool exportProcess(OID *oid);
   void printNetworkFlow(ProcessObj *proc);
   void printStats();
@@ -76,6 +81,33 @@ public:
       total += it->second->fileflows.size();
     }
     return total;
+  }
+
+  inline void checkForDeletion() {
+    time_t curTime = utils::getCurrentTime(m_cxt);
+    if (difftime(curTime, m_delProcTime) <= PROC_DEL_EXPIRED) {
+      return;
+    }
+    SF_DEBUG(m_logger, "Checking process queue for deletion. Queue Size: "
+                           << m_delProcQue.size())
+    for (auto it = m_delProcQue.begin(); it != m_delProcQue.end(); ++it) {
+      if (difftime(curTime, (*it)->exportTime) >= PROC_DEL_EXPIRED) {
+        SF_DEBUG(m_logger, "Proc expired: " << (*it)->oid.hpid)
+        ProcessObj *p = getProcess(&((*it)->oid));
+        if (p != nullptr) {
+          SF_DEBUG(m_logger, "Deleting process: " << p->proc.oid.hpid)
+          deleteProcess(&p);
+        } else {
+          SF_DEBUG(m_logger,
+                   "Unable to find process in cache: " << (*it)->oid.hpid)
+        }
+        delete (*it);
+        it = m_delProcQue.erase(it);
+      } else {
+        break;
+      }
+    }
+    m_delProcTime = utils::getCurrentTime(m_cxt);
   }
 };
 } // namespace process

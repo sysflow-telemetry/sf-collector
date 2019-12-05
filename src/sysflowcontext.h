@@ -73,7 +73,7 @@ public:
   inline void enableStats() { m_stats = true; }
   inline bool isDomainSock() { return m_domainSock; }
   inline void enableDomainSock() { m_domainSock = true; }
-  inline int getStatsInterval() { return m_statsInterval;}
+  inline int getStatsInterval() { return m_statsInterval; }
 };
 } // namespace context
 

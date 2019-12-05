@@ -41,6 +41,16 @@ struct NFKey {
   uint32_t fd;
 };
 
+class OIDObj {
+public:
+  time_t exportTime;
+  OID oid;
+  explicit OIDObj(OID o) {
+    oid.hpid = o.hpid;
+    oid.createTS = o.createTS;
+  }
+};
+
 class DataFlowObj {
 public:
   time_t exportTime;
@@ -189,7 +199,7 @@ typedef google::dense_hash_map<OID, NetworkFlowTable *, MurmurHasher<OID>,
     OIDNetworkTable;
 typedef google::dense_hash_set<OID, MurmurHasher<OID>, eqoid> ProcessSet;
 typedef multiset<DataFlowObj *, eqdfobj> DataFlowSet;
-
+typedef std::list<OIDObj *> OIDQueue;
 class ProcessObj {
 public:
   bool written{false};

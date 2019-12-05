@@ -42,9 +42,7 @@ private:
 public:
   SFFileWriter(context::SysFlowContext *cxt, time_t start);
   virtual ~SFFileWriter();
-  inline void write(SysFlow* flow) {
-    m_dfw->write(*flow);
-  }
+  inline void write(SysFlow *flow) { m_dfw->write(*flow); }
   int initialize();
   void reset(time_t curTime);
 };

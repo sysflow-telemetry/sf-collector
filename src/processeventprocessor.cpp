@@ -86,7 +86,8 @@ void ProcessEventProcessor::writeExitEvent(sinsp_evt *ev) {
   m_writer->writeProcessEvent(&m_procEvt);
   // delete the process from the proc table after an exit
   if (ti->is_main_thread()) {
-    m_processCxt->deleteProcess(&proc);
+    // m_processCxt->deleteProcess(&proc);
+    m_processCxt->markForDeletion(&proc);
   }
 }
 

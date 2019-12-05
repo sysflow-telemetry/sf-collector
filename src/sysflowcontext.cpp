@@ -26,13 +26,13 @@ CREATE_LOGGER(SysFlowContext, "sysflow.sysflowcontext");
 
 SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
                                const string &sFile, string schFile,
-                               string expID, string filter,
-                               string criPath, int criTO)
+                               string expID, string filter, string criPath,
+                               int criTO)
     : m_filterCont(fCont), m_fileDuration(fDur), m_outputFile(oFile),
       m_scapFile(sFile), m_schemaFile(std::move(schFile)),
       m_exporterID(std::move(expID)), m_nfExportInterval(30),
-      m_nfExpireInterval(30), m_filter(std::move(filter)), 
-      m_criPath(std::move(criPath)), m_criTO(criTO), m_stats(false), 
+      m_nfExpireInterval(30), m_filter(std::move(filter)),
+      m_criPath(std::move(criPath)), m_criTO(criTO), m_stats(false),
       m_statsInterval(30), m_domainSock(false) {
   m_inspector = new sinsp();
   m_inspector->set_hostname_and_port_resolution_mode(false);

@@ -25,10 +25,10 @@
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
 #include "utils.h"
-#include <sys/socket.h>
 #include <netinet/in.h>
-#include <sys/un.h>
 #include <sstream>
+#include <sys/socket.h>
+#include <sys/un.h>
 
 using sysflow::SysFlow;
 
@@ -45,13 +45,14 @@ private:
 public:
   SFSocketWriter(context::SysFlowContext *cxt, time_t start);
   virtual ~SFSocketWriter();
-  inline void write(SysFlow* flow) {
+  inline void write(SysFlow *flow) {
     avro::encode(*m_encoder, *flow);
     m_encoder->flush();
-    if(send (m_sock, (const void*)m_stringStream.str().c_str(), m_stringStream.str().size(), 0) <0) {
-      SF_ERROR(m_logger,
-                 "Unable to send on domain socket:  " << m_sockPath << ". Error Code: "
-                 << std::strerror(errno));
+    if (send(m_sock, (const void *)m_stringStream.str().c_str(),
+             m_stringStream.str().size(), 0) < 0) {
+      SF_ERROR(m_logger, "Unable to send on domain socket:  "
+                             << m_sockPath
+                             << ". Error Code: " << std::strerror(errno));
     }
 
     m_stringStream.str("");

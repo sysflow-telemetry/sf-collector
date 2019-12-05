@@ -26,9 +26,10 @@ ProcessContext::ProcessContext(context::SysFlowContext *cxt,
                                container::ContainerContext *ccxt,
                                file::FileContext *fileCxt,
                                writer::SysFlowWriter *writer)
-    : m_procs(PROC_TABLE_SIZE) {
+    : m_procs(PROC_TABLE_SIZE), m_delProcQue() {
   OID *emptyoidkey = utils::getOIDEmptyKey();
   OID *deloidkey = utils::getOIDDelKey();
+  m_delProcTime = utils::getCurrentTime(m_cxt);
   m_procs.set_empty_key(emptyoidkey);
   m_procs.set_deleted_key(deloidkey);
   m_cxt = cxt;
@@ -63,6 +64,23 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
     poid.createTS = parent->m_clone_ts;
     poid.hpid = parent->m_pid;
     p->proc.poid.set_OID(poid);
+    SF_DEBUG(m_logger,
+             "PARENT PID: " << parent->m_pid << " ts " << parent->m_clone_ts)
+  } else {
+    SF_DEBUG(m_logger, "Unable to find parent for process "
+                           << mainthread->m_exe << " PID " << mainthread->m_pid
+                           << " PTID " << mainthread->m_ptid)
+    if (mainthread->m_ptid != -1) {
+      SF_DEBUG(m_logger, "Searching for potential parent in process table.")
+      ProcessObj *pt = getProcess(mainthread->m_ptid);
+      if (pt != nullptr) {
+        SF_DEBUG(m_logger, "Found parent candidate! Process: " << pt->proc.exe);
+        OID poid;
+        poid.createTS = pt->proc.oid.createTS;
+        poid.hpid = pt->proc.oid.hpid;
+        p->proc.poid.set_OID(poid);
+      }
+    }
   }
   p->proc.exe = (mainthread->m_exepath.empty())
                     ? utils::getAbsolutePath(ti, mainthread->m_exe)
@@ -156,6 +174,22 @@ void ProcessContext::reupContainer(sinsp_evt *ev, ProcessObj *proc) {
   }
 }
 
+ProcessObj *ProcessContext::getProcess(int64_t pid) {
+  // SF_DEBUG(m_logger, "getProcess PID: " << pid)
+  ProcessTable::iterator it;
+  // SF_DEBUG(m_logger, " Size of Proc Table: " << m_procs.size())
+  for (it = m_procs.begin(); it != m_procs.end(); it++) {
+    // SF_DEBUG(m_logger, "getProcess Iterating PID: " << it->first->hpid)
+    if (it->first->hpid == pid) {
+      // SF_DEBUG(m_logger, "getProcess FOUND/RETURNING PID: " << pid)
+      return it->second;
+    }
+  }
+
+  // SF_DEBUG(m_logger, "getProcess RETURN NULL")
+  return nullptr;
+}
+
 ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
                                        bool &created) {
   sinsp_threadinfo *ti = ev->get_thread_info();
@@ -189,9 +223,13 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
                          << " EXEPATH: " << mt->m_exepath
                          << " EXE: " << mt->m_exe);
   processes.push_back(process);
+
+  sinsp_threadinfo *ct = mt;
   mt = mt->get_parent_thread();
+
   while (mt != nullptr) {
     if (mt->m_clone_ts == 0 && mt->m_pid == 0) {
+      ct = mt;
       mt = mt->get_parent_thread();
       continue;
     }
@@ -217,9 +255,37 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     }
     parent->children.insert(processes.back()->proc.oid);
     processes.push_back(parent);
+    ct = mt;
     mt = mt->get_parent_thread();
   }
+  if (mt == nullptr && ct->m_ptid != -1) {
+    SF_DEBUG(m_logger,
+             "Ancestral chain not found standard way.. searching based on pid")
+    ProcessObj *prt = getProcess(ct->m_ptid);
+    OID o;
+    o.hpid = ct->m_pid;
+    o.createTS = ct->m_clone_ts;
+    while (prt != nullptr) {
+      SF_DEBUG(m_logger, "Found parent with pid: " << prt->proc.oid.hpid
+                                                   << " create TS "
+                                                   << prt->proc.oid.createTS
+                                                   << " exe: " << prt->proc.exe)
+      if (!prt->written) {
+        SF_DEBUG(m_logger, "Writing to process vector...")
+        processes.push_back(prt);
+      }
+      prt->children.insert(o);
+      o.hpid = prt->proc.oid.hpid;
+      o.createTS = prt->proc.oid.createTS;
+      if (prt->proc.poid.is_null()) {
+        break;
+      }
+      OID poid = prt->proc.poid.get_OID();
+      prt = getProcess(&poid);
+    }
+  }
 
+  SF_DEBUG(m_logger, " Size of Proc Table: " << m_procs.size())
   for (auto it = processes.rbegin(); it != processes.rend(); ++it) {
     SF_DEBUG(m_logger, "Writing process " << (*it)->proc.exe << " "
                                           << (*it)->proc.oid.hpid);
@@ -227,6 +293,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     m_writer->writeProcess(&((*it)->proc));
     (*it)->written = true;
   }
+  SF_DEBUG(m_logger, " Size of Proc Table: " << m_procs.size())
   return process;
 }
 
@@ -332,10 +399,13 @@ void ProcessContext::clearProcesses() {
 }
 
 void ProcessContext::printStats() {
-  SF_INFO(m_logger, "# Containers: " << m_containerCxt->getSize() <<  " # Procs: "  << m_procs.size());
+  SF_INFO(m_logger, "# Containers: " << m_containerCxt->getSize()
+                                     << " # Procs: " << m_procs.size());
   for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
     ProcessObj *proc = it->second;
-    SF_INFO(m_logger, proc->proc.exe << " " << proc->children.size() << " " << proc->netflows.size() << " " << proc->fileflows.size());
+    SF_INFO(m_logger, proc->proc.exe << " " << proc->children.size() << " "
+                                     << proc->netflows.size() << " "
+                                     << proc->fileflows.size());
   }
 }
 
@@ -404,6 +474,18 @@ void ProcessContext::clearAllProcesses() {
   for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
     delete it->second;
   }
+
+  for (auto it = m_delProcQue.begin(); it != m_delProcQue.end(); ++it) {
+    delete (*it);
+    it = m_delProcQue.erase(it);
+  }
+}
+
+void ProcessContext::markForDeletion(ProcessObj **proc) {
+  OIDObj *o = new OIDObj((*proc)->proc.oid);
+  o->exportTime = utils::getCurrentTime(m_cxt);
+  m_delProcQue.push_back(o);
+  *proc = nullptr;
 }
 
 void ProcessContext::deleteProcess(ProcessObj **proc) {

@@ -25,10 +25,10 @@
 #include "logger.h"
 #include "processcontext.h"
 #include "processeventprocessor.h"
-#include "syscall_defs.h"
-#include "sysflowcontext.h"
 #include "sffilewriter.h"
 #include "sfsockwriter.h"
+#include "syscall_defs.h"
+#include "sysflowcontext.h"
 #include <ctime>
 #include <string>
 

@@ -19,8 +19,8 @@
 
 #include "fileflowprocessor.h"
 #include "utils.h"
-#include <utility>
 #include <boost/stacktrace.hpp>
+#include <utility>
 
 using fileflow::FileFlowProcessor;
 
@@ -280,29 +280,27 @@ int FileFlowProcessor::removeFileFlowFromSet(FileFlowObj **ffo,
   if (!found) {
     SF_ERROR(m_logger,
              "Cannot find FileFlow Object "
-                 << (*ffo)->filekey  << " "  
-		 << (*ffo)->flowkey  << " "  
-		 << (*ffo)->fileflow.opFlags << " "  
-		 << (*ffo)->fileflow.endTs << " " 
-		 << boost::stacktrace::stacktrace() 
+                 << (*ffo)->filekey << " " << (*ffo)->flowkey << " "
+                 << (*ffo)->fileflow.opFlags << " " << (*ffo)->fileflow.endTs
+                 << " " << boost::stacktrace::stacktrace()
                  << " in data flow set. Deleting. This should not happen.");
     ProcessObj *proc = m_processCxt->getProcess(&((*ffo)->fileflow.procOID));
     if (proc == nullptr) {
-      SF_ERROR(m_logger, "Could not find proc " << (*ffo)->fileflow.procOID.hpid
-                                              << " "
-                                              << (*ffo)->fileflow.procOID.createTS
-                                              << " This shouldn't happen!");
+      SF_ERROR(m_logger, "Could not find proc "
+                             << (*ffo)->fileflow.procOID.hpid << " "
+                             << (*ffo)->fileflow.procOID.createTS
+                             << " This shouldn't happen!");
     } else {
       FileObj *file = m_fileCxt->getFile((*ffo)->filekey);
       if (file == nullptr) {
         SF_ERROR(m_logger, "Unable to find file object of key "
-                             << (*ffo)->filekey << ". Shouldn't happen!");
+                               << (*ffo)->filekey << ". Shouldn't happen!");
       } else {
-	SF_ERROR(m_logger, "Proc name: " << proc->proc.exe << " " << proc->proc.exeArgs <<
-			   " Pid: " << proc->proc.oid.hpid << " " << 
-			   " File Name: " << file->file.path << " " <<
-			   " File type: " << file->file.restype );
-
+        SF_ERROR(m_logger,
+                 "Proc name: " << proc->proc.exe << " " << proc->proc.exeArgs
+                               << " Pid: " << proc->proc.oid.hpid << " "
+                               << " File Name: " << file->file.path << " "
+                               << " File type: " << file->file.restype);
       }
     }
 

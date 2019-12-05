@@ -19,16 +19,16 @@
 
 #ifndef _SF_UTILS_
 #define _SF_UTILS_
-#include <fstream>
-#include <sinsp.h>
-#include <string>
 #include "avro/Compiler.hh"
 #include "avro/ValidSchema.hh"
 #include "ghc/fs_std.hpp"
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include <ctime>
+#include <fstream>
 #include <openssl/sha.h>
+#include <sinsp.h>
+#include <string>
 
 using sysflow::OID;
 
