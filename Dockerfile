@@ -75,7 +75,7 @@ RUN cd /build/src && make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysdig/sysdig:0.26.4 as runtime
+FROM sysdig/sysdig:0.26.5 as runtime
 
 # environment variables
 ARG interval=30
