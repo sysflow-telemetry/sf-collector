@@ -48,20 +48,11 @@ OID *getOIDDelKey();
 OID *getOIDEmptyKey();
 void generateFOID(const string &key, FOID *foid);
 string getPath(sinsp_evt *ev, const string &paraName);
+fs::path getCanonicalPath(const string &fileName);
 string getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
                        const string &fileName);
 string getAbsolutePath(sinsp_threadinfo *ti, const string &fileName);
 int64_t getFD(sinsp_evt *ev, const string &paraName);
-
-inline fs::path getCanonicalPath(const string &fileName) {
-  fs::path p(fileName);
-  try {
-    p = fs::weakly_canonical(p);
-  } catch (...) {
-    SF_ERROR(m_logger, "Unable to compute canonical path from " << filename);
-  }
-  return p;
-}
 
 inline time_t getCurrentTime(context::SysFlowContext *cxt) {
   if (cxt->isOffline()) {

@@ -186,6 +186,16 @@ int64_t utils::getFD(sinsp_evt *ev, const string &paraName) {
   return fd;
 }
 
+fs::path utils::getCanonicalPath(const string &fileName) {
+  fs::path p(fileName);
+  try {
+    p = fs::weakly_canonical(p);
+  } catch (...) {
+    SF_WARN(m_logger, "Unable to compute canonical path from " << filename);
+  }
+  return p;
+}
+
 string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
                               const string &fileName) {
   fs::path p(fileName);
