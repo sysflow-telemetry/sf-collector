@@ -191,7 +191,7 @@ fs::path utils::getCanonicalPath(const string &fileName) {
   try {
     p = fs::weakly_canonical(p);
   } catch (...) {
-    SF_WARN(m_logger, "Unable to compute canonical path from " << filename);
+    SF_WARN(m_logger, "Unable to compute canonical path from " << fileName);
   }
   return p;
 }
