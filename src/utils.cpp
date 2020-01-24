@@ -202,7 +202,9 @@ string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
       tmp = ti->get_cwd();
     } else {
       sinsp_fdinfo_t *fdinfo = ti->get_fd(dirfd);
-      assert(fdinfo != nullptr);
+      if (fdinfo == nullptr) {
+        return p.string();
+      }
       tmp = fdinfo->m_name;
       SF_DEBUG(m_logger,
                "getAbsolutePath: Retrieve fdinfo for fd. Path:  " << tmp);
