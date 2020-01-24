@@ -211,10 +211,10 @@ string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
     }
     tmp /= fileName;
     SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
-    p = fs::weakly_canonical(tmp);
+    p = utils::getCanonicalPath(tmp);
     SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);
   } else {
-    p = fs::weakly_canonical(p);
+    p = utils::getCanonicalPath(p);
   }
 
   return p.string();
@@ -232,11 +232,11 @@ string utils::getAbsolutePath(sinsp_threadinfo *ti, const string &fileName) {
       tmp = cwd;
       tmp /= fileName;
       SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
-      p = fs::weakly_canonical(tmp);
+      p = utils::getCanonicalPath(tmp);
       SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);
     }
   } else {
-    p = fs::weakly_canonical(p);
+    p = utils::getCanonicalPath(p);
   }
   return p.string();
 }
