@@ -186,6 +186,16 @@ int64_t utils::getFD(sinsp_evt *ev, const string &paraName) {
   return fd;
 }
 
+fs::path utils::getCanonicalPath(const string &fileName) {
+  fs::path p(fileName);
+  try {
+    p = fs::weakly_canonical(p);
+  } catch (...) {
+    SF_WARN(m_logger, "Unable to compute canonical path from " << fileName);
+  }
+  return p;
+}
+
 string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
                               const string &fileName) {
   fs::path p(fileName);
@@ -202,17 +212,19 @@ string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
       tmp = ti->get_cwd();
     } else {
       sinsp_fdinfo_t *fdinfo = ti->get_fd(dirfd);
-      assert(fdinfo != nullptr);
+      if (fdinfo == nullptr) {
+        return p.string();
+      }
       tmp = fdinfo->m_name;
       SF_DEBUG(m_logger,
                "getAbsolutePath: Retrieve fdinfo for fd. Path:  " << tmp);
     }
     tmp /= fileName;
     SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
-    p = fs::weakly_canonical(tmp);
+    p = utils::getCanonicalPath(tmp);
     SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);
   } else {
-    p = fs::weakly_canonical(p);
+    p = utils::getCanonicalPath(p);
   }
 
   return p.string();
@@ -230,11 +242,11 @@ string utils::getAbsolutePath(sinsp_threadinfo *ti, const string &fileName) {
       tmp = cwd;
       tmp /= fileName;
       SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
-      p = fs::weakly_canonical(tmp);
+      p = utils::getCanonicalPath(tmp);
       SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);
     }
   } else {
-    p = fs::weakly_canonical(p);
+    p = utils::getCanonicalPath(p);
   }
   return p.string();
 }

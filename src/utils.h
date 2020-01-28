@@ -48,15 +48,11 @@ OID *getOIDDelKey();
 OID *getOIDEmptyKey();
 void generateFOID(const string &key, FOID *foid);
 string getPath(sinsp_evt *ev, const string &paraName);
+fs::path getCanonicalPath(const string &fileName);
 string getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
                        const string &fileName);
 string getAbsolutePath(sinsp_threadinfo *ti, const string &fileName);
 int64_t getFD(sinsp_evt *ev, const string &paraName);
-inline string getCanonicalPath(const string &fileName) {
-  fs::path p(fileName);
-  p = weakly_canonical(p);
-  return p.string();
-}
 
 inline time_t getCurrentTime(context::SysFlowContext *cxt) {
   if (cxt->isOffline()) {
