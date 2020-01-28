@@ -20,5 +20,7 @@
 PREFIX=/usr/local/sysflow
 MODPREFIX=$(PREFIX)/modules
 LIBPREFIX=$(MODPREFIX)/lib
+BINPREFIX=$(MODPREFIX)/bin
+DRIVERPREFIX=/usr/src/sysdig-
 SDINCPREFIX=$(MODPREFIX)/include/sysdig
 AVRINCPREFIX=$(MODPREFIX)/include/avro

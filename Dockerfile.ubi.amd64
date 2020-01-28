@@ -1,0 +1,57 @@
+#
+# Copyright (C) 2019 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#-----------------------
+# Stage: deps
+#-----------------------
+FROM registry.access.redhat.com/ubi8/ubi:latest AS deps
+
+ENV LIBRARY_PATH=/lib64
+
+ENV SYSDIG_HOST_ROOT=/host
+
+ENV PATH="$PATH:/usr/local/sysflow/modules/bin"
+
+ENV HOME=/root
+
+ARG gllogtostderr=1
+ENV GLOG_logtostderr=$gllogtostderr
+
+ARG glv=
+ENV GLOG_v=$glv
+
+## dependencies 
+ARG INSTALL_PKGS="kernel-devel kernel-headers gcc gcc-c++ make cmake lua-devel pkgconfig autoconf wget automake libtool patch binutils bzip2 perl make flex bison libstdc++-static glibc-static diffutils kmod epel-release"
+RUN dnf install -y --disableplugin=subscription-manager http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.1-1.1911.0.8.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.8.el8.x86_64.rpm && \
+     dnf update -y --disableplugin=subscription-manager && \
+     dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools  ${INSTALL_PKGS} \
+     xz boost-devel elfutils-libelf-devel apr-devel apr-util apr-util-devel sparsehash-devel ncurses-devel openssl-devel glog-devel && \
+     dnf update -y --disableplugin=subscription-manager && \
+     dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools dkms
+
+
+##  build dependencies
+#RUN mkdir /build
+COPY  ./modules /build/modules
+COPY  ./makefile.* /build/
+RUN cd /build/modules && make install
+COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
+RUN  cp /usr/local/sysflow/modules/bin/sysdig-probe-loader  /usr/bin/
+
+ENTRYPOINT ["/usr/local/sysflow/modules/bin/docker-entry-ubi.sh"]

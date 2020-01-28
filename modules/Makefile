@@ -43,8 +43,8 @@ install: modules \
 sysdig/package: 
 	cd sysdig && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(SYSDIG_VERSION)\"/" CMakeLists.txt && \
 	mkdir -p build && cd build && \
-    cmake ../. && make tbb grpc c-ares zlib jq curl luajit protobuf b64 openssl scap sinsp && \
-	mkdir -p include && mkdir -p lib && \
+    cmake ../. && make tbb grpc c-ares zlib jq curl luajit protobuf b64 openssl scap sinsp sysdig && \
+	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
 	mkdir -p include/json && cp ../userspace/libsinsp/third-party/jsoncpp/jsoncpp.cpp include/json && \
@@ -61,6 +61,9 @@ sysdig/package:
 	cp tbb-prefix/src/tbb/build/lib_release/libtbbmalloc.a lib/ && \
 	cp userspace/libsinsp/libsinsp.a lib/ && \
 	cp userspace/libscap/libscap.a lib/ && \
+	cp userspace/sysdig/sysdig bin/ && \
+	cp ../scripts/sysdig-probe-loader bin/ && \
+	cp ../docker/stable/docker-entrypoint.sh bin/ && \
 	cp grpc-prefix/src/grpc/libs/opt/*.a lib/ && \
 	cp protobuf-prefix/src/protobuf/src/.libs/* lib/ && \
 	cp c-ares-prefix/src/c-ares/.libs/* lib/ && \
@@ -75,8 +78,8 @@ sysdig/package:
 
 .PHONY: sysdig/install
 sysdig/install:	
-	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && \
-	cd sysdig/build && cp -r include/* $(SDINCPREFIX)/ && cp -r lib/* $(LIBPREFIX)/
+	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(SYSDIG_VERSION)" && \
+	cd sysdig/build && cp -r include/* $(SDINCPREFIX)/ && cp -r lib/* $(LIBPREFIX)/ && cp -r bin/* $(BINPREFIX)/ && cp -r driver/src/* "$(DRIVERPREFIX)$(SYSDIG_VERSION)"
 
 .PHONY: avro/package
 avro/package:

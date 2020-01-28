@@ -212,7 +212,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  try {
+  //try {
     CONFIGURE_LOGGER(logProps);
     SF_DEBUG(logger, "Starting sysporter..");
     auto *cxt = new context::SysFlowContext(filterCont, fileDuration, outputDir,
@@ -228,6 +228,9 @@ int main(int argc, char **argv) {
     int ret = s_prc->run();
     delete s_prc;
     return ret;
-  }
-  CATCH_LOGGER_EXCEPTION();
+  /*}
+  CATCH_LOGGER_EXCEPTION()
+  catch(...) {
+    SF_ERROR(logger, "Unexcepted exception in main loop.");
+  }*/
 }

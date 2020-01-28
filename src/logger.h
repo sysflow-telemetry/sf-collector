@@ -19,41 +19,26 @@
 
 #ifndef __SF_LOGGER
 #define __SF_LOGGER
-#include "log4cxx/basicconfigurator.h"
-#include "log4cxx/helpers/exception.h"
-#include "log4cxx/logger.h"
-#include "log4cxx/propertyconfigurator.h"
+#include <glog/logging.h>
+
 #include <iostream>
 
-using namespace log4cxx;
-using namespace log4cxx::helpers;
 
-#define CREATE_LOGGER(ClassName, logger)                                       \
-  LoggerPtr ClassName::m_logger(Logger::getLogger(logger));
-#define CREATE_LOGGER_2(logger) LoggerPtr m_logger(Logger::getLogger(logger));
-#define CREATE_MAIN_LOGGER()                                                   \
-  static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("sysflow."       \
-                                                              "main"));
-#define DEFINE_LOGGER() static log4cxx::LoggerPtr m_logger;
+#define CREATE_LOGGER(ClassName, logger)
+#define CREATE_LOGGER_2(logger)
+#define CREATE_MAIN_LOGGER()
+#define DEFINE_LOGGER()
+#define m_logger
 
 #define CONFIGURE_LOGGER(logConfig)                                            \
-  do {                                                                         \
-    if (!(logConfig).empty()) {                                                \
-      PropertyConfigurator::configure((logConfig).c_str());                    \
-    } else {                                                                   \
-      BasicConfigurator::configure();                                          \
-    }                                                                          \
-  } while (0)
+	 google::InitGoogleLogging(argv[0]);
 
-#define CATCH_LOGGER_EXCEPTION()                                               \
-  catch (Exception & ex) {                                                     \
-    cerr << ex.what() << endl;                                                 \
-    return 1;                                                                  \
-  }
-#define SF_DEBUG(logger, message) LOG4CXX_DEBUG(logger, message)
-#define SF_WARN(logger, message) LOG4CXX_WARN(logger, message)
-#define SF_INFO(logger, message) LOG4CXX_INFO(logger, message)
-#define SF_ERROR(logger, message) LOG4CXX_ERROR(logger, message)
+#define CATCH_LOGGER_EXCEPTION()
 
-#define IS_DEBUG_ENABLED(logger) logger->isDebugEnabled()
+#define SF_DEBUG(logger, message) VLOG(1) << message;
+#define SF_WARN(logger, message) LOG(WARNING) <<  message;
+#define SF_INFO(logger, message) LOG(INFO) <<  message;
+#define SF_ERROR(logger, message) LOG(ERROR) << message;
+
+#define IS_DEBUG_ENABLED(logger) VLOG_IS_ON(1)
 #endif

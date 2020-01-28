@@ -1,0 +1,108 @@
+#
+# Copyright (C) 2019 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+#-----------------------
+# Stage: builder
+#-----------------------
+FROM sfcollector-ubi:latest AS builder
+
+ENV LIBRARY_PATH=/lib64
+ARG gllogtostderr=1
+ENV GLOG_logtostderr=$gllogtostderr
+
+ARG glv=
+ENV GLOG_v=$glv
+
+ARG BUILD_NUMBER=0
+
+## build sysporter
+COPY ./src/ /build/src/
+RUN cd /build/src && make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER
+
+##-----------------------
+## Stage: Runtime
+##-----------------------
+FROM sfcollector-ubi:latest as runtime
+
+## environment variables
+ARG interval=30
+ENV INTERVAL=$interval
+
+ARG filter=""
+ENV FILTER=$filter
+
+ARG exporterid="local"
+ENV EXPORTER_ID=$exporterid
+
+ARG output=/mnt/data/
+ENV OUTPUT=$output
+
+## copy dependencies
+COPY --from=builder /build/src/sysporter /usr/local/sysflow/bin/
+COPY --from=builder /build/modules/sysflow/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
+RUN ln -s /usr/local/sysflow/modules/lib/libcrypto.so /usr/local/sysflow/modules/lib/libcrypto.so.1.0.0
+RUN ln -s /usr/local/sysflow/modules/lib/libssl.so /usr/local/sysflow/modules/lib/libssl.so.1.0.0
+
+## entrypoint
+WORKDIR /usr/local/sysflow/bin/
+CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e "$EXPORTER_ID" -f "$FILTER"
+
+##-----------------------
+## Stage: Testing
+##-----------------------
+FROM runtime as testing
+
+ARG wdir=/usr/local/sysflow
+ENV WDIR=$wdir
+
+## dependencies
+# Install Python environment
+RUN dnf install -y --disableplugin=subscription-manager \
+	python3 \
+        python3-wheel && \
+    mkdir -p /usr/local/lib/python3.6/site-packages && \
+    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    ln -s /usr/bin/pip3 /usr/bin/pip && \
+    dnf -y clean all && rm -rf /var/cache/dnf
+#RUN apt-get update -yqq && \
+#    apt-get --no-install-recommends --fix-broken install -yqq && \
+#    apt-get install -yqq \
+#        apt-utils \
+#        git \
+#        locales \
+#        valgrind \
+#        python3 \
+#        python3-pip && \
+#    locale-gen en_US.UTF-8 && \
+#    apt-get clean -yqq && \
+#    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
+
+## copy dependencies
+COPY --from=builder /build/modules/sysflow/py3 /usr/local/sysflow/utils/
+
+RUN cd /usr/local/sysflow/utils && \
+    python3 setup.py install 
+
+RUN mkdir /bats && git clone https://github.com/bats-core/bats-core.git /bats && \
+    cd /bats && ./install.sh /usr/local && rm -r /bats
+
+WORKDIR $wdir
+ENTRYPOINT ["/usr/local/bin/bats"]
