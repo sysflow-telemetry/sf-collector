@@ -7,25 +7,6 @@ make -C modules init
 
 # Multi-stage build
 docker build \
-    --cache-from $IMAGE_NAME-base \
-    --target base \
-    -f Dockerfile.ubi.amd64 \
-    -t $IMAGE_NAME-base .
-
-docker build \
-    --cache-from $IMAGE_NAME-mods \
-    --target mods \
-    -f Dockerfile.ubi.amd64 \
-    -t $IMAGE_NAME-mods .
-
-docker build \
-    --build-arg TAG=$DOCKER_TAG \
-    --cache-from $IMAGE_NAME-builder \
-    --target builder \
-    -t $IMAGE_NAME-builder .
-
-docker build \
     --build-arg BUILD_NUMBER=$(git rev-parse --short HEAD) \
-    --cache-from $IMAGE_NAME \
     --target runtime \
     -t $IMAGE_NAME .

@@ -17,71 +17,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ARG UBI_TAG=0.26.4
 
 #-----------------------
-# Stage: deps
+# Stage: builder
 #-----------------------
-FROM ubuntu:18.04 as deps
+FROM sysflowtelemetry/ubi:mods-${TAG} AS builder
 
-# dependencies
-RUN apt-get update -yqq && \
-    apt-get --fix-broken install -yqq && \
-    apt-get upgrade -yqq && \
-    apt-get install -yqq \
-        patch \
-        base-files \
-        binutils \
-        bzip2 \
-        libdpkg-perl \
-        perl \
-        make \
-        xz-utils \
-        libncurses5-dev \
-        libncursesw5-dev \
-        cmake \
-        libboost-all-dev \
-        g++ \
-        flex \ 
-        bison \
-        wget \
-        libelf-dev \
-        liblog4cxx-dev \
-        libapr1 \
-        pkg-config \
-        libaprutil1 \
-        libsparsehash-dev && \ 
-    apt-get clean -yqq && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
-
-COPY  ./modules /build/modules
-COPY  ./makefile.* /build/
-RUN cd /build/modules && make install
-
-#-----------------------
-# Stage: Builder
-#-----------------------
-FROM deps as builder
+# environment and build args
 ARG BUILD_NUMBER=0
 
-# copy dependencies
-COPY --from=deps /build /build/
-COPY --from=deps /usr/local/lib/ /usr/local/lib/
-COPY --from=deps /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
+ARG INSTALL_PATH=/usr/local/sysflow
+
+ARG MODPREFIX=${INSTALL_PATH}/modules
+
+ENV LIBRARY_PATH=/lib64
 
 # build sysporter
 COPY ./src/ /build/src/
-RUN cd /build/src && make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER
+RUN cd /build/src && \
+    make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
+         LIBLOCALPREFIX=${MODPREFIX} \
+         SDLOCALLIBPREFIX=${MODPREFIX}/lib \
+         SDLOCALINCPREFIX=${MODPREFIX}/include/sysdig \
+         AVRLOCALLIBPREFIX=${MODPREFIX}/lib \
+         AVRLOCALINCPREFIX=${MODPREFIX}/include \
+         SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
+         FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
+         SCHLOCALPREFIX=${MODPREFIX}/conf \
+         install && \
+    make clean && \
+    rm -rf /build
 
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysdig/sysdig:0.26.4 as runtime
+FROM sysflowtelemetry/ubi:base-${TAG} AS runtime
 
 # environment variables
 ARG interval=30
 ENV INTERVAL=$interval
 
-ARG filter=""
+ARG filter=
 ENV FILTER=$filter
 
 ARG exporterid="local"
@@ -90,52 +67,78 @@ ENV EXPORTER_ID=$exporterid
 ARG output=/mnt/data/
 ENV OUTPUT=$output
 
+ARG cripath=
+ENV CRI_PATH=$cripath
+
+ARG critimeout=
+ENV CRI_TIMEOUT=$critimeout
+
+ARG debug=
+ENV DEBUG=$debug
+
+ARG gllogtostderr=1
+ENV GLOG_logtostderr=$gllogtostderr
+
+ARG glv=
+ENV GLOG_v=$glv
+
+ARG INSTALL_PATH=/usr/local/sysflow
+
+ARG MODPREFIX=${INSTALL_PATH}/modules
+
+# copy dependencies
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
-COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost*.so* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/liblog4cxx*.so* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libapr* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libexpat* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libexpat* /lib/x86_64-linux-gnu/
-COPY --from=builder /build/src/sysporter /usr/local/sysflow/bin/
-COPY --from=builder /build/modules/sysflow/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/
-COPY --from=builder /build/src/conf/log4cxx.properties /usr/local/sysflow/conf/
-RUN ln -s /usr/local/sysflow/modules/lib/libcrypto.so /usr/local/sysflow/modules/lib/libcrypto.so.1.0.0
-RUN ln -s /usr/local/sysflow/modules/lib/libssl.so /usr/local/sysflow/modules/lib/libssl.so.1.0.0
+COPY --from=builder ${MODPREFIX}/lib/*.so* ${MODPREFIX}/lib/
+COPY --from=builder ${MODPREFIX}/bin/sysdig-probe-loader ${MODPREFIX}/bin/
+RUN ln -s ${INSTALL_PATH}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader
+COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
+COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
-CMD /usr/local/sysflow/bin/sysporter -G $INTERVAL -w $OUTPUT -e "$EXPORTER_ID" -f "$FILTER"
+
+CMD /usr/local/sysflow/bin/sysporter \
+    ${INTERVAL:+-G} $INTERVAL \
+    ${OUTPUT:+-w} $OUTPUT \
+    ${EXPORTER_ID:+-e} "$EXPORTER_ID" \
+    ${FILTER:+-f} "$FILTER" \
+    ${CRI_PATH:+-p} ${CRI_PATH} \
+    ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
+    ${DEBUG:+-d}
 
 #-----------------------
 # Stage: Testing
 #-----------------------
-FROM runtime as testing
+FROM runtime AS testing
+
+# environment and build args
+ARG BATS_VERSION=1.1.0
 
 ARG wdir=/usr/local/sysflow
 ENV WDIR=$wdir
 
-# dependencies
-RUN apt-get update -yqq && \
-    apt-get --no-install-recommends --fix-broken install -yqq && \
-    apt-get install -yqq \
-        apt-utils \
-        git \
-        locales \
-        valgrind \
-        python3 \
-        python3-pip && \
-    locale-gen en_US.UTF-8 && \
-    apt-get clean -yqq && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/apt/archive/*
+ARG INSTALL_PATH=/usr/local/sysflow
 
-COPY --from=builder /build/modules/sysflow/py3 /usr/local/sysflow/utils/
+# dependencies
+RUN dnf install -y --disableplugin=subscription-manager \
+	    python3 \
+        python3-wheel && \
+    mkdir -p /usr/local/lib/python3.6/site-packages && \
+    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    ln -s /usr/bin/pip3 /usr/bin/pip && \
+    dnf -y clean all && rm -rf /var/cache/dnf
+
+RUN mkdir /tmp/bats && cd /tmp/bats && \
+    wget https://github.com/bats-core/bats-core/archive/v${BATS_VERSION}.tar.gz && \
+    tar -xzf v${BATS_VERSION}.tar.gz && rm -rf v${BATS_VERSION}.tar.gz && \
+    cd bats-core-${BATS_VERSION} && ./install.sh /usr/local && rm -rf /tmp/bats
+
+# install APIs
+COPY modules/sysflow/py3 ${INSTALL_PATH}/utils
 
 RUN cd /usr/local/sysflow/utils && \
     python3 setup.py install 
-
-RUN mkdir /bats && git clone https://github.com/bats-core/bats-core.git /bats && \
-    cd /bats && ./install.sh /usr/local && rm -r /bats
 
 WORKDIR $wdir
 ENTRYPOINT ["/usr/local/bin/bats"]

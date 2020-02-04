@@ -1,8 +1,0 @@
-#!/bin/bash
-
-echo "[***] Post-push hook running"
-
-docker push $IMAGE_NAME-base
-docker push $IMAGE_NAME-mods
-docker push $IMAGE_NAME-builder
-docker push $IMAGE_NAME-testing
