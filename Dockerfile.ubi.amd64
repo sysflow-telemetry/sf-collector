@@ -18,40 +18,75 @@
 # limitations under the License.
 
 #-----------------------
-# Stage: deps
+# Stage: base
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi:latest AS deps
+FROM registry.access.redhat.com/ubi8/ubi AS base
+
+# dependencies 
+RUN dnf install -y --disableplugin=subscription-manager \ 
+     http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.1-1.1911.0.8.el8.noarch.rpm \
+     http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.8.el8.x86_64.rpm && \
+     dnf update -y --disableplugin=subscription-manager && \
+     dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools \
+        kernel-devel \
+        kernel-headers \
+        gcc \
+        gcc-c++ \
+        make \
+        cmake \
+        lua-devel \
+        pkgconfig \
+        autoconf \
+        wget \
+        automake \
+        libtool \
+        patch \
+        binutils \
+        bzip2 \
+        perl \
+        flex \
+        bison \
+        libstdc++-static \
+        glibc-static \
+        diffutils \
+        kmod \
+        epel-release \
+        xz \
+        boost-devel \
+        elfutils-libelf-devel \
+        apr-devel \
+        apr-util-devel \
+        sparsehash-devel \
+        ncurses-devel \
+        openssl-devel \
+        glog-devel && \
+     dnf update -y --disableplugin=subscription-manager && \
+     dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools dkms && \
+     dnf -y clean all && rm -rf /var/cache/dnf
+
+#-----------------------
+# Stage: mods
+#-----------------------
+FROM base AS mods
+
+# environment and args
+ARG INSTALL_PATH=/usr/local/sysflow
+
+ENV PATH="$PATH:"${INSTALL_PATH}"/modules/bin"
 
 ENV LIBRARY_PATH=/lib64
 
 ENV SYSDIG_HOST_ROOT=/host
 
-ENV PATH="$PATH:/usr/local/sysflow/modules/bin"
-
 ENV HOME=/root
 
-ARG gllogtostderr=1
-ENV GLOG_logtostderr=$gllogtostderr
-
-ARG glv=
-ENV GLOG_v=$glv
-
-## dependencies 
-ARG INSTALL_PKGS="kernel-devel kernel-headers gcc gcc-c++ make cmake lua-devel pkgconfig autoconf wget automake libtool patch binutils bzip2 perl make flex bison libstdc++-static glibc-static diffutils kmod epel-release"
-RUN dnf install -y --disableplugin=subscription-manager http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.1-1.1911.0.8.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.8.el8.x86_64.rpm && \
-     dnf update -y --disableplugin=subscription-manager && \
-     dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools  ${INSTALL_PKGS} \
-     xz boost-devel elfutils-libelf-devel apr-devel apr-util apr-util-devel sparsehash-devel ncurses-devel openssl-devel glog-devel && \
-     dnf update -y --disableplugin=subscription-manager && \
-     dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools dkms
-
-
-##  build dependencies
-#RUN mkdir /build
-COPY  ./modules /build/modules
-COPY  ./makefile.* /build/
-RUN cd /build/modules && make install
+#  build modules
+COPY ./modules /build/modules
+COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
-RUN  cp /usr/local/sysflow/modules/bin/sysdig-probe-loader  /usr/bin/
+RUN  cd /build/modules && \
+     make INSTALL_PATH=${INSTALL_PATH} install && \
+     ln -s ${INSTALL_PATH}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader && \
+     make clean && rm -rf /build/modules
 
 ENTRYPOINT ["/usr/local/sysflow/modules/bin/docker-entry-ubi.sh"]

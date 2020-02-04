@@ -19,7 +19,7 @@
 
 include ../makefile.manifest.inc
 include ../makefile.env.inc
- 
+
 .PHONY: all
 all: init \
 	 modules
@@ -37,7 +37,9 @@ modules: sysdig/package \
 .PHONY: install
 install: modules \
 	sysdig/install \
-	avro/install
+	avro/install \
+	sysflow/install \
+	fs/install
 
 .PHONY: sysdig/package
 sysdig/package: 
@@ -71,15 +73,17 @@ sysdig/package:
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
 	cp jq-prefix/src/jq/.libs/libjq.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
-	cp openssl-prefix/src/openssl/libcrypto.so.1.0.0 lib/libcrypto.so && \
-	cp openssl-prefix/src/openssl/libssl.so.1.0.0 lib/libssl.so && \
+	cp openssl-prefix/src/openssl/libcrypto.so.1.0.0 lib/libcrypto.so.1.0.0 && \
+	cd lib && ln -s libcrypto.so.1.0.0 libcrypto.so && cd .. && \
+	cp openssl-prefix/src/openssl/libssl.so.1.0.0 lib/libssl.so.1.0.0 && \
+	cd lib && ln -s libssl.so.1.0.0 libssl.so && cd .. &&  \
 	cp protobuf-prefix/src/protobuf/src/.libs/* lib && \
 	cp zlib-prefix/src/zlib/libz.so.1.2.11 lib/libz.so
 
 .PHONY: sysdig/install
 sysdig/install:	
 	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(SYSDIG_VERSION)" && \
-	cd sysdig/build && cp -r include/* $(SDINCPREFIX)/ && cp -r lib/* $(LIBPREFIX)/ && cp -r bin/* $(BINPREFIX)/ && cp -r driver/src/* "$(DRIVERPREFIX)$(SYSDIG_VERSION)"
+	cd sysdig/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(SYSDIG_VERSION)"
 
 .PHONY: avro/package
 avro/package:
@@ -87,15 +91,26 @@ avro/package:
 		cmake -DCMAKE_INSTALL_PREFIX=$(MODPREFIX) \
 		-DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-w" \
 		-DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" ../. && make && \
-		cp -r ../api avro
+		cp -a ../api avro
 
 .PHONY: avro/install
 avro/install:
 	cd avro/lang/c++/build && make install
 
+.PHONY: sysflow/install
+sysflow/install:
+	mkdir -p $(CONFPREFIX) && cp sysflow/avro/avsc/SysFlow.avsc $(CONFPREFIX)/ && \
+	mkdir -p $(SFINCPREFIX)/c++/sysflow && cp -r sysflow/c++/sysflow/* $(SFINCPREFIX)/c++/sysflow/
+
+.PHONY: fs/install
+fs/install:
+	mkdir -p $(FSINCPREFIX) && cp -r filesystem/include/* $(FSINCPREFIX)/
+
 .PHONY: uninstall
 uninstall:
-	rm -rf $(PREFIX)/libs
+	rm -rf $(LIBPREFIX) $(INCPREFIX) $(CONFPREFIX) && \
+	rm -rf $(DRIVERPREFIX)$(SYSDIG_VERSION) && \
+	find $(BINPREFIX) ! -name "sysporter" -type f -exec rm -f {} +
 
 .PHONY: clean
 clean:

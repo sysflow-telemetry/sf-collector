@@ -192,7 +192,7 @@ int main(int argc, char **argv) {
       } else {
         fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
       }
-      return 1;
+      exit(1);
     default:
       abort();
     }
@@ -212,9 +212,9 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  //try {
+  try {
     CONFIGURE_LOGGER(logProps);
-    SF_DEBUG(logger, "Starting sysporter..");
+    SF_DEBUG(logger, "Starting sysporter...");
     auto *cxt = new context::SysFlowContext(filterCont, fileDuration, outputDir,
                                             scapFile, schemaFile, exporterID,
                                             filter, criPath, criTO);
@@ -228,9 +228,9 @@ int main(int argc, char **argv) {
     int ret = s_prc->run();
     delete s_prc;
     return ret;
-  /*}
-  CATCH_LOGGER_EXCEPTION()
-  catch(...) {
-    SF_ERROR(logger, "Unexcepted exception in main loop.");
-  }*/
+  }
+  catch (sinsp_exception &ex) {
+    SF_ERROR(logger, "Runtime exception caught in main loop: " << ex.what());
+    return 1;
+  }
 }

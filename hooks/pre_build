@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "[***] Pre-build hook running"
+
+docker pull $IMAGE_NAME-base
+docker pull $IMAGE_NAME-mods
+docker pull $IMAGE_NAME-builder
+docker pull $IMAGE_NAME

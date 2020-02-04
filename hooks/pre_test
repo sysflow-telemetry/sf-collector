@@ -3,7 +3,9 @@
 echo "[***] Pre-test hook running"
 
 # Build test container
+docker pull $IMAGE_NAME-testing
+
 docker build \
-    --cache-from $IMAGE_NAME \
+    --cache-from $IMAGE_NAME-testing \
     --target testing \
     -t $IMAGE_NAME-testing .

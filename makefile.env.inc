@@ -17,10 +17,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PREFIX=/usr/local/sysflow
-MODPREFIX=$(PREFIX)/modules
+INSTALL_PATH?=/usr/local/sysflow
+MODPREFIX=$(INSTALL_PATH)/modules
 LIBPREFIX=$(MODPREFIX)/lib
 BINPREFIX=$(MODPREFIX)/bin
+CONFPREFIX=$(MODPREFIX)/conf
 DRIVERPREFIX=/usr/src/sysdig-
 SDINCPREFIX=$(MODPREFIX)/include/sysdig
 AVRINCPREFIX=$(MODPREFIX)/include/avro
+SFINCPREFIX=$(MODPREFIX)/include/sysflow
+FSINCPREFIX=$(MODPREFIX)/include/filesystem

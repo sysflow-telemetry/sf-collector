@@ -24,6 +24,7 @@ include ../makefile.env.inc
 
 # Target configuration
 TARGET = sysporter
+SYSFLOW_BUILD_NUMBER ?= 0
 
 # Lint options
 LINT = clang-tidy-9
@@ -37,11 +38,15 @@ LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
 LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration
-LIBLOCALPREFIX = ../modules
-SDLOCALLIBPREFIX = $(LIBLOCALPREFIX)/sysdig/build/lib
-SDLOCALINCPREFIX = $(LIBLOCALPREFIX)/sysdig/build/include
-AVRLOCALLIBPREFIX = $(LIBLOCALPREFIX)/avro/lang/c++/build
-AVRLOCALINCPREFIX = $(LIBLOCALPREFIX)/avro/lang/c++/build
+LIBLOCALPREFIX ?= ../modules
+SDLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/sysdig/build/lib
+SDLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysdig/build/include
+AVRLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
+AVRLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
+SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
+FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
+SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
+
 
 # Compiler options 
 CXX = g++
@@ -50,7 +55,7 @@ LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIB
       -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl
 LDFLAGS = $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
-CFLAGS = -std=c++11 -Wall -ggdb -I.. -I../modules/sysflow/c++/ -I../modules/filesystem/include/ \
+CFLAGS = -std=c++11 -Wall -ggdb -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
@@ -60,13 +65,13 @@ all: version $(TARGET)
 
 .PHONY: install
 install: all 
-	mkdir -p $(PREFIX)/bin && cp sysporter $(PREFIX)/bin
-	mkdir -p $(PREFIX)/conf && cp avro/avsc/SysFlow.avsc $(PREFIX)/conf && cp conf/log4cxx.properties $(PREFIX)/conf
+	mkdir -p $(INSTALL_PATH)/bin && cp sysporter $(INSTALL_PATH)/bin
+	mkdir -p $(INSTALL_PATH)/conf && cp $(SCHLOCALPREFIX)/SysFlow.avsc $(INSTALL_PATH)/conf
 
 .PHONY: uninstall
 uninstall: 
-	rm -rf $(PREFIX)/bin
-	rm -rf $(PREFIX)/conf
+	rm -rf $(INSTALL_PATH)/bin
+	rm -rf $(INSTALL_PATH)/conf
 
 .PHONY: lint
 lint: $(LINTSRCS)
