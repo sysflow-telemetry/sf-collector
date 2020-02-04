@@ -22,7 +22,7 @@ ARG UBI_TAG=0.26.4
 #-----------------------
 # Stage: builder
 #-----------------------
-FROM sysflowtelemetry/ubi:mods-${TAG} AS builder
+FROM sysflowtelemetry/ubi:mods-${UBI_TAG} AS builder
 
 # environment and build args
 ARG BUILD_NUMBER=0
@@ -52,7 +52,7 @@ RUN cd /build/src && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:base-${TAG} AS runtime
+FROM sysflowtelemetry/ubi:base-${UBI_TAG} AS runtime
 
 # environment variables
 ARG interval=30
