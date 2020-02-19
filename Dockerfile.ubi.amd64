@@ -28,8 +28,6 @@ RUN dnf install -y --disableplugin=subscription-manager \
      http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.8.el8.x86_64.rpm && \
      dnf update -y --disableplugin=subscription-manager && \
      dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools \
-        kernel-devel \
-        kernel-headers \
         gcc \
         gcc-c++ \
         make \
