@@ -85,18 +85,22 @@ ENV GLOG_v=$glv
 ARG INSTALL_PATH=/usr/local/sysflow
 
 ARG MODPREFIX=${INSTALL_PATH}/modules
+ENV SYSDIG_HOST_ROOT=/host
 
 # copy dependencies
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /sysdigsrc/ /usr/src/
 COPY --from=builder ${MODPREFIX}/lib/*.so* ${MODPREFIX}/lib/
 COPY --from=builder ${MODPREFIX}/bin/ ${MODPREFIX}/bin/
-RUN ln -s ${INSTALL_PATH}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader
+RUN ln -s ${MODPREFIX}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader
+RUN ln -s ${MODPREFIX}/bin/sysdig /usr/bin/sysdig
 COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
+
+ENTRYPOINT ["/usr/local/sysflow/modules/bin/docker-entry-ubi.sh"]
 
 CMD /usr/local/sysflow/bin/sysporter \
     ${INTERVAL:+-G} $INTERVAL \
