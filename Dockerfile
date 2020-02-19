@@ -88,8 +88,9 @@ ARG MODPREFIX=${INSTALL_PATH}/modules
 
 # copy dependencies
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
+COPY --from=builder /sysdigsrc/ /usr/src/
 COPY --from=builder ${MODPREFIX}/lib/*.so* ${MODPREFIX}/lib/
-COPY --from=builder ${MODPREFIX}/bin/*.sh ${MODPREFIX}/bin/sysdig-probe-loader ${MODPREFIX}/bin/
+COPY --from=builder ${MODPREFIX}/bin/ ${MODPREFIX}/bin/
 RUN ln -s ${INSTALL_PATH}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader
 COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
