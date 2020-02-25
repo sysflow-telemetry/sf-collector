@@ -22,10 +22,11 @@
 using container::ContainerContext;
 using sysflow::ContainerType;
 
-void ContainerContext::setContainer(ContainerObj** cont, sinsp_container_info *container) {
-  SF_DEBUG(m_logger, "Setting container info.  name: " << container->m_name)
+void ContainerContext::setContainer(ContainerObj **cont,
+                                    sinsp_container_info *container) {
+  SF_DEBUG(m_logger, "Setting container info. Name: " << container->m_name)
   (*cont)->cont.name = container->m_name;
-  (*cont)->cont.image = container->m_image + "/" + container->m_imagetag;
+  (*cont)->cont.image = container->m_image + ":" + container->m_imagetag;
   (*cont)->cont.id = container->m_id;
   (*cont)->cont.imageid = container->m_imageid;
   (*cont)->cont.type = static_cast<ContainerType>(container->m_type);
@@ -58,7 +59,8 @@ ContainerObj *ContainerContext::createContainer(sinsp_evt *ev) {
   }
   auto *cont = new ContainerObj();
   setContainer(&cont, container);
-  if(cont->cont.name.compare(INCOMPLETE) == 0 || cont->cont.image.compare(INCOMPLETE_IMAGE) == 0) {
+  if (cont->cont.name.compare(INCOMPLETE) == 0 ||
+      cont->cont.image.compare(INCOMPLETE_IMAGE) == 0) {
     cont->incomplete = true;
   }
   return cont;
@@ -106,21 +108,23 @@ ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
   if (cont != m_containers.end()) {
     if (cont->second->written && !cont->second->incomplete) {
       return cont->second;
-    } 
+    }
     sinsp_container_info *container =
-       m_cxt->getInspector()->m_container_manager.get_container(
-        ti->m_container_id);
+        m_cxt->getInspector()->m_container_manager.get_container(
+            ti->m_container_id);
     if (container == nullptr) {
       m_containers.erase(cont);
       delete cont->second;
       return nullptr;
     }
     if (cont->second->written && cont->second->incomplete) {
-      SF_DEBUG(m_logger, "container is written and inc. Name: " << container->m_name);
-      if(container->m_name.compare(INCOMPLETE) == 0 || container->m_image.compare(INCOMPLETE) == 0) {
+      SF_DEBUG(m_logger,
+               "Container is written and includes name: " << container->m_name);
+      if (container->m_name.compare(INCOMPLETE) == 0 ||
+          container->m_image.compare(INCOMPLETE) == 0) {
         return cont->second;
       } else {
-	cont->second->incomplete = false;
+        cont->second->incomplete = false;
       }
     }
     ct = cont->second;

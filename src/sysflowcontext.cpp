@@ -45,8 +45,8 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
   if (m_criTO > 0) {
     m_inspector->set_cri_timeout(m_criTO);
   }
-  const char* envP = std::getenv(SYSDIG_LOG);
-  if(envP != nullptr && strcmp(envP, "1") == 0) {
+  const char *envP = std::getenv(SYSDIG_LOG);
+  if (envP != nullptr && strcmp(envP, "1") == 0) {
     m_inspector->set_log_stderr();
     m_inspector->set_min_log_severity(sinsp_logger::severity::SEV_DEBUG);
   }
