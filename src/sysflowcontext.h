@@ -28,6 +28,9 @@
 #include <cstring>
 #include <sinsp.h>
 #include <unistd.h>
+#include <cstdlib>
+
+#define SYSDIG_LOG "SYSDIG_LOG"
 
 namespace context {
 class SysFlowContext {

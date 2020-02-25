@@ -177,6 +177,7 @@ public:
 class ContainerObj {
 public:
   bool written{false};
+  bool incomplete{false};
   uint32_t refs{0};
   Container cont;
   ContainerObj() {}

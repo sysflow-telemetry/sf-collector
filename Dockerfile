@@ -82,6 +82,9 @@ ENV GLOG_logtostderr=$gllogtostderr
 ARG glv=
 ENV GLOG_v=$glv
 
+ARG sysdig_log=
+ENV SYSDIG_LOG=$sysdig_log
+
 ARG INSTALL_PATH=/usr/local/sysflow
 
 ARG MODPREFIX=${INSTALL_PATH}/modules

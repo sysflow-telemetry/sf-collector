@@ -28,6 +28,8 @@
 #include <sinsp.h>
 
 #define CONT_TABLE_SIZE 100
+#define INCOMPLETE "incomplete"
+#define INCOMPLETE_IMAGE "incomplete/incomplete"
 
 namespace container {
 class ContainerContext {
@@ -36,6 +38,7 @@ private:
   context::SysFlowContext *m_cxt;
   writer::SysFlowWriter *m_writer;
   ContainerObj *createContainer(sinsp_evt *ev);
+  void setContainer(ContainerObj** cont, sinsp_container_info *container);
 
 public:
   ContainerContext(context::SysFlowContext *cxt, writer::SysFlowWriter *writer);
