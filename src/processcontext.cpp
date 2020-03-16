@@ -27,12 +27,12 @@ ProcessContext::ProcessContext(context::SysFlowContext *cxt,
                                file::FileContext *fileCxt,
                                writer::SysFlowWriter *writer)
     : m_procs(PROC_TABLE_SIZE), m_delProcQue() {
+  m_cxt = cxt;
   OID *emptyoidkey = utils::getOIDEmptyKey();
   OID *deloidkey = utils::getOIDDelKey();
   m_delProcTime = utils::getCurrentTime(m_cxt);
   m_procs.set_empty_key(emptyoidkey);
   m_procs.set_deleted_key(deloidkey);
-  m_cxt = cxt;
   m_containerCxt = ccxt;
   m_writer = writer;
   m_fileCxt = fileCxt;
