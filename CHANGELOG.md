@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...HEAD)]
 
-## [[0.1-rc3](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc2...0.1-rc3)] - 2020-02-04
+## [[0.1-rc3](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc2...0.1-rc3)] - 2020-03-17
 
 ### Added
 
@@ -32,7 +32,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed ppid issue with children missing parent processes that terminate before a child is spawned.
-- Fixed issues [12](https://github.com/sysflow-telemetry/sf-docs/issues/12) and [13](https://github.com/sysflow-telemetry/sf-docs/issues/13).
+- Fixed issue [12](https://github.com/sysflow-telemetry/sf-docs/issues/12). 
+- Fixed issue [13](https://github.com/sysflow-telemetry/sf-docs/issues/13).
+- Fixed corrupt memory error that caused coredump when using domain socket interface.
 
 ## [[0.1-rc2](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc1...0.1-rc2)] - 2019-11-08
 
