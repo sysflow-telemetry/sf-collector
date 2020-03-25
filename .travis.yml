@@ -1,0 +1,35 @@
+os: linux
+dist: xenial
+language: generic
+sudo: required
+services:
+ - docker
+
+stages:
+    lint-checking
+    compile
+    test
+    cleanup
+
+before_install:
+ - make -C modules init
+
+script:
+ - echo "Build $(git rev-parse --short HEAD) Started"
+ - docker build --build-arg BUILD_NUMBER=$(git rev-parse --short HEAD)  --target runtime -t sf-collector-ci .
+ - docker build --cache-from sf-collector-ci --target testing -t sf-collector-ci-testing .
+ - docker run --rm --name sftests -v "$(pwd)/tests:/usr/local/sysflow/tests" sf-collector-ci-testing -t tests/tests.bats
+after_success:
+ - echo "Build $(git rev-parse --short HEAD) Passed!"
+after_failure:
+ - echo "Build $(git rev-parse --short HEAD) Failed!"
+
+after_script:
+ - docker rmi sf-collector-ci-testing
+ - docker rmi sf-collector-ci
+ - docker image prune -f
+ - docker rmi $(docker images -q sysflowtelemetry/ubi)
+
+branches:
+  only:
+  - /.*/
