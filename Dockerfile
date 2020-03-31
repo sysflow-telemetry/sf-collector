@@ -90,6 +90,19 @@ ARG INSTALL_PATH=/usr/local/sysflow
 ARG MODPREFIX=${INSTALL_PATH}/modules
 ENV SYSDIG_HOST_ROOT=/host
 
+ARG VERSION=dev
+ARG RELEASE=dev
+
+
+LABEL "name"="Sysflow Collector"
+LABEL "vendor"="Sysflow Telemetry"
+LABEL "version"="${VERSION}"
+LABEL "release"="${RELEASE}"
+LABEL "summary"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+LABEL "description"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+LABEL "io.k8s.display-name"="Sysflow Collector"
+LABEL "io.k8s.description"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+
 # copy dependencies
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /sysdigsrc/ /usr/src/
