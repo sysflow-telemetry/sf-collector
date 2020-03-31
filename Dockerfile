@@ -52,7 +52,7 @@ RUN cd /build/src && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:base-${UBI_TAG} AS runtime
+FROM registry.access.redhat.com/ubi8/ubi:8.1-406 AS runtime
 
 # environment variables
 ARG interval=30
@@ -145,7 +145,41 @@ ENV WDIR=$wdir
 ARG INSTALL_PATH=/usr/local/sysflow
 
 # dependencies
-RUN dnf install -y --disableplugin=subscription-manager \
+RUN dnf install -y --disableplugin=subscription-manager \ 
+     http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.1-1.1911.0.8.el8.noarch.rpm \
+     http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.8.el8.x86_64.rpm && \
+     dnf update -y --disableplugin=subscription-manager && \
+     dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools \
+        gcc \
+        gcc-c++ \
+        make \
+        cmake \
+        lua-devel \
+        pkgconfig \
+        autoconf \
+        wget \
+        automake \
+        libtool \
+        patch \
+        binutils \
+        bzip2 \
+        perl \
+        flex \
+        bison \
+        libstdc++-static \
+        glibc-static \
+        diffutils \
+        kmod \
+        epel-release \
+        xz \
+        boost-devel \
+        elfutils-libelf-devel \
+        apr-devel \
+        apr-util-devel \
+        sparsehash-devel \
+        ncurses-devel \
+        openssl-devel \
+        glog-devel \
 	    python3 \
         python3-wheel && \
     mkdir -p /usr/local/lib/python3.6/site-packages && \
