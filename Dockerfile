@@ -105,7 +105,7 @@ LABEL "io.k8s.description"="Sysflow Collector monitors and collects system call 
 
 # Install Packages
 COPY ./scripts/installUBIDependency.sh /
-RUN /installUBIDependency.sh && rm /installUBIDependency.sh
+RUN /installUBIDependency.sh base && rm /installUBIDependency.sh
 
 # Update License
 RUN mkdir /licenses
@@ -147,6 +147,10 @@ ARG wdir=/usr/local/sysflow
 ENV WDIR=$wdir
 
 ARG INSTALL_PATH=/usr/local/sysflow
+
+# Install extra packages for tests
+COPY ./scripts/installUBIDependency.sh /
+RUN /installUBIDependency.sh test-extra && rm /installUBIDependency.sh
 
 RUN mkdir /tmp/bats && cd /tmp/bats && \
     wget https://github.com/bats-core/bats-core/archive/v${BATS_VERSION}.tar.gz && \

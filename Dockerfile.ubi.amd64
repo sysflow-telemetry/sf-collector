@@ -24,7 +24,7 @@ FROM registry.access.redhat.com/ubi8/ubi AS base
 
 # Install Packages
 COPY ./scripts/installUBIDependency.sh /
-RUN /installUBIDependency.sh && rm /installUBIDependency.sh
+RUN /installUBIDependency.sh base && rm /installUBIDependency.sh
 
 #-----------------------
 # Stage: mods
