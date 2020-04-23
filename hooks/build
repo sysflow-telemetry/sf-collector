@@ -8,5 +8,7 @@ make -C modules init
 # Multi-stage build
 docker build \
     --build-arg BUILD_NUMBER=$(git rev-parse --short HEAD) \
+    --build-arg VERSION=${SOURCE_BRANCH} \
+    --build-arg RELEASE=$(git rev-parse --short HEAD) \
     --target runtime \
     -t $IMAGE_NAME .
