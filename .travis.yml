@@ -1,0 +1,26 @@
+os: linux
+dist: xenial
+language: generic
+sudo: required
+services:
+ - docker
+
+before_install:
+ - ./scripts/build/env_init.sh
+
+script:
+ - "echo \"Build ${TRAVIS_BRANCH}:$(git rev-parse --short HEAD) Started\""
+ - ./scripts/build/build.sh ${TRAVIS_BRANCH} $(git rev-parse --short HEAD) sf-collector-ci
+ - ./scripts/build/test.sh sf-collector-ci
+
+after_success:
+ - echo "Build $(git rev-parse --short HEAD) Passed!"
+after_failure:
+ - echo "Build $(git rev-parse --short HEAD) Failed!"
+
+after_script:
+ - ./scripts/build/cleanup.sh sf-collector-ci
+
+branches:
+  only:
+  - /.*/

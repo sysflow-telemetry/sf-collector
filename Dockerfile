@@ -52,7 +52,7 @@ RUN cd /build/src && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:base-${UBI_TAG} AS runtime
+FROM registry.access.redhat.com/ubi8/ubi:8.1-406 AS runtime
 
 # environment variables
 ARG interval=30
@@ -89,6 +89,27 @@ ARG INSTALL_PATH=/usr/local/sysflow
 
 ARG MODPREFIX=${INSTALL_PATH}/modules
 ENV SYSDIG_HOST_ROOT=/host
+
+ARG VERSION=dev
+ARG RELEASE=dev
+
+# Update Label
+LABEL "name"="Sysflow Collector"
+LABEL "vendor"="IBM"
+LABEL "version"="${VERSION}"
+LABEL "release"="${RELEASE}"
+LABEL "summary"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+LABEL "description"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+LABEL "io.k8s.display-name"="Sysflow Collector"
+LABEL "io.k8s.description"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+
+# Install Packages
+COPY ./scripts/installUBIDependency.sh /
+RUN /installUBIDependency.sh base && rm /installUBIDependency.sh
+
+# Update License
+RUN mkdir /licenses
+COPY ./LICENSE.md /licenses/
 
 # copy dependencies
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
@@ -127,15 +148,9 @@ ENV WDIR=$wdir
 
 ARG INSTALL_PATH=/usr/local/sysflow
 
-# dependencies
-RUN dnf install -y --disableplugin=subscription-manager \
-	    python3 \
-        python3-wheel && \
-    mkdir -p /usr/local/lib/python3.6/site-packages && \
-    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install && \
-    ln -s /usr/bin/python3 /usr/bin/python && \
-    ln -s /usr/bin/pip3 /usr/bin/pip && \
-    dnf -y clean all && rm -rf /var/cache/dnf
+# Install extra packages for tests
+COPY ./scripts/installUBIDependency.sh /
+RUN /installUBIDependency.sh test-extra && rm /installUBIDependency.sh
 
 RUN mkdir /tmp/bats && cd /tmp/bats && \
     wget https://github.com/bats-core/bats-core/archive/v${BATS_VERSION}.tar.gz && \
