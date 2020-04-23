@@ -64,7 +64,7 @@ ENV FILTER=$filter
 ARG exporterid="local"
 ENV EXPORTER_ID=$exporterid
 
-ARG output=/mnt/data/
+ARG output=
 ENV OUTPUT=$output
 
 ARG cripath=
@@ -89,6 +89,9 @@ ARG INSTALL_PATH=/usr/local/sysflow
 
 ARG MODPREFIX=${INSTALL_PATH}/modules
 ENV SYSDIG_HOST_ROOT=/host
+
+ARG sockfile=
+ENV SOCK_FILE=
 
 ARG VERSION=dev
 ARG RELEASE=dev
@@ -133,6 +136,7 @@ CMD /usr/local/sysflow/bin/sysporter \
     ${FILTER:+-f} "$FILTER" \
     ${CRI_PATH:+-p} ${CRI_PATH} \
     ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
+    ${SOCK_FILE:+-u} ${SOCK_FILE} \
     ${DEBUG:+-d}
 
 #-----------------------

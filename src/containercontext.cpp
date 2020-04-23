@@ -55,7 +55,14 @@ ContainerObj *ContainerContext::createContainer(sinsp_evt *ev) {
       m_cxt->getInspector()->m_container_manager.get_container(
           ti->m_container_id);
   if (container == nullptr) {
-    return nullptr;
+    SF_WARN(m_logger, "Thread has container id, but no container object. ID: "
+                          << ti->m_container_id)
+    auto *cont = new ContainerObj();
+    cont->cont.name = INCOMPLETE;
+    cont->cont.image = INCOMPLETE_IMAGE;
+    cont->cont.id = ti->m_container_id;
+    cont->incomplete = true;
+    return cont;
   }
   auto *cont = new ContainerObj();
   setContainer(&cont, container);
@@ -113,9 +120,9 @@ ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
         m_cxt->getInspector()->m_container_manager.get_container(
             ti->m_container_id);
     if (container == nullptr) {
-      m_containers.erase(cont);
-      delete cont->second;
-      return nullptr;
+      // m_containers.erase(cont);
+      // delete cont->second;
+      return cont->second;
     }
     if (cont->second->written && cont->second->incomplete) {
       SF_DEBUG(m_logger,
@@ -132,6 +139,9 @@ ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
   }
   if (ct == nullptr) {
     ct = createContainer(ev);
+  }
+  if (ct == nullptr) {
+    return nullptr;
   }
   m_containers[ct->cont.id] = ct;
   m_writer->writeContainer(&(ct->cont));

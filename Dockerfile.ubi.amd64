@@ -48,7 +48,6 @@ COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  cd /build/modules && \
      make INSTALL_PATH=${INSTALL_PATH} install && \
-     ln -s ${INSTALL_PATH}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader && \
      mkdir /sysdigsrc && cp -a /usr/src/sysdig-* /sysdigsrc/ && \
      make clean && rm -rf /build/modules
 
