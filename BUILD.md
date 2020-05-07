@@ -98,7 +98,7 @@ docker run -d --privileged --name sf-collector \
              -e EXPORTER_ID=${HOSTNAME} \
              -e OUTPUT=/mnt/data/    \
              -e FILTER="container.name!=sf-collector and container.name!=sf-exporter" \
-             --rm sysflow-telemetry/sf-collector
+             --rm sysflowtelemetry/sf-collector
 ```
 where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events. Note: append `container.type!=host` to FILTER expression to filter host events. 
 
