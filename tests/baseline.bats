@@ -135,3 +135,11 @@ exporter=tests
   run $sfcomp ${tdir}/${tfile}.sf ${tdir}/${tfile}.sf
   [ ${status} -eq 0 ]
 }
+
+@test "Trace comparison on alpine" {
+  tdir=${TDIR}/alpine
+  tfile=alpine
+  run $sysporter -r ${tdir}/${tfile}.scap -w ${tdir}/${tfile}.sf -e $exporter > /tmp/${tfile}.log
+  run $sfcomp ${tdir}/${tfile}.sf ${tdir}/${tfile}.sf
+  [ ${status} -eq 0 ]
+}
