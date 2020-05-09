@@ -17,7 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG UBI_TAG=0.26.4
+ARG UBI_TAG=0.26.7
 
 #-----------------------
 # Stage: builder

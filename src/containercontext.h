@@ -38,7 +38,7 @@ private:
   context::SysFlowContext *m_cxt;
   writer::SysFlowWriter *m_writer;
   ContainerObj *createContainer(sinsp_evt *ev);
-  void setContainer(ContainerObj **cont, sinsp_container_info *container);
+  void setContainer(ContainerObj **cont, sinsp_container_info::ptr_t container);
 
 public:
   ContainerContext(context::SysFlowContext *cxt, writer::SysFlowWriter *writer);

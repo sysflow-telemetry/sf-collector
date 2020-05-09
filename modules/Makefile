@@ -54,6 +54,7 @@ sysdig/package:
 	mkdir -p include/userspace/common && cp ../userspace/common/*.h include/userspace/common && \
 	mkdir -p include/userspace/libsinsp && cp ../userspace/libsinsp/*.h include/userspace/libsinsp && \
 	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
+	mkdir -p include/userspace/libsinsp/include && cp ../userspace/libsinsp/include/*.h include/userspace/libsinsp/include/ && \
 	mkdir -p include/userspace/libscap && cp ../userspace/libscap/*.h include/userspace/libscap && \
 	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
 	cp -r tbb-prefix/src/tbb/include/serial  include/ && \
