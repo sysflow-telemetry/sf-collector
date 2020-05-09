@@ -20,7 +20,7 @@
 #-----------------------
 # Stage: base
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi AS base
+FROM registry.access.redhat.com/ubi8/ubi:8.1-406 AS base
 
 # Install Packages
 COPY ./scripts/installUBIDependency.sh /
@@ -42,6 +42,7 @@ ENV SYSDIG_HOST_ROOT=/host
 
 ENV HOME=/root
 
+RUN dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools git
 #  build modules
 COPY ./modules /build/modules
 COPY ./makefile.* /build/

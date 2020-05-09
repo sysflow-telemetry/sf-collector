@@ -28,15 +28,14 @@ MODE=${1:-base}
 
 echo "Install Dependency under mode: ${MODE}"
 if [ "${MODE}" == "base" ] ; then
-    # Run package installation for base images
-    dnf install -y --disableplugin=subscription-manager http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.1-1.1911.0.8.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.8.el8.x86_64.rpm
-    dnf update -y --disableplugin=subscription-manager
-    dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools \
+     # Run package installation for base images
+     dnf install -y --disableplugin=subscription-manager http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.1-1.1911.0.8.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.8.el8.x86_64.rpm
+     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+     dnf -y install --enablerepo=PowerTools --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos --disableplugin=subscription-manager \
         gcc \
         gcc-c++ \
         make \
         cmake \
-        lua-devel \
         pkgconfig \
         autoconf \
         wget \
@@ -46,24 +45,24 @@ if [ "${MODE}" == "base" ] ; then
         binutils \
         bzip2 \
         perl \
-        flex \
-        bison \
-        libstdc++-static \
         glibc-static \
         diffutils \
         kmod \
-        epel-release \
         xz \
-        boost-devel \
-        elfutils-libelf-devel \
         apr-devel \
         apr-util-devel \
-        sparsehash-devel \
         ncurses-devel \
         openssl-devel \
-        glog-devel
-     dnf update -y --disableplugin=subscription-manager
-     dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools dkms
+	flex \
+        bison \
+	libstdc++-static \
+	boost-devel \
+        elfutils-libelf-devel \
+	sparsehash-devel \
+	glog-devel 
+
+
+     dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=epel --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos  dkms
      dnf -y clean all && rm -rf /var/cache/dnf
 elif [ "${MODE}" == "test-extra" ] ; then
     # Install extra(compared to base) packages for tests

@@ -23,7 +23,7 @@ using container::ContainerContext;
 using sysflow::ContainerType;
 
 void ContainerContext::setContainer(ContainerObj **cont,
-                                    sinsp_container_info *container) {
+                                    sinsp_container_info::ptr_t container) {
   SF_DEBUG(m_logger, "Setting container info. Name: " << container->m_name)
   (*cont)->cont.name = container->m_name;
   (*cont)->cont.image = container->m_image + ":" + container->m_imagetag;
@@ -51,10 +51,10 @@ ContainerObj *ContainerContext::createContainer(sinsp_evt *ev) {
     return nullptr;
   }
 
-  sinsp_container_info *container =
+  const sinsp_container_info::ptr_t container =
       m_cxt->getInspector()->m_container_manager.get_container(
           ti->m_container_id);
-  if (container == nullptr) {
+  if (!container) {
     SF_WARN(m_logger, "Thread has container id, but no container object. ID: "
                           << ti->m_container_id)
     auto *cont = new ContainerObj();
@@ -116,10 +116,10 @@ ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
     if (cont->second->written && !cont->second->incomplete) {
       return cont->second;
     }
-    sinsp_container_info *container =
+    const sinsp_container_info::ptr_t container =
         m_cxt->getInspector()->m_container_manager.get_container(
             ti->m_container_id);
-    if (container == nullptr) {
+    if (!container) {
       // m_containers.erase(cont);
       // delete cont->second;
       return cont->second;
