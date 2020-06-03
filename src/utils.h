@@ -40,7 +40,7 @@ int64_t getFlags(sinsp_evt *ev);
 bool isCloneThreadSet(sinsp_evt *ev);
 int64_t getFD(sinsp_evt *ev);
 bool isMapAnonymous(sinsp_evt *ev);
-int64_t getIntParam(sinsp_evt* ev, string pname);
+int64_t getIntParam(sinsp_evt *ev, string pname);
 string getUserName(context::SysFlowContext *cxt, uint32_t uid);
 string getGroupName(context::SysFlowContext *cxt, uint32_t gid);
 bool isInContainer(sinsp_evt *ev);

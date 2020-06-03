@@ -229,8 +229,7 @@ int main(int argc, char **argv) {
     int ret = s_prc->run();
     delete s_prc;
     return ret;
-  }
-  catch (sinsp_exception &ex) {
+  } catch (sinsp_exception &ex) {
     SF_ERROR(logger, "Runtime exception caught in main loop: " << ex.what());
     return 1;
   }
