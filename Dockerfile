@@ -123,7 +123,8 @@ RUN ln -s ${MODPREFIX}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader
 RUN ln -s ${MODPREFIX}/bin/sysdig /usr/bin/sysdig
 COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
-
+COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
+COPY ./modules/sysflow/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/SysFlow.avsc
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
 

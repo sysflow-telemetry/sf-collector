@@ -49,9 +49,8 @@ FileObj *FileContext::createFile(sinsp_evt *ev, string path, char typechar,
   }
   return f;
 }
-FileObj *FileContext::getFile(sinsp_evt *ev, SFObjectState state,
+FileObj *FileContext::getFile(sinsp_evt *ev, sinsp_fdinfo_t *fdinfo, SFObjectState state,
                               bool &created) {
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
   return getFile(ev, fdinfo->m_name, fdinfo->get_typechar(), state, created);
 }
 FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,

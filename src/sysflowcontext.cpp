@@ -31,7 +31,7 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
     : m_filterCont(fCont), m_fileDuration(fDur), m_outputFile(oFile),
       m_scapFile(sFile), m_schemaFile(std::move(schFile)),
       m_exporterID(std::move(expID)), m_nfExportInterval(30),
-      m_nfExpireInterval(30), m_offline(false), m_filter(std::move(filter)),
+      m_nfExpireInterval(60), m_offline(false), m_filter(std::move(filter)),
       m_criPath(std::move(criPath)), m_criTO(criTO), m_stats(false),
       m_statsInterval(30), m_domainSock(false) {
   m_inspector = new sinsp();

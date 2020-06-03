@@ -100,11 +100,11 @@ int main(int argc, char **argv) {
   string exporterID = "";
   char *duration;
   char c;
-  struct sigaction sigIntHandler {};
+  struct sigaction sigHandler {};
   string schemaFile = "/usr/local/sysflow/conf/SysFlow.avsc";
-  sigIntHandler.sa_handler = signal_handler;
-  sigemptyset(&sigIntHandler.sa_mask);
-  sigIntHandler.sa_flags = 0;
+  sigHandler.sa_handler = signal_handler;
+  sigemptyset(&sigHandler.sa_mask);
+  sigHandler.sa_flags = 0;
   bool filterCont = false;
   int fileDuration = 0;
   int criTO = 0;
@@ -117,7 +117,8 @@ int main(int argc, char **argv) {
   bool writeFile = false;
   string logProps = "/usr/local/sysflow/conf/log4cxx.properties";
 
-  sigaction(SIGINT, &sigIntHandler, nullptr);
+  sigaction(SIGINT, &sigHandler, nullptr);
+  sigaction(SIGTERM, &sigHandler, nullptr);
 
   while ((c = static_cast<char>(
               getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:"))) != -1) {

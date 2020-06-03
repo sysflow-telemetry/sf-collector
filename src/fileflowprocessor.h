@@ -40,12 +40,12 @@ private:
   DataFlowSet *m_dfSet;
   file::FileContext *m_fileCxt;
   void populateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev,
-                        ProcessObj *proc, FileObj *file, string flowkey);
-  void updateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev);
+                        ProcessObj *proc, FileObj *file, string flowkey, sinsp_fdinfo_t *fdinfo, int64_t fd);
+  void updateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev, sinsp_fdinfo_t* fdinfo);
   void processExistingFlow(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
-                           OpFlags flag, string flowkey, FileFlowObj *ff);
+                           OpFlags flag, string flowkey, FileFlowObj *ff, sinsp_fdinfo_t *fdinfo);
   void processNewFlow(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
-                      OpFlags flag, const string &flowkey);
+                      OpFlags flag, const string &flowkey, sinsp_fdinfo_t *fdinfo, int64_t fd);
   void removeAndWriteFileFlow(ProcessObj *proc, FileObj *file, FileFlowObj **nf,
                               string flowkey);
   void removeFileFlow(ProcessObj *proc, FileObj *file, FileFlowObj **ff,

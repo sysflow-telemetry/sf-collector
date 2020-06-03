@@ -135,6 +135,54 @@ int64_t utils::getSyscallResult(sinsp_evt *ev) {
   return res;
 }
 
+int64_t utils::getFlags(sinsp_evt *ev) {
+  return utils::getIntParam(ev, "flags");
+}
+
+int64_t utils::getFD(sinsp_evt *ev) {
+  return utils::getIntParam(ev, "fd");
+}
+
+bool utils::isMapAnonymous(sinsp_evt *ev) {
+  int64_t flags = utils::getFlags(ev);
+  return  flags & PPM_MAP_ANONYMOUS;
+}
+
+int64_t utils::getIntParam(sinsp_evt* ev, string pname) {
+  uint32_t n = ev->get_num_params();
+  for(uint32_t i = n; i >= 0; i--)
+  {
+    string name = ev->get_param_name(i);	  
+    if(name.compare(pname) == 0)
+    {
+      const ppm_param_info *param = ev->get_param_info(i);
+      switch (param->type) {
+        case PT_PID:
+        case PT_ERRNO:
+        case PT_FD:
+        case PT_INT64:
+        case PT_INT32:
+	case PT_FLAGS8:
+	case PT_FLAGS16:
+	case PT_FLAGS32:
+		{
+          const sinsp_evt_param *p = ev->get_param(i);
+          return *reinterpret_cast<int64_t *>(p->m_val);
+		}
+        default:
+	  return 0;
+      }
+    }
+  }
+  return 0;
+}
+
+
+bool utils::isCloneThreadSet(sinsp_evt *ev) {
+  int64_t cloneThread = utils::getFlags(ev);
+  return cloneThread & PPM_CL_CLONE_THREAD;
+}
+
 avro::ValidSchema utils::loadSchema(const char *filename) {
   avro::ValidSchema result;
   try {

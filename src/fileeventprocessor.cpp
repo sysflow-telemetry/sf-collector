@@ -116,7 +116,7 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
   sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
   FileObj *file = nullptr;
   if (fdinfo != nullptr) {
-    file = m_fileCxt->getFile(ev, SFObjectState::CREATED, created);
+    file = m_fileCxt->getFile(ev, fdinfo, SFObjectState::CREATED, created);
   } else {
     string fileName = (IS_UNLINKAT(ev->get_type()))
                           ? utils::getPath(ev, "name")

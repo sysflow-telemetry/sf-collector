@@ -62,11 +62,17 @@ public:
     write(&m_flow);
   }
   inline void writeNetFlow(NetworkFlow *nf) {
+    if(nf->opFlags == 0) {
+	    return;
+    }
     m_flow.rec.set_NetworkFlow(*nf);
     m_numRecs++;
     write(&m_flow);
   }
   inline void writeFileFlow(FileFlow *ff) {
+    if(ff->opFlags == 0) {
+	    return;
+    }
     m_flow.rec.set_FileFlow(*ff);
     m_numRecs++;
     write(&m_flow);

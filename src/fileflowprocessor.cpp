@@ -42,9 +42,8 @@ FileFlowProcessor::~FileFlowProcessor() = default;
 
 inline void FileFlowProcessor::populateFileFlow(FileFlowObj *ff, OpFlags flag,
                                                 sinsp_evt *ev, ProcessObj *proc,
-                                                FileObj *file, string flowkey) {
+                                                FileObj *file, string flowkey, sinsp_fdinfo_t *fdinfo, int64_t fd) {
   sinsp_threadinfo *ti = ev->get_thread_info();
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
   ff->fileflow.opFlags = flag;
   ff->fileflow.ts = ev->get_ts();
   ff->fileflow.openFlags = 0;
@@ -55,7 +54,7 @@ inline void FileFlowProcessor::populateFileFlow(FileFlowObj *ff, OpFlags flag,
   ff->fileflow.procOID.hpid = proc->proc.oid.hpid;
   ff->fileflow.procOID.createTS = proc->proc.oid.createTS;
   ff->fileflow.tid = ti->m_tid;
-  ff->fileflow.fd = ev->get_fd_num();
+  ff->fileflow.fd = fd;
   ff->fileflow.fileOID = file->file.oid;
   ff->filekey = file->key;
   ff->flowkey = std::move(flowkey);
@@ -93,9 +92,8 @@ void FileFlowProcessor::removeAndWriteRelatedFlows(ProcessObj *proc,
 }
 
 inline void FileFlowProcessor::updateFileFlow(FileFlowObj *ff, OpFlags flag,
-                                              sinsp_evt *ev) {
+                                              sinsp_evt *ev, sinsp_fdinfo_t* fdinfo) {
   ff->fileflow.opFlags |= flag;
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
   ff->lastUpdate = utils::getCurrentTime(m_cxt);
   if (flag == OP_OPEN) {
     ff->fileflow.openFlags = fdinfo->m_openflags;
@@ -116,12 +114,12 @@ inline void FileFlowProcessor::updateFileFlow(FileFlowObj *ff, OpFlags flag,
 
 inline void FileFlowProcessor::processNewFlow(sinsp_evt *ev, ProcessObj *proc,
                                               FileObj *file, OpFlags flag,
-                                              const string &flowkey) {
+                                              const string &flowkey, sinsp_fdinfo_t *fdinfo, int64_t fd) {
   auto *ff = new FileFlowObj();
   ff->exportTime = utils::getExportTime(m_cxt);
   ff->lastUpdate = utils::getCurrentTime(m_cxt);
-  populateFileFlow(ff, flag, ev, proc, file, flowkey);
-  updateFileFlow(ff, flag, ev);
+  populateFileFlow(ff, flag, ev, proc, file, flowkey, fdinfo, fd);
+  updateFileFlow(ff, flag, ev, fdinfo);
   if (flag != OP_CLOSE) {
     proc->fileflows[flowkey] = ff;
     file->refs++;
@@ -147,8 +145,8 @@ inline void FileFlowProcessor::processExistingFlow(sinsp_evt *ev,
                                                    ProcessObj *proc,
                                                    FileObj *file, OpFlags flag,
                                                    string flowkey,
-                                                   FileFlowObj *ff) {
-  updateFileFlow(ff, flag, ev);
+                                                   FileFlowObj *ff, sinsp_fdinfo_t *fdinfo) {
+  updateFileFlow(ff, flag, ev, fdinfo);
   if (flag == OP_CLOSE) {
     removeAndWriteRelatedFlows(proc, ff, ev->get_ts());
     ff->fileflow.endTs = ev->get_ts();
@@ -158,12 +156,32 @@ inline void FileFlowProcessor::processExistingFlow(sinsp_evt *ev,
 
 int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+  int64_t fd = ev->get_fd_num();
 
   if (fdinfo == nullptr) {
     SF_DEBUG(m_logger,
              "Event: " << ev->get_name()
                        << " doesn't have a fdinfo associated with it!");
-    return 1;
+    if(flag == OP_MMAP) {
+	    if (fd != sinsp_evt::INVALID_FD_NUM) {
+              sinsp_threadinfo *ti = ev->get_thread_info();
+              fdinfo = ti->get_fd(fd);
+
+	    }else {
+	      fd = utils::getFD(ev);
+	      if(!utils::isMapAnonymous(ev) && fd != -1) {
+                 // SF_INFO(m_logger, "FDs: " << fd );
+                  sinsp_threadinfo *ti = ev->get_thread_info();
+                  fdinfo = ti->get_fd(fd);
+	     /* if(fdinfo) {
+                 SF_INFO(m_logger, "Found fdinfo for MMAP")
+	      }*/
+	    }
+	  }
+    }
+    if(fdinfo == nullptr) {
+       return 1;
+    }
   }
 
   if ((fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket())) {
@@ -191,9 +209,9 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   sinsp_threadinfo *ti = ev->get_thread_info();
   string filekey = ti->m_container_id + fdinfo->m_name;
   string flowkey =
-      filekey + std::to_string(ti->m_tid) + std::to_string(ev->get_fd_num());
+      filekey + std::to_string(ti->m_tid) + std::to_string(fd);
 
-  FileObj *file = m_fileCxt->getFile(ev, SFObjectState::REUP, created);
+  FileObj *file = m_fileCxt->getFile(ev, fdinfo, SFObjectState::REUP, created);
   FileFlowTable::iterator ffi = proc->fileflows.find(flowkey);
   if (ffi != proc->fileflows.end()) {
     ff = ffi->second;
@@ -204,9 +222,9 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
                                     << ev->get_name());
 
   if (ff == nullptr) {
-    processNewFlow(ev, proc, file, flag, flowkey);
+    processNewFlow(ev, proc, file, flag, flowkey, fdinfo, fd);
   } else {
-    processExistingFlow(ev, proc, file, flag, flowkey, ff);
+    processExistingFlow(ev, proc, file, flag, flowkey, ff, fdinfo);
   }
   return 0;
 }
