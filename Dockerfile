@@ -52,7 +52,7 @@ RUN cd /build/src && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi:8.1-406 AS runtime
+FROM registry.access.redhat.com/ubi8/ubi:8.2-299 AS runtime
 
 # environment variables
 ARG interval=30
