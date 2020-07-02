@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo docker build -t httpd_worker .
+sudo docker build -t httpd_worker-1000 .
