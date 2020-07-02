@@ -55,10 +55,11 @@ LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIB
       -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl
 LDFLAGS = $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
-CFLAGS = -std=c++11 -Wall -ggdb -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
+CFLAGS = -std=c++11 -Wall -ggdb -I.. -I. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/
+SYSDIG_OBJS = .sdinspector.o .sdutils.o .sdevent.o .sdcont.o .sdfiledescinfo.o .sdprocess.o
 
 .PHONY: all
 all: version $(TARGET)
@@ -66,7 +67,7 @@ all: version $(TARGET)
 .PHONY: install
 install: all 
 	mkdir -p $(INSTALL_PATH)/bin && cp sysporter $(INSTALL_PATH)/bin
-	mkdir -p $(INSTALL_PATH)/conf && cp $(SCHLOCALPREFIX)/SysFlow.avsc $(INSTALL_PATH)/conf
+	mkdir -p $(INSTALL_PATH)/conf && cp ../modules/sysflow/avro/avsc/SysFlow.avsc $(INSTALL_PATH)/conf
 
 .PHONY: uninstall
 uninstall: 
@@ -88,7 +89,7 @@ version:
 	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
 
 .PHONY: $(TARGET)
-$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .filecontext.o
+$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .controlflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .filecontext.o .sfinspector.o $(SYSDIG_OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .main.o: main.cpp
@@ -127,6 +128,9 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 .dataflowprocessor.o: dataflowprocessor.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
+.controlflowprocessor.o: controlflowprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
 .networkflowprocessor.o: networkflowprocessor.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
@@ -143,6 +147,27 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .filecontext.o: filecontext.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sfinspector.o: api/sfinspector.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sdinspector.o: sysdig/sdinspector.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sdutils.o: sysdig/sdutils.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sdprocess.o: sysdig/sdprocess.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sdevent.o: sysdig/sdevent.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sdcont.o: sysdig/sdcont.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sdfiledescinfo.o: sysdig/sdfiledescinfo.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .PHONY: clean
