@@ -51,31 +51,31 @@ DataFlowProcessor::~DataFlowProcessor() {
   }
 }
 
-int DataFlowProcessor::handleDataEvent(sinsp_evt *ev, OpFlags flag) {
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+int DataFlowProcessor::handleDataEvent(api::SysFlowEvent *ev) {
+  api::SysFlowFileDescInfo *fdinfo = ev->getFileDescInfo();
 
   if (fdinfo == nullptr) {
     SF_DEBUG(
         m_logger,
-        "Event: " << ev->get_name()
+        "Event: " << ev->getName()
                   << " doesn't have an fdinfo associated with it! ErrorCode: "
-                  << utils::getSyscallResult(ev));
-    if (IS_FILE_EVT(flag)) {
-      return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
-    } else if (flag == OP_MMAP) {
-      return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
+                  << ev->getSysCallResult());
+    if (IS_FILE_EVT(ev->opFlag)) {
+      return m_fileevtPrcr->handleFileFlowEvent(ev);
+    } else if (ev->opFlag == OP_MMAP) {
+      return m_fileflowPrcr->handleFileFlowEvent(ev);
     }
     if (fdinfo == nullptr) {
       SF_DEBUG(m_logger, " Returning 1");
       return 1;
     }
   }
-  if (fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket()) {
-    return m_netflowPrcr->handleNetFlowEvent(ev, flag);
-  } else if (IS_FILE_EVT(flag)) {
-    return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
+  if (fdinfo->isIPSocket()) {
+    return m_netflowPrcr->handleNetFlowEvent(ev);
+  } else if (IS_FILE_EVT(ev->opFlag)) {
+    return m_fileevtPrcr->handleFileFlowEvent(ev);
   } else {
-    return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
+    return m_fileflowPrcr->handleFileFlowEvent(ev);
   }
   return 2;
 }

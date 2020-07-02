@@ -30,6 +30,7 @@ using sysflow::FileFlow;
 using sysflow::NetworkFlow;
 using sysflow::Process;
 using sysflow::ProcessEvent;
+using sysflow::ProcessFlow;
 using sysflow::SysFlow;
 
 namespace writer {
@@ -66,6 +67,14 @@ public:
       return;
     }
     m_flow.rec.set_NetworkFlow(*nf);
+    m_numRecs++;
+    write(&m_flow);
+  }
+  inline void writeProcessFlow(ProcessFlow *pf) {
+    if (pf->opFlags == 0) {
+      return;
+    }
+    m_flow.rec.set_ProcessFlow(*pf);
     m_numRecs++;
     write(&m_flow);
   }

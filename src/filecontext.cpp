@@ -32,16 +32,16 @@ FileContext::FileContext(container::ContainerContext *containerCxt,
 
 FileContext::~FileContext() { clearAllFiles(); }
 
-FileObj *FileContext::createFile(sinsp_evt *ev, string path, char typechar,
+FileObj *FileContext::createFile(api::SysFlowEvent *ev, string path, char typechar,
                                  SFObjectState state, string key) {
   auto *f = new FileObj();
   f->key = std::move(key);
   f->file.state = state;
-  f->file.ts = ev->get_ts();
+  f->file.ts = ev->getTS();
   utils::generateFOID(f->key, &(f->file.oid));
   f->file.path = std::move(path);
   f->file.restype = typechar;
-  ContainerObj *cont = m_containerCxt->getContainer(ev);
+  ContainerObj *cont = m_containerCxt->getContainer(ev->getProcess());
   if (cont != nullptr) {
     f->file.containerId.set_string(cont->cont.id);
   } else {
@@ -49,15 +49,14 @@ FileObj *FileContext::createFile(sinsp_evt *ev, string path, char typechar,
   }
   return f;
 }
-FileObj *FileContext::getFile(sinsp_evt *ev, sinsp_fdinfo_t *fdinfo,
+FileObj *FileContext::getFile(api::SysFlowEvent *ev, api::SysFlowFileDescInfo *fdinfo,
                               SFObjectState state, bool &created) {
-  return getFile(ev, fdinfo->m_name, fdinfo->get_typechar(), state, created);
+  return getFile(ev, fdinfo->getName(), fdinfo->getFileType(), state, created);
 }
-FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,
+FileObj *FileContext::getFile(api::SysFlowEvent *ev, const string &path, char typechar,
                               SFObjectState state, bool &created) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
   created = true;
-  string key = ti->m_container_id + path;
+  string key = ev->getContainerID() + path;
   FileTable::iterator f = m_files.find(key);
   FileObj *file = nullptr;
   if (f != m_files.end()) {

@@ -32,67 +32,63 @@ ProcessEventProcessor::ProcessEventProcessor(
 
 ProcessEventProcessor::~ProcessEventProcessor() = default;
 
-void ProcessEventProcessor::setUID(sinsp_evt *ev) {
-  m_uid = ev->get_param_value_str(SF_UID);
+void ProcessEventProcessor::setUID(api::SysFlowEvent *ev) {
+  m_uid = ev->getUIDFromParameter();
 }
 
-void ProcessEventProcessor::writeCloneEvent(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+void ProcessEventProcessor::writeCloneEvent(api::SysFlowEvent *ev) {
   bool created = false;
   ProcessObj *proc =
       m_processCxt->getProcess(ev, SFObjectState::CREATED, created);
   m_procEvt.opFlags = OP_CLONE;
-  m_procEvt.ts = ev->get_ts();
+  m_procEvt.ts = ev->getTS();
   m_procEvt.procOID.hpid = proc->proc.oid.hpid;
   m_procEvt.procOID.createTS = proc->proc.oid.createTS;
-  m_procEvt.tid = ti->m_tid;
-  m_procEvt.ret = utils::getSyscallResult(ev);
+  m_procEvt.tid = ev->getTID();
+  m_procEvt.ret = ev->getSysCallResult();
   m_procEvt.args.clear();
   m_writer->writeProcessEvent(&m_procEvt);
 }
 
-void ProcessEventProcessor::writeSetUIDEvent(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+void ProcessEventProcessor::writeSetUIDEvent(api::SysFlowEvent *ev) {
   bool created = false;
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
   m_procEvt.opFlags = OP_SETUID;
-  m_procEvt.ts = ev->get_ts();
+  m_procEvt.ts = ev->getTS();
   m_procEvt.procOID.hpid = proc->proc.oid.hpid;
   m_procEvt.procOID.createTS = proc->proc.oid.createTS;
-  m_procEvt.tid = ti->m_tid;
-  m_procEvt.ret = utils::getSyscallResult(ev);
+  m_procEvt.tid = ev->getTID();
+  m_procEvt.ret = ev->getSysCallResult();
   m_procEvt.args.clear();
   m_procEvt.args.push_back(m_uid);
   m_writer->writeProcessEvent(&m_procEvt);
   m_procEvt.args.clear();
 }
 
-void ProcessEventProcessor::writeExitEvent(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+void ProcessEventProcessor::writeExitEvent(api::SysFlowEvent *ev) {
   bool created = false;
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
   m_procEvt.opFlags = OP_EXIT;
-  m_procEvt.ts = ev->get_ts();
+  m_procEvt.ts = ev->getTS();
   m_procEvt.procOID.hpid = proc->proc.oid.hpid;
   m_procEvt.procOID.createTS = proc->proc.oid.createTS;
-  m_procEvt.tid = ti->m_tid;
-  m_procEvt.ret = utils::getSyscallResult(ev);
+  m_procEvt.tid = ev->getTID();
+  m_procEvt.ret = ev->getSysCallResult();
   m_procEvt.args.clear();
   int64_t tid = -1;
-  if (!ti->is_main_thread()) {
-    tid = ti->m_tid;
+  if (!ev->isMainThread()) {
+    tid = ev->getTID();
   }
   m_dfPrcr->removeAndWriteDFFromProc(proc, tid);
   m_writer->writeProcessEvent(&m_procEvt);
   // delete the process from the proc table after an exit
-  if (ti->is_main_thread()) {
+  if (ev->isMainThread()) {
     // m_processCxt->deleteProcess(&proc);
     m_processCxt->markForDeletion(&proc);
   }
 }
 
-void ProcessEventProcessor::writeExecEvent(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+void ProcessEventProcessor::writeExecEvent(api::SysFlowEvent *ev) {
   bool created = false;
   ProcessObj *proc =
       m_processCxt->getProcess(ev, SFObjectState::CREATED, created);
@@ -108,11 +104,11 @@ void ProcessEventProcessor::writeExecEvent(sinsp_evt *ev) {
   }
 
   m_procEvt.opFlags = OP_EXEC;
-  m_procEvt.ts = ev->get_ts();
+  m_procEvt.ts = ev->getTS();
   m_procEvt.procOID.hpid = proc->proc.oid.hpid;
   m_procEvt.procOID.createTS = proc->proc.oid.createTS;
-  m_procEvt.tid = ti->m_tid;
-  m_procEvt.ret = utils::getSyscallResult(ev);
+  m_procEvt.tid = ev->getTID();
+  m_procEvt.ret = ev->getSysCallResult();
   m_procEvt.args.clear();
   m_writer->writeProcessEvent(&m_procEvt);
 }

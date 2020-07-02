@@ -47,32 +47,34 @@ ProcessContext::~ProcessContext() {
   }
 }
 
-ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
-                                          sinsp_evt *ev, SFObjectState state) {
+ProcessFlowSet *ProcessContext::getPFSet() { return &m_pfSet; }
+
+ProcessObj *ProcessContext::createProcess(api::SysFlowProcess *pr,
+                                          api::SysFlowEvent *ev,
+                                          SFObjectState state) {
   auto *p = new ProcessObj();
   p->proc.state = state;
-  p->proc.ts = ev->get_ts();
-  p->proc.oid.hpid = mainthread->m_pid;
-  p->proc.oid.createTS = mainthread->m_clone_ts;
+  p->proc.ts = ev->getTS();
+  p->proc.oid.hpid = pr->getHostPID();
+  p->proc.oid.createTS = pr->getCreateTS();
+  p->proc.tty = pr->getTTY();
+  // auto *inspector = m_cxt->getInspector();
+  // auto *parent = inspector->getProcess(pr->getParentPID());
 
-  sinsp_threadinfo *ti = ev->get_thread_info();
-  p->proc.tty = ti->m_tty;
-  sinsp_threadinfo *parent = mainthread->get_parent_thread();
-
-  if (parent != nullptr) {
+  if (pr->hasParent()) {
     OID poid;
-    poid.createTS = parent->m_clone_ts;
-    poid.hpid = parent->m_pid;
+    poid.createTS = pr->getParentCreateTS();
+    poid.hpid = pr->getParentPID();
     p->proc.poid.set_OID(poid);
-    SF_DEBUG(m_logger,
-             "PARENT PID: " << parent->m_pid << " ts " << parent->m_clone_ts)
+    SF_DEBUG(m_logger, "PARENT PID: " << pr->getParentPID() << " ts "
+                                      << pr->getParentCreateTS())
   } else {
     SF_DEBUG(m_logger, "Unable to find parent for process "
-                           << mainthread->m_exe << " PID " << mainthread->m_pid
-                           << " PTID " << mainthread->m_ptid)
-    if (mainthread->m_ptid != -1) {
+                           << pr->getExe() << " PID " << pr->getHostPID()
+                           << " PTID " << pr->getParentPID())
+    if (pr->getParentPID() != -1) {
       SF_DEBUG(m_logger, "Searching for potential parent in process table.")
-      ProcessObj *pt = getProcess(mainthread->m_ptid);
+      ProcessObj *pt = getProcess(pr->getParentPID());
       if (pt != nullptr) {
         SF_DEBUG(m_logger, "Found parent candidate! Process: " << pt->proc.exe);
         OID poid;
@@ -82,15 +84,13 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
       }
     }
   }
-  p->proc.exe = (mainthread->m_exepath.empty())
-                    ? utils::getAbsolutePath(ti, mainthread->m_exe)
-                    : mainthread->m_exepath;
+  p->proc.exe = pr->getExe();
+
   SF_DEBUG(m_logger, "createProcess: The exepath is "
-                         << p->proc.exe << " ti->exepath: " << ti->get_exepath()
-                         << " EXE: " << mainthread->get_exe()
-                         << " CWD: " << mainthread->get_cwd());
-  p->proc.exeArgs.clear();
-  int i = 0;
+                         << p->proc.exe << "pr->getExe: " << pr->getExe());
+  // p->proc.exeArgs.clear();
+  p->proc.exeArgs = pr->getArgs();
+  /*int i = 0;
   for (auto it = mainthread->m_args.begin(); it != mainthread->m_args.end();
        ++it) {
     if (i == 0) {
@@ -99,12 +99,12 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
       p->proc.exeArgs += " " + *it;
     }
     i++;
-  }
-  p->proc.uid = mainthread->m_uid;
-  p->proc.gid = mainthread->m_gid;
-  p->proc.userName = utils::getUserName(m_cxt, mainthread->m_uid);
-  p->proc.groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
-  ContainerObj *cont = m_containerCxt->getContainer(ev);
+  }*/
+  p->proc.uid = pr->getUID();
+  p->proc.gid = pr->getGID();
+  p->proc.userName = pr->getUserName();
+  p->proc.groupName = pr->getGroupName();
+  ContainerObj *cont = m_containerCxt->getContainer(pr);
   if (cont != nullptr) {
     p->proc.containerId.set_string(cont->cont.id);
     cont->refs++;
@@ -153,7 +153,7 @@ bool ProcessContext::isAncestor(OID *oid, Process *proc) {
   return false;
 }
 
-void ProcessContext::reupContainer(sinsp_evt *ev, ProcessObj *proc) {
+void ProcessContext::reupContainer(api::SysFlowProcess *pr, ProcessObj *proc) {
   string containerId = "";
   if (!proc->proc.containerId.is_null()) {
     containerId = proc->proc.containerId.get_string();
@@ -165,7 +165,7 @@ void ProcessContext::reupContainer(sinsp_evt *ev, ProcessObj *proc) {
       cont1->refs--;
     }
   }
-  ContainerObj *cont = m_containerCxt->getContainer(ev);
+  ContainerObj *cont = m_containerCxt->getContainer(pr);
   if (cont != nullptr) {
     proc->proc.containerId.set_string(cont->cont.id);
     cont->refs++;
@@ -190,18 +190,17 @@ ProcessObj *ProcessContext::getProcess(int64_t pid) {
   return nullptr;
 }
 
-ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
-                                       bool &created) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
-  sinsp_threadinfo *mt = ti->get_main_thread();
+ProcessObj *ProcessContext::getProcess(api::SysFlowEvent *ev,
+                                       SFObjectState state, bool &created) {
   OID key;
-  key.createTS = mt->m_clone_ts;
-  key.hpid = mt->m_pid;
+  auto pr = ev->getProcess();
+  auto inspector = m_cxt->getInspector();
+  key.createTS = pr->getCreateTS();
+  key.hpid = pr->getHostPID();
   created = true;
-  SF_DEBUG(m_logger, "getProcess: PID: " << mt->m_pid << " ts "
-                                         << mt->m_clone_ts
-                                         << " EXEPATH: " << mt->m_exepath
-                                         << " EXE: " << mt->m_exe);
+  SF_DEBUG(m_logger, "getProcess: PID: " << pr->getHostPID() << " ts "
+                                         << pr->getCreateTS()
+                                         << " EXEPATH: " << pr->getExe());
   ProcessTable::iterator proc = m_procs.find(&key);
   ProcessObj *process = nullptr;
   if (proc != m_procs.end()) {
@@ -214,30 +213,32 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   }
   std::vector<ProcessObj *> processes;
   if (process == nullptr) {
-    process = createProcess(mt, ev, state);
+    process = createProcess(pr, ev, state);
   } else { // must make sure the container is in the sysflow file..
-    reupContainer(ev, process);
+    reupContainer(pr, process);
   }
   SF_DEBUG(m_logger, "CREATING PROCESS FOR WRITING: PID: "
-                         << mt->m_pid << " ts " << mt->m_clone_ts
-                         << " EXEPATH: " << mt->m_exepath
-                         << " EXE: " << mt->m_exe);
+                         << pr->getHostPID() << " ts " << pr->getCreateTS()
+                         << " EXEPATH: " << pr->getExe());
   processes.push_back(process);
 
-  sinsp_threadinfo *ct = mt;
-  mt = mt->get_parent_thread();
-
+  std::unique_ptr<api::SysFlowProcess> ct =
+      inspector->getProcess(pr->getHostPID());
+  std::unique_ptr<api::SysFlowProcess> mt =
+      inspector->getProcess(pr->getParentPID());
+  int parentPID = -1;
   while (mt != nullptr) {
-    if (mt->m_clone_ts == 0 && mt->m_pid == 0) {
-      ct = mt;
-      mt = mt->get_parent_thread();
+    if (mt->getCreateTS() == 0 && mt->getHostPID() == 0) {
+      parentPID = mt->getParentPID();
+      ct = std::move(mt);
+      mt = inspector->getProcess(parentPID);
       continue;
     }
-    key.createTS = mt->m_clone_ts;
-    key.hpid = mt->m_pid;
-    SF_DEBUG(m_logger, "PARENT PID: " << mt->m_pid << " ts " << mt->m_clone_ts
-                                      << " EXEPATH: " << mt->m_exepath
-                                      << " EXE: " << mt->m_exe);
+    key.createTS = mt->getCreateTS();
+    key.hpid = mt->getHostPID();
+    SF_DEBUG(m_logger, "PARENT PID: " << mt->getHostPID() << " ts "
+                                      << mt->getCreateTS()
+                                      << " EXEPATH: " << mt->getExe());
     ProcessObj *parent = nullptr;
     ProcessTable::iterator proc2 = m_procs.find(&key);
     if (proc2 != m_procs.end()) {
@@ -249,22 +250,23 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
       }
     }
     if (parent == nullptr) {
-      parent = createProcess(mt, ev, SFObjectState::REUP);
+      parent = createProcess(mt.get(), ev, SFObjectState::REUP);
     } else {
-      reupContainer(ev, parent);
+      reupContainer(mt.get(), parent);
     }
     parent->children.insert(processes.back()->proc.oid);
     processes.push_back(parent);
-    ct = mt;
-    mt = mt->get_parent_thread();
+    parentPID = mt->getParentPID();
+    ct = std::move(mt);
+    mt = inspector->getProcess(parentPID);
   }
-  if (mt == nullptr && ct->m_ptid != -1) {
+  if (mt == nullptr && ct->getParentPID() != -1) {
     SF_DEBUG(m_logger,
              "Ancestral chain not found standard way.. searching based on pid")
-    ProcessObj *prt = getProcess(ct->m_ptid);
+    ProcessObj *prt = getProcess(ct->getParentPID());
     OID o;
-    o.hpid = ct->m_pid;
-    o.createTS = ct->m_clone_ts;
+    o.hpid = ct->getHostPID();
+    o.createTS = ct->getCreateTS();
     while (prt != nullptr) {
       SF_DEBUG(m_logger, "Found parent with pid: " << prt->proc.oid.hpid
                                                    << " create TS "
@@ -324,36 +326,23 @@ bool ProcessContext::exportProcess(OID *oid) {
   return expt;
 }
 
-void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
+void ProcessContext::updateProcess(Process *proc, api::SysFlowEvent *ev,
                                    SFObjectState state) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
-  sinsp_threadinfo *mainthread = ti->get_main_thread();
+  auto pr = ev->getProcess();
   proc->state = state;
-  proc->ts = ev->get_ts();
-  proc->exe = (mainthread->m_exepath.empty())
-                  ? utils::getAbsolutePath(ti, mainthread->m_exe)
-                  : mainthread->m_exepath;
-  proc->exeArgs.clear();
-  int i = 0;
-  for (auto it = mainthread->m_args.begin(); it != mainthread->m_args.end();
-       ++it) {
-    if (i == 0) {
-      proc->exeArgs += *it;
-    } else {
-      proc->exeArgs += " " + *it;
-    }
-    i++;
-  }
-  proc->uid = mainthread->m_uid;
-  proc->gid = mainthread->m_gid;
-  proc->userName = utils::getUserName(m_cxt, mainthread->m_uid);
-  proc->groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
+  proc->ts = ev->getTS();
+  proc->exe = pr->getExe();
+  proc->exeArgs = pr->getArgs();
+  proc->uid = pr->getUID();
+  proc->gid = pr->getGID();
+  proc->userName = pr->getUserName();
+  proc->groupName = pr->getGroupName();
 }
 
 void ProcessContext::clearProcesses() {
   for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
     if (it->second->netflows.empty() && it->second->fileflows.empty() &&
-        it->second->children.empty()) {
+        it->second->children.empty() && it->second->pfo == nullptr) {
       ProcessObj *proc = it->second;
       Process::poid_t poid = proc->proc.poid;
       ProcessObj *curProc = proc;
@@ -387,7 +376,7 @@ void ProcessContext::clearProcesses() {
   }
   for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
     if (it->second->netflows.empty() && it->second->fileflows.empty() &&
-        it->second->children.empty()) {
+        it->second->children.empty() && it->second->pfo == nullptr) {
       ProcessObj *proc = it->second;
       if (!proc->proc.containerId.is_null()) {
         m_containerCxt->derefContainer(proc->proc.containerId.get_string());
@@ -449,25 +438,35 @@ void ProcessContext::printNetworkFlow(ProcessObj *proc) {
 }
 
 void ProcessContext::clearAllProcesses() {
+  SF_INFO(m_logger, "Deleting all processes");
   for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
-    if (((!it->second->netflows.empty()) || (!it->second->fileflows.empty())) &&
+    if (((!it->second->netflows.empty()) || (!it->second->fileflows.empty()) ||
+         (it->second->pfo != nullptr)) &&
         !it->second->written) {
       writeProcessAndAncestors(it->second);
     }
     for (NetworkFlowTable::iterator nfi = it->second->netflows.begin();
          nfi != it->second->netflows.end(); nfi++) {
       nfi->second->netflow.opFlags |= OP_TRUNCATE;
-      nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
+      nfi->second->netflow.endTs = utils::getSystemTime(m_cxt);
       m_writer->writeNetFlow(&(nfi->second->netflow));
       delete nfi->second;
     }
     for (FileFlowTable::iterator ffi = it->second->fileflows.begin();
          ffi != it->second->fileflows.end(); ffi++) {
       ffi->second->fileflow.opFlags |= OP_TRUNCATE;
-      ffi->second->fileflow.endTs = utils::getSysdigTime(m_cxt);
+      ffi->second->fileflow.endTs = utils::getSystemTime(m_cxt);
       m_fileCxt->exportFile(ffi->second->filekey);
       m_writer->writeFileFlow(&(ffi->second->fileflow));
       delete ffi->second;
+    }
+    if (it->second->pfo != nullptr) {
+      it->second->pfo->procflow.opFlags |= OP_TRUNCATE;
+      it->second->pfo->procflow.endTs = utils::getSystemTime(m_cxt);
+      SF_INFO(m_logger, "Writing processflow!")
+      m_writer->writeProcessFlow(&(it->second->pfo->procflow));
+      delete it->second->pfo;
+      it->second->pfo = nullptr;
     }
   }
 
@@ -500,7 +499,35 @@ void ProcessContext::deleteProcess(ProcessObj **proc) {
   if (!(*proc)->proc.containerId.is_null()) {
     m_containerCxt->derefContainer((*proc)->proc.containerId.get_string());
   }
+  if ((*proc)->pfo != nullptr) {
+    removeProcessFromSet(*proc, false);
+  }
   m_procs.erase(&((*proc)->proc.oid));
   delete *proc;
   *proc = nullptr;
+}
+
+int ProcessContext::removeProcessFromSet(ProcessObj *proc, bool checkForErr) {
+  bool found = false;
+  int removed = 0;
+  for (auto iter = m_pfSet.find(proc); iter != m_pfSet.end(); iter++) {
+    auto *foundObj = static_cast<ProcessObj *>(*iter);
+    if (*foundObj == *proc) {
+      SF_INFO(m_logger, "Removing procflow element from multiset.");
+      m_pfSet.erase(iter);
+      removed++;
+      found = true;
+      break;
+    }
+  }
+  if (!found && checkForErr) {
+    SF_ERROR(m_logger,
+             "Cannot find Procflow Object in proc flow set. Deleting. "
+             "This should not happen");
+  }
+  if (proc->pfo != nullptr) {
+    delete proc->pfo;
+    proc->pfo = nullptr;
+  }
+  return removed;
 }

@@ -24,21 +24,18 @@
 #include "filecontext.h"
 #include "logger.h"
 #include "processcontext.h"
-#include "processeventprocessor.h"
+#include "controlflowprocessor.h"
 #include "sffilewriter.h"
 #include "sfsockwriter.h"
 #include "syscall_defs.h"
 #include "sysflowcontext.h"
 #include <ctime>
 #include <string>
+#include <system_error>
+#include "api/sfinspector.h"
 
 namespace sysflowprocessor {
 class SysFlowProcessor {
-public:
-  explicit SysFlowProcessor(context::SysFlowContext *cxt);
-  virtual ~SysFlowProcessor();
-  inline void exit() { m_exit = true; }
-  int run();
 
 private:
   DEFINE_LOGGER();
@@ -48,11 +45,17 @@ private:
   container::ContainerContext *m_containerCxt;
   file::FileContext *m_fileCxt;
   process::ProcessContext *m_processCxt;
-  processevent::ProcessEventProcessor *m_procEvtPrcr;
+  controlflow::ControlFlowProcessor* m_ctrlPrcr;
   dataflow::DataFlowProcessor *m_dfPrcr;
   void clearTables();
   bool checkAndRotateFile();
+  int checkForExpiredRecords();
   time_t m_statsTime;
+public:
+  explicit SysFlowProcessor(context::SysFlowContext *cxt);
+  virtual ~SysFlowProcessor();
+  inline void exit() { SF_INFO(m_logger, "EXIT Called"); m_exit = true; }
+  int run();
 };
 } // namespace sysflowprocessor
 

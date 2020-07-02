@@ -31,12 +31,29 @@
 #include <sinsp.h>
 #include <string>
 #include <unistd.h>
+#include <exception>
+#include <execinfo.h>
+#include <signal.h>
+#define BOOST_STACKTRACE_USE_ADDR2LINE
+#include <boost/stacktrace.hpp>
 
 using sysflowprocessor::SysFlowProcessor;
 
 SysFlowProcessor *s_prc = nullptr;
 
 void signal_handler(int /*i*/) { s_prc->exit(); }
+
+void segfault_handler(int sig) {
+  void *array[10];
+  size_t size;
+  // get void*'s for all entries on the stack
+  size = backtrace(array, 10);
+  // print out all the frames to stderr
+  fprintf(stderr, "Error: signal %d:\n", sig);
+  backtrace_symbols_fd(array, size, STDERR_FILENO);
+  std::cout << boost::stacktrace::stacktrace() << std::endl;
+  exit(1);
+}
 
 int str2int(int &i, char const *s, int base = 0) {
   char *end;
@@ -95,7 +112,7 @@ static void usage(const std::string &name) {
 
 CREATE_MAIN_LOGGER()
 int main(int argc, char **argv) {
-  string scapFile = "";
+  string inputFile = "";
   string outputDir;
   string exporterID = "";
   char *duration;
@@ -119,6 +136,7 @@ int main(int argc, char **argv) {
 
   sigaction(SIGINT, &sigHandler, nullptr);
   sigaction(SIGTERM, &sigHandler, nullptr);
+  signal(SIGSEGV, segfault_handler);
 
   while ((c = static_cast<char>(
               getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:"))) != -1) {
@@ -134,7 +152,7 @@ int main(int argc, char **argv) {
       exporterID = optarg;
       break;
     case 'r':
-      scapFile = optarg;
+      inputFile = optarg;
       break;
     case 'w':
       writeFile = true;
@@ -213,11 +231,11 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  try {
+//  try {
     CONFIGURE_LOGGER(logProps);
     SF_DEBUG(logger, "Starting sysporter...");
     auto *cxt = new context::SysFlowContext(filterCont, fileDuration, outputDir,
-                                            scapFile, schemaFile, exporterID,
+                                            inputFile, schemaFile, exporterID,
                                             filter, criPath, criTO);
     if (stats) {
       cxt->enableStats();
@@ -229,8 +247,8 @@ int main(int argc, char **argv) {
     int ret = s_prc->run();
     delete s_prc;
     return ret;
-  } catch (sinsp_exception &ex) {
+ /* } catch (std::exception &ex) {
     SF_ERROR(logger, "Runtime exception caught in main loop: " << ex.what());
     return 1;
-  }
+  }*/
 }

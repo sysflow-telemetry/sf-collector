@@ -27,23 +27,24 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
-#include <sinsp.h>
 #include <unistd.h>
 
-#define SYSDIG_LOG "SYSDIG_LOG"
+namespace api {
+class SysFlowInspector;
+}
+
+using namespace std;
 
 namespace context {
 class SysFlowContext {
 private:
   bool m_filterCont;
-  // time_t m_start{};
   int m_fileDuration;
   bool m_hasPrefix;
   string m_outputFile;
-  string m_scapFile;
+  string m_inputFile;
   string m_schemaFile;
   string m_exporterID;
-  sinsp *m_inspector;
   int m_nfExportInterval;
   int m_nfExpireInterval;
   bool m_offline;
@@ -53,6 +54,8 @@ private:
   bool m_stats;
   int m_statsInterval;
   bool m_domainSock;
+  bool m_processFlow;
+  api::SysFlowInspector *m_inspector;
   DEFINE_LOGGER();
 
 public:
@@ -61,13 +64,16 @@ public:
                  string criPath, int criTO);
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
-  string getExporterID();
+  inline string getExporterID() { return m_exporterID; }
+  inline void setExporterID(std::string exporter) { m_exporterID = exporter; }
+  inline string getFilter() { return m_filter; }
+  inline string getCriPath() { return m_criPath; }
+  inline int getCriTO() { return m_criTO; }
+  inline string getInputFile() { return m_inputFile; }
   inline bool isOffline() { return m_offline; }
-  inline sinsp *getInspector() { return m_inspector; }
   inline int getNFExportInterval() { return m_nfExportInterval; }
   inline int getNFExpireInterval() { return m_nfExpireInterval; }
   inline string getOutputFile() { return m_outputFile; }
-  inline string getScapFile() { return m_scapFile; }
   inline const char *getSchemaFile() { return m_schemaFile.c_str(); }
   inline bool hasPrefix() { return m_hasPrefix; }
   inline int getFileDuration() { return m_fileDuration; }
@@ -75,8 +81,10 @@ public:
   inline bool isStatsEnabled() { return m_stats; }
   inline void enableStats() { m_stats = true; }
   inline bool isDomainSock() { return m_domainSock; }
+  inline bool isProcessFlowEnabled() { return m_processFlow; }
   inline void enableDomainSock() { m_domainSock = true; }
   inline int getStatsInterval() { return m_statsInterval; }
+  inline api::SysFlowInspector *getInspector() { return m_inspector; }
 };
 } // namespace context
 

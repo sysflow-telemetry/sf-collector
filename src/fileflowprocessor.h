@@ -19,6 +19,7 @@
 
 #ifndef _SF_FILE_FLOW_
 #define _SF_FILE_FLOW_
+#include "api/sfinspector.h"
 #include "datatypes.h"
 #include "file_types.h"
 #include "filecontext.h"
@@ -29,7 +30,6 @@
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
 #include <ctime>
-#include <sinsp.h>
 
 namespace fileflow {
 class FileFlowProcessor {
@@ -39,17 +39,17 @@ private:
   writer::SysFlowWriter *m_writer;
   DataFlowSet *m_dfSet;
   file::FileContext *m_fileCxt;
-  void populateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev,
+  void populateFileFlow(FileFlowObj *ff, OpFlags flag, api::SysFlowEvent *ev,
                         ProcessObj *proc, FileObj *file, string flowkey,
-                        sinsp_fdinfo_t *fdinfo, int64_t fd);
-  void updateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev,
-                      sinsp_fdinfo_t *fdinfo);
-  void processExistingFlow(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
-                           OpFlags flag, string flowkey, FileFlowObj *ff,
-                           sinsp_fdinfo_t *fdinfo);
-  void processNewFlow(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
+                        api::SysFlowFileDescInfo *fdinfo, int64_t fd);
+  void updateFileFlow(FileFlowObj *ff, OpFlags flag, api::SysFlowEvent *ev,
+                      api::SysFlowFileDescInfo *fdinfo);
+  void processExistingFlow(api::SysFlowEvent *ev, ProcessObj *proc,
+                           FileObj *file, OpFlags flag, string flowkey,
+                           FileFlowObj *ff, api::SysFlowFileDescInfo *fdinfo);
+  void processNewFlow(api::SysFlowEvent *ev, ProcessObj *proc, FileObj *file,
                       OpFlags flag, const string &flowkey,
-                      sinsp_fdinfo_t *fdinfo, int64_t fd);
+                      api::SysFlowFileDescInfo *fdinfo, int64_t fd);
   void removeAndWriteFileFlow(ProcessObj *proc, FileObj *file, FileFlowObj **nf,
                               string flowkey);
   void removeFileFlow(ProcessObj *proc, FileObj *file, FileFlowObj **ff,
@@ -64,7 +64,7 @@ public:
                     process::ProcessContext *procCxt, DataFlowSet *dfSet,
                     file::FileContext *fileCxt);
   virtual ~FileFlowProcessor();
-  int handleFileFlowEvent(sinsp_evt *ev, OpFlags flag);
+  int handleFileFlowEvent(api::SysFlowEvent *ev);
   inline int getSize() { return m_processCxt->getNumFileFlows(); }
   int removeAndWriteFFFromProc(ProcessObj *proc, int64_t tid);
   void removeFileFlow(DataFlowObj *dfo);

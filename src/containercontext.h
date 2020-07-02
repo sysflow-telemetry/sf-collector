@@ -21,11 +21,11 @@
 #define _SF_CONT_
 #include <string>
 
+#include "api/sfinspector.h"
 #include "datatypes.h"
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
-#include <sinsp.h>
 
 #define CONT_TABLE_SIZE 100
 #define INCOMPLETE "incomplete"
@@ -37,13 +37,13 @@ private:
   ContainerTable m_containers;
   context::SysFlowContext *m_cxt;
   writer::SysFlowWriter *m_writer;
-  ContainerObj *createContainer(sinsp_evt *ev);
-  void setContainer(ContainerObj **cont, sinsp_container_info::ptr_t container);
+  ContainerObj *createContainer(api::SysFlowProcess *proc);
+  void setContainer(ContainerObj **cont, api::SysFlowContainer *container);
 
 public:
   ContainerContext(context::SysFlowContext *cxt, writer::SysFlowWriter *writer);
   virtual ~ContainerContext();
-  ContainerObj *getContainer(sinsp_evt *ev);
+  ContainerObj *getContainer(api::SysFlowProcess *proc);
   ContainerObj *getContainer(const string &id);
   bool exportContainer(const string &id);
   int derefContainer(const string &id);

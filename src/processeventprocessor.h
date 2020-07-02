@@ -24,10 +24,8 @@
 #include "processcontext.h"
 #include "sysflow.h"
 #include "sysflowwriter.h"
-#include "utils.h"
-#include <sinsp.h>
 #include <string>
-#define SF_UID "uid"
+#include "api/sfinspector.h"
 
 namespace processevent {
 class ProcessEventProcessor {
@@ -36,11 +34,11 @@ public:
                         process::ProcessContext *pc,
                         dataflow::DataFlowProcessor *dfPrcr);
   virtual ~ProcessEventProcessor();
-  void writeCloneEvent(sinsp_evt *ev);
-  void writeExitEvent(sinsp_evt *ev);
-  void writeExecEvent(sinsp_evt *ev);
-  void writeSetUIDEvent(sinsp_evt *ev);
-  void setUID(sinsp_evt *ev);
+  void writeCloneEvent(api::SysFlowEvent *ev);
+  void writeExitEvent(api::SysFlowEvent *ev);
+  void writeExecEvent(api::SysFlowEvent *ev);
+  void writeSetUIDEvent(api::SysFlowEvent *ev);
+  void setUID(api::SysFlowEvent *ev);
 
 private:
   writer::SysFlowWriter *m_writer;

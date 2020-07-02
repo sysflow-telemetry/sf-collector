@@ -26,7 +26,7 @@
 #include "op_flags.h"
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
-#include <sinsp.h>
+#include "api/sfinspector.h"
 
 namespace dataflow {
 class DataFlowProcessor {
@@ -42,7 +42,7 @@ private:
 
 public:
   inline int getSize() { return m_netflowPrcr->getSize(); }
-  int handleDataEvent(sinsp_evt *ev, OpFlags flag);
+  int handleDataEvent(api::SysFlowEvent *ev);
   DataFlowProcessor(context::SysFlowContext *cxt, writer::SysFlowWriter *writer,
                     process::ProcessContext *processCxt,
                     file::FileContext *fileCxt);

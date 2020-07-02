@@ -46,13 +46,13 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
       new process::ProcessContext(m_cxt, m_containerCxt, m_fileCxt, m_writer);
   m_dfPrcr =
       new dataflow::DataFlowProcessor(m_cxt, m_writer, m_processCxt, m_fileCxt);
-  m_procEvtPrcr =
-      new processevent::ProcessEventProcessor(m_writer, m_processCxt, m_dfPrcr);
+  m_ctrlPrcr = new controlflow::ControlFlowProcessor(m_cxt, m_writer,
+                                                     m_processCxt, m_dfPrcr);
 }
 
 SysFlowProcessor::~SysFlowProcessor() {
   delete m_dfPrcr;
-  delete m_procEvtPrcr;
+  delete m_ctrlPrcr;
   delete m_containerCxt;
   delete m_processCxt;
   delete m_fileCxt;
@@ -90,47 +90,54 @@ bool SysFlowProcessor::checkAndRotateFile() {
   return fileRotated;
 }
 
+int SysFlowProcessor::checkForExpiredRecords() {
+  int numExpired = m_dfPrcr->checkForExpiredRecords();
+  if (numExpired) {
+    SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
+  }
+  int numProcExpired = m_ctrlPrcr->checkForExpiredRecords();
+  if (numProcExpired) {
+    SF_DEBUG(m_logger, "Data Flow Records exported: " << numProcExpired);
+  }
+  return numExpired + numProcExpired;
+}
+
 int SysFlowProcessor::run() {
   int32_t res = 0;
-  sinsp_evt *ev = nullptr;
+  api::SysFlowInspector *inspector = m_cxt->getInspector();
+  api::SysFlowEvent *ev = nullptr;
   try {
     m_writer->initialize();
     while (true) {
-      res = m_cxt->getInspector()->next(&ev);
-      if (res == SCAP_TIMEOUT) {
+      res = inspector->next(&ev);
+      //printf("Record res: %d, opflag: %d\n", res, ev->opFlag);
+      if (res == SF_TIMEOUT) {
         if (m_exit) {
           break;
         }
-        int numExpired = m_dfPrcr->checkForExpiredRecords();
-        if (numExpired) {
-          SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
-        }
+        checkForExpiredRecords();
         m_processCxt->checkForDeletion();
         checkAndRotateFile();
         continue;
-      } else if (res == SCAP_EOF) {
+      } else if (res == SF_EOF) {
         break;
-      } else if (res != SCAP_SUCCESS) {
-        SF_ERROR(m_logger, "SCAP processor failed with res = "
+      } else if (res != SF_SUCCESS) {
+        SF_ERROR(m_logger, "System event processor failed with res = "
                                << res << " and error: "
-                               << m_cxt->getInspector()->getlasterr());
-        throw sinsp_exception(m_cxt->getInspector()->getlasterr().c_str());
+                               << m_cxt->getInspector()->getLastError());
+        throw std::system_error(EIO, std::system_category(),  m_cxt->getInspector()->getLastError());
       }
-      m_cxt->timeStamp = ev->get_ts();
+      m_cxt->timeStamp = ev->getTS();
       if (m_exit) {
         break;
       }
-      int numExpired = m_dfPrcr->checkForExpiredRecords();
-      if (numExpired) {
-        SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
-      }
+      checkForExpiredRecords();
       m_processCxt->checkForDeletion();
       checkAndRotateFile();
-      if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
+      if (m_cxt->isFilterContainers() && !ev->isInContainer()) {
         continue;
       }
-      switch (ev->get_type()) {
-        SF_EXECVE_ENTER()
+      switch (ev->opFlag) {
         SF_EXECVE_EXIT(ev)
         SF_CLONE_EXIT(ev)
         SF_PROCEXIT_E_X(ev)
@@ -147,8 +154,7 @@ int SysFlowProcessor::run() {
         SF_UNLINK_EXIT(ev)
         SF_SYMLINK_EXIT(ev)
         SF_RENAME_EXIT(ev)
-        SF_SETUID_ENTER(ev)
-        SF_SETUID_EXIT(ev)
+        SF_SETUID(ev)
         SF_SHUTDOWN_EXIT(ev)
         SF_MMAP_EXIT(ev)
       }
@@ -160,12 +166,12 @@ int SysFlowProcessor::run() {
                                 << " NetworkFlow Table: " << m_dfPrcr->getSize()
                                 << " Num Records Written: "
                                 << m_writer->getNumRecs());
-  } catch (sinsp_exception &e) {
+  } catch (std::system_error &e) {
     SF_ERROR(m_logger, "Sysdig exception " << e.what());
     return 1;
-  } catch (avro::Exception &ex) {
+  } /*catch (avro::Exception &ex) {
     SF_ERROR(m_logger, "Avro Exception! Error: " << ex.what());
     return 1;
-  }
+  }*/
   return 0;
 }

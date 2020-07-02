@@ -27,7 +27,7 @@
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
 #include <ctime>
-#include <sinsp.h>
+#include "api/sfinspector.h"
 
 namespace networkflow {
 class NetworkFlowProcessor {
@@ -37,18 +37,17 @@ private:
   writer::SysFlowWriter *m_writer;
   DataFlowSet *m_dfSet;
   DEFINE_LOGGER();
-  void canonicalizeKey(sinsp_fdinfo_t *fdinfo, NFKey *key, uint64_t tid,
+  void canonicalizeKey(api::SysFlowFileDescInfo *fdinfo, NFKey *key, uint64_t tid,
                        uint64_t fd);
   void canonicalizeKey(NetFlowObj *nf, NFKey *key);
-  void populateNetFlow(NetFlowObj *nf, OpFlags flag, sinsp_evt *ev,
+  void populateNetFlow(NetFlowObj *nf, OpFlags flag, api::SysFlowEvent *ev,
                        ProcessObj *proc);
-  void updateNetFlow(NetFlowObj *nf, OpFlags flag, sinsp_evt *ev);
-  void processExistingFlow(sinsp_evt *ev, ProcessObj *proc, OpFlags flag,
+  void updateNetFlow(NetFlowObj *nf, OpFlags flag, api::SysFlowEvent *ev);
+  void processExistingFlow(api::SysFlowEvent *ev, ProcessObj *proc, OpFlags flag,
                            NFKey key, NetFlowObj *nf);
-  void processNewFlow(sinsp_evt *ev, ProcessObj *proc, OpFlags flag, NFKey key);
+  void processNewFlow(api::SysFlowEvent *ev, ProcessObj *proc, OpFlags flag, NFKey key);
   void removeAndWriteNetworkFlow(ProcessObj *proc, NetFlowObj **nf, NFKey *key);
   void removeNetworkFlow(ProcessObj *proc, NetFlowObj **nf, NFKey *key);
-  int32_t getProtocol(scap_l4_proto proto);
   int removeNetworkFlowFromSet(NetFlowObj **nfo, bool deleteNetFlow);
   void removeAndWriteRelatedFlows(ProcessObj *proc, NFKey *key, uint64_t endTs);
 
@@ -57,7 +56,7 @@ public:
                        writer::SysFlowWriter *writer,
                        process::ProcessContext *procCxt, DataFlowSet *dfSet);
   virtual ~NetworkFlowProcessor();
-  int handleNetFlowEvent(sinsp_evt *ev, OpFlags flag);
+  int handleNetFlowEvent(api::SysFlowEvent *ev);
   inline int getSize() { return m_processCxt->getNumNetworkFlows(); }
   int removeAndWriteNFFromProc(ProcessObj *proc, int64_t tid);
   void removeNetworkFlow(DataFlowObj *dfo);

@@ -16,36 +16,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-
-#ifndef _SF_FILE_EVT
-#define _SF_FILE_EVT
-#include "file_types.h"
-#include "filecontext.h"
-#include "logger.h"
-#include "processcontext.h"
-#include "syscall_defs.h"
-#include "sysflow.h"
-#include "sysflowwriter.h"
-#include "utils.h"
+#ifndef SF_SD_FILEINFO
+#define SF_SD_FILEINFO
 #include "api/sfinspector.h"
+#include "logger.h"
+#include <sinsp.h>
+#include <string>
+namespace sysdig {
 
-namespace fileevent {
-class FileEventProcessor {
+class SDFileDescInfo : public api::SysFlowFileDescInfo {
 private:
-  process::ProcessContext *m_processCxt;
-  writer::SysFlowWriter *m_writer;
-  file::FileContext *m_fileCxt;
-  FileEvent m_fileEvt;
-  int writeFileEvent(api::SysFlowEvent *ev);
-  int writeLinkEvent(api::SysFlowEvent *ev);
+  sinsp_fdinfo_t *fdinfo;
+  sinsp_evt *ev;
   DEFINE_LOGGER();
 
 public:
-  FileEventProcessor(writer::SysFlowWriter *writer,
-                     process::ProcessContext *procCxt,
-                     file::FileContext *fileCxt);
-  virtual ~FileEventProcessor();
-  int handleFileFlowEvent(api::SysFlowEvent *ev);
+  SDFileDescInfo();
+  virtual ~SDFileDescInfo();
+  inline void init(sinsp_evt *e, sinsp_fdinfo_t *f) {
+    fdinfo = f;
+    ev = e;
+  }
+  int32_t getOpenFlag();
+  bool isIPSocket();
+  bool isIPv6Socket(); 
+  char getFileType(); 
+  std::string getName();
+  uint32_t getSIPv4();
+  uint32_t getDIPv4();
+  uint32_t getSPort();
+  uint32_t getDPort();
+  int32_t getProtocol();
+  void printIPTupleDebug();
 };
-} // namespace fileevent
+
+} // namespace sysdig
+
 #endif

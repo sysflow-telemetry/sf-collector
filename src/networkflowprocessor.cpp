@@ -35,34 +35,13 @@ NetworkFlowProcessor::NetworkFlowProcessor(context::SysFlowContext *cxt,
 
 NetworkFlowProcessor::~NetworkFlowProcessor() = default;
 
-inline int32_t NetworkFlowProcessor::getProtocol(scap_l4_proto proto) {
-  int32_t prt = -1;
-  switch (proto) {
-  case SCAP_L4_TCP:
-    prt = 6;
-    break;
-  case SCAP_L4_UDP:
-    prt = 17;
-    break;
-  case SCAP_L4_ICMP:
-    prt = 1;
-    break;
-  case SCAP_L4_RAW:
-    prt = 254;
-    break;
-  default:
-    break;
-  }
-  return prt;
-}
-
-inline void NetworkFlowProcessor::canonicalizeKey(sinsp_fdinfo_t *fdinfo,
+inline void NetworkFlowProcessor::canonicalizeKey(api::SysFlowFileDescInfo *fdinfo,
                                                   NFKey *key, uint64_t tid,
                                                   uint64_t fd) {
-  uint32_t sip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sip;
-  uint32_t dip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dip;
-  uint32_t sport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sport;
-  uint32_t dport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dport;
+  uint32_t sip = fdinfo->getSIPv4();
+  uint32_t dip = fdinfo->getDIPv4();
+  uint32_t sport = fdinfo->getSPort();
+  uint32_t dport = fdinfo->getDPort();
   key->tid = tid;
   key->fd = fd;
   key->ip1 = sip;
@@ -85,22 +64,21 @@ inline void NetworkFlowProcessor::canonicalizeKey(NetFlowObj *nf, NFKey *key) {
 }
 
 inline void NetworkFlowProcessor::populateNetFlow(NetFlowObj *nf, OpFlags flag,
-                                                  sinsp_evt *ev,
+                                                  api::SysFlowEvent *ev,
                                                   ProcessObj *proc) {
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
-  sinsp_threadinfo *ti = ev->get_thread_info();
+  api::SysFlowFileDescInfo *fdinfo = ev->getFileDescInfo();
   nf->netflow.opFlags = flag;
-  nf->netflow.ts = ev->get_ts();
-  nf->netflow.fd = ev->get_fd_num();
+  nf->netflow.ts = ev->getTS();
+  nf->netflow.fd = ev->getFD();
   nf->netflow.endTs = 0;
   nf->netflow.procOID.hpid = proc->proc.oid.hpid;
   nf->netflow.procOID.createTS = proc->proc.oid.createTS;
-  nf->netflow.tid = ti->m_tid;
-  nf->netflow.sip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sip;
-  nf->netflow.dip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dip;
-  nf->netflow.sport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sport;
-  nf->netflow.dport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dport;
-  nf->netflow.proto = getProtocol(fdinfo->get_l4proto());
+  nf->netflow.tid = ev->getTID();
+  nf->netflow.sip = fdinfo->getSIPv4();
+  nf->netflow.dip = fdinfo->getDIPv4();
+  nf->netflow.sport = fdinfo->getSPort();
+  nf->netflow.dport = fdinfo->getDPort();
+  nf->netflow.proto = fdinfo->getProtocol();
   nf->netflow.numRRecvOps = 0;
   nf->netflow.numWSendOps = 0;
   nf->netflow.numRRecvBytes = 0;
@@ -108,25 +86,25 @@ inline void NetworkFlowProcessor::populateNetFlow(NetFlowObj *nf, OpFlags flag,
 }
 
 inline void NetworkFlowProcessor::updateNetFlow(NetFlowObj *nf, OpFlags flag,
-                                                sinsp_evt *ev) {
+                                                api::SysFlowEvent *ev) {
   nf->netflow.opFlags |= flag;
   nf->lastUpdate = utils::getCurrentTime(m_cxt);
   if (flag == OP_WRITE_SEND) {
     nf->netflow.numWSendOps++;
-    int res = utils::getSyscallResult(ev);
+    int res = ev->getSysCallResult();
     if (res > 0) {
       nf->netflow.numWSendBytes += res;
     }
   } else if (flag == OP_READ_RECV) {
     nf->netflow.numRRecvOps++;
-    int res = utils::getSyscallResult(ev);
+    int res = ev->getSysCallResult();
     if (res > 0) {
       nf->netflow.numRRecvBytes += res;
     }
   }
 }
 
-inline void NetworkFlowProcessor::processNewFlow(sinsp_evt *ev,
+inline void NetworkFlowProcessor::processNewFlow(api::SysFlowEvent *ev,
                                                  ProcessObj *proc, OpFlags flag,
                                                  NFKey key) {
   auto *nf = new NetFlowObj();
@@ -138,8 +116,8 @@ inline void NetworkFlowProcessor::processNewFlow(sinsp_evt *ev,
     proc->netflows[key] = nf;
     m_dfSet->insert(nf);
   } else {
-    removeAndWriteRelatedFlows(proc, &key, ev->get_ts());
-    nf->netflow.endTs = ev->get_ts();
+    removeAndWriteRelatedFlows(proc, &key, ev->getTS());
+    nf->netflow.endTs = ev->getTS();
     m_writer->writeNetFlow(&(nf->netflow));
     delete nf;
   }
@@ -153,36 +131,37 @@ inline void NetworkFlowProcessor::removeAndWriteNetworkFlow(ProcessObj *proc,
   removeNetworkFlow(proc, nf, key);
 }
 
-inline void NetworkFlowProcessor::processExistingFlow(sinsp_evt *ev,
+inline void NetworkFlowProcessor::processExistingFlow(api::SysFlowEvent *ev,
                                                       ProcessObj *proc,
                                                       OpFlags flag, NFKey key,
                                                       NetFlowObj *nf) {
   updateNetFlow(nf, flag, ev);
   if (flag == OP_CLOSE) {
-    removeAndWriteRelatedFlows(proc, &key, ev->get_ts());
-    nf->netflow.endTs = ev->get_ts();
+    removeAndWriteRelatedFlows(proc, &key, ev->getTS());
+    nf->netflow.endTs = ev->getTS();
     removeAndWriteNetworkFlow(proc, &nf, &key);
   }
 }
 
-int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt *ev, OpFlags flag) {
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+int NetworkFlowProcessor::handleNetFlowEvent(api::SysFlowEvent *ev) {
+  OpFlags flag = ev->opFlag;
+  api::SysFlowFileDescInfo *fdinfo = ev->getFileDescInfo();
   if (fdinfo == nullptr) {
     SF_DEBUG(m_logger,
-             "Event: " << ev->get_name()
+             "Event: " << ev->getName()
                        << " doesn't have an fdinfo associated with it!");
     return 1;
   }
 
-  if (!(fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket())) {
+  if (!(fdinfo->isIPSocket())) {
     SF_ERROR(m_logger, "handleNetFlowEvent can only handle ip sockets, not "
                        "file descriptor of type: "
-                           << fdinfo->get_typechar() << ". Ignoring...");
+                           << fdinfo->getFileType() << ". Ignoring...");
     return 1;
   }
 
-  if (fdinfo->is_ipv6_socket()) {
-    SF_WARN(
+  if (fdinfo->isIPv6Socket()) {
+    SF_DEBUG(
         m_logger,
         "IPv6 is not supported in the current version of SysFlow. Ignoring...");
     return 1;
@@ -194,9 +173,8 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt *ev, OpFlags flag) {
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
   NetFlowObj *nf = nullptr;
 
-  sinsp_threadinfo *ti = ev->get_thread_info();
   static NFKey key = NFKey();
-  canonicalizeKey(fdinfo, &key, ti->m_tid, ev->get_fd_num());
+  canonicalizeKey(fdinfo, &key, ev->getTID(), ev->getFD());
   SF_DEBUG(m_logger, "Key: " << key.ip1 << " " << key.ip2 << " " << key.port1
                              << " " << key.port2 << " " << key.tid << " "
                              << key.fd);
@@ -211,16 +189,7 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt *ev, OpFlags flag) {
   }
 
   if (IS_DEBUG_ENABLED(m_logger)) {
-    string ip4tuple =
-        ipv4tuple_to_string(&(fdinfo->m_sockinfo.m_ipv4info), false);
-    SF_DEBUG(m_logger, proc->proc.exe
-                           << " " << ip4tuple
-                           << " Proto: " << getProtocol(fdinfo->get_l4proto())
-                           << " Server: " << fdinfo->is_role_server()
-                           << " Client: " << fdinfo->is_role_client() << " "
-                           << ev->get_name() << " " << proc->proc.oid.hpid
-                           << " " << proc->proc.oid.createTS << " " << ti->m_tid
-                           << " " << ev->get_fd_num());
+    fdinfo->printIPTupleDebug();
   }
   if (nf == nullptr) {
     SF_DEBUG(m_logger, "Processing as new flow!");
@@ -274,7 +243,7 @@ int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj *proc,
   for (NetworkFlowTable::iterator nfi = proc->netflows.begin();
        nfi != proc->netflows.end(); nfi++) {
     if (tid == -1 || tid == nfi->second->netflow.tid) {
-      nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
+      nfi->second->netflow.endTs = utils::getSystemTime(m_cxt);
       if (tid != -1) {
         static NFKey k;
         canonicalizeKey(nfi->second, &k);
@@ -331,7 +300,7 @@ void NetworkFlowProcessor::removeNetworkFlow(DataFlowObj *dfo) {
   NFKey key{};
   auto *nfo = static_cast<NetFlowObj *>(dfo);
   // do we want to write out a netflow that hasn't had any action in an
-  // interval? nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
+  // interval? nfo->netflow.endTs = utils::getSystemTime(m_cxt);
   // m_writer->writeNetFlow(&(nfo->netflow));
   canonicalizeKey(nfo, &key);
   SF_DEBUG(m_logger, "Erasing network flow");
@@ -348,11 +317,11 @@ void NetworkFlowProcessor::removeNetworkFlow(DataFlowObj *dfo) {
 
 void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj *dfo, time_t /*now*/) {
   auto *nfo = static_cast<NetFlowObj *>(dfo);
-  nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
+  nfo->netflow.endTs = utils::getSystemTime(m_cxt);
   m_processCxt->exportProcess(&(nfo->netflow.procOID));
   m_writer->writeNetFlow(&(nfo->netflow));
   SF_DEBUG(m_logger, "Reupping network flow");
-  nfo->netflow.ts = utils::getSysdigTime(m_cxt);
+  nfo->netflow.ts = utils::getSystemTime(m_cxt);
   nfo->netflow.endTs = 0;
   nfo->netflow.opFlags = 0;
   nfo->netflow.numRRecvOps = 0;

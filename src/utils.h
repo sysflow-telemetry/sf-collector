@@ -27,7 +27,6 @@
 #include <ctime>
 #include <fstream>
 #include <openssl/sha.h>
-#include <sinsp.h>
 #include <string>
 
 using sysflow::OID;
@@ -36,15 +35,6 @@ typedef std::array<uint8_t, 20> FOID;
 struct NFKey;
 
 namespace utils {
-int64_t getFlags(sinsp_evt *ev);
-bool isCloneThreadSet(sinsp_evt *ev);
-int64_t getFD(sinsp_evt *ev);
-bool isMapAnonymous(sinsp_evt *ev);
-int64_t getIntParam(sinsp_evt *ev, string pname);
-string getUserName(context::SysFlowContext *cxt, uint32_t uid);
-string getGroupName(context::SysFlowContext *cxt, uint32_t gid);
-bool isInContainer(sinsp_evt *ev);
-int64_t getSyscallResult(sinsp_evt *ev);
 avro::ValidSchema loadSchema(const char *filename);
 time_t getExportTime(context::SysFlowContext *cxt);
 NFKey *getNFDelKey();
@@ -52,12 +42,7 @@ NFKey *getNFEmptyKey();
 OID *getOIDDelKey();
 OID *getOIDEmptyKey();
 void generateFOID(const string &key, FOID *foid);
-string getPath(sinsp_evt *ev, const string &paraName);
 fs::path getCanonicalPath(const string &fileName);
-string getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
-                       const string &fileName);
-string getAbsolutePath(sinsp_threadinfo *ti, const string &fileName);
-int64_t getFD(sinsp_evt *ev, const string &paraName);
 
 inline time_t getCurrentTime(context::SysFlowContext *cxt) {
   if (cxt->isOffline()) {
@@ -65,11 +50,22 @@ inline time_t getCurrentTime(context::SysFlowContext *cxt) {
   }
   return time(nullptr);
 }
-inline uint64_t getSysdigTime(context::SysFlowContext *cxt) {
+
+inline uint64_t getCurrentTimeNS()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    return tv.tv_sec * (uint64_t) 1000000000 + tv.tv_usec * 1000;
+}
+
+
+
+inline uint64_t getSystemTime(context::SysFlowContext *cxt) {
   if (cxt->isOffline()) {
     return cxt->timeStamp;
   }
-  return sinsp_utils::get_current_time_ns();
+  return getCurrentTimeNS();
 }
 } // namespace utils
 #endif

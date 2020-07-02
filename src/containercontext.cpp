@@ -23,14 +23,14 @@ using container::ContainerContext;
 using sysflow::ContainerType;
 
 void ContainerContext::setContainer(ContainerObj **cont,
-                                    sinsp_container_info::ptr_t container) {
-  SF_DEBUG(m_logger, "Setting container info. Name: " << container->m_name)
-  (*cont)->cont.name = container->m_name;
-  (*cont)->cont.image = container->m_image + ":" + container->m_imagetag;
-  (*cont)->cont.id = container->m_id;
-  (*cont)->cont.imageid = container->m_imageid;
-  (*cont)->cont.type = static_cast<ContainerType>(container->m_type);
-  (*cont)->cont.privileged = container->m_privileged;
+                                    api::SysFlowContainer *container) {
+  SF_DEBUG(m_logger, "Setting container info. Name: " << container->getName())
+  (*cont)->cont.name = container->getName();
+  (*cont)->cont.image = container->getImage() + ":" + container->getImageTag();
+  (*cont)->cont.id = container->getID();
+  (*cont)->cont.imageid = container->getImageID();
+  (*cont)->cont.type = container->getType();
+  (*cont)->cont.privileged = container->getPriv();
 }
 
 ContainerContext::ContainerContext(context::SysFlowContext *cxt,
@@ -44,23 +44,20 @@ ContainerContext::ContainerContext(context::SysFlowContext *cxt,
 
 ContainerContext::~ContainerContext() { clearAllContainers(); }
 
-ContainerObj *ContainerContext::createContainer(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+ContainerObj *ContainerContext::createContainer(api::SysFlowProcess *proc) {
 
-  if (ti->m_container_id.empty()) {
+  if (!proc->isInContainer()) {
     return nullptr;
   }
 
-  const sinsp_container_info::ptr_t container =
-      m_cxt->getInspector()->m_container_manager.get_container(
-          ti->m_container_id);
+  api::SysFlowContainer *container = proc->getContainer();
   if (!container) {
     SF_WARN(m_logger, "Thread has container id, but no container object. ID: "
-                          << ti->m_container_id)
+                          << proc->getContainerID())
     auto *cont = new ContainerObj();
     cont->cont.name = INCOMPLETE;
     cont->cont.image = INCOMPLETE_IMAGE;
-    cont->cont.id = ti->m_container_id;
+    cont->cont.id = proc->getContainerID();
     cont->incomplete = true;
     return cont;
   }
@@ -104,31 +101,28 @@ int ContainerContext::derefContainer(const string &id) {
   return result;
 }
 
-ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+ContainerObj *ContainerContext::getContainer(api::SysFlowProcess *proc) {
 
-  if (ti->m_container_id.empty()) {
+  if (!proc->isInContainer()) {
     return nullptr;
   }
   ContainerObj *ct = nullptr;
-  ContainerTable::iterator cont = m_containers.find(ti->m_container_id);
+  ContainerTable::iterator cont = m_containers.find(proc->getContainerID());
   if (cont != m_containers.end()) {
     if (cont->second->written && !cont->second->incomplete) {
       return cont->second;
     }
-    const sinsp_container_info::ptr_t container =
-        m_cxt->getInspector()->m_container_manager.get_container(
-            ti->m_container_id);
+    api::SysFlowContainer *container = proc->getContainer();
     if (!container) {
       // m_containers.erase(cont);
       // delete cont->second;
       return cont->second;
     }
     if (cont->second->written && cont->second->incomplete) {
-      SF_DEBUG(m_logger,
-               "Container is written and includes name: " << container->m_name);
-      if (container->m_name.compare(INCOMPLETE) == 0 ||
-          container->m_image.compare(INCOMPLETE) == 0) {
+      SF_DEBUG(m_logger, "Container is written and includes name: "
+                             << container->getName());
+      if (container->getName().compare(INCOMPLETE) == 0 ||
+          container->getImage().compare(INCOMPLETE) == 0) {
         return cont->second;
       } else {
         cont->second->incomplete = false;
@@ -138,7 +132,7 @@ ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
     setContainer(&ct, container);
   }
   if (ct == nullptr) {
-    ct = createContainer(ev);
+    ct = createContainer(proc);
   }
   if (ct == nullptr) {
     return nullptr;

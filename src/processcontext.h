@@ -19,6 +19,7 @@
 
 #ifndef _SF_PROC_
 #define _SF_PROC_
+#include "api/sfinspector.h"
 #include "containercontext.h"
 #include "datatypes.h"
 #include "filecontext.h"
@@ -27,7 +28,6 @@
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "utils.h"
-#include <sinsp.h>
 
 #define PROC_TABLE_SIZE 50000
 #define PROC_DEL_EXPIRED 1.0
@@ -40,20 +40,22 @@ private:
   ProcessTable m_procs;
   file::FileContext *m_fileCxt;
   OIDQueue m_delProcQue;
+  ProcessFlowSet m_pfSet;
   time_t m_delProcTime;
   DEFINE_LOGGER();
   void writeProcessAndAncestors(ProcessObj *proc);
-  void reupContainer(sinsp_evt *ev, ProcessObj *proc);
+  void reupContainer(api::SysFlowProcess *pr, ProcessObj *proc);
 
 public:
   ProcessContext(context::SysFlowContext *cxt,
                  container::ContainerContext *ccxt, file::FileContext *fileCxt,
                  writer::SysFlowWriter *writer);
   virtual ~ProcessContext();
-  void updateProcess(Process *proc, sinsp_evt *ev, SFObjectState state);
-  ProcessObj *createProcess(sinsp_threadinfo *mainthread, sinsp_evt *ev,
+  void updateProcess(Process *proc, api::SysFlowEvent *ev, SFObjectState state);
+  ProcessObj *createProcess(api::SysFlowProcess *pr, api::SysFlowEvent *ev,
                             SFObjectState state);
-  ProcessObj *getProcess(sinsp_evt *ev, SFObjectState state, bool &created);
+  ProcessObj *getProcess(api::SysFlowEvent *ev, SFObjectState state,
+                         bool &created);
   ProcessObj *getProcess(OID *oid);
   ProcessObj *getProcess(int64_t pid);
   void printAncestors(Process *proc);
@@ -65,6 +67,7 @@ public:
   bool exportProcess(OID *oid);
   void printNetworkFlow(ProcessObj *proc);
   void printStats();
+  int removeProcessFromSet(ProcessObj *proc, bool checkForErr);
   inline int getSize() { return m_procs.size(); }
   inline int getNumNetworkFlows() {
     int total = 0;
@@ -109,6 +112,8 @@ public:
     }
     m_delProcTime = utils::getCurrentTime(m_cxt);
   }
+
+  ProcessFlowSet *getPFSet();
 };
 } // namespace process
 #endif

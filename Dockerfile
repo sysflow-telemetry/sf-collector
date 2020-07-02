@@ -17,7 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG UBI_TAG=0.26.7
+ARG UBI_TAG=rearch-0.26.7
 
 #-----------------------
 # Stage: builder
@@ -35,6 +35,8 @@ ENV LIBRARY_PATH=/lib64
 
 # build sysporter
 COPY ./src/ /build/src/
+COPY ./modules/sysflow/avro/avsc/SysFlow.avsc /build/modules/sysflow/avro/avsc/SysFlow.avsc
+COPY ./modules/sysflow/c++/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c++/sysflow/sysflow.hh
 RUN cd /build/src && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
          LIBLOCALPREFIX=${MODPREFIX} \

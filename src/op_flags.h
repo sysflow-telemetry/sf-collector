@@ -21,6 +21,7 @@
 #define __SF_OP_FLAGS
 
 enum OpFlags {
+  OP_NONE = (0),
   OP_CLONE = (1 << 0),
   OP_EXEC = (1 << 1),
   OP_EXIT = (1 << 2),
