@@ -130,7 +130,9 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
     } else {
       fileName = utils::getAbsolutePath(ti, fileName);
     }
-    file = m_fileCxt->getFile(ev, fileName, SF_UNK, SFObjectState::CREATED,
+    FileType fileType =
+        (flag == OP_MKDIR || flag == OP_RMDIR) ? SF_DIR : SF_UNK;
+    file = m_fileCxt->getFile(ev, fileName, fileType, SFObjectState::CREATED,
                               created);
   }
   m_fileEvt.opFlags = flag;
