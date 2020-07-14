@@ -1,4 +1,3 @@
-
 #!/bin/bash
 #
 # Copyright (C) 2019 IBM Corporation.
@@ -27,11 +26,35 @@ set -ex
 MODE=${1:-base}
 
 echo "Install Dependency under mode: ${MODE}"
+
+#
+# Clean up function
+#
+cleanup() {
+    dnf -y clean all && rm -rf /var/cache/dnf
+    subscription-manager unregister || true
+}
+trap cleanup EXIT
+
+#
+# RHEL subscription
+#
+(
+    set +x
+    if [ -z "$REGISTER_USER" -o -z "$REGISTER_PASSWORD" ] ; then
+        echo 'Lack of RHEL credential.'
+        echo 'Assume build on RHEL machines or install packages only in UBI repositories.'
+    else
+        echo "Login RHEL..."
+        subscription-manager register --username "$REGISTER_USER" --password "$REGISTER_PASSWORD" --auto-attach
+    fi
+)
+
 if [ "${MODE}" == "base" ] ; then
-     # Run package installation for base images
-     dnf install -y --disableplugin=subscription-manager http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.2-2.2004.0.1.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.2-2.2004.0.1.el8.x86_64.rpm
-     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-     dnf -y install --enablerepo=PowerTools --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos --disableplugin=subscription-manager \
+    # packages for base image
+
+    subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms"
+    dnf -y install --disablerepo=epel \
         gcc \
         gcc-c++ \
         make \
@@ -53,30 +76,33 @@ if [ "${MODE}" == "base" ] ; then
         apr-util-devel \
         ncurses-devel \
         openssl-devel \
-	flex \
+        flex \
         bison \
-	libstdc++-static \
-	boost-devel \
+        libstdc++-static \
+        boost-devel \
         elfutils-libelf-devel \
-	sparsehash-devel \
-	glog-devel 
+        sparsehash-devel \
+        glog-devel
 
 
-     dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=epel --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos  dkms
-     dnf -y clean all && rm -rf /var/cache/dnf
+    # Install dkms from EPEL.
+    # ref: https://access.redhat.com/solutions/1132653
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf -y install dkms
+    dnf -y remove epel-release
+
 elif [ "${MODE}" == "test-extra" ] ; then
-    # Install extra(compared to base) packages for tests
-    dnf install -y --disableplugin=subscription-manager \
-	    python3 \
-        python3-wheel && \
-    mkdir -p /usr/local/lib/python3.6/site-packages && \
-    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install && \
-    ln -s /usr/bin/python3 /usr/bin/python && \
-    ln -s /usr/bin/pip3 /usr/bin/pip && \
-    dnf -y clean all && rm -rf /var/cache/dnf
+    # additional packages for testing
+
+    dnf -y install python3 python3-wheel
+    mkdir -p /usr/local/lib/python3.6/site-packages
+    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install
+    ln -s /usr/bin/python3 /usr/bin/python
+    ln -s /usr/bin/pip3 /usr/bin/pip
+
 else
     echo "Unsupported mode: ${MODE}"
+    exit 1
 fi
 
 exit 0
-
