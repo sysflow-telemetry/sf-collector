@@ -17,12 +17,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG UBI_TAG=0.26.7
+ARG SYSDIG_VER=0.26.7
+ARG UBI_VER=8.2.299
 
 #-----------------------
 # Stage: builder
 #-----------------------
-FROM sysflowtelemetry/ubi:mods-${UBI_TAG} AS builder
+FROM sysflowtelemetry/ubi:mods-${SYSDIG_VER}-${UBI_VER} AS builder
 
 # environment and build args
 ARG BUILD_NUMBER=0
@@ -52,7 +53,7 @@ RUN cd /build/src && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:base-${UBI_TAG} AS runtime
+FROM sysflowtelemetry/ubi:base-${SYSDIG_VER}-${UBI_VER} AS runtime
 
 # environment variables
 ARG interval=30
