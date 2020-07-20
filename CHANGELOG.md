@@ -15,11 +15,31 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...HEAD)]
 
+## [[0.1-rc4](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...0.1-rc4)] - 2020-07-20
+
+### Added
+
+- Added mmap support for files.
+- Add labels for container images.
+- Embed license file inside the container image.
+
+### Changed
+
+- Increased the nf/ff expire time to 60 seconds. 
+- Port to sysdig probe 0.26.7.
+- Increased `sf-collector` version to the latest release candidate 0.1-rc4.
+
+### Fixed
+
+- Fixed SIGTERM bug.
+- Fixed container context to prevent a sysporter crash due to a null variable.
+- Fixed memory leak found in sysdig 0.26.4 [CRITICAL].
+
 ## [[0.1-rc3](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc2...0.1-rc3)] - 2020-03-17
 
 ### Added
 
-- Added domain sockets as additional output to the collector..
+- Added domain sockets as additional output to the collector.
 
 ### Changed
 
