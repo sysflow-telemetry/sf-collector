@@ -32,6 +32,7 @@ void SysFlowWriter::writeHeader() {
   sysflow::SFHeader header;
   header.version = m_version;
   header.exporter = m_cxt->getExporterID();
+  header.ip = m_cxt->getNodeIP();
   m_flow.rec.set_SFHeader(header);
   m_numRecs++;
   write(&m_flow);
