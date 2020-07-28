@@ -34,6 +34,9 @@ ARG MODPREFIX=${INSTALL_PATH}/modules
 ENV LIBRARY_PATH=/lib64
 
 # build sysporter
+COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
+COPY ./modules/sysflow/c++/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c++/sysflow/sysflow.hh
+COPY ./modules/sysflow/c++/sysflow/avsc_sysflow2.hh ${MODPREFIX}/include/sysflow/c++/sysflow/avsc_sysflow2.hh
 COPY ./src/ /build/src/
 RUN cd /build/src && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
@@ -96,15 +99,18 @@ ENV SOCK_FILE=
 ARG VERSION=dev
 ARG RELEASE=dev
 
+ARG nodeip=
+ENV NODE_IP=$nodeip
+
 # Update Label
-LABEL "name"="Sysflow Collector"
+LABEL "name"="SysFlow Collector"
 LABEL "vendor"="IBM"
 LABEL "version"="${VERSION}"
 LABEL "release"="${RELEASE}"
-LABEL "summary"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
-LABEL "description"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
-LABEL "io.k8s.display-name"="Sysflow Collector"
-LABEL "io.k8s.description"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+LABEL "summary"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+LABEL "description"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+LABEL "io.k8s.display-name"="SysFlow Collector"
+LABEL "io.k8s.description"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
 
 # Install Packages
 COPY ./scripts/installUBIDependency.sh /
@@ -124,7 +130,6 @@ RUN ln -s ${MODPREFIX}/bin/sysdig /usr/bin/sysdig
 COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
-COPY ./modules/sysflow/avro/avsc/SysFlow.avsc /usr/local/sysflow/conf/SysFlow.avsc
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
 

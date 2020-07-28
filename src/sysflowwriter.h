@@ -40,6 +40,7 @@ protected:
   int m_numRecs{};
   void writeHeader();
   time_t m_start;
+  int64_t m_version;
   virtual void write(SysFlow *flow) = 0;
 
 public:

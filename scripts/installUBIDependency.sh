@@ -59,6 +59,8 @@ if [ "${MODE}" == "base" ] ; then
 	boost-devel \
         elfutils-libelf-devel \
 	sparsehash-devel \
+	snappy-devel \
+	jsoncpp-devel \
 	glog-devel 
 
 
@@ -68,6 +70,7 @@ elif [ "${MODE}" == "test-extra" ] ; then
     # Install extra(compared to base) packages for tests
     dnf install -y --disableplugin=subscription-manager \
 	    python3 \
+            python3-devel \
         python3-wheel && \
     mkdir -p /usr/local/lib/python3.6/site-packages && \
     ln -s /usr/bin/easy_install-3 /usr/bin/easy_install && \

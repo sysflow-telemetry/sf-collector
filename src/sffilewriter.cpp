@@ -23,7 +23,7 @@ using writer::SFFileWriter;
 
 SFFileWriter::SFFileWriter(context::SysFlowContext *cxt, time_t start)
     : writer::SysFlowWriter(cxt, start), m_dfw(nullptr) {
-  m_sysfSchema = utils::loadSchema(m_cxt->getSchemaFile());
+  m_sysfSchema = utils::loadSchema();
 }
 
 SFFileWriter::~SFFileWriter() {
