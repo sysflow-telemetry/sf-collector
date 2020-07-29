@@ -11,14 +11,14 @@ The primary objective of SysFlow is to lift raw system call data into more seman
     * [Process](#process)
     * [File](#file)
 * [Events](#events)
-    * [Operation Flags](#oflags)
-    * [ProcessEvent](#procevent)
-    * [FileEvent](#fileevent)
-    * [NetworkEvent](#netevent)
+    * [Operation Flags](#operation-flags)
+    * [Process Event](#process-event)
+    * [File Event](#file-event)
+    * [Network Event](#network-event)
 * [Flows](#flows)
-    * [ProcessFlow](#procflow)
-    * [FileFlow](#fileflow)
-    * [NetworkFlow](#netflow)
+    * [Process Flow](#process-flow-added-in-schema-v2)
+    * [File Flow](#file-flow)
+    * [Network Flow](#network-flow)
 
 ## Overview 
 
@@ -175,7 +175,7 @@ A File Event is an event that creates, deletes or modifies a File Entity.   Curr
 | OP_SYMLINK    | Exported when a process creates a sym link to an existing file.  Should be accompanied by a new File Entity representing the new link.|
 | OP_RENAME     | Exported when a process creates renames an existing file.  Should be accompanied by a new File Entity representing the renamed file.|
 
-> **NOTE:**   We'd like to also support **chmod** and **chown** but these two operations are not fully supported in sysdig. We'd also like to support **umount** and **mount** but these operations are not implemented.
+> **NOTE:**   We'd like to also support **chmod** and **chown** but these two operations are not fully supported in sysdig. We'd also like to support **umount** and **mount** but these operations are not implemented.  We anticipate supporting these in a future version.
 
 The list of attributes for the File Event are as follows:
 
@@ -189,7 +189,7 @@ The list of attributes for the File Event are as follows:
 | **FOID:** |  string (128bit) | The id of the file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. | Implemented |
 | **NewFOID:** |  string (128bit) | Some syscalls (link, symlink, etc.) convert one file into another requiring two files. This id is the id of the file secondary or new file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. Can be NULL. | Implemented |
 
-#### NetworkEvent 
+#### Network Event 
 Currently, NOT IMPLEMENTED.
 
 ### Flows 
@@ -199,7 +199,7 @@ A flow can be started by any supported operation and are exported in one of two 
 
 In this section, we describe three categories of Flows:  Process, File and Network Flows.
 
-#### ProcessFlow (Added in Schema v2)
+#### Process Flow (Added in Schema v2)
 A Process Flow represents a summarization of the number of threads created and destroyed over a time period. Process Flows are partially implemented in the collector and will be fully implemented in a later 
 release. It was added in Schema v2. Currently we support the following operations (for more information on operations see ([Operation Flags](#oflags))):
 
@@ -220,7 +220,7 @@ The list of attributes for the Process Flow are as follows:
 | numThreadsExited | int64 | Number of threads exited during the duration of the flow. | Implemented |
 | numCloneErrors | int64 | Number of clone errors occuring during the duration of the flow. | Implemented |
 
-#### FileFlow 
+#### File Flow 
 A File Flow represents a collection of operations on a file.   Currently we support the following operations (for more information on operations see ([Operation Flags](#oflags))):
 
 | Operation     | Behavior  |
@@ -251,7 +251,7 @@ The list of attributes for the File Flow are as follows:
 | numRRecvBytes | int64 | Number of bytes read during the duration of the flow. | Implemented |
 | numWSendBytes | int64 | Number of bytes written during the duration of the flow. | Implemented | 
 
-#### NetworkFlow 
+#### Network Flow 
 A Network Flow represents a collection of operations on a network connection.   Currently we support the following operations (for more information on operations see ([Operation Flags](#oflags))):
 
 | Operation     | Behavior  |
