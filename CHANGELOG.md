@@ -31,7 +31,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Increased the nf/ff expire time to 60 seconds.
 - Port to sysdig probe 0.26.7.
 - Increased `sf-collector` version to the latest release candidate 0.1.0-rc4.
-- Adding patch level to comply with semnatic versioning.
+- Adding patch level to comply with semantic versioning.
 
 ### Fixed
 
