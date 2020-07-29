@@ -82,19 +82,19 @@ if [ "${MODE}" == "base" ] ; then
         boost-devel \
         elfutils-libelf-devel \
         sparsehash-devel \
+        snappy-devel \
         glog-devel
 
-
-    # Install dkms from EPEL.
+    # Install dkms and jsoncpp from EPEL.
     # ref: https://access.redhat.com/solutions/1132653
     dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    dnf -y install dkms
+    dnf -y install dkms jsoncpp-devel
     dnf -y remove epel-release
 
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing
 
-    dnf -y install python3 python3-wheel
+    dnf -y install python3 python3-devel python3-wheel
     mkdir -p /usr/local/lib/python3.6/site-packages
     ln -s /usr/bin/easy_install-3 /usr/bin/easy_install
     ln -s /usr/bin/python3 /usr/bin/python

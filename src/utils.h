@@ -26,9 +26,20 @@
 #include "sysflowcontext.h"
 #include <ctime>
 #include <fstream>
+#include <json/json.h>
+#include <json/reader.h>
+#include <json/value.h>
 #include <openssl/sha.h>
 #include <sinsp.h>
+#include <sstream>
 #include <string>
+
+#define SCH_FIELDS_STR "fields"
+#define SCH_TYPE_STR "type"
+#define SCH_NAME_STR "name"
+#define SCH_SFHEADER_STR "SFHeader"
+#define SCH_VERSION_STR "version"
+#define SCH_DEFAULT_STR "default"
 
 using sysflow::OID;
 
@@ -45,7 +56,7 @@ string getUserName(context::SysFlowContext *cxt, uint32_t uid);
 string getGroupName(context::SysFlowContext *cxt, uint32_t gid);
 bool isInContainer(sinsp_evt *ev);
 int64_t getSyscallResult(sinsp_evt *ev);
-avro::ValidSchema loadSchema(const char *filename);
+avro::ValidSchema loadSchema();
 time_t getExportTime(context::SysFlowContext *cxt);
 NFKey *getNFDelKey();
 NFKey *getNFEmptyKey();
@@ -58,6 +69,7 @@ string getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
                        const string &fileName);
 string getAbsolutePath(sinsp_threadinfo *ti, const string &fileName);
 int64_t getFD(sinsp_evt *ev, const string &paraName);
+int64_t getSchemaVersion();
 
 inline time_t getCurrentTime(context::SysFlowContext *cxt) {
   if (cxt->isOffline()) {

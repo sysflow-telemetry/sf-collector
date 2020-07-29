@@ -20,6 +20,7 @@
 #include "utils.h"
 #include "datatypes.h"
 #include "logger.h"
+#include "sysflow/avsc_sysflow2.hh"
 #include "sysflowcontext.h"
 
 static NFKey s_nfdelkey;
@@ -177,17 +178,58 @@ bool utils::isCloneThreadSet(sinsp_evt *ev) {
   return cloneThread & PPM_CL_CLONE_THREAD;
 }
 
-avro::ValidSchema utils::loadSchema(const char *filename) {
+avro::ValidSchema utils::loadSchema() {
   avro::ValidSchema result;
   try {
-    std::ifstream ifs(filename);
-    avro::compileJsonSchema(ifs, result);
+    std::stringstream ss;
+    ss << AVSC_SF;
+    avro::compileJsonSchema(ss, result);
   } catch (avro::Exception &ex) {
-    SF_ERROR(m_logger, "Unable to load schema file from "
-                           << filename << " Error: " << ex.what());
+    SF_ERROR(m_logger,
+             "Unable to load avro sysflow schema Error: " << ex.what());
     throw;
   }
   return result;
+}
+
+int64_t utils::getSchemaVersion() {
+  avro::ValidSchema result = utils::loadSchema();
+  std::string strJson = result.toJson(true);
+  Json::Value root;
+  Json::Reader reader;
+  bool succ = reader.parse(strJson.c_str(), root); // parse process
+  if (!succ) {
+    SF_ERROR(m_logger, "Unable to parse avro sysflow schema Error: "
+                           << reader.getFormattedErrorMessages());
+    return -1;
+  }
+  if (root.isMember(SCH_FIELDS_STR) && root[SCH_FIELDS_STR].size() > 0 &&
+      root[SCH_FIELDS_STR][0].isMember(SCH_TYPE_STR)) {
+    const Json::Value fields = root[SCH_FIELDS_STR][0][SCH_TYPE_STR];
+    for (unsigned int i = 0; i < fields.size(); i++) {
+      const Json::Value obj = fields[i];
+      if (obj.isMember(SCH_NAME_STR) && obj[SCH_NAME_STR].isString() &&
+          obj[SCH_NAME_STR].asString().compare(SCH_SFHEADER_STR) == 0) {
+        if (obj.isMember(SCH_FIELDS_STR)) {
+          const Json::Value f = obj[SCH_FIELDS_STR];
+          for (unsigned int j = 0; j < f.size(); j++) {
+            if (f[j].isMember(SCH_NAME_STR) && f[j][SCH_NAME_STR].isString() &&
+                f[j][SCH_NAME_STR].asString().compare(SCH_VERSION_STR) == 0) {
+              if (f[j].isMember(SCH_DEFAULT_STR) &&
+                  f[j][SCH_DEFAULT_STR].isInt64()) {
+                int64_t version = f[j][SCH_DEFAULT_STR].asInt64();
+                return version;
+              }
+            }
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  SF_ERROR(m_logger, "Unable to find schema version in avro schema.")
+  return -1;
 }
 
 string utils::getPath(sinsp_evt *ev, const string &paraName) {

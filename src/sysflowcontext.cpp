@@ -33,7 +33,7 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
       m_exporterID(std::move(expID)), m_nfExportInterval(30),
       m_nfExpireInterval(60), m_offline(false), m_filter(std::move(filter)),
       m_criPath(std::move(criPath)), m_criTO(criTO), m_stats(false),
-      m_statsInterval(30), m_domainSock(false) {
+      m_statsInterval(30), m_domainSock(false), m_nodeIP() {
   m_inspector = new sinsp();
   m_inspector->set_hostname_and_port_resolution_mode(false);
   if (!m_filter.empty()) {
@@ -49,6 +49,10 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
   if (envP != nullptr && strcmp(envP, "1") == 0) {
     m_inspector->set_log_stderr();
     m_inspector->set_min_log_severity(sinsp_logger::severity::SEV_DEBUG);
+  }
+  const char *ip = std::getenv(NODE_IP);
+  if (envP != nullptr && std::strlen(ip) > 0) {
+    m_nodeIP = std::string(ip);
   }
   m_inspector->open(m_scapFile);
   m_offline = !sFile.empty();
@@ -80,3 +84,5 @@ string SysFlowContext::getExporterID() {
   }
   return m_exporterID;
 }
+
+string SysFlowContext::getNodeIP() { return m_nodeIP; }

@@ -25,6 +25,7 @@
 #include "logger.h"
 #include "sysflow_config.h"
 #include "sysflowprocessor.h"
+#include "utils.h"
 #include <csignal>
 #include <cstdio>
 #include <iostream>
@@ -181,7 +182,7 @@ int main(int argc, char **argv) {
       }
       break;
     case 'v':
-      cerr << " Version: " << SF_VERSION << "." << SF_BUILD << endl;
+      cerr << " Version: " << SF_VERSION << "+" << SF_BUILD  << " Avro Schema Version: " << utils::getSchemaVersion() << endl;
       exit(0);
     case '?':
       if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' ||

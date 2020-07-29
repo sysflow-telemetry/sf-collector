@@ -43,7 +43,7 @@ private:
   time_t m_delProcTime;
   DEFINE_LOGGER();
   void writeProcessAndAncestors(ProcessObj *proc);
-  void reupContainer(sinsp_evt *ev, ProcessObj *proc);
+  void reupContainer(sinsp_threadinfo *ti, ProcessObj *proc);
 
 public:
   ProcessContext(context::SysFlowContext *cxt,

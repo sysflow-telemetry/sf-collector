@@ -44,8 +44,7 @@ ContainerContext::ContainerContext(context::SysFlowContext *cxt,
 
 ContainerContext::~ContainerContext() { clearAllContainers(); }
 
-ContainerObj *ContainerContext::createContainer(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+ContainerObj *ContainerContext::createContainer(sinsp_threadinfo *ti) {
 
   if (ti->m_container_id.empty()) {
     return nullptr;
@@ -104,8 +103,7 @@ int ContainerContext::derefContainer(const string &id) {
   return result;
 }
 
-ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+ContainerObj *ContainerContext::getContainer(sinsp_threadinfo *ti) {
 
   if (ti->m_container_id.empty()) {
     return nullptr;
@@ -138,7 +136,7 @@ ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
     setContainer(&ct, container);
   }
   if (ct == nullptr) {
-    ct = createContainer(ev);
+    ct = createContainer(ti);
   }
   if (ct == nullptr) {
     return nullptr;
