@@ -52,7 +52,7 @@ trap cleanup EXIT
 
 if [ "${MODE}" == "base" ] ; then
     # packages for base image
-    
+
     subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms"
     dnf -y install --disablerepo=epel \
         gcc \
@@ -81,15 +81,14 @@ if [ "${MODE}" == "base" ] ; then
         libstdc++-static \
         boost-devel \
         elfutils-libelf-devel \
-    	sparsehash-devel \
-	    snappy-devel \
-	    jsoncpp-devel \
-	    glog-devel 
+        sparsehash-devel \
+        snappy-devel \
+        glog-devel
 
-    # Install dkms from EPEL.
+    # Install dkms and jsoncpp from EPEL.
     # ref: https://access.redhat.com/solutions/1132653
     dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    dnf -y install dkms
+    dnf -y install dkms jsoncpp-devel
     dnf -y remove epel-release
 
 elif [ "${MODE}" == "test-extra" ] ; then
