@@ -24,15 +24,15 @@
 #include "utils.h"
 #include <google/dense_hash_map>
 #include <google/dense_hash_set>
-#include <set>
 #include <list>
+#include <set>
 
 using sysflow::Container;
 using sysflow::FileFlow;
 using sysflow::NetworkFlow;
-using sysflow::ProcessFlow;
 using sysflow::OID;
 using sysflow::Process;
+using sysflow::ProcessFlow;
 
 struct NFKey {
   uint64_t tid;
@@ -91,7 +91,14 @@ public:
     if (exportTime != ffo.exportTime) {
       return false;
     }
-    return (flowkey.compare(ffo.flowkey) == 0);
+      return (fileflow.procOID.createTS == ffo.fileflow.procOID.createTS &&
+              fileflow.procOID.hpid == ffo.fileflow.procOID.hpid &&
+              fileflow.ts == ffo.fileflow.ts &&
+              fileflow.tid == ffo.fileflow.tid &&
+              fileflow.fd == ffo.fileflow.fd &&
+              fileflow.opFlags == ffo.fileflow.opFlags &&
+              fileflow.openFlags == ffo.fileflow.openFlags &&
+              flowkey.compare(ffo.flowkey) == 0);
   }
   FileFlowObj() : DataFlowObj(false) {}
 };
@@ -103,7 +110,8 @@ public:
     if (exportTime != pfo.exportTime) {
       return false;
     }
-    return (procflow.procOID.createTS == pfo.procflow.procOID.createTS && procflow.procOID.hpid == pfo.procflow.procOID.hpid);
+    return (procflow.procOID.createTS == pfo.procflow.procOID.createTS &&
+            procflow.procOID.hpid == pfo.procflow.procOID.hpid);
   }
   ProcessFlowObj() : DataFlowObj(false) {}
 };
@@ -179,7 +187,6 @@ struct eqdfobj {
   }
 };
 
-
 class FileObj {
 public:
   bool written{false};
@@ -223,7 +230,7 @@ public:
   NetworkFlowTable netflows;
   FileFlowTable fileflows;
   ProcessSet children;
-  ProcessFlowObj* pfo;
+  ProcessFlowObj *pfo;
   ProcessObj() : proc(), netflows(), fileflows(), children(), pfo(nullptr) {
     NFKey *emptykey = utils::getNFEmptyKey();
     NFKey *delkey = utils::getNFDelKey();
@@ -237,10 +244,12 @@ public:
     children.set_deleted_key(*deloidkey);
   }
   bool operator==(const ProcessObj &p) {
-    if (pfo != nullptr && p.pfo != nullptr && pfo->exportTime != p.pfo->exportTime) {
+    if (pfo != nullptr && p.pfo != nullptr &&
+        pfo->exportTime != p.pfo->exportTime) {
       return false;
     }
-    return (proc.oid.createTS == p.proc.oid.createTS && proc.oid.hpid == p.proc.oid.hpid);
+    return (proc.oid.createTS == p.proc.oid.createTS &&
+            proc.oid.hpid == p.proc.oid.hpid);
   }
 };
 

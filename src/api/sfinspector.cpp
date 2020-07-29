@@ -18,6 +18,9 @@
  **/
 
 #include "api/sfinspector.h"
+#include "processcontext.h"
+#include "filecontext.h"
+#include "containercontext.h"
 
 using api::SysFlowContainer;
 using api::SysFlowEvent;
@@ -25,8 +28,14 @@ using api::SysFlowFileDescInfo;
 using api::SysFlowInspector;
 using api::SysFlowProcess;
 
-SysFlowInspector::SysFlowInspector(context::SysFlowContext *cxt) {
+SysFlowInspector::SysFlowInspector(context::SysFlowContext *cxt,
+                                   process::ProcessContext *procCxt,
+                                   file::FileContext *fileCxt,
+                                   container::ContainerContext *contCxt) {
   m_cxt = cxt;
+  m_procCxt = procCxt;
+  m_fileCxt = fileCxt;
+  m_contCxt = contCxt;
 }
 
 SysFlowInspector::~SysFlowInspector() {}

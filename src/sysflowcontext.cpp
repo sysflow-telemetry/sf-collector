@@ -18,7 +18,10 @@
  **/
 
 #include "sysflowcontext.h"
-#include "cdm/cdminspector.h"
+#include "sysdig/sdinspector.h"
+#include "containercontext.h"
+#include "filecontext.h"
+#include "processcontext.h"
 #include <utility>
 
 using context::SysFlowContext;
@@ -37,13 +40,17 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
       m_statsInterval(30), m_domainSock(false), m_processFlow(false) {
   m_offline = !m_inputFile.empty();
   m_hasPrefix = (m_outputFile.back() != '/');
-  m_inspector = new cdm::CDMInspector(this);
-  m_inspector->init();
 }
 
 SysFlowContext::~SysFlowContext() {
   m_inspector->cleanup();
-  if(m_inspector != nullptr) {
-     delete m_inspector;
+  if (m_inspector != nullptr) {
+    delete m_inspector;
   }
+}
+void SysFlowContext::init(process::ProcessContext *procCxt,
+                          file::FileContext *fileCxt,
+                          container::ContainerContext *contCxt) {
+  m_inspector = new sysdig::SDInspector(this, procCxt, fileCxt, contCxt);
+  m_inspector->init();
 }

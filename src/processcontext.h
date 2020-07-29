@@ -19,7 +19,6 @@
 
 #ifndef _SF_PROC_
 #define _SF_PROC_
-#include "api/sfinspector.h"
 #include "containercontext.h"
 #include "datatypes.h"
 #include "filecontext.h"
@@ -28,9 +27,11 @@
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "utils.h"
+#include "api/sfinspector.h"
 
 #define PROC_TABLE_SIZE 50000
 #define PROC_DEL_EXPIRED 1.0
+
 namespace process {
 class ProcessContext {
 private:

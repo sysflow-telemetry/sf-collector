@@ -491,6 +491,7 @@ void ProcessContext::deleteProcess(ProcessObj **proc) {
   Process::poid_t poid = (*proc)->proc.poid;
   if (!poid.is_null()) {
     OID key = poid.get_OID();
+    std::cout << "Deleting process: " << key.hpid << " " << key.createTS << std::endl;
     ProcessTable::iterator p = m_procs.find(&key);
     if (p != m_procs.end()) {
       p->second->children.erase((*proc)->proc.oid);

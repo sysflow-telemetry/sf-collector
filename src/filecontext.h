@@ -39,8 +39,8 @@ public:
   FileContext(container::ContainerContext *containerCxt,
               writer::SysFlowWriter *writer);
   virtual ~FileContext();
-  FileObj *getFile(api::SysFlowEvent *ev, api::SysFlowFileDescInfo *fdinfo, SFObjectState state,
-                   bool &created);
+  FileObj *getFile(api::SysFlowEvent *ev, api::SysFlowFileDescInfo *fdinfo,
+                   SFObjectState state, bool &created);
   FileObj *getFile(api::SysFlowEvent *ev, const string &path, char typechar,
                    SFObjectState state, bool &created);
   FileObj *getFile(const string &key);

@@ -30,6 +30,18 @@
 #define SF_TIMEOUT -1
 #define SF_EOF 6
 
+namespace process {
+class ProcessContext;
+}
+
+namespace container {
+class ContainerContext;
+}
+
+namespace file {
+class FileContext;
+}
+
 namespace api {
 class SysFlowFileDescInfo {
 public:
@@ -107,9 +119,14 @@ public:
 class SysFlowInspector {
 protected:
   context::SysFlowContext *m_cxt;
+  process::ProcessContext *m_procCxt;
+  file::FileContext *m_fileCxt;
+  container::ContainerContext *m_contCxt;
 
 public:
-  SysFlowInspector(context::SysFlowContext *cxt);
+  SysFlowInspector(context::SysFlowContext *cxt,
+                   process::ProcessContext *procCxt, file::FileContext *fileCxt,
+                   container::ContainerContext *contCxt);
   virtual ~SysFlowInspector();
   virtual int init() = 0;
   virtual int next(SysFlowEvent **evt) = 0;

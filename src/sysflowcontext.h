@@ -33,6 +33,19 @@ namespace api {
 class SysFlowInspector;
 }
 
+namespace process {
+class ProcessContext;
+}
+
+namespace container {
+class ContainerContext;
+}
+
+namespace file {
+class FileContext;
+}
+
+
 using namespace std;
 
 namespace context {
@@ -62,6 +75,8 @@ public:
   SysFlowContext(bool fCont, int fDur, string oFile, const string &sFile,
                  string schFile, string exporterID, string filter,
                  string criPath, int criTO);
+  void init(process::ProcessContext *procCxt, file::FileContext *fileCxt,
+            container::ContainerContext *contCxt);
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
   inline string getExporterID() { return m_exporterID; }

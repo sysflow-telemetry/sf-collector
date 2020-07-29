@@ -48,6 +48,7 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
       new dataflow::DataFlowProcessor(m_cxt, m_writer, m_processCxt, m_fileCxt);
   m_ctrlPrcr = new controlflow::ControlFlowProcessor(m_cxt, m_writer,
                                                      m_processCxt, m_dfPrcr);
+  m_cxt->init(m_processCxt, m_fileCxt, m_containerCxt);
 }
 
 SysFlowProcessor::~SysFlowProcessor() {
