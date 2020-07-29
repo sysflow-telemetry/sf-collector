@@ -11,14 +11,14 @@ The primary objective of SysFlow is to lift raw system call data into more seman
     * [Process](#process)
     * [File](#file)
 * [Events](#events)
-    * [Operation Flags](#oflags)
-    * [ProcessEvent](#procevent)
-    * [FileEvent](#fileevent)
-    * [NetworkEvent](#netevent)
+    * [Operation Flags](#operation-flags)
+    * [Process Event](#process-event)
+    * [File Event](#file-event)
+    * [Network Event](#network-event)
 * [Flows](#flows)
-    * [ProcessFlow](#procflow)
-    * [FileFlow](#fileflow)
-    * [NetworkFlow](#netflow)
+    * [Process Flow](#process-flow-added-in-schema-v2)
+    * [File Flow](#file-flow)
+    * [Network Flow](#network-flow)
 
 ## Overview 
 
@@ -56,7 +56,8 @@ The Header entity is an object which appears at the beginning of each binary Sys
 | Attribute     | Type           | Description  | Status |
 | ------------- |:-------------:| -----|  ----- |
 | version | long |  The current SysFlow version. | Implemented  |
-| exporter | string |  Globally unique id representing the host monitored by SysFlow | Implemented  |
+| exporter | string |  Globally unique id representing the host monitored by SysFlow. | Implemented  |
+| ip | string |  IP address in dot notation representing the monitored host. | Added in Schema v2  |
 
 #### Container
 The Container entity represents a system or application container such as docker or LXC.   It contains important information about the container including its id, name, and whether it is privileged.
@@ -70,7 +71,7 @@ The Container entity represents a system or application container such as docker
 | image | string |  Image name associated with container as provided by docker, LXC, etc. | Implemented |
 | imageID | string |  Image ID associated with container as provided by docker, LXC, etc. | Implemented |
 | type | enum |  Can be one of: CT_DOCKER, CT_LXC, CT_LIBVIRT_LXC, CT_MESOS, CT_RKT, CT_CUSTOM. | Implemented |
-| privileged | boolean |  If true, the container is running with root privileges | Implemented |
+| privileged | boolean |  If true, the container is running with root privileges. | Implemented |
 
 #### Process 
 The process entity represents a running process on the system.  It contains important information about the process including its host pid, creation time, oid id, as well as references to its parent id. When a process entity is exported to a SysFlow file, all its parent processes should be exported before the process, as well as the process's Container entity.   Processes are only exported to a SysFlow file if an event or flow associated with that process or any of its threads are exported.  Threads are not explicitly exported in the process object but are represented in events and flows through a thread id field. Finally, a Process entity only needs to be exported to a file once, unless it's been modified by an event or flow.
@@ -89,8 +90,9 @@ The process entity represents a running process on the system.  It contains impo
 | userName |  string |  User name under which the process is running. | Implemented |
 | gid |  int32 |  Group ID under which the process is running. | Implemented |
 | groupName |  string |  Group Name under which the process is running. | Implemented |
-| tty |  boolean |  If true, the process is tied to a shell | Implemented |
-| containerId | string |  Unique string representing the Container Object to which the process resides.  Can be NULL if process isn't in a container. | Implemented
+| tty |  boolean |  If true, the process is tied to a shell. | Implemented |
+| containerId | string |  Unique string representing the Container Object to which the process resides.  Can be NULL if process isn't in a container. | Implemented |
+| entry | boolean |  If true, the process is a container or system entrypoint (i.e., virtual pid = 1). | Added in Schema v2 |
  
 #### File
 The File entity represents file-based resources on a system including files, directories, unix sockets, and pipes.
@@ -129,13 +131,15 @@ The operation flags describe the actual behavior associated with the event (or f
 | OP_WRITE_SEND | (1 << 9) | Process writing to file, sending network data | write(),pwrite(),send(),sendto(),sendmsg() | NetworkFlow, FileFlow |
 | OP_CLOSE      | (1 << 10)| Process close resource | close(),socketshutdown | NetworkFlow, FileFlow |
 | OP_TRUNCATE   | (1 << 11)| Premature closing of a flow due to exporter shutdown | N/A| NetworkFlow, FileFlow |
-| OP_DIGEST     | (1 << 12)| Summary flow information for long running flows | N/A | NetworkFlow, FileFlow |
-| OP_MKDIR      | (1 << 13)| Make directory | mkdir(), mkdirat() | FileEvent|
-| OP_RMDIR      | (1 << 14)| Remove directory | rmdir() | FileEvent|
-| OP_LINK       | (1 << 15)| Process creates hard link to existing file | link(), linkat() | FileEvent|
-| OP_UNLINK     | (1 << 16)| Process deletes file | unlink(), unlinkat() | FileEvent|
-| OP_SYMLINK    | (1 << 17)| Process creates sym link to existing file | symlink(), symlinkat() | FileEvent|
-| OP_RENAME     | (1 << 18) | File renamed | rename(), renameat() | FileEvent|
+| OP_SHUTDOWN   | (1 << 12)| Shutdown all or part of a full duplex socket connection | shutdown() | NetworkFlow |
+| OP_MMAP       | (1 << 13)| Memory map of a file. | mmap() | FileFlow |
+| OP_DIGEST     | (1 << 14)| Summary flow information for long running flows | N/A | NetworkFlow, FileFlow |
+| OP_MKDIR      | (1 << 15)| Make directory | mkdir(), mkdirat() | FileEvent|
+| OP_RMDIR      | (1 << 16)| Remove directory | rmdir() | FileEvent|
+| OP_LINK       | (1 << 17)| Process creates hard link to existing file | link(), linkat() | FileEvent|
+| OP_UNLINK     | (1 << 18)| Process deletes file | unlink(), unlinkat() | FileEvent|
+| OP_SYMLINK    | (1 << 19)| Process creates sym link to existing file | symlink(), symlinkat() | FileEvent|
+| OP_RENAME     | (1 << 20)| File renamed | rename(), renameat() | FileEvent|
    
 #### Process Event 
 
@@ -171,7 +175,7 @@ A File Event is an event that creates, deletes or modifies a File Entity.   Curr
 | OP_SYMLINK    | Exported when a process creates a sym link to an existing file.  Should be accompanied by a new File Entity representing the new link.|
 | OP_RENAME     | Exported when a process creates renames an existing file.  Should be accompanied by a new File Entity representing the renamed file.|
 
-> **NOTE:**   We'd like to also support **chmod** and **chown** but these two operations are not fully supported in sysdig. We'd also like to support **umount** and **mount** but these operations are not implemented.
+> **NOTE:**   We'd like to also support **chmod** and **chown** but these two operations are not fully supported in sysdig. We'd also like to support **umount** and **mount** but these operations are not implemented.  We anticipate supporting these in a future version.
 
 The list of attributes for the File Event are as follows:
 
@@ -185,7 +189,7 @@ The list of attributes for the File Event are as follows:
 | **FOID:** |  string (128bit) | The id of the file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. | Implemented |
 | **NewFOID:** |  string (128bit) | Some syscalls (link, symlink, etc.) convert one file into another requiring two files. This id is the id of the file secondary or new file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. Can be NULL. | Implemented |
 
-#### NetworkEvent 
+#### Network Event 
 Currently, NOT IMPLEMENTED.
 
 ### Flows 
@@ -195,10 +199,28 @@ A flow can be started by any supported operation and are exported in one of two 
 
 In this section, we describe three categories of Flows:  Process, File and Network Flows.
 
-#### ProcessFlow 
-Currently, NOT IMPLEMENTED.
+#### Process Flow (Added in Schema v2)
+A Process Flow represents a summarization of the number of threads created and destroyed over a time period. Process Flows are partially implemented in the collector and will be fully implemented in a later 
+release. It was added in Schema v2. Currently we support the following operations (for more information on operations see ([Operation Flags](#oflags))):
 
-#### FileFlow 
+| Operation     | Behavior  |
+| ------------- | -----------| 
+| OP_CLONE      | Recorded when a new thread is cloned. |
+| OP_EXIT       | Recorded on a thread exit. |
+
+The list of attributes for the Process Flow are as follows:
+
+| Attribute     | Type           | Description  | Status |
+| ------------- |:-------------:| -----|  ----- |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | Implemented |
+| timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | Implemented |
+| numThreadsCloned |  int64 | The number of threads cloned during the duration of the flow. | Implemented |
+| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the ProcessFlow.  See list of Operation Flags for details. | Implemented | 
+| endTs |  int64 | The timestamp when the process flow is exported (nanoseconds). | Implemented | 
+| numThreadsExited | int64 | Number of threads exited during the duration of the flow. | Implemented |
+| numCloneErrors | int64 | Number of clone errors occuring during the duration of the flow. | Implemented |
+
+#### File Flow 
 A File Flow represents a collection of operations on a file.   Currently we support the following operations (for more information on operations see ([Operation Flags](#oflags))):
 
 | Operation     | Behavior  |
@@ -207,6 +229,7 @@ A File Flow represents a collection of operations on a file.   Currently we supp
 | OP_OPEN       | Process opening a file/resource. |
 | OP_READ_RECV  | Process reading from file/resource.|
 | OP_WRITE_SEND | Process writing to file. |
+| OP_MMAP       | Processing memory mapping a file.|
 | OP_CLOSE      | Process closing resource. This action will close corresponding FileFlow. |
 | OP_TRUNCATE   | Indicates Premature closing of a flow due to exporter shutdown.|
 | OP_DIGEST     | Summary flow information for long running flows. **NOT CURRENTLY IMPLEMENTED**. |
@@ -223,12 +246,12 @@ The list of attributes for the File Flow are as follows:
 | endTs |  int64 | The timestamp when the file flow is exported (nanoseconds). | Implemented | 
 | **FOID:** |  string (128bit) | The id of the file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. | Implemented |
 | fd |  int32 | The file descriptor associated with the flow. | Implemented |
-| numRRecvOps | int32 | Number of read operations performed during duration of the flow. | Implemented |
-| numWSendOps | int32 | Number of write operations performed during duration of the flow. | Implemented |
-| numRRecvBytes | int32 | Number of bytes read during duration of the flow. | Implemented |
-| numWSendBytes | int32 | Number of bytes written during duration of the flow. | Implemented | 
+| numRRecvOps | int64 | Number of read operations performed during the duration of the flow. | Implemented |
+| numWSendOps | int64 | Number of write operations performed during the duration of the flow. | Implemented |
+| numRRecvBytes | int64 | Number of bytes read during the duration of the flow. | Implemented |
+| numWSendBytes | int64 | Number of bytes written during the duration of the flow. | Implemented | 
 
-#### NetworkFlow 
+#### Network Flow 
 A Network Flow represents a collection of operations on a network connection.   Currently we support the following operations (for more information on operations see ([Operation Flags](#oflags))):
 
 | Operation     | Behavior  |
@@ -237,6 +260,7 @@ A Network Flow represents a collection of operations on a network connection.   
 | OP_CONNECT    | Process connected to a remote host or process.  |
 | OP_READ_RECV  | Process receiving data from a remote host or process.|
 | OP_WRITE_SEND | Process sending data to a remote host or process.|
+| OP_SHUTDOWN   | Process shutdown full or single duplex connections.|
 | OP_CLOSE      | Process closing network connection. This action will close corresponding NetworkFlow. |
 | OP_TRUNCATE   | Indicates Premature closing of a flow due to exporter shutdown.|
 | OP_DIGEST     | Summary flow information for long running flows. **NOT CURRENTLY IMPLEMENTED**. |
@@ -255,9 +279,9 @@ The list of attributes for the Network Flow are as follows:
 | dip |  int32 | The destination IP address. | Implemented |
 | dport |  int16 | The destination port. | Implemented |
 | proto |  enum | The network protocol of the flow.  Can be: TCP, UDP, ICMP, RAW | Implemented |
-| numRRecvOps | int32 | Number of receive operations performed during duration of the flow. | Implemented |
-| numWSendOps | int32 | Number of send operations performed during duration of the flow. | Implemented |
-| numRRecvBytes | int32 | Number of bytes received during duration of the flow. | Implemented |
-| numWSendBytes | int32 | Number of bytes sent during duration of the flow. | Implemented | 
+| numRRecvOps | int64 | Number of receive operations performed during the duration of the flow. | Implemented |
+| numWSendOps | int64 | Number of send operations performed during the duration of the flow. | Implemented |
+| numRRecvBytes | int64 | Number of bytes received during the duration of the flow. | Implemented |
+| numWSendBytes | int64 | Number of bytes sent during the duration of the flow. | Implemented | 
 
 > **NOTE:**  The current implementation of NetworkFlow only supports ipv4.  What's the best way to add in ipv6?
