@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:1.0-experimental
 #
 # Copyright (C) 2019 IBM Corporation.
 #
@@ -18,13 +19,29 @@
 # limitations under the License.
 
 #-----------------------
+# Usage
+#-----------------------
+#
+# 1. Modify scripts/build/secret.sh and add user/password for RHEL
+# 2. Build with Docker BuildKit:
+#
+#    DOCKER_BUILDKIT=1 docker build --no-cache \
+#                                   --secret id=rhsecret,src=scripts/build/secret.sh \
+#                                   --target mods \
+#                                   -t ubi:mods-0.0.0 \
+#                                   -f Dockerfile.ubi.amd64 .
+#
+
+#-----------------------
 # Stage: base
 #-----------------------
 FROM registry.access.redhat.com/ubi8/ubi:8.2-299 AS base
 
 # Install Packages
-COPY ./scripts/installUBIDependency.sh /
-RUN /installUBIDependency.sh base && rm /installUBIDependency.sh
+COPY ./scripts/installUBIDependency.sh /build/install.sh
+RUN --mount=type=secret,id=rhsecret,dst=/secret/rh_register.sh \
+    ( source /secret/rh_register.sh && bash /build/install.sh base ) && \
+    rm -rf /build
 
 #-----------------------
 # Stage: mods
@@ -42,14 +59,15 @@ ENV SYSDIG_HOST_ROOT=/host
 
 ENV HOME=/root
 
-RUN dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools git
 #  build modules
 COPY ./modules /build/modules
 COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
-RUN  cd /build/modules && \
+RUN  dnf -y install git && \
+     cd /build/modules && \
      make INSTALL_PATH=${INSTALL_PATH} install && \
      mkdir /sysdigsrc && cp -a /usr/src/sysdig-* /sysdigsrc/ && \
-     make clean && rm -rf /build/modules
+     make clean && rm -rf /build/modules && \
+     dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
 
 ENTRYPOINT ["/usr/local/sysflow/modules/bin/docker-entry-ubi.sh"]
