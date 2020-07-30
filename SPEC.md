@@ -117,7 +117,7 @@ Each event and flow contains a process object id, a timestamp, a thread id, and 
 The operation flags describe the actual behavior associated with the event (or flow).  The flags are represented in a single bitmap which enables multiple behaviors to be combined easily into a flow.   An event will have a single bit active, while a flow could have several. The current supported flags are as follows:
 
 
-| Operation     | Numeric ID  | Description |System Calls | Evts/Flows Supported | Since (schema version) }
+| Operation     | Numeric ID  | Description |System Calls | Evts/Flows Supported | Since (schema version) |
 | ------------- | ------------- | ----------- |  ----- | ------- | ------- |
 | OP_CLONE      | (1 << 0) | Process or thread cloned. | clone() | ProcessEvent | 1 |
 | OP_EXEC       | (1 << 1) | Execution of a file| execve() | ProcessEvent | 1 |
