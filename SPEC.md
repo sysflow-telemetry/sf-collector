@@ -160,7 +160,7 @@ The list of attributes for the Process Event are as follows:
 | timestamp (ts)|  int64 | The timestamp when the event occurred (nanoseconds). | 1 |
 | tid |  int64 | The id of the thread associated with the ProcessEvent.  If the running process is single threaded tid == pid | 1 |
 | opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | 1 | 
-| args |  string[] | An array of arguments encoded as string for the syscall. |  Sparingly implemented. Only really used with setuid for now. | 1 | 
+| args |  string[] | An array of arguments encoded as string for the syscall. |  Sparingly implemented. Only really used with setuid for now. | 
 | ret | int64 | Syscall return value. | 1 | 
 
 #### File Event 
