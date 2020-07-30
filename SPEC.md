@@ -4,7 +4,7 @@ SysFlow is an open specification for system event-level telemetry.  The main goa
 
 The primary objective of SysFlow is to lift raw system call data into more semantic process behaviors which promote significant data reductions for longer term forensic storage of data which is crucial for security analyzes.  Through an object relational model of entities, events and flows, we enable SysFlow users to configure the desired granularity of data collection and filtering in order to facilitate most types of analysis in big data frameworks.          
 
-*  [Overview](#overview)
+* [Overview](#overview)
 * [Entities](#entities)
     * [Header](#header)
     * [Container](#container)
@@ -16,7 +16,7 @@ The primary objective of SysFlow is to lift raw system call data into more seman
     * [File Event](#file-event)
     * [Network Event](#network-event)
 * [Flows](#flows)
-    * [Process Flow](#process-flow-added-in-schema-v2)
+    * [Process Flow](#process-flow)
     * [File Flow](#file-flow)
     * [Network Flow](#network-flow)
 
@@ -53,60 +53,60 @@ Each entity is defined below with recommendations on what to use for object iden
 #### Header 
 The Header entity is an object which appears at the beginning of each binary SysFlow file.   It contains the current version of SysFlow as supported in the file, and the exporter ID.
 
-| Attribute     | Type           | Description  | Status |
+| Attribute     | Type           | Description  | Since (schema version) |
 | ------------- |:-------------:| -----|  ----- |
-| version | long |  The current SysFlow version. | Implemented  |
-| exporter | string |  Globally unique id representing the host monitored by SysFlow. | Implemented  |
-| ip | string |  IP address in dot notation representing the monitored host. | Added in Schema v2  |
+| version | long |  The current SysFlow version. | 1 |
+| exporter | string |  Globally unique id representing the host monitored by SysFlow. | 1 |
+| ip | string |  IP address in dot notation representing the monitored host. | 2 |
 
 #### Container
 The Container entity represents a system or application container such as docker or LXC.   It contains important information about the container including its id, name, and whether it is privileged.
 
-| Attribute     | Type           | Description  | Status |
+| Attribute     | Type           | Description  | Since (schema version) |
 | ------------- |:-------------:| -----|  ----- |
-| id | string |  Unique string representing the Container Object as provided by docker, LXC, etc. | Implemented (Should we rename to oid?)  |
-| **state**      | enum | state of the process (CREATED, MODIFIED, REUP) | **NOT IMPLEMENTED** |
-| **timestamp (ts)**|  int64 | The timestamp when container object is exported (nanoseconds). | **NOT IMPLEMENTED** |
-| name | string |  Container name as provided by docker, LXC, etc. | Implemented |
-| image | string |  Image name associated with container as provided by docker, LXC, etc. | Implemented |
-| imageID | string |  Image ID associated with container as provided by docker, LXC, etc. | Implemented |
-| type | enum |  Can be one of: CT_DOCKER, CT_LXC, CT_LIBVIRT_LXC, CT_MESOS, CT_RKT, CT_CUSTOM. | Implemented |
-| privileged | boolean |  If true, the container is running with root privileges. | Implemented |
+| id | string |  Unique string representing the Container Object as provided by docker, LXC, etc. | 1 |
+| **state**      | enum | state of the process (CREATED, MODIFIED, REUP). | not implemented |
+| **timestamp (ts)**|  int64 | The timestamp when container object is exported (nanoseconds). | not implemented |
+| name | string |  Container name as provided by docker, LXC, etc. | 1 |
+| image | string |  Image name associated with container as provided by docker, LXC, etc. | 1 |
+| imageID | string |  Image ID associated with container as provided by docker, LXC, etc. | 1 |
+| type | enum |  Can be one of: CT_DOCKER, CT_LXC, CT_LIBVIRT_LXC, CT_MESOS, CT_RKT, CT_CUSTOM | 1 |
+| privileged | boolean |  If true, the container is running with root privileges | 1 |
 
 #### Process 
 The process entity represents a running process on the system.  It contains important information about the process including its host pid, creation time, oid id, as well as references to its parent id. When a process entity is exported to a SysFlow file, all its parent processes should be exported before the process, as well as the process's Container entity.   Processes are only exported to a SysFlow file if an event or flow associated with that process or any of its threads are exported.  Threads are not explicitly exported in the process object but are represented in events and flows through a thread id field. Finally, a Process entity only needs to be exported to a file once, unless it's been modified by an event or flow.
 
 > **NOTE:**  In current implementation, the creation timestamp is the time at which the process is cloned.  If the process was cloned before capture was started, this value is 0.  The current implementation also has problems getting absolute paths for exes when relative paths are used to launch processes.
 
-| Attribute     | Type           | Description  | Status |
+| Attribute     | Type           | Description  | Since (schema version) |
 | ------------- |:-------------:| -----|  ----- |
 | state      | enum | state of the process (CREATED, MODIFIED, REUP) | Implemented |
-| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The Process OID contains the host pid of the project, and creation timestamp. | Implemented |
-| **POID:**<br> *parent host pid*<br>*parent create ts* | **struct** <br> *int64*<br>*int64*| The OID of the parent process can be NULL if not available or if a root process. | Implemented |
-| timestamp (ts)|  int64 | The timestamp when process object is exported (nanoseconds). | Implemented |
-| exe |  string |  Full path (if available) of the executable used in the process launch. Otherwise, it's the name of the exe. | Implemented |
-| exeArgs |  string |  Concatenated list of args passed on process startup. | Implemented |
-| uid |  int32 |  User ID under which the process is running. | Implemented |
-| userName |  string |  User name under which the process is running. | Implemented |
-| gid |  int32 |  Group ID under which the process is running. | Implemented |
-| groupName |  string |  Group Name under which the process is running. | Implemented |
-| tty |  boolean |  If true, the process is tied to a shell. | Implemented |
-| containerId | string |  Unique string representing the Container Object to which the process resides.  Can be NULL if process isn't in a container. | Implemented |
-| entry | boolean |  If true, the process is a container or system entrypoint (i.e., virtual pid = 1). | Added in Schema v2 |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The Process OID contains the host pid of the project, and creation timestamp. | 1 |
+| **POID:**<br> *parent host pid*<br>*parent create ts* | **struct** <br> *int64*<br>*int64*| The OID of the parent process can be NULL if not available or if a root process. | 1 |
+| timestamp (ts)|  int64 | The timestamp when process object is exported (nanoseconds). | 1 |
+| exe |  string |  Full path (if available) of the executable used in the process launch; otherwise, it's the name of the exe. | 1 |
+| exeArgs |  string |  Concatenated list of args passed on process startup. | 1 |
+| uid |  int32 |  User ID under which the process is running. | 1 |
+| userName |  string |  User name under which the process is running. | 1 |
+| gid |  int32 |  Group ID under which the process is running | 1 |
+| groupName |  string |  Group Name under which the process is running | 1 |
+| tty |  boolean |  If true, the process is tied to a shell | 1 |
+| containerId | string |  Unique string representing the Container Object to which the process resides. It can be NULL if process isn't in a container. | 1 |
+| entry | boolean |  If true, the process is a container or system entrypoint (i.e., virtual pid = 1). | 2 |
  
 #### File
 The File entity represents file-based resources on a system including files, directories, unix sockets, and pipes.
 
 > **NOTE:** Current implementation does not have access to inode related values, which would greatly improve object ids.   Also, the current implementation has some issues with absolute paths when monitoring operations that use relative paths.
 
-| Attribute     | Type           | Description  | Status |
+| Attribute     | Type           | Description  | Since (schema version) |
 | ------------- |:-------------:| -----|  ----- |
-| **state**      | enum | state of the file (CREATED, MODIFIED, REUP) | Implemented |
-| **FOID:** |  string (128bit) | File Identifier, is a SHA1 hash of the concatenation of the path + container ID | Implemented |
-| timestamp (ts)|  int64 | The timestamp when file object is exported (nanoseconds). | Implemented |
-| restype |   enum | Indicates the resource type.  Currently support: SF_FILE, SF_DIR, SF_UNIX (unix socket), SF_PIPE, SF_UNKNOWN | Implemented |
-| path |   string | Full path of the file/directory, or unique identifier for pipe, unix socket | Implemented |
-| containerId | string |  Unique string representing the Container Object to which the file resides.  Can be NULL if file isn't in a container. | Implemented
+| **state**      | enum | state of the file (CREATED, MODIFIED, REUP) | 1 |
+| **FOID:** |  string (128bit) | File Identifier, is a SHA1 hash of the concatenation of the path + container ID | 1 |
+| timestamp (ts)|  int64 | The timestamp when file object is exported (nanoseconds). | 1 |
+| restype |   enum | Indicates the resource type.  Currently support: SF_FILE, SF_DIR, SF_UNIX (unix socket), SF_PIPE, SF_UNKNOWN | 1 |
+| path |   string | Full path of the file/directory, or unique identifier for pipe, unix socket | 1 |
+| containerId | string |  Unique string representing the Container Object to which the file resides.  Can be NULL if file isn't in a container. | 1 |
 
 ### Events 
 Events represent important individual behaviors of an entity that are broken out on their own due to their importance, their rarity, or because maintaining operation order is important.  In order to manage events and their differing attributes, we divide them into three different categories:  Process, File, and Network events.  These are described more in detail later on.  
@@ -117,54 +117,54 @@ Each event and flow contains a process object id, a timestamp, a thread id, and 
 The operation flags describe the actual behavior associated with the event (or flow).  The flags are represented in a single bitmap which enables multiple behaviors to be combined easily into a flow.   An event will have a single bit active, while a flow could have several. The current supported flags are as follows:
 
 
-| Operation     | Numeric ID  | Description |System Calls | Evts/Flows Supported |
-| ------------- | ------------- | ----------- |  ----- | ------- |
-| OP_CLONE      | (1 << 0) | Process or thread cloned. | clone() | ProcessEvent |
-| OP_EXEC       | (1 << 1) | Execution of a file| execve() | ProcessEvent |
-| OP_EXIT       | (1 << 2) | Process or thread exit. | exit() | ProcessEvent |
-| OP_SETUID     | (1 << 3) | UID of process was changed | setuid(), setresuid | ProcessEvent |
-| OP_SETNS      | (1 << 4) | Process entering namespace | setns() | FileFlow |
-| OP_ACCEPT     | (1 << 5) | Process accepting network connections | accept(), select() | NetworkFlow |
-| OP_CONNECT    | (1 << 6) | Process connecting to remote host or process | connect() | NetworkFlow |
-| OP_OPEN       | (1 << 7) | Process opening a file/resource | open(), openat(), create() | FileFlow |
-| OP_READ_RECV  | (1 << 8) | Process reading from file, receiving network data | read(),pread(),recv(),recvfrom(),recvmsg() | NetworkFlow, FileFlow |
-| OP_WRITE_SEND | (1 << 9) | Process writing to file, sending network data | write(),pwrite(),send(),sendto(),sendmsg() | NetworkFlow, FileFlow |
-| OP_CLOSE      | (1 << 10)| Process close resource | close(),socketshutdown | NetworkFlow, FileFlow |
-| OP_TRUNCATE   | (1 << 11)| Premature closing of a flow due to exporter shutdown | N/A| NetworkFlow, FileFlow |
-| OP_SHUTDOWN   | (1 << 12)| Shutdown all or part of a full duplex socket connection | shutdown() | NetworkFlow |
-| OP_MMAP       | (1 << 13)| Memory map of a file. | mmap() | FileFlow |
-| OP_DIGEST     | (1 << 14)| Summary flow information for long running flows | N/A | NetworkFlow, FileFlow |
-| OP_MKDIR      | (1 << 15)| Make directory | mkdir(), mkdirat() | FileEvent|
-| OP_RMDIR      | (1 << 16)| Remove directory | rmdir() | FileEvent|
-| OP_LINK       | (1 << 17)| Process creates hard link to existing file | link(), linkat() | FileEvent|
-| OP_UNLINK     | (1 << 18)| Process deletes file | unlink(), unlinkat() | FileEvent|
-| OP_SYMLINK    | (1 << 19)| Process creates sym link to existing file | symlink(), symlinkat() | FileEvent|
-| OP_RENAME     | (1 << 20)| File renamed | rename(), renameat() | FileEvent|
+| Operation     | Numeric ID  | Description |System Calls | Evts/Flows Supported | Since (schema version) }
+| ------------- | ------------- | ----------- |  ----- | ------- | ------- |
+| OP_CLONE      | (1 << 0) | Process or thread cloned. | clone() | ProcessEvent | 1 |
+| OP_EXEC       | (1 << 1) | Execution of a file| execve() | ProcessEvent | 1 |
+| OP_EXIT       | (1 << 2) | Process or thread exit. | exit() | ProcessEvent | 1 |
+| OP_SETUID     | (1 << 3) | UID of process was changed | setuid(), setresuid | ProcessEvent | 1 |
+| OP_SETNS      | (1 << 4) | Process entering namespace | setns() | FileFlow | 1 |
+| OP_ACCEPT     | (1 << 5) | Process accepting network connections | accept(), select() | NetworkFlow | 1 |
+| OP_CONNECT    | (1 << 6) | Process connecting to remote host or process | connect() | NetworkFlow | 1 |
+| OP_OPEN       | (1 << 7) | Process opening a file/resource | open(), openat(), create() | FileFlow | 1 |
+| OP_READ_RECV  | (1 << 8) | Process reading from file, receiving network data | read(),pread(),recv(),recvfrom(),recvmsg() | NetworkFlow, FileFlow | 1 |
+| OP_WRITE_SEND | (1 << 9) | Process writing to file, sending network data | write(),pwrite(),send(),sendto(),sendmsg() | NetworkFlow, FileFlow | 1 |
+| OP_CLOSE      | (1 << 10)| Process close resource | close(),socketshutdown | NetworkFlow, FileFlow | 1 |
+| OP_TRUNCATE   | (1 << 11)| Premature closing of a flow due to exporter shutdown | N/A| NetworkFlow, FileFlow | 1 |
+| OP_SHUTDOWN   | (1 << 12)| Shutdown all or part of a full duplex socket connection | shutdown() | NetworkFlow | 1 |
+| OP_MMAP       | (1 << 13)| Memory map of a file. | mmap() | FileFlow | 1 |
+| OP_DIGEST     | (1 << 14)| Summary flow information for long running flows | N/A | NetworkFlow, FileFlow | 1 |
+| OP_MKDIR      | (1 << 15)| Make directory | mkdir(), mkdirat() | FileEvent| 1 |
+| OP_RMDIR      | (1 << 16)| Remove directory | rmdir() | FileEvent| 1 |
+| OP_LINK       | (1 << 17)| Process creates hard link to existing file | link(), linkat() | FileEvent| 1 |
+| OP_UNLINK     | (1 << 18)| Process deletes file | unlink(), unlinkat() | FileEvent| 1 |
+| OP_SYMLINK    | (1 << 19)| Process creates sym link to existing file | symlink(), symlinkat() | FileEvent| 1 |
+| OP_RENAME     | (1 << 20)| File renamed | rename(), renameat() | FileEvent| 1 |
    
 #### Process Event 
 
-A Process Event is an event that creates or modifies a process in some way.   Currently, we support four Process Events (referred to as operations), and their behavior in SysFlow is described below.  For more information on operations see ([Operation Flags](#oflags)).  
+A Process Event is an event that creates or modifies a process in some way. Currently, we support four Process Events (referred to as operations), and their behavior in SysFlow is described below.
 
 | Operation     | Behavior  |
 | ------------- | -----------| 
 | OP_CLONE      | Exported when a new process or thread is cloned.  A new Process Entity should be exported prior to exporting the clone operation of a new process. |
 | OP_EXEC       | Exported when a process calls an exec syscall.  This event will modify an existing process, and should be accompanied by a modified Process Entity. |
 | OP_EXIT       | Exported on a process or thread exit. |
-| OP_SETUID     | Exported when a process's UID is changed. This event will modify an existing process, and should be accompanied by a modified Process Entity. **NEED TO CHECK THIS** |
+| OP_SETUID     | Exported when a process's UID is changed. This event will modify an existing process, and should be accompanied by a modified Process Entity. |
 
 The list of attributes for the Process Event are as follows:
 
-| Attribute     | Type           | Description  | Status |
-| ------------- |:-------------:| -----|  ----- |
-| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the event occurred. | Implemented |
-| timestamp (ts)|  int64 | The timestamp when the event occurred (nanoseconds). | Implemented |
-| tid |  int64 | The id of the thread associated with the ProcessEvent.  If the running process is single threaded tid == pid | Implemented |
-| opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | Implemented | 
-| args |  string[] | An array of arguments encoded as string for the syscall. |  Sparingly implemented. Only really used with setuid for now. |
-| ret | int64 | Syscall return value. | Implemented | 
+| Attribute     | Type           | Description | Since (schema version) |
+| ------------- |:-------------:| ----- |  ----- |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the event occurred. | 1 |
+| timestamp (ts)|  int64 | The timestamp when the event occurred (nanoseconds). | 1 |
+| tid |  int64 | The id of the thread associated with the ProcessEvent.  If the running process is single threaded tid == pid | 1 |
+| opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | 1 | 
+| args |  string[] | An array of arguments encoded as string for the syscall. |  Sparingly implemented. Only really used with setuid for now. | 1 | 
+| ret | int64 | Syscall return value. | 1 | 
 
 #### File Event 
-A File Event is an event that creates, deletes or modifies a File Entity.   Currently, we support six File Events (referred to as operations), and their behavior in SysFlow is described below.  For more information on operations see ([Operation Flags](#oflags)).
+A File Event is an event that creates, deletes or modifies a File Entity.   Currently, we support six File Events (referred to as operations), and their behavior in SysFlow is described below.
 
 | Operation     | Behavior  |
 | ------------- | -----------| 
@@ -179,18 +179,18 @@ A File Event is an event that creates, deletes or modifies a File Entity.   Curr
 
 The list of attributes for the File Event are as follows:
 
-| Attribute     | Type           | Description  | Status |
+| Attribute     | Type           | Description  | Since (schema version) |
 | ------------- |:-------------:| -----|  ----- |
-| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the event occurred. | Implemented |
-| timestamp (ts)|  int64 | The timestamp when the event occurred (nanoseconds). | Implemented |
-| tid |  int64 | The id of the thread associated with the FileEvent.  If the running process is single threaded tid == pid | Implemented |
-| opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | Implemented | 
-| ret | int64 | Syscall return value. | Implemented | 
-| **FOID:** |  string (128bit) | The id of the file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. | Implemented |
-| **NewFOID:** |  string (128bit) | Some syscalls (link, symlink, etc.) convert one file into another requiring two files. This id is the id of the file secondary or new file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. Can be NULL. | Implemented |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the event occurred. | 1 |
+| timestamp (ts)|  int64 | The timestamp when the event occurred (nanoseconds). | 1 |
+| tid |  int64 | The id of the thread associated with the FileEvent.  If the running process is single threaded tid == pid | 1 |
+| opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | 1 | 
+| ret | int64 | Syscall return value. | 1 | 
+| **FOID:** |  string (128bit) | The id of the file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. | 1 |
+| **NewFOID:** |  string (128bit) | Some syscalls (link, symlink, etc.) convert one file into another requiring two files. This id is the id of the file secondary or new file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. Can be NULL. | 1 |
 
 #### Network Event 
-Currently, NOT IMPLEMENTED.
+Currently, not implemented.
 
 ### Flows 
 A Flow represents an aggregation of multiple events that naturally fit together to describe a particular behavior.   They are designed to reduce data and collect statistics.   Examples of flows include an application reading or writing to a file, or sending and receiving data from another process or host.    Flows represent a number of events occurring over a period of time, and as such each flow has a set of operations (encoded in a bitmap), a start and an end time.   One can determine the operations in the flow by decoding the operation flags.
@@ -199,9 +199,9 @@ A flow can be started by any supported operation and are exported in one of two 
 
 In this section, we describe three categories of Flows:  Process, File and Network Flows.
 
-#### Process Flow (Added in Schema v2)
+#### Process Flow
 A Process Flow represents a summarization of the number of threads created and destroyed over a time period. Process Flows are partially implemented in the collector and will be fully implemented in a later 
-release. It was added in Schema v2. Currently we support the following operations (for more information on operations see ([Operation Flags](#oflags))):
+release. Since schema version 2. Currently we support the following operations:
 
 | Operation     | Behavior  |
 | ------------- | -----------| 
@@ -210,18 +210,18 @@ release. It was added in Schema v2. Currently we support the following operation
 
 The list of attributes for the Process Flow are as follows:
 
-| Attribute     | Type           | Description  | Status |
+| Attribute     | Type           | Description  | Since (schema version) |
 | ------------- |:-------------:| -----|  ----- |
-| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | Implemented |
-| timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | Implemented |
-| numThreadsCloned |  int64 | The number of threads cloned during the duration of the flow. | Implemented |
-| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the ProcessFlow.  See list of Operation Flags for details. | Implemented | 
-| endTs |  int64 | The timestamp when the process flow is exported (nanoseconds). | Implemented | 
-| numThreadsExited | int64 | Number of threads exited during the duration of the flow. | Implemented |
-| numCloneErrors | int64 | Number of clone errors occuring during the duration of the flow. | Implemented |
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | 2 |
+| timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | 2 |
+| numThreadsCloned |  int64 | The number of threads cloned during the duration of the flow. | 2 |
+| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the ProcessFlow.  See list of Operation Flags for details. | 2 | 
+| endTs |  int64 | The timestamp when the process flow is exported (nanoseconds). | 2 | 
+| numThreadsExited | int64 | Number of threads exited during the duration of the flow. | 2 |
+| numCloneErrors | int64 | Number of clone errors occuring during the duration of the flow. | 2 |
 
 #### File Flow 
-A File Flow represents a collection of operations on a file.   Currently we support the following operations (for more information on operations see ([Operation Flags](#oflags))):
+A File Flow represents a collection of operations on a file. Currently we support the following operations:
 
 | Operation     | Behavior  |
 | ------------- | -----------| 
@@ -232,27 +232,27 @@ A File Flow represents a collection of operations on a file.   Currently we supp
 | OP_MMAP       | Processing memory mapping a file.|
 | OP_CLOSE      | Process closing resource. This action will close corresponding FileFlow. |
 | OP_TRUNCATE   | Indicates Premature closing of a flow due to exporter shutdown.|
-| OP_DIGEST     | Summary flow information for long running flows. **NOT CURRENTLY IMPLEMENTED**. |
+| OP_DIGEST     | Summary flow information for long running flows (not implemented). |
 
 The list of attributes for the File Flow are as follows:
 
-| Attribute     | Type           | Description  | Status |
+| Attribute     | Type           | Description  | Since (schema version) |
 | ------------- |:-------------:| -----|  ----- |
-| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | Implemented |
-| timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | Implemented |
-| tid |  int64 | The id of the thread associated with the flow.  If the running process is single threaded tid == pid | Implemented |
-| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the FileFlow.  See list of Operation Flags for details. | Implemented | 
-| openFlags | int64 | Flags associated with an open syscall if present. | Implemented |
-| endTs |  int64 | The timestamp when the file flow is exported (nanoseconds). | Implemented | 
-| **FOID:** |  string (128bit) | The id of the file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. | Implemented |
-| fd |  int32 | The file descriptor associated with the flow. | Implemented |
-| numRRecvOps | int64 | Number of read operations performed during the duration of the flow. | Implemented |
-| numWSendOps | int64 | Number of write operations performed during the duration of the flow. | Implemented |
-| numRRecvBytes | int64 | Number of bytes read during the duration of the flow. | Implemented |
-| numWSendBytes | int64 | Number of bytes written during the duration of the flow. | Implemented | 
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | 1 |
+| timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | 1 |
+| tid |  int64 | The id of the thread associated with the flow.  If the running process is single threaded tid == pid | 1 |
+| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the FileFlow.  See list of Operation Flags for details. | 1 | 
+| openFlags | int64 | Flags associated with an open syscall if present. | 1 |
+| endTs |  int64 | The timestamp when the file flow is exported (nanoseconds). | 1 | 
+| **FOID:** |  string (128bit) | The id of the file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. | 1 |
+| fd |  int32 | The file descriptor associated with the flow. | 1 |
+| numRRecvOps | int64 | Number of read operations performed during the duration of the flow. | 1 |
+| numWSendOps | int64 | Number of write operations performed during the duration of the flow. | 1 |
+| numRRecvBytes | int64 | Number of bytes read during the duration of the flow. | 1 |
+| numWSendBytes | int64 | Number of bytes written during the duration of the flow. | 1 | 
 
 #### Network Flow 
-A Network Flow represents a collection of operations on a network connection.   Currently we support the following operations (for more information on operations see ([Operation Flags](#oflags))):
+A Network Flow represents a collection of operations on a network connection. Currently we support the following operations:
 
 | Operation     | Behavior  |
 | ------------- | -----------| 
@@ -263,25 +263,25 @@ A Network Flow represents a collection of operations on a network connection.   
 | OP_SHUTDOWN   | Process shutdown full or single duplex connections.|
 | OP_CLOSE      | Process closing network connection. This action will close corresponding NetworkFlow. |
 | OP_TRUNCATE   | Indicates Premature closing of a flow due to exporter shutdown.|
-| OP_DIGEST     | Summary flow information for long running flows. **NOT CURRENTLY IMPLEMENTED**. |
+| OP_DIGEST     | Summary flow information for long running flows (not implemented). |
 
 The list of attributes for the Network Flow are as follows:
 
-| Attribute     | Type           | Description  | Status |
+| Attribute     | Type           | Description  | Since (schema version) |
 | ------------- |:-------------:| -----|  ----- |
-| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | Implemented |
-| timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | Implemented |
-| tid |  int64 | The id of the thread associated with the flow.  If the running process is single threaded tid == pid | Implemented |
-| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the flow.  See list of Operation Flags for details. | Implemented | 
-| endTs |  int64 | The timestamp when the flow is exported (nanoseconds). | Implemented | 
-| sip |  int32 | The source IP address. | Implemented |
-| sport |  int16 | The source port. | Implemented |
-| dip |  int32 | The destination IP address. | Implemented |
-| dport |  int16 | The destination port. | Implemented |
-| proto |  enum | The network protocol of the flow.  Can be: TCP, UDP, ICMP, RAW | Implemented |
-| numRRecvOps | int64 | Number of receive operations performed during the duration of the flow. | Implemented |
-| numWSendOps | int64 | Number of send operations performed during the duration of the flow. | Implemented |
-| numRRecvBytes | int64 | Number of bytes received during the duration of the flow. | Implemented |
-| numWSendBytes | int64 | Number of bytes sent during the duration of the flow. | Implemented | 
+| **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | 1 |
+| timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | 1 |
+| tid |  int64 | The id of the thread associated with the flow.  If the running process is single threaded tid == pid | 1 |
+| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the flow.  See list of Operation Flags for details. | 1 | 
+| endTs |  int64 | The timestamp when the flow is exported (nanoseconds). | 1 | 
+| sip |  int32 | The source IP address. | 1 |
+| sport |  int16 | The source port. | 1 |
+| dip |  int32 | The destination IP address. | 1 |
+| dport |  int16 | The destination port. | 1 |
+| proto |  enum | The network protocol of the flow.  Can be: TCP, UDP, ICMP, RAW | 1 |
+| numRRecvOps | int64 | Number of receive operations performed during the duration of the flow. | 1 |
+| numWSendOps | int64 | Number of send operations performed during the duration of the flow. | 1 |
+| numRRecvBytes | int64 | Number of bytes received during the duration of the flow. | 1 |
+| numWSendBytes | int64 | Number of bytes sent during the duration of the flow. | 1 | 
 
-> **NOTE:**  The current implementation of NetworkFlow only supports ipv4.  What's the best way to add in ipv6?
+> **NOTE:**  The current implementation of NetworkFlow only supports ipv4.
