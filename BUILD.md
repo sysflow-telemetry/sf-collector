@@ -1,6 +1,6 @@
 # Installation and Usage
 
-## Installing sysporter
+## Installing the collector
 
 ### Cloning source
 
@@ -22,7 +22,7 @@ To build as docker container:
 ```
 cd sf-collector
 make -C modules init
-docker build --target runtime -t sysporter .
+docker build --target runtime -t sf-collector .
 ``` 
 
 The container is built in stages to enable caching of the intermediate steps of the build and reduce final image sizes. 
@@ -34,17 +34,17 @@ First, install required dependencies:
 apt install patch base-files binutils bzip2 libdpkg-perl perl make xz-utils libncurses5-dev libncursesw5-dev cmake libboost-all-dev g++  flex bison wget libelf-dev liblog4cxx-dev libapr1 libaprutil1 libsparsehash-dev
 ```
 
-To build sysporter:
+To build the collector:
 ```
 cd sf-collector
 make install
 ```
 
-## Running sysporter
+## Running the collector
 
-### Running sysporter from the command line 
+### Running the collector from the command line 
 
-Sysporter has the following options:
+The collector has the following options:
 ```
 Usage: sysporter [options] -w <file name/dir>
 
@@ -57,16 +57,15 @@ Options:
   -s schema file                The sysflow avro schema file (.avsc) used for schema validation (default: /usr/local/sysflow/conf/SysFlow.avsc)
   -f filter                     Sysdig style filtering string to filter scap. Must be surrounded by quotes
   -c                            Simple, fast filter to allow only container-related events to be dumped
-  -l log conf file              Location of log4cxx properties configuration file. (default: /usr/local/sysflow/conf/log4cxx.properties). Properties file follows log4j format. See conf directory in github for example.  Setting log level to debug is extremely verbose
   -p cri-o path                 The path to the cri-o domain socket
   -t cri-o timeout              The amount of time in ms to wait for cri-o socket to respond
   -u domain socket file         Outputs SysFlow to a unix domain socket rather than to a file
-  -v                            Print the version of sysporter and exit
+  -v                            Print version information and exit
 ``` 
 
 ### Example usage
 
-Convert Sysdig scap file to SysFlow file with an export id. The output will be written to `output.sf`.  Note that sysporter must be run with root privilege:
+Convert Sysdig scap file to SysFlow file with an export id. The output will be written to `output.sf`.  Note that the collector must be run with root privilege:
 
 ```
 sysporter -r input.scap -w ./output.sf  -e host
@@ -84,7 +83,7 @@ Trace a system live, and output SysFlow to files in a directory which are rotate
 sysporter -G 30 -w ./output/output -e host -f "container.type!=host and container.type=docker" </code>`
 ```
 
-### Running sysporter from a Docker container
+### Running the collector from a Docker container
 
 The easiest way to run the SysFlow collector is from a Docker container, with host mount for the output trace files. The following command shows how to run sf-collector with trace files exported to `/mnt/data` on the host.
 
