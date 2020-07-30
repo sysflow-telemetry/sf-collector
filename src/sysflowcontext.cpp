@@ -51,7 +51,7 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
     m_inspector->set_min_log_severity(sinsp_logger::severity::SEV_DEBUG);
   }
   const char *ip = std::getenv(NODE_IP);
-  if (envP != nullptr && std::strlen(ip) > 0) {
+  if (ip != nullptr && std::strlen(ip) > 0) {
     m_nodeIP = std::string(ip);
   }
   m_inspector->open(m_scapFile);
