@@ -80,7 +80,7 @@ The process entity represents a running process on the system.  It contains impo
 
 | Attribute     | Type           | Description  | Since (schema version) |
 | ------------- |:-------------:| -----|  ----- |
-| state      | enum | state of the process (CREATED, MODIFIED, REUP) | Implemented |
+| state      | enum | state of the process (CREATED, MODIFIED, REUP) | 1 |
 | **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The Process OID contains the host pid of the project, and creation timestamp. | 1 |
 | **POID:**<br> *parent host pid*<br>*parent create ts* | **struct** <br> *int64*<br>*int64*| The OID of the parent process can be NULL if not available or if a root process. | 1 |
 | timestamp (ts)|  int64 | The timestamp when process object is exported (nanoseconds). | 1 |
