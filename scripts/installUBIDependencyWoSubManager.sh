@@ -27,20 +27,11 @@ MODE=${1:-base}
 
 echo "Install Dependency under mode: ${MODE}"
 
-#
-# Clean up function
-#
-cleanup() {
-    dnf -y clean all && rm -rf /var/cache/dnf
-}
-trap cleanup EXIT
-
 if [ "${MODE}" == "base" ] ; then
-    # packages for base image
-
+     # packages for base image
      dnf install -y --disableplugin=subscription-manager http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.2-2.2004.0.1.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.2-2.2004.0.1.el8.x86_64.rpm
      dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-     dnf -y install --enablerepo=PowerTools --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos --disableplugin=subscription-manager \ 
+     dnf -y install --enablerepo=PowerTools --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos --disableplugin=subscription-manager \
         gcc \
         gcc-c++ \
         make \
@@ -62,31 +53,31 @@ if [ "${MODE}" == "base" ] ; then
         apr-util-devel \
         ncurses-devel \
         openssl-devel \
-        flex \
+    	flex \
         bison \
-        libstdc++-static \
-        boost-devel \
+	    libstdc++-static \
+	    boost-devel \
         elfutils-libelf-devel \
-        sparsehash-devel \
-        snappy-devel \
-        glog-devel \
-        jsoncpp-devel \
+	    sparsehash-devel \
+	    snappy-devel \
+	    jsoncpp-devel \
+	    glog-devel \
         llvm-toolset
 
-    # Install dkms and jsoncpp from EPEL.
-    # ref: https://access.redhat.com/solutions/1132653
-    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    dnf -y install dkms jsoncpp-devel
-    dnf -y remove epel-release
+     dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=epel --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos  dkms
+     dnf -y clean all && rm -rf /var/cache/dnf
 
-elif [ "${MODE}" == "test-extra" ] ; then
+ elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing
-
-    dnf -y install python3 python3-devel python3-wheel
-    mkdir -p /usr/local/lib/python3.6/site-packages
-    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install
-    ln -s /usr/bin/python3 /usr/bin/python
-    ln -s /usr/bin/pip3 /usr/bin/pip
+    dnf install -y --disableplugin=subscription-manager \
+	    python3 \
+        python3-devel \
+        python3-wheel && \
+    mkdir -p /usr/local/lib/python3.6/site-packages && \
+    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    ln -s /usr/bin/pip3 /usr/bin/pip && \
+    dnf -y clean all && rm -rf /var/cache/dnf
 
 else
     echo "Unsupported mode: ${MODE}"

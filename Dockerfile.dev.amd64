@@ -25,8 +25,7 @@ FROM registry.access.redhat.com/ubi8/ubi:8.2-299 AS base
 
 # Install Packages
 COPY ./scripts/installUBIDependencyWoSubManager.sh /build/install.sh
-RUN bash /build/install.sh base && \
-    rm -rf /build
+RUN ( /build/install.sh base ) && rm -rf /build
 
 #-----------------------
 # Stage: mods
