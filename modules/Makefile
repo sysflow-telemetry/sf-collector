@@ -65,6 +65,7 @@ sysdig/package:
 	cp userspace/libsinsp/libsinsp.a lib/ && \
 	cp userspace/libscap/libscap.a lib/ && \
 	cp userspace/sysdig/sysdig bin/ && \
+	cp -r ../driver/bpf driver/src/ && \
 	cp ../scripts/sysdig-probe-loader bin/ && \
 	cp ../docker/stable/docker-entrypoint.sh bin/ && \
 	cp grpc-prefix/src/grpc/libs/opt/*.a lib/ && \

@@ -25,36 +25,22 @@
 set -ex
 MODE=${1:-base}
 
-echo "Install dependencies under mode: ${MODE}"
+echo "Install Dependency under mode: ${MODE}"
 
 #
 # Clean up function
 #
 cleanup() {
     dnf -y clean all && rm -rf /var/cache/dnf
-    subscription-manager unregister || true
 }
 trap cleanup EXIT
-
-#
-# RHEL subscription
-#
-(
-    set +x
-    if [ -z "$REGISTER_USER" -o -z "$REGISTER_PASSWORD" ] ; then
-        echo 'Lack of RHEL credential.'
-        echo 'Assume build on RHEL machines or install packages only in UBI repositories.'
-    else
-        echo "Registerting to RHEL subscription manager..."
-        subscription-manager register --username "$REGISTER_USER" --password "$REGISTER_PASSWORD" --auto-attach
-    fi
-)
 
 if [ "${MODE}" == "base" ] ; then
     # packages for base image
 
-    subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms"
-    dnf -y install --disablerepo=epel \
+     dnf install -y --disableplugin=subscription-manager http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.2-2.2004.0.1.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.2-2.2004.0.1.el8.x86_64.rpm
+     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+     dnf -y install --enablerepo=PowerTools --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos --disableplugin=subscription-manager \ 
         gcc \
         gcc-c++ \
         make \
@@ -84,6 +70,7 @@ if [ "${MODE}" == "base" ] ; then
         sparsehash-devel \
         snappy-devel \
         glog-devel \
+        jsoncpp-devel \
         llvm-toolset
 
     # Install dkms and jsoncpp from EPEL.
