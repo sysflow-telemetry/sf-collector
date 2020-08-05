@@ -74,7 +74,6 @@ if [ "${MODE}" == "base" ] ; then
         xz \
         apr-devel \
         apr-util-devel \
-        ncurses-devel \
         openssl-devel \
         flex \
         bison \

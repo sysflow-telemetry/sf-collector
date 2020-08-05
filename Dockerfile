@@ -103,6 +103,8 @@ ARG RELEASE=dev
 ARG nodeip=
 ENV NODE_IP=$nodeip
 
+ENV SYSDIG_VERSION=${SYSDIG_VER}
+
 # Update Label
 LABEL "name"="SysFlow Collector"
 LABEL "vendor"="IBM"
