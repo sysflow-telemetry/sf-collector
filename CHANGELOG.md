@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0-rc4...HEAD)]
 
-## [[0.1.0-rc4](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...0.1.0-rc4)] - 2020-07-30
+## [[0.1.0-rc4](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...0.1.0-rc4)] - 2020-08-10
 
 ### Added
 
@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- New Avro schema (version 2).
 - Increased the nf/ff expire time to 60 seconds.
 - Port to sysdig probe 0.26.7.
 - Increased `sf-collector` version to the latest release candidate 0.1.0-rc4.
