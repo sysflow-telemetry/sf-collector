@@ -22,6 +22,7 @@
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "utils.h"
+#include "op_flags.h"
 
 using sysflow::Container;
 using sysflow::File;
@@ -40,6 +41,7 @@ protected:
   int m_numRecs{};
   void writeHeader();
   time_t m_start;
+  int64_t m_version;
   virtual void write(SysFlow *flow) = 0;
 
 public:
@@ -62,11 +64,17 @@ public:
     write(&m_flow);
   }
   inline void writeNetFlow(NetworkFlow *nf) {
+    if (nf->opFlags == 0 || nf->opFlags == OP_TRUNCATE) {
+      return;
+    }
     m_flow.rec.set_NetworkFlow(*nf);
     m_numRecs++;
     write(&m_flow);
   }
   inline void writeFileFlow(FileFlow *ff) {
+    if (ff->opFlags == 0 || ff->opFlags == OP_TRUNCATE) {
+      return;
+    }
     m_flow.rec.set_FileFlow(*ff);
     m_numRecs++;
     write(&m_flow);

@@ -37,13 +37,13 @@ private:
   ContainerTable m_containers;
   context::SysFlowContext *m_cxt;
   writer::SysFlowWriter *m_writer;
-  ContainerObj *createContainer(sinsp_evt *ev);
-  void setContainer(ContainerObj **cont, sinsp_container_info *container);
+  ContainerObj *createContainer(sinsp_threadinfo *ti);
+  void setContainer(ContainerObj **cont, sinsp_container_info::ptr_t container);
 
 public:
   ContainerContext(context::SysFlowContext *cxt, writer::SysFlowWriter *writer);
   virtual ~ContainerContext();
-  ContainerObj *getContainer(sinsp_evt *ev);
+  ContainerObj *getContainer(sinsp_threadinfo *ti);
   ContainerObj *getContainer(const string &id);
   bool exportContainer(const string &id);
   int derefContainer(const string &id);

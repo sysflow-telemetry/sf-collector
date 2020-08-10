@@ -17,7 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SYSFLOW_VERSION=0.1
-SYSFLOW_BUILD_NUMBER=1
-SYSDIG_VERSION=0.26.4
-AVRO_VERSION=release-1.9.1
+SYSFLOW_VERSION?=0.1.0
+SYSFLOW_BUILD_NUMBER?=1
+SYSDIG_VERSION=0.26.7
+AVRO_VERSION=release-1.10.0

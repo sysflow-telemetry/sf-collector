@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:1.0-experimental
 #
 # Copyright (C) 2019 IBM Corporation.
 #
@@ -18,49 +19,29 @@
 # limitations under the License.
 
 #-----------------------
+# Usage
+#-----------------------
+#
+# 1. Modify scripts/build/secret.sh and add user/password for RHEL
+# 2. Build with Docker BuildKit:
+#
+#    DOCKER_BUILDKIT=1 docker build --no-cache \
+#                                   --secret id=rhsecret,src=scripts/build/secret.sh \
+#                                   --target mods \
+#                                   -t ubi:mods-0.0.0 \
+#                                   -f Dockerfile.ubi.amd64 .
+#
+
+#-----------------------
 # Stage: base
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi AS base
+FROM registry.access.redhat.com/ubi8/ubi:8.2-299 AS base
 
-# dependencies 
-RUN dnf install -y --disableplugin=subscription-manager \ 
-     http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.1-1.1911.0.8.el8.noarch.rpm \
-     http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.8.el8.x86_64.rpm && \
-     dnf update -y --disableplugin=subscription-manager && \
-     dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools \
-        gcc \
-        gcc-c++ \
-        make \
-        cmake \
-        lua-devel \
-        pkgconfig \
-        autoconf \
-        wget \
-        automake \
-        libtool \
-        patch \
-        binutils \
-        bzip2 \
-        perl \
-        flex \
-        bison \
-        libstdc++-static \
-        glibc-static \
-        diffutils \
-        kmod \
-        epel-release \
-        xz \
-        boost-devel \
-        elfutils-libelf-devel \
-        apr-devel \
-        apr-util-devel \
-        sparsehash-devel \
-        ncurses-devel \
-        openssl-devel \
-        glog-devel && \
-     dnf update -y --disableplugin=subscription-manager && \
-     dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools dkms && \
-     dnf -y clean all && rm -rf /var/cache/dnf
+# Install Packages
+COPY ./scripts/installUBIDependency.sh /build/install.sh
+RUN --mount=type=secret,id=rhsecret,dst=/secret/rh_register.sh \
+    ( source /secret/rh_register.sh && bash /build/install.sh base ) && \
+    rm -rf /build
 
 #-----------------------
 # Stage: mods
@@ -82,10 +63,11 @@ ENV HOME=/root
 COPY ./modules /build/modules
 COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
-RUN  cd /build/modules && \
+RUN  dnf -y install git && \
+     cd /build/modules && \
      make INSTALL_PATH=${INSTALL_PATH} install && \
-     ln -s ${INSTALL_PATH}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader && \
      mkdir /sysdigsrc && cp -a /usr/src/sysdig-* /sysdigsrc/ && \
-     make clean && rm -rf /build/modules
+     make clean && rm -rf /build/modules && \
+     dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
 
 ENTRYPOINT ["/usr/local/sysflow/modules/bin/docker-entry-ubi.sh"]

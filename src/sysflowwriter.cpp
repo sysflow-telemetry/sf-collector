@@ -22,15 +22,17 @@
 using writer::SysFlowWriter;
 
 SysFlowWriter::SysFlowWriter(context::SysFlowContext *cxt, time_t start)
-    : m_start(start) {
+    : m_start(start), m_version(0) {
   m_cxt = cxt;
   m_start = start;
+  m_version = utils::getSchemaVersion();
 }
 
 void SysFlowWriter::writeHeader() {
   sysflow::SFHeader header;
-  header.version = 1000;
+  header.version = m_version;
   header.exporter = m_cxt->getExporterID();
+  header.ip = m_cxt->getNodeIP();
   m_flow.rec.set_SFHeader(header);
   m_numRecs++;
   write(&m_flow);

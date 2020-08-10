@@ -25,6 +25,7 @@
 #include "logger.h"
 #include "sysflow_config.h"
 #include "sysflowprocessor.h"
+#include "utils.h"
 #include <csignal>
 #include <cstdio>
 #include <iostream>
@@ -100,11 +101,11 @@ int main(int argc, char **argv) {
   string exporterID = "";
   char *duration;
   char c;
-  struct sigaction sigIntHandler {};
+  struct sigaction sigHandler {};
   string schemaFile = "/usr/local/sysflow/conf/SysFlow.avsc";
-  sigIntHandler.sa_handler = signal_handler;
-  sigemptyset(&sigIntHandler.sa_mask);
-  sigIntHandler.sa_flags = 0;
+  sigHandler.sa_handler = signal_handler;
+  sigemptyset(&sigHandler.sa_mask);
+  sigHandler.sa_flags = 0;
   bool filterCont = false;
   int fileDuration = 0;
   int criTO = 0;
@@ -117,7 +118,8 @@ int main(int argc, char **argv) {
   bool writeFile = false;
   string logProps = "/usr/local/sysflow/conf/log4cxx.properties";
 
-  sigaction(SIGINT, &sigIntHandler, nullptr);
+  sigaction(SIGINT, &sigHandler, nullptr);
+  sigaction(SIGTERM, &sigHandler, nullptr);
 
   while ((c = static_cast<char>(
               getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:"))) != -1) {
@@ -180,7 +182,7 @@ int main(int argc, char **argv) {
       }
       break;
     case 'v':
-      cerr << " Version: " << SF_VERSION << "." << SF_BUILD << endl;
+      cerr << " Version: " << SF_VERSION << "+" << SF_BUILD  << " Avro Schema Version: " << utils::getSchemaVersion() << endl;
       exit(0);
     case '?':
       if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' ||
@@ -228,8 +230,7 @@ int main(int argc, char **argv) {
     int ret = s_prc->run();
     delete s_prc;
     return ret;
-  }
-  catch (sinsp_exception &ex) {
+  } catch (sinsp_exception &ex) {
     SF_ERROR(logger, "Runtime exception caught in main loop: " << ex.what());
     return 1;
   }
