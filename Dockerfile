@@ -94,6 +94,8 @@ ARG INSTALL_PATH=/usr/local/sysflow
 ARG MODPREFIX=${INSTALL_PATH}/modules
 ENV SYSDIG_HOST_ROOT=/host
 
+ENV INTERNAL_CRI_PATH=/var/run/cri.sock
+
 ARG sockfile=
 ENV SOCK_FILE=
 
@@ -126,6 +128,8 @@ RUN ln -s ${MODPREFIX}/bin/sysdig /usr/bin/sysdig
 COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
+
+# RUN dnf install -y procps net-tools
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
 
@@ -136,7 +140,7 @@ CMD /usr/local/sysflow/bin/sysporter \
     ${OUTPUT:+-w} $OUTPUT \
     ${EXPORTER_ID:+-e} "$EXPORTER_ID" \
     ${FILTER:+-f} "$FILTER" \
-    ${CRI_PATH:+-p} ${CRI_PATH} \
+    -p "${INTERNAL_CRI_PATH}" \
     ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
     ${SOCK_FILE:+-u} ${SOCK_FILE} \
     ${DEBUG:+-d}
