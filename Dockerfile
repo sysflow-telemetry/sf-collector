@@ -138,7 +138,7 @@ CMD /usr/local/sysflow/bin/sysporter \
     ${OUTPUT:+-w} $OUTPUT \
     ${EXPORTER_ID:+-e} "$EXPORTER_ID" \
     ${FILTER:+-f} "$FILTER" \
-    ${CRI_PATH:+-p} "$CRI_PATH" \
+    ${CRI_PATH:+-p} ${CRI_PATH} \
     ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
     ${SOCK_FILE:+-u} ${SOCK_FILE} \
     ${DEBUG:+-d}

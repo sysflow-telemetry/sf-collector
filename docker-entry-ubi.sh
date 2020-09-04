@@ -9,6 +9,9 @@ fi
 echo "CRI_PATH: ${CRI_PATH}"
 if [ ! -z "${CRI_PATH}" ] ; then
     echo "Adopt CRI_PATH: ${CRI_PATH}"
+elif [ -S "/host/var/run/docker.sock" ] ; then
+    echo "DOCKER domain socket detected"
+    # Do not set CRI_PATH here, we will take DOCKER domain socket
 elif [ -S "/host/var/run/crio/crio.sock" ] ; then
     echo "CRIO domain socket detected"
     CRI_PATH="/var/run/crio/crio.sock"
