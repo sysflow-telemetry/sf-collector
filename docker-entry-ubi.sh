@@ -6,15 +6,15 @@ rm -fr /boot && ln -s $SYSDIG_HOST_ROOT/boot /boot
 if [ -S "/host/var/run/docker.sock" ] ; then
 echo "Docker Engine domain socket detected"
 fi
-# if we found cri domain socket on one of CRI_PATH for CRIO or
-# containerd.sock for containerd, link that to the real internal
-# cri domain socket path we are using. Via this we can avoid 
-# creating dummy links in local file system
-if [ -S "/host${CRI_PATH}" ] ; then
-echo "CRIO domain socket detected"
-ln -s /host${CRI_PATH} /host${INTERNAL_CRI_PATH}
+echo "CRI_PATH: ${CRI_PATH}"
+if [ ! -z "${CRI_PATH}" ] ; then
+    echo "Adopt CRI_PATH: ${CRI_PATH}"
+elif [ -S "/host/var/run/crio/crio.sock" ] ; then
+    echo "CRIO domain socket detected"
+    CRI_PATH="/var/run/crio/crio.sock"
 elif [ -S "/host/run/containerd/containerd.sock" ] ; then
-echo "Containerd Domain Socket detected"
-ln -s /host/run/containerd/containerd.sock /host${INTERNAL_CRI_PATH}
+    echo "Containerd Domain Socket detected"
+    CRI_PATH="/run/containerd/containerd.sock"
 fi
-exec /usr/local/sysflow/modules/bin/docker-entrypoint.sh "$@"
+
+exec /usr/local/sysflow/modules/bin/docker-entrypoint.sh ${DETECTED_CRI_PATH} "$@"    

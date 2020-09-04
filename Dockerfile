@@ -94,8 +94,6 @@ ARG INSTALL_PATH=/usr/local/sysflow
 ARG MODPREFIX=${INSTALL_PATH}/modules
 ENV SYSDIG_HOST_ROOT=/host
 
-ENV INTERNAL_CRI_PATH=/var/run/cri.sock
-
 ARG sockfile=
 ENV SOCK_FILE=
 
@@ -140,7 +138,7 @@ CMD /usr/local/sysflow/bin/sysporter \
     ${OUTPUT:+-w} $OUTPUT \
     ${EXPORTER_ID:+-e} "$EXPORTER_ID" \
     ${FILTER:+-f} "$FILTER" \
-    -p "${INTERNAL_CRI_PATH}" \
+    ${CRI_PATH:+-p} "$CRI_PATH" \
     ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
     ${SOCK_FILE:+-u} ${SOCK_FILE} \
     ${DEBUG:+-d}
