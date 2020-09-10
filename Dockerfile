@@ -126,6 +126,8 @@ RUN ln -s ${MODPREFIX}/bin/sysdig /usr/bin/sysdig
 COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
+
+# RUN dnf install -y procps net-tools
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
 

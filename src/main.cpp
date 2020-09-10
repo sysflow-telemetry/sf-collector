@@ -160,6 +160,7 @@ int main(int argc, char **argv) {
       break;
     case 'f':
       filter = optarg;
+      cout << "Configured filter: " << filter << endl;
       break;
     case 'l':
       logProps = optarg;
