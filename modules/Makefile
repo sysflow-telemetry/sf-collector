@@ -43,9 +43,9 @@ install: modules \
 
 .PHONY: sysdig/package
 sysdig/package: 
-	cd sysdig && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(SYSDIG_VERSION)\"/" CMakeLists.txt && \
-	mkdir -p build && cd build && \
-    cmake ../. && make tbb grpc c-ares zlib jq curl luajit protobuf b64 openssl scap sinsp sysdig && \
+	cd sysdig && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(SYSDIG_VERSION)\"/" CMakeLists.txt && sed -i '/ctext.cpp/d' userspace/libsinsp/CMakeLists.txt &&  sed -i '/table.cpp/d' userspace/libsinsp/CMakeLists.txt && \
+	sed -i "/#define CSYSDIG/d" userspace/libsinsp/settings.h &&  sed -i "/#define HAS_CHISELS/d" userspace/libsinsp/settings.h && mkdir -p build && cd build && \
+    cmake ../. && make tbb grpc c-ares zlib jq curl luajit protobuf b64 openssl scap sinsp && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
@@ -64,7 +64,6 @@ sysdig/package:
 	cp tbb-prefix/src/tbb/build/lib_release/libtbbmalloc.a lib/ && \
 	cp userspace/libsinsp/libsinsp.a lib/ && \
 	cp userspace/libscap/libscap.a lib/ && \
-	cp userspace/sysdig/sysdig bin/ && \
 	cp -r ../driver/bpf driver/src/ && \
 	cp ../scripts/sysdig-probe-loader bin/ && \
 	cp ../docker/stable/docker-entrypoint.sh bin/ && \
