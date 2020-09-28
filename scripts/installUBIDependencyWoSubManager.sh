@@ -52,15 +52,15 @@ if [ "${MODE}" == "base" ] ; then
         apr-devel \
         apr-util-devel \
         openssl-devel \
-    	flex \
+    	  flex \
         bison \
-	    libstdc++-static \
-	    boost-devel \
+	      libstdc++-static \
+	      boost-devel \
         elfutils-libelf-devel \
-	    sparsehash-devel \
-	    snappy-devel \
-	    jsoncpp-devel \
-	    glog-devel \
+	      sparsehash-devel \
+	      snappy-devel \
+	      jsoncpp-devel \
+	      glog-devel \
         llvm-toolset
 
      dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=epel --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos  dkms

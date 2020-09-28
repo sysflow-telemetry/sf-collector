@@ -103,8 +103,12 @@ ARG RELEASE=dev
 ARG nodeip=
 ENV NODE_IP=$nodeip
 
+ARG BPF_PROBE
+ENV SYSDIG_BPF_PROBE=${BPF_PROBE:+""}
+
 ARG SYSDIG_VER
 ENV SYSDIG_VERSION=${SYSDIG_VER}
+
 
 # Update Label
 LABEL "name"="SysFlow Collector"
