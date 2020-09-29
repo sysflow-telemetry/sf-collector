@@ -64,7 +64,6 @@ sysdig/package:
 	cp tbb-prefix/src/tbb/build/lib_release/libtbbmalloc.a lib/ && \
 	cp userspace/libsinsp/libsinsp.a lib/ && \
 	cp userspace/libscap/libscap.a lib/ && \
-	cp -r ../driver/bpf driver/src/ && \
 	cp ../scripts/sysdig-probe-loader bin/ && \
 	cp ../docker/stable/docker-entrypoint.sh bin/ && \
 	cp grpc-prefix/src/grpc/libs/opt/*.a lib/ && \

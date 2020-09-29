@@ -19,13 +19,13 @@
 # limitations under the License.
 # dependencies 
 
-# Install required dependencies to the UBI base image.
-# Based on mode, it installs different set of dependencies.
-# Modes supported: base and test-extra.
+# Insatall required dependencies to the UBI base image.
+# Based on different purpose, we will install different stuff inside
+# Mode we supports: base and test-extra
 set -ex
 MODE=${1:-base}
 
-echo "Install dependencies under mode: ${MODE}"
+echo "Install Dependency under mode: ${MODE}"
 
 #
 # Clean up function
@@ -45,7 +45,7 @@ trap cleanup EXIT
         echo 'Lack of RHEL credential.'
         echo 'Assume build on RHEL machines or install packages only in UBI repositories.'
     else
-        echo "Registerting to RHEL subscription manager..."
+        echo "Login RHEL..."
         subscription-manager register --username "$REGISTER_USER" --password "$REGISTER_PASSWORD" --auto-attach
     fi
 )
@@ -82,8 +82,7 @@ if [ "${MODE}" == "base" ] ; then
         elfutils-libelf-devel \
         sparsehash-devel \
         snappy-devel \
-        glog-devel \
-        llvm-toolset
+        glog-devel
 
     # Install dkms and jsoncpp from EPEL.
     # ref: https://access.redhat.com/solutions/1132653
