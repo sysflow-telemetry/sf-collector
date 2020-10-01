@@ -47,9 +47,10 @@ ProcessContext::~ProcessContext() {
   }
 }
 
-ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
+ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti,
                                           sinsp_evt *ev, SFObjectState state) {
   auto *p = new ProcessObj();
+  sinsp_threadinfo* mainthread = ti->is_main_thread() ? ti : ti->get_main_thread();
   p->proc.state = state;
   p->proc.ts = ev->get_ts();
   p->proc.oid.hpid = mainthread->m_pid;
@@ -58,14 +59,18 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
 
   p->proc.tty = mainthread->m_tty;
   sinsp_threadinfo *parent = mainthread->get_parent_thread();
+  //sinsp_threadinfo *par = ti->get_parent_thread();
 
   if (parent != nullptr) {
     OID poid;
+    parent = parent->is_main_thread() ? parent : parent->get_main_thread();
     poid.createTS = parent->m_clone_ts;
     poid.hpid = parent->m_pid;
     p->proc.poid.set_OID(poid);
     SF_DEBUG(m_logger,
              "PARENT PID: " << parent->m_pid << " ts " << parent->m_clone_ts)
+    SF_DEBUG(m_logger, "Creating Process: " <<  mainthread->m_pid << " " 
+            << mainthread->m_clone_ts << " "  << parent->m_pid << " " << parent->m_clone_ts);
   } else {
     SF_DEBUG(m_logger, "Unable to find parent for process "
                            << mainthread->m_exe << " PID " << mainthread->m_pid
@@ -105,12 +110,14 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
   p->proc.gid = mainthread->m_gid;
   p->proc.userName = utils::getUserName(m_cxt, mainthread->m_uid);
   p->proc.groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
-  ContainerObj *cont = m_containerCxt->getContainer(mainthread);
+  ContainerObj *cont = m_containerCxt->getContainer(ti);
   if (cont != nullptr) {
     p->proc.containerId.set_string(cont->cont.id);
     cont->refs++;
+    //std::cout << "Cont Exists: " << p->proc.oid.hpid << " " << p->proc.exe << " " << p->proc.exeArgs << " " << mainthread->m_container_id <<  std::endl;
   } else {
     p->proc.containerId.set_null();
+    //std::cout << "Cont doesn't Exists: " << p->proc.oid.hpid << " " << p->proc.exe << " " << p->proc.exeArgs << " " << mainthread->m_container_id <<  std::endl;
   }
   return p;
 }
@@ -203,10 +210,33 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
                                          << mt->m_clone_ts
                                          << " EXEPATH: " << mt->m_exepath
                                          << " EXE: " << mt->m_exe);
+  SF_DEBUG(m_logger, "Get Process: " << mt->m_pid << " " << " " << mt->m_clone_ts << mt->m_exe 
+           << " MTCI " << mt->m_container_id << " TICI: " << ti->m_container_id)
   ProcessTable::iterator proc = m_procs.find(&key);
   ProcessObj *process = nullptr;
   if (proc != m_procs.end()) {
     created = false;
+    /*sinsp_threadinfo* par = mt->get_parent_thread();
+    if(par != nullptr) {
+      par = par->is_main_thread() ? par : par->get_main_thread();
+    }
+
+    if(par == nullptr) {
+       std::cout << "Parent is nil!!! STILL" << std::endl;
+    }
+
+    if(proc->second->proc.poid.is_null() && par != nullptr) {
+	    std::cout << "Parent is no longer nil!!!!" << std::endl;
+
+    }else if (!proc->second->proc.poid.is_null() && par != nullptr && (proc->second->proc.poid.get_OID().hpid != par->m_pid || 
+	      proc->second->proc.poid.get_OID().createTS != par->m_clone_ts))
+    {
+	    std::cout << "Parent poid's don't match!!!" << std::endl;
+
+    } else if(!proc->second->proc.poid.is_null() && par == nullptr) {
+	    std::cout << "Parent is now nil!!!" << proc->second->proc.poid.get_OID().hpid << " " << proc->second->proc.poid.get_OID().createTS << std::endl;
+    }*/
+
     if (proc->second->written) {
       return proc->second;
     }
@@ -215,9 +245,11 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   }
   std::vector<ProcessObj *> processes;
   if (process == nullptr) {
-    process = createProcess(mt, ev, state);
+    //use the curretn thread here rather than the main thread because it appears the main
+    //thread does not always get the container id right away.
+    process = createProcess(ti, ev, state);
   } else { // must make sure the container is in the sysflow file..
-    reupContainer(mt, process);
+    reupContainer(ti, process);
   }
   SF_DEBUG(m_logger, "CREATING PROCESS FOR WRITING: PID: "
                          << mt->m_pid << " ts " << mt->m_clone_ts
@@ -229,6 +261,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   mt = mt->get_parent_thread();
 
   while (mt != nullptr) {
+    mt = mt->is_main_thread() ?  mt : mt->get_main_thread();
     if (mt->m_clone_ts == 0 && mt->m_pid == 0) {
       ct = mt;
       mt = mt->get_parent_thread();
@@ -238,10 +271,13 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     key.hpid = mt->m_pid;
     SF_DEBUG(m_logger, "PARENT PID: " << mt->m_pid << " ts " << mt->m_clone_ts
                                       << " EXEPATH: " << mt->m_exepath
-                                      << " EXE: " << mt->m_exe);
+                                      << " EXE: " << mt->m_exe)
     ProcessObj *parent = nullptr;
     ProcessTable::iterator proc2 = m_procs.find(&key);
     if (proc2 != m_procs.end()) {
+      SF_DEBUG(m_logger, "FOUND PARENT PID: " << mt->m_pid << " ts " << mt->m_clone_ts
+                                      << " EXEPATH: " << mt->m_exepath
+                                      << " EXE: " << mt->m_exe)
       if (proc2->second->written) {
         break;
       } else {
@@ -250,6 +286,9 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
       }
     }
     if (parent == nullptr) {
+      SF_DEBUG(m_logger, "CREATING PARENT PID: " << mt->m_pid << " ts " << mt->m_clone_ts
+                                      << " EXEPATH: " << mt->m_exepath
+                                      << " EXE: " << mt->m_exe << " " << mt->is_main_thread())
       parent = createProcess(mt, ev, SFObjectState::REUP);
     } else {
       reupContainer(mt, parent);
