@@ -82,7 +82,8 @@ if [ "${MODE}" == "base" ] ; then
         elfutils-libelf-devel \
         sparsehash-devel \
         snappy-devel \
-        glog-devel
+        glog-devel \
+        llvm-toolset
 
     # Install dkms and jsoncpp from EPEL.
     # ref: https://access.redhat.com/solutions/1132653
