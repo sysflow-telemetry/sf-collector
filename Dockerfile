@@ -23,7 +23,7 @@ ARG UBI_VER=8.2.299
 #-----------------------
 # Stage: builder
 #-----------------------
-FROM sysflowtelemetry/ubi:mods-${SYSDIG_VER}-${UBI_VER} AS builder
+FROM sysflowtelemetry/ubi:mods-${SYSDIG_VER}-${UBI_VER}-noncurses AS builder
 
 # environment and build args
 ARG BUILD_NUMBER=0
@@ -56,7 +56,7 @@ RUN cd /build/src && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:base-${SYSDIG_VER}-${UBI_VER} AS runtime
+FROM sysflowtelemetry/ubi:base-${SYSDIG_VER}-${UBI_VER}-noncurses AS runtime
 
 # environment variables
 ARG interval=30
@@ -103,6 +103,9 @@ ARG RELEASE=dev
 ARG nodeip=
 ENV NODE_IP=$nodeip
 
+ARG SYSDIG_VER
+ENV SYSDIG_VERSION=${SYSDIG_VER}
+
 # Update Label
 LABEL "name"="SysFlow Collector"
 LABEL "vendor"="IBM"
@@ -126,6 +129,8 @@ RUN ln -s ${MODPREFIX}/bin/sysdig /usr/bin/sysdig
 COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
+
+# RUN dnf install -y procps net-tools
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
 
