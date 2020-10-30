@@ -41,7 +41,9 @@ FileObj *FileContext::createFile(sinsp_evt *ev, string path, char typechar,
   utils::generateFOID(f->key, &(f->file.oid));
   f->file.path = std::move(path);
   f->file.restype = typechar;
-  ContainerObj *cont = m_containerCxt->getContainer(ev);
+  sinsp_threadinfo *ti = ev->get_thread_info();
+  sinsp_threadinfo *mt = ti->get_main_thread();
+  ContainerObj *cont = m_containerCxt->getContainer(mt);
   if (cont != nullptr) {
     f->file.containerId.set_string(cont->cont.id);
   } else {
@@ -49,9 +51,8 @@ FileObj *FileContext::createFile(sinsp_evt *ev, string path, char typechar,
   }
   return f;
 }
-FileObj *FileContext::getFile(sinsp_evt *ev, SFObjectState state,
-                              bool &created) {
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+FileObj *FileContext::getFile(sinsp_evt *ev, sinsp_fdinfo_t *fdinfo,
+                              SFObjectState state, bool &created) {
   return getFile(ev, fdinfo->m_name, fdinfo->get_typechar(), state, created);
 }
 FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,

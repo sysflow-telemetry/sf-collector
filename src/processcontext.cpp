@@ -54,9 +54,9 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
   p->proc.ts = ev->get_ts();
   p->proc.oid.hpid = mainthread->m_pid;
   p->proc.oid.createTS = mainthread->m_clone_ts;
+  p->proc.entry = (mainthread->m_vpid == 1);
 
-  sinsp_threadinfo *ti = ev->get_thread_info();
-  p->proc.tty = ti->m_tty;
+  p->proc.tty = mainthread->m_tty;
   sinsp_threadinfo *parent = mainthread->get_parent_thread();
 
   if (parent != nullptr) {
@@ -83,10 +83,11 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
     }
   }
   p->proc.exe = (mainthread->m_exepath.empty())
-                    ? utils::getAbsolutePath(ti, mainthread->m_exe)
+                    ? utils::getAbsolutePath(mainthread, mainthread->m_exe)
                     : mainthread->m_exepath;
   SF_DEBUG(m_logger, "createProcess: The exepath is "
-                         << p->proc.exe << " ti->exepath: " << ti->get_exepath()
+                         << p->proc.exe
+                         << " mt->exepath: " << mainthread->get_exepath()
                          << " EXE: " << mainthread->get_exe()
                          << " CWD: " << mainthread->get_cwd());
   p->proc.exeArgs.clear();
@@ -104,7 +105,7 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *mainthread,
   p->proc.gid = mainthread->m_gid;
   p->proc.userName = utils::getUserName(m_cxt, mainthread->m_uid);
   p->proc.groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
-  ContainerObj *cont = m_containerCxt->getContainer(ev);
+  ContainerObj *cont = m_containerCxt->getContainer(mainthread);
   if (cont != nullptr) {
     p->proc.containerId.set_string(cont->cont.id);
     cont->refs++;
@@ -153,7 +154,7 @@ bool ProcessContext::isAncestor(OID *oid, Process *proc) {
   return false;
 }
 
-void ProcessContext::reupContainer(sinsp_evt *ev, ProcessObj *proc) {
+void ProcessContext::reupContainer(sinsp_threadinfo *ti, ProcessObj *proc) {
   string containerId = "";
   if (!proc->proc.containerId.is_null()) {
     containerId = proc->proc.containerId.get_string();
@@ -165,7 +166,7 @@ void ProcessContext::reupContainer(sinsp_evt *ev, ProcessObj *proc) {
       cont1->refs--;
     }
   }
-  ContainerObj *cont = m_containerCxt->getContainer(ev);
+  ContainerObj *cont = m_containerCxt->getContainer(ti);
   if (cont != nullptr) {
     proc->proc.containerId.set_string(cont->cont.id);
     cont->refs++;
@@ -216,7 +217,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   if (process == nullptr) {
     process = createProcess(mt, ev, state);
   } else { // must make sure the container is in the sysflow file..
-    reupContainer(ev, process);
+    reupContainer(mt, process);
   }
   SF_DEBUG(m_logger, "CREATING PROCESS FOR WRITING: PID: "
                          << mt->m_pid << " ts " << mt->m_clone_ts
@@ -251,7 +252,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     if (parent == nullptr) {
       parent = createProcess(mt, ev, SFObjectState::REUP);
     } else {
-      reupContainer(ev, parent);
+      reupContainer(mt, parent);
     }
     parent->children.insert(processes.back()->proc.oid);
     processes.push_back(parent);
@@ -331,7 +332,7 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
   proc->state = state;
   proc->ts = ev->get_ts();
   proc->exe = (mainthread->m_exepath.empty())
-                  ? utils::getAbsolutePath(ti, mainthread->m_exe)
+                  ? utils::getAbsolutePath(mainthread, mainthread->m_exe)
                   : mainthread->m_exepath;
   proc->exeArgs.clear();
   int i = 0;

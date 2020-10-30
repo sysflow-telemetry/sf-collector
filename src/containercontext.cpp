@@ -23,7 +23,7 @@ using container::ContainerContext;
 using sysflow::ContainerType;
 
 void ContainerContext::setContainer(ContainerObj **cont,
-                                    sinsp_container_info *container) {
+                                    sinsp_container_info::ptr_t container) {
   SF_DEBUG(m_logger, "Setting container info. Name: " << container->m_name)
   (*cont)->cont.name = container->m_name;
   (*cont)->cont.image = container->m_image + ":" + container->m_imagetag;
@@ -44,18 +44,24 @@ ContainerContext::ContainerContext(context::SysFlowContext *cxt,
 
 ContainerContext::~ContainerContext() { clearAllContainers(); }
 
-ContainerObj *ContainerContext::createContainer(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+ContainerObj *ContainerContext::createContainer(sinsp_threadinfo *ti) {
 
   if (ti->m_container_id.empty()) {
     return nullptr;
   }
 
-  sinsp_container_info *container =
+  const sinsp_container_info::ptr_t container =
       m_cxt->getInspector()->m_container_manager.get_container(
           ti->m_container_id);
-  if (container == nullptr) {
-    return nullptr;
+  if (!container) {
+    SF_WARN(m_logger, "Thread has container id, but no container object. ID: "
+                          << ti->m_container_id)
+    auto *cont = new ContainerObj();
+    cont->cont.name = INCOMPLETE;
+    cont->cont.image = INCOMPLETE_IMAGE;
+    cont->cont.id = ti->m_container_id;
+    cont->incomplete = true;
+    return cont;
   }
   auto *cont = new ContainerObj();
   setContainer(&cont, container);
@@ -97,8 +103,7 @@ int ContainerContext::derefContainer(const string &id) {
   return result;
 }
 
-ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
-  sinsp_threadinfo *ti = ev->get_thread_info();
+ContainerObj *ContainerContext::getContainer(sinsp_threadinfo *ti) {
 
   if (ti->m_container_id.empty()) {
     return nullptr;
@@ -109,13 +114,13 @@ ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
     if (cont->second->written && !cont->second->incomplete) {
       return cont->second;
     }
-    sinsp_container_info *container =
+    const sinsp_container_info::ptr_t container =
         m_cxt->getInspector()->m_container_manager.get_container(
             ti->m_container_id);
-    if (container == nullptr) {
-      m_containers.erase(cont);
-      delete cont->second;
-      return nullptr;
+    if (!container) {
+      // m_containers.erase(cont);
+      // delete cont->second;
+      return cont->second;
     }
     if (cont->second->written && cont->second->incomplete) {
       SF_DEBUG(m_logger,
@@ -131,7 +136,10 @@ ContainerObj *ContainerContext::getContainer(sinsp_evt *ev) {
     setContainer(&ct, container);
   }
   if (ct == nullptr) {
-    ct = createContainer(ev);
+    ct = createContainer(ti);
+  }
+  if (ct == nullptr) {
+    return nullptr;
   }
   m_containers[ct->cont.id] = ct;
   m_writer->writeContainer(&(ct->cont));

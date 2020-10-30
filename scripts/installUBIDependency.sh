@@ -1,4 +1,3 @@
-
 #!/bin/bash
 #
 # Copyright (C) 2019 IBM Corporation.
@@ -27,16 +26,39 @@ set -ex
 MODE=${1:-base}
 
 echo "Install Dependency under mode: ${MODE}"
+
+#
+# Clean up function
+#
+cleanup() {
+    dnf -y clean all && rm -rf /var/cache/dnf
+    subscription-manager unregister || true
+}
+trap cleanup EXIT
+
+#
+# RHEL subscription
+#
+(
+    set +x
+    if [ -z "$REGISTER_USER" -o -z "$REGISTER_PASSWORD" ] ; then
+        echo 'Lack of RHEL credential.'
+        echo 'Assume build on RHEL machines or install packages only in UBI repositories.'
+    else
+        echo "Login RHEL..."
+        subscription-manager register --username "$REGISTER_USER" --password "$REGISTER_PASSWORD" --auto-attach
+    fi
+)
+
 if [ "${MODE}" == "base" ] ; then
-    # Run package installation for base images
-    dnf install -y --disableplugin=subscription-manager http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.1-1.1911.0.8.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.1-1.1911.0.8.el8.x86_64.rpm
-    dnf update -y --disableplugin=subscription-manager
-    dnf install -y  --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools \
+    # packages for base image
+
+    subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms"
+    dnf -y install --disablerepo=epel \
         gcc \
         gcc-c++ \
         make \
         cmake \
-        lua-devel \
         pkgconfig \
         autoconf \
         wget \
@@ -46,38 +68,41 @@ if [ "${MODE}" == "base" ] ; then
         binutils \
         bzip2 \
         perl \
-        flex \
-        bison \
-        libstdc++-static \
         glibc-static \
         diffutils \
         kmod \
-        epel-release \
         xz \
-        boost-devel \
-        elfutils-libelf-devel \
         apr-devel \
         apr-util-devel \
-        sparsehash-devel \
         ncurses-devel \
         openssl-devel \
+        flex \
+        bison \
+        libstdc++-static \
+        boost-devel \
+        elfutils-libelf-devel \
+        sparsehash-devel \
+        snappy-devel \
         glog-devel
-     dnf update -y --disableplugin=subscription-manager
-     dnf install -y --disableplugin=subscription-manager --disableexcludes=all --enablerepo=PowerTools dkms
-     dnf -y clean all && rm -rf /var/cache/dnf
+
+    # Install dkms and jsoncpp from EPEL.
+    # ref: https://access.redhat.com/solutions/1132653
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf -y install dkms jsoncpp-devel
+    dnf -y remove epel-release
+
 elif [ "${MODE}" == "test-extra" ] ; then
-    # Install extra(compared to base) packages for tests
-    dnf install -y --disableplugin=subscription-manager \
-	    python3 \
-        python3-wheel && \
-    mkdir -p /usr/local/lib/python3.6/site-packages && \
-    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install && \
-    ln -s /usr/bin/python3 /usr/bin/python && \
-    ln -s /usr/bin/pip3 /usr/bin/pip && \
-    dnf -y clean all && rm -rf /var/cache/dnf
+    # additional packages for testing
+
+    dnf -y install python3 python3-devel python3-wheel
+    mkdir -p /usr/local/lib/python3.6/site-packages
+    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install
+    ln -s /usr/bin/python3 /usr/bin/python
+    ln -s /usr/bin/pip3 /usr/bin/pip
+
 else
     echo "Unsupported mode: ${MODE}"
+    exit 1
 fi
 
 exit 0
-

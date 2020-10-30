@@ -191,3 +191,15 @@ exporter=tests
   fi
   [ ${status} -eq 0 ]
 }
+
+@test "Trace comparison on alpine" {
+  tdir=${TDIR}/alpine
+  tfile=alpine
+  run $sysporter -r ${tdir}/${tfile}.scap -w /tmp/${tfile}.sf -e $exporter > /tmp/${tfile}.log
+  if [ $quiet ]; then
+      run $sfcomp /tmp/${tfile}.sf ${tdir}/${tfile}.sf
+  else
+      $sfcomp /tmp/${tfile}.sf ${tdir}/${tfile}.sf >&3
+  fi
+  [ ${status} -eq 0 ]
+}

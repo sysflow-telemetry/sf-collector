@@ -74,6 +74,7 @@ public:
             netflow.sport == nfo.netflow.sport &&
             netflow.dport == nfo.netflow.dport &&
             netflow.proto == nfo.netflow.proto &&
+            netflow.opFlags == nfo.netflow.opFlags &&
             netflow.ts == nfo.netflow.ts && netflow.tid == nfo.netflow.tid &&
             netflow.fd == nfo.netflow.fd);
   }
@@ -89,7 +90,14 @@ public:
     if (exportTime != ffo.exportTime) {
       return false;
     }
-    return (flowkey.compare(ffo.flowkey) == 0);
+    return (fileflow.procOID.createTS == ffo.fileflow.procOID.createTS &&
+            fileflow.procOID.hpid == ffo.fileflow.procOID.hpid &&
+            fileflow.ts == ffo.fileflow.ts &&
+            fileflow.tid == ffo.fileflow.tid &&
+            fileflow.fd  == ffo.fileflow.fd &&
+            fileflow.opFlags == ffo.fileflow.opFlags &&
+            fileflow.openFlags == ffo.fileflow.openFlags &&
+            flowkey.compare(ffo.flowkey) == 0);
   }
   FileFlowObj() : DataFlowObj(false) {}
 };

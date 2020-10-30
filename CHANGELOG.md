@@ -13,7 +13,32 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 > - **Fixed**: for any bug fixes.
 > - **Security**: in case of vulnerabilities.
 
-## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...HEAD)]
+## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0-rc4...HEAD)]
+
+## [[0.1.0-rc4](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...0.1.0-rc4)] - 2020-08-10
+
+### Added
+
+- Added node IP field to the header.  
+- Added entry field to the process object.
+- Implemented ProcessFlow object.
+- Added mmap support for files.
+- Add labels for container images.
+- Embed license file inside the container image.
+
+### Changed
+
+- New Avro schema (version 2).
+- Increased the nf/ff expire time to 60 seconds.
+- Port to sysdig probe 0.26.7.
+- Increased `sf-collector` version to the latest release candidate 0.1.0-rc4.
+- Adding patch level to comply with semantic versioning.
+
+### Fixed
+
+- Fixed SIGTERM bug.
+- Fixed container context to prevent a sysporter crash due to a null variable.
+- Fixed memory leak found in sysdig 0.26.4 [CRITICAL].
 
 ## [[0.1-rc3](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc2...0.1-rc3)] - 2020-03-17
 

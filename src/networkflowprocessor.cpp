@@ -182,7 +182,7 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt *ev, OpFlags flag) {
   }
 
   if (fdinfo->is_ipv6_socket()) {
-    SF_WARN(
+    SF_DEBUG(
         m_logger,
         "IPv6 is not supported in the current version of SysFlow. Ignoring...");
     return 1;

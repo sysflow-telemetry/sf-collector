@@ -17,12 +17,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG UBI_TAG=0.26.4
+ARG SYSDIG_VER=0.26.7
+ARG UBI_VER=8.2.299
 
 #-----------------------
 # Stage: builder
 #-----------------------
-FROM sysflowtelemetry/ubi:mods-${UBI_TAG} AS builder
+FROM sysflowtelemetry/ubi:mods-${SYSDIG_VER}-${UBI_VER} AS builder
 
 # environment and build args
 ARG BUILD_NUMBER=0
@@ -34,6 +35,9 @@ ARG MODPREFIX=${INSTALL_PATH}/modules
 ENV LIBRARY_PATH=/lib64
 
 # build sysporter
+COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
+COPY ./modules/sysflow/c++/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c++/sysflow/sysflow.hh
+COPY ./modules/sysflow/c++/sysflow/avsc_sysflow2.hh ${MODPREFIX}/include/sysflow/c++/sysflow/avsc_sysflow2.hh
 COPY ./src/ /build/src/
 RUN cd /build/src && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
@@ -52,7 +56,7 @@ RUN cd /build/src && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi:8.1-406 AS runtime
+FROM sysflowtelemetry/ubi:base-${SYSDIG_VER}-${UBI_VER} AS runtime
 
 # environment variables
 ARG interval=30
@@ -64,7 +68,7 @@ ENV FILTER=$filter
 ARG exporterid="local"
 ENV EXPORTER_ID=$exporterid
 
-ARG output=/mnt/data/
+ARG output=
 ENV OUTPUT=$output
 
 ARG cripath=
@@ -90,26 +94,27 @@ ARG INSTALL_PATH=/usr/local/sysflow
 ARG MODPREFIX=${INSTALL_PATH}/modules
 ENV SYSDIG_HOST_ROOT=/host
 
+ARG sockfile=
+ENV SOCK_FILE=
+
 ARG VERSION=dev
 ARG RELEASE=dev
 
+ARG nodeip=
+ENV NODE_IP=$nodeip
+
 # Update Label
-LABEL "name"="Sysflow Collector"
+LABEL "name"="SysFlow Collector"
 LABEL "vendor"="IBM"
 LABEL "version"="${VERSION}"
 LABEL "release"="${RELEASE}"
-LABEL "summary"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
-LABEL "description"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
-LABEL "io.k8s.display-name"="Sysflow Collector"
-LABEL "io.k8s.description"="Sysflow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
-
-# Install Packages
-COPY ./scripts/installUBIDependency.sh /
-RUN /installUBIDependency.sh base && rm /installUBIDependency.sh
+LABEL "summary"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+LABEL "description"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
+LABEL "io.k8s.display-name"="SysFlow Collector"
+LABEL "io.k8s.description"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
 
 # Update License
-RUN mkdir /licenses
-COPY ./LICENSE.md /licenses/
+COPY ./LICENSE.md /licenses/LICENSE.md
 
 # copy dependencies
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
@@ -120,7 +125,7 @@ RUN ln -s ${MODPREFIX}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader
 RUN ln -s ${MODPREFIX}/bin/sysdig /usr/bin/sysdig
 COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
-
+COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
 
@@ -133,6 +138,7 @@ CMD /usr/local/sysflow/bin/sysporter \
     ${FILTER:+-f} "$FILTER" \
     ${CRI_PATH:+-p} ${CRI_PATH} \
     ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
+    ${SOCK_FILE:+-u} ${SOCK_FILE} \
     ${DEBUG:+-d}
 
 #-----------------------
@@ -161,7 +167,7 @@ RUN mkdir /tmp/bats && cd /tmp/bats && \
 COPY modules/sysflow/py3 ${INSTALL_PATH}/utils
 
 RUN cd /usr/local/sysflow/utils && \
-    python3 setup.py install 
+    python3 setup.py install
 
 WORKDIR $wdir
 ENTRYPOINT ["/usr/local/bin/bats"]

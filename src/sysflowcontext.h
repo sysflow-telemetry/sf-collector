@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #define SYSDIG_LOG "SYSDIG_LOG"
+#define NODE_IP "NODE_IP"
 
 namespace context {
 class SysFlowContext {
@@ -53,6 +54,7 @@ private:
   bool m_stats;
   int m_statsInterval;
   bool m_domainSock;
+  string m_nodeIP;
   DEFINE_LOGGER();
 
 public:
@@ -62,6 +64,7 @@ public:
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
   string getExporterID();
+  string getNodeIP();
   inline bool isOffline() { return m_offline; }
   inline sinsp *getInspector() { return m_inspector; }
   inline int getNFExportInterval() { return m_nfExportInterval; }
