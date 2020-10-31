@@ -25,9 +25,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - Removed dependency to ncurses.
 
-### Changed
-
-
 ## [[0.1.0-rc4](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...0.1.0-rc4)] - 2020-08-10
 
 ### Added
