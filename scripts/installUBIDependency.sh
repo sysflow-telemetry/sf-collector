@@ -33,6 +33,12 @@ echo "Install Dependency under mode: ${MODE}"
 cleanup() {
     dnf -y clean all && rm -rf /var/cache/dnf
     subscription-manager unregister || true
+    dnf -y remove \
+        python3-subscription-manager-rhsm \
+        subscription-manager \
+        subscription-manager-rhsm-certificates \
+        vim-minimal \
+        || true
 }
 trap cleanup EXIT
 
@@ -41,6 +47,7 @@ trap cleanup EXIT
 #
 (
     set +x
+    which subscription-manager || dnf -y install subscription-manager
     if [ -z "$REGISTER_USER" -o -z "$REGISTER_PASSWORD" ] ; then
         echo 'Lack of RHEL credential.'
         echo 'Assume build on RHEL machines or install packages only in UBI repositories.'
@@ -83,7 +90,8 @@ if [ "${MODE}" == "base" ] ; then
         sparsehash-devel \
         snappy-devel \
         glog-devel \
-        llvm-toolset
+        clang \
+        llvm
 
     # Install dkms and jsoncpp from EPEL.
     # ref: https://access.redhat.com/solutions/1132653
@@ -94,7 +102,7 @@ if [ "${MODE}" == "base" ] ; then
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing
 
-    dnf -y install python3 python3-devel python3-wheel
+    dnf -y --noplugins install python3 python3-devel python3-wheel
     mkdir -p /usr/local/lib/python3.6/site-packages
     ln -s /usr/bin/easy_install-3 /usr/bin/easy_install
     ln -s /usr/bin/python3 /usr/bin/python
