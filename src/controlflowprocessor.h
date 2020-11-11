@@ -17,40 +17,44 @@
  * limitations under the License.
  **/
 
-#ifndef _SF_DATA_FLOW_
-#define _SF_DATA_FLOW_
-#include "fileeventprocessor.h"
-#include "fileflowprocessor.h"
+#ifndef _SF_CONT_FLOW_
+#define _SF_CONT_FLOW_
+#include "processeventprocessor.h"
 #include "logger.h"
-#include "networkflowprocessor.h"
 #include "op_flags.h"
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
+#include "utils.h"
 #include <sinsp.h>
 
-namespace dataflow {
-class DataFlowProcessor {
+namespace controlflow {
+class ControlFlowProcessor {
 private:
-  networkflow::NetworkFlowProcessor *m_netflowPrcr;
-  fileflow::FileFlowProcessor *m_fileflowPrcr;
-  fileevent::FileEventProcessor *m_fileevtPrcr;
+  processevent::ProcessEventProcessor *m_procEvtPrcr;
   context::SysFlowContext *m_cxt;
-  process::ProcessContext *m_procCxt;
-  DataFlowSet m_dfSet;
+  process::ProcessContext *m_processCxt;
+  writer::SysFlowWriter *m_writer;
+  ProcessFlowSet* m_pfSet;
   time_t m_lastCheck;
   DEFINE_LOGGER();
+  void updateProcFlow(ProcessFlowObj *pf, OpFlags flag, sinsp_evt *ev);
+  void populateProcFlow(ProcessFlowObj *pf, OpFlags flag, sinsp_evt *ev, ProcessObj *proc); 
+  void processNewFlow(sinsp_evt *ev, ProcessObj *proc, OpFlags flag);
+  void processFlow(sinsp_evt *ev, OpFlags flag);
+  void removeAndWriteProcessFlow(ProcessObj *proc);
+
 
 public:
-  inline int getNFSize() { return m_netflowPrcr->getSize(); }
-  inline int getFFSize() { return m_fileflowPrcr->getSize(); }
-  int handleDataEvent(sinsp_evt *ev, OpFlags flag);
-  DataFlowProcessor(context::SysFlowContext *cxt, writer::SysFlowWriter *writer,
+  inline int getSize() { return m_pfSet->size(); }
+  int handleProcEvent(sinsp_evt *ev, OpFlags flag);
+  ControlFlowProcessor(context::SysFlowContext *cxt, writer::SysFlowWriter *writer,
                     process::ProcessContext *processCxt,
-                    file::FileContext *fileCxt);
-  virtual ~DataFlowProcessor();
+		    dataflow::DataFlowProcessor *dfPrcr);
+  virtual ~ControlFlowProcessor();
   int checkForExpiredRecords();
   void printFlowStats();
-  int removeAndWriteDFFromProc(ProcessObj *proc, int64_t tid);
+  void exportProcessFlow(ProcessFlowObj *pfo);
+  void setUID(sinsp_evt *ev);
 };
 } // namespace dataflow
 

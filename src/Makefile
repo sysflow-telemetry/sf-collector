@@ -52,7 +52,7 @@ SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
 CXX = g++
 LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
       $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a $(SDLOCALLIBPREFIX)/libgrpc++.a  $(SDLOCALLIBPREFIX)/libgrpc.a $(SDLOCALLIBPREFIX)/libgpr.a -lcares -lprotobuf \
-      -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl
+      -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl -lprofiler -ltcmalloc
 LDFLAGS = $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
 CFLAGS = -std=c++11 -Wall -ggdb -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
@@ -88,7 +88,7 @@ version:
 	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
 
 .PHONY: $(TARGET)
-$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .filecontext.o
+$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .filecontext.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .main.o: main.cpp
@@ -124,6 +124,9 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 .processeventprocessor.o: processeventprocessor.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
+.controlflowprocessor.o: controlflowprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
 .dataflowprocessor.o: dataflowprocessor.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
@@ -144,6 +147,9 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 
 .filecontext.o: filecontext.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
+
+#.xxhash.o: xxhash.c
+#	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .PHONY: clean
 clean:

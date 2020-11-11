@@ -43,12 +43,12 @@ int SFSocketWriter::initialize() {
   memset(&addr, 0, sizeof(addr));
   addr.sun_family = AF_UNIX;
   strncpy(addr.sun_path, m_sockPath.c_str(), sizeof(addr.sun_path) - 1);
-  if (connect(m_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+ /* if (connect(m_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
     SF_ERROR(m_logger, "Unable to connect to domain socket: "
                            << m_sockPath
                            << ". Error Code: " << std::strerror(errno));
     exit(EXIT_FAILURE);
-  }
+  }*/
   writeHeader();
   return 0;
 }

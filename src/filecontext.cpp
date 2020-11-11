@@ -59,7 +59,10 @@ FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,
                               SFObjectState state, bool &created) {
   sinsp_threadinfo *ti = ev->get_thread_info();
   created = true;
-  string key = ti->m_container_id + path;
+  string key;
+  key.reserve(ti->m_container_id.length() + path.length());
+  key +=  ti->m_container_id;
+  key += path;
   FileTable::iterator f = m_files.find(key);
   FileObj *file = nullptr;
   if (f != m_files.end()) {

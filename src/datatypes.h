@@ -19,7 +19,9 @@
 
 #ifndef __HASHER__
 #define __HASHER__
+#define XXH_INLINE_ALL 1
 #include "MurmurHash3.h"
+#include "xxhash.h"
 #include "sysflow.h"
 #include "utils.h"
 #include <google/dense_hash_map>
@@ -29,6 +31,7 @@
 using sysflow::Container;
 using sysflow::FileFlow;
 using sysflow::NetworkFlow;
+using sysflow::ProcessFlow;
 using sysflow::OID;
 using sysflow::Process;
 
@@ -102,6 +105,18 @@ public:
   FileFlowObj() : DataFlowObj(false) {}
 };
 
+class ProcessFlowObj : public DataFlowObj {
+public:
+  ProcessFlow procflow;
+  bool operator==(const ProcessFlowObj &pfo) {
+    if (exportTime != pfo.exportTime) {
+      return false;
+    }
+    return (procflow.procOID.createTS == pfo.procflow.procOID.createTS && procflow.procOID.hpid == pfo.procflow.procOID.hpid);
+  }
+  ProcessFlowObj() : DataFlowObj(false) {}
+};
+
 // simple hash adapter for types without pointers
 template <typename T> struct MurmurHasher {
   size_t operator()(const T &t) const {
@@ -126,6 +141,24 @@ template <> struct MurmurHasher<NFKey *> {
   }
 };
 
+// simple hash adapter for types without pointers
+template <typename T> struct XXHasher {
+  size_t operator()(const T &t) const {
+    return XXH3_64bits(&t, sizeof(t));
+  }
+};
+
+template <> struct XXHasher<OID *> {
+  size_t operator()(const OID *t) const {
+    return XXH3_64bits((void *)t, sizeof(OID));
+  }
+};
+template <> struct XXHasher<NFKey *> {
+  size_t operator()(const NFKey *t) const {
+    return XXH3_64bits((void *)t, sizeof(NFKey));
+  }
+};
+
 struct eqoidptr {
   bool operator()(const OID *s1, const OID *s2) const {
     return (s1->hpid == s2->hpid && s1->createTS == s2->createTS);
@@ -146,6 +179,13 @@ template <> struct MurmurHasher<string> {
   }
 };
 
+// specialization for strings
+template <> struct XXHasher<string> {
+  size_t operator()(const string &t) const {
+    return XXH3_64bits(t.c_str(), t.size());
+  }
+};
+
 struct eqstr {
   bool operator()(const string &s1, const string &s2) const {
     return (s1.compare(s2) == 0);
@@ -157,6 +197,12 @@ template <> struct MurmurHasher<NFKey> {
     size_t hash = 0;
     MurmurHash3_x86_32((void *)&t, sizeof(NFKey), 0, &hash);
     return hash;
+  }
+};
+
+template <> struct XXHasher<NFKey> {
+  size_t operator()(const NFKey &t) const {
+    return XXH3_64bits((void *)&t, sizeof(NFKey));
   }
 };
 
@@ -192,21 +238,21 @@ public:
 };
 
 typedef google::dense_hash_map<int, string> ParameterMapping;
-typedef google::dense_hash_map<string, ContainerObj *, MurmurHasher<string>,
+typedef google::dense_hash_map<string, ContainerObj *, XXHasher<string>,
                                eqstr>
     ContainerTable;
-typedef google::dense_hash_map<NFKey, NetFlowObj *, MurmurHasher<NFKey>,
+typedef google::dense_hash_map<NFKey, NetFlowObj *, XXHasher<NFKey>,
                                eqnfkey>
     NetworkFlowTable;
-typedef google::dense_hash_map<string, FileFlowObj *, MurmurHasher<string>,
+typedef google::dense_hash_map<string, FileFlowObj *, XXHasher<string>,
                                eqstr>
     FileFlowTable;
-typedef google::dense_hash_map<string, FileObj *, MurmurHasher<string>, eqstr>
+typedef google::dense_hash_map<string, FileObj *, XXHasher<string>, eqstr>
     FileTable;
-typedef google::dense_hash_map<OID, NetworkFlowTable *, MurmurHasher<OID>,
+typedef google::dense_hash_map<OID, NetworkFlowTable *, XXHasher<OID>,
                                eqoid>
     OIDNetworkTable;
-typedef google::dense_hash_set<OID, MurmurHasher<OID>, eqoid> ProcessSet;
+typedef google::dense_hash_set<OID, XXHasher<OID>, eqoid> ProcessSet;
 typedef multiset<DataFlowObj *, eqdfobj> DataFlowSet;
 typedef std::list<OIDObj *> OIDQueue;
 class ProcessObj {
@@ -216,7 +262,8 @@ public:
   NetworkFlowTable netflows;
   FileFlowTable fileflows;
   ProcessSet children;
-  ProcessObj() : proc(), netflows(), fileflows(), children() {
+  ProcessFlowObj* pfo;
+  ProcessObj() : proc(), netflows(), fileflows(), children(), pfo(nullptr) {
     NFKey *emptykey = utils::getNFEmptyKey();
     NFKey *delkey = utils::getNFDelKey();
     OID *emptyoidkey = utils::getOIDEmptyKey();
@@ -228,9 +275,21 @@ public:
     children.set_empty_key(*emptyoidkey);
     children.set_deleted_key(*deloidkey);
   }
+  bool operator==(const ProcessObj &p) {
+    if (pfo != nullptr && p.pfo != nullptr && pfo->exportTime != p.pfo->exportTime) {
+      return false;
+    }
+    return (proc.oid.createTS == p.proc.oid.createTS && proc.oid.hpid == p.proc.oid.hpid);
+  }
 };
 
-typedef google::dense_hash_map<OID *, ProcessObj *, MurmurHasher<OID *>,
+struct eqpfobj {
+  bool operator()(const ProcessObj *p1, const ProcessObj *p2) const {
+    return (p1->pfo->exportTime < p2->pfo->exportTime);
+  }
+};
+typedef multiset<ProcessObj *, eqpfobj> ProcessFlowSet;
+typedef google::dense_hash_map<OID *, ProcessObj *, XXHasher<OID *>,
                                eqoidptr>
     ProcessTable;
 

@@ -29,6 +29,7 @@ using sysflow::File;
 using sysflow::FileEvent;
 using sysflow::FileFlow;
 using sysflow::NetworkFlow;
+using sysflow::ProcessFlow;
 using sysflow::Process;
 using sysflow::ProcessEvent;
 using sysflow::SysFlow;
@@ -68,6 +69,14 @@ public:
       return;
     }
     m_flow.rec.set_NetworkFlow(*nf);
+    m_numRecs++;
+    write(&m_flow);
+  }
+  inline void writeProcessFlow(ProcessFlow *pf) {
+    if (pf->opFlags == 0 || pf->opFlags == OP_TRUNCATE) {
+      return;
+    }
+    m_flow.rec.set_ProcessFlow(*pf);
     m_numRecs++;
     write(&m_flow);
   }

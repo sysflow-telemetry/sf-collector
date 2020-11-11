@@ -121,12 +121,12 @@ inline void FileFlowProcessor::processNewFlow(sinsp_evt *ev, ProcessObj *proc,
                                               sinsp_fdinfo_t *fdinfo,
                                               int64_t fd) {
   auto *ff = new FileFlowObj();
-  ff->exportTime = utils::getExportTime(m_cxt);
+  ff->exportTime = utils::getCurrentTime(m_cxt);
   ff->lastUpdate = utils::getCurrentTime(m_cxt);
   populateFileFlow(ff, flag, ev, proc, file, flowkey, fdinfo, fd);
   updateFileFlow(ff, flag, ev, fdinfo);
   if (flag != OP_CLOSE) {
-    proc->fileflows[flowkey] = ff;
+    proc->fileflows[ff->flowkey] = ff;
     file->refs++;
     m_dfSet->insert(ff);
   } else {
@@ -210,8 +210,12 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
   FileFlowObj *ff = nullptr;
   sinsp_threadinfo *ti = ev->get_thread_info();
-  string filekey = ti->m_container_id + fdinfo->m_name;
-  string flowkey = filekey + std::to_string(ti->m_tid) + std::to_string(fd);
+  string flowkey;
+  flowkey.reserve(ti->m_container_id.length() + fdinfo->m_name.length() + 32);
+  flowkey += ti->m_container_id;
+  flowkey += fdinfo->m_name;
+  flowkey.append(utils::itoa(ti->m_tid, 10));
+  flowkey.append(utils::itoa(fd, 10));
 
   FileObj *file = m_fileCxt->getFile(ev, fdinfo, SFObjectState::REUP, created);
   FileFlowTable::iterator ffi = proc->fileflows.find(flowkey);

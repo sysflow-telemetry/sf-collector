@@ -46,13 +46,13 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
       new process::ProcessContext(m_cxt, m_containerCxt, m_fileCxt, m_writer);
   m_dfPrcr =
       new dataflow::DataFlowProcessor(m_cxt, m_writer, m_processCxt, m_fileCxt);
-  m_procEvtPrcr =
-      new processevent::ProcessEventProcessor(m_writer, m_processCxt, m_dfPrcr);
+  m_ctrlPrcr =
+      new controlflow::ControlFlowProcessor(m_cxt, m_writer, m_processCxt, m_dfPrcr);
 }
 
 SysFlowProcessor::~SysFlowProcessor() {
   delete m_dfPrcr;
-  delete m_procEvtPrcr;
+  delete m_ctrlPrcr;
   delete m_containerCxt;
   delete m_processCxt;
   delete m_fileCxt;
@@ -73,7 +73,9 @@ bool SysFlowProcessor::checkAndRotateFile() {
     SF_INFO(m_logger,
             "Container Table: " << m_containerCxt->getSize()
                                 << " Process Table: " << m_processCxt->getSize()
-                                << " NetworkFlow Table: " << m_dfPrcr->getSize()
+                                << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
+                                << " FileFlow Table: " << m_dfPrcr->getFFSize()
+                                << " ProcFlow Table: " << m_ctrlPrcr->getSize()
                                 << " Num Records Written: "
                                 << m_writer->getNumRecs());
     m_writer->reset(curTime);
@@ -90,6 +92,18 @@ bool SysFlowProcessor::checkAndRotateFile() {
   return fileRotated;
 }
 
+int SysFlowProcessor::checkForExpiredRecords() {
+  int numExpired = m_dfPrcr->checkForExpiredRecords();
+  if (numExpired) {
+    SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
+  }
+  int numProcExpired = m_ctrlPrcr->checkForExpiredRecords();
+  if (numProcExpired) {
+    SF_DEBUG(m_logger, "Data Flow Records exported: " << numProcExpired);
+  }
+  return numExpired + numProcExpired;
+}
+
 int SysFlowProcessor::run() {
   int32_t res = 0;
   sinsp_evt *ev = nullptr;
@@ -101,10 +115,7 @@ int SysFlowProcessor::run() {
         if (m_exit) {
           break;
         }
-        int numExpired = m_dfPrcr->checkForExpiredRecords();
-        if (numExpired) {
-          SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
-        }
+        checkForExpiredRecords();
         m_processCxt->checkForDeletion();
         checkAndRotateFile();
         continue;
@@ -120,10 +131,7 @@ int SysFlowProcessor::run() {
       if (m_exit) {
         break;
       }
-      int numExpired = m_dfPrcr->checkForExpiredRecords();
-      if (numExpired) {
-        SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
-      }
+      checkForExpiredRecords();
       m_processCxt->checkForDeletion();
       checkAndRotateFile();
       if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
@@ -157,7 +165,9 @@ int SysFlowProcessor::run() {
     SF_INFO(m_logger,
             "Container Table: " << m_containerCxt->getSize()
                                 << " Process Table: " << m_processCxt->getSize()
-                                << " NetworkFlow Table: " << m_dfPrcr->getSize()
+                                << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
+                                << " FileFlow Table: " << m_dfPrcr->getFFSize()
+                                << " ProcFlow Table: " << m_ctrlPrcr->getSize()
                                 << " Num Records Written: "
                                 << m_writer->getNumRecs());
   } catch (sinsp_exception &e) {

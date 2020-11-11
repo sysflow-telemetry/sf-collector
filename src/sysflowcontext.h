@@ -55,6 +55,7 @@ private:
   bool m_stats;
   int m_statsInterval;
   bool m_domainSock;
+  bool m_processFlow;
   string m_nodeIP;
   DEFINE_LOGGER();
 
@@ -78,6 +79,7 @@ public:
   inline bool isStatsEnabled() { return m_stats; }
   inline void enableStats() { m_stats = true; }
   inline bool isDomainSock() { return m_domainSock; }
+  inline bool isProcessFlowEnabled() { return m_processFlow; }
   inline void enableDomainSock() { m_domainSock = true; }
   inline int getStatsInterval() { return m_statsInterval; }
 };

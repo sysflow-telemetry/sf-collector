@@ -105,7 +105,7 @@ int DataFlowProcessor::checkForExpiredRecords() {
   for (auto it = m_dfSet.begin(); it != m_dfSet.end();) {
     SF_DEBUG(m_logger, "Checking flow with exportTime: " << (*it)->exportTime
                                                          << " Now: " << now);
-    if ((*it)->exportTime <= now) {
+    if (difftime(now, (*it)->exportTime) >= m_cxt->getNFExportInterval()) {
       SF_DEBUG(m_logger, "Exporting flow!!! ");
       if (difftime(now, (*it)->lastUpdate) >= m_cxt->getNFExpireInterval()) {
         if ((*it)->isNetworkFlow) {
@@ -122,7 +122,7 @@ int DataFlowProcessor::checkForExpiredRecords() {
         }
         DataFlowObj *dfo = (*it);
         it = m_dfSet.erase(it);
-        dfo->exportTime = utils::getExportTime(m_cxt);
+        dfo->exportTime = utils::getCurrentTime(m_cxt);
         m_dfSet.insert(dfo);
       }
       i++;
