@@ -77,8 +77,8 @@ static void usage(const std::string &name) {
       << "\t-r scap file\t\tThe scap file to be read and dumped as sysflow "
          "format at the file specified by -w\n"
       << "\t\t\t\tIf this option is not specified, a live capture is assumed\n"
-      << "\t-s schema file\t\tThe sysflow avro schema file (.avsc) used for "
-         "schema validation (default: /usr/local/sysflow/conf/SysFlow.avsc)\n"
+      << "\t-s sampling ratio\t\tThe sampling ratio for system call drops. "
+         "Value can be between 1 (default, no drops) to 10^9 (all drops).\n"
       << "\t-f filter\t\tSysdig style filtering string to filter scap. Must be "
          "surrounded by quotes\n"
       << "\t-c\t\t\tSimple, fast filter to allow only container-related events "
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
   char *duration;
   char c;
   struct sigaction sigHandler {};
-  string schemaFile = "/usr/local/sysflow/conf/SysFlow.avsc";
+  int samplingRatio = 1;
   sigHandler.sa_handler = signal_handler;
   sigemptyset(&sigHandler.sa_mask);
   sigHandler.sa_flags = 0;
@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
     case 'G':
       duration = optarg;
       if (str2int(fileDuration, duration, 10)) {
-        cout << "Unable to parse " << duration << endl;
+        cout << "Unable to parse file duration " << duration << endl;
         exit(1);
       }
       if (fileDuration < 1) {
@@ -156,7 +156,12 @@ int main(int argc, char **argv) {
       filterCont = true;
       break;
     case 's':
-      schemaFile = optarg;
+      char *sr;
+      sr = optarg;
+      if (str2int(samplingRatio, sr, 10)) {
+        cout << "Unable to parse sampling ratio " << samplingRatio << endl;
+        exit(1);
+      }
       break;
     case 'f':
       filter = optarg;
@@ -219,7 +224,7 @@ int main(int argc, char **argv) {
     CONFIGURE_LOGGER(logProps);
     SF_DEBUG(logger, "Starting sysporter...");
     auto *cxt = new context::SysFlowContext(filterCont, fileDuration, outputDir,
-                                            scapFile, schemaFile, exporterID,
+                                            scapFile, samplingRatio, exporterID,
                                             filter, criPath, criTO);
     if (stats) {
       cxt->enableStats();

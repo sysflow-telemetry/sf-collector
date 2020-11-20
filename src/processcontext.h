@@ -51,7 +51,7 @@ public:
                  writer::SysFlowWriter *writer);
   virtual ~ProcessContext();
   void updateProcess(Process *proc, sinsp_evt *ev, SFObjectState state);
-  ProcessObj *createProcess(sinsp_threadinfo *mainthread, sinsp_evt *ev,
+  ProcessObj *createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
                             SFObjectState state);
   ProcessObj *getProcess(sinsp_evt *ev, SFObjectState state, bool &created);
   ProcessObj *getProcess(OID *oid);
