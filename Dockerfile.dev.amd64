@@ -19,6 +19,20 @@
 # limitations under the License.
 
 #-----------------------
+# Usage
+#-----------------------
+#
+# 1. Modify scripts/build/secret.sh and add user/password for RHEL
+# 2. Build with Docker BuildKit:
+#
+#    DOCKER_BUILDKIT=1 docker build --no-cache \
+#                                   --secret id=rhsecret,src=scripts/build/secret.sh \
+#                                   --target mods \
+#                                   -t ubi:mods-0.0.0 \
+#                                   -f Dockerfile.ubi.amd64 .
+#
+
+#-----------------------
 # Stage: base
 #-----------------------
 FROM registry.access.redhat.com/ubi8/ubi:8.2-299 AS base

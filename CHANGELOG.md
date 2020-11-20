@@ -13,7 +13,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 > - **Fixed**: for any bug fixes.
 > - **Security**: in case of vulnerabilities.
 
-## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0-rc4...HEAD)]
+## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0...HEAD)]
+
+## [[0.1.0](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc4...0.1.0)] - 2020-10-30
+
+### Added
+
+- Added support for containerd; container runtime auto-detection.
+
+### Changed
+
+- Removed dependency to ncurses.
 
 ## [[0.1.0-rc4](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...0.1.0-rc4)] - 2020-08-10
 
