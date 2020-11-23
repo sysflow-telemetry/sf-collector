@@ -27,6 +27,7 @@ FROM sysflowtelemetry/ubi:mods-${SYSDIG_VER}-${UBI_VER} AS builder
 
 # environment and build args
 ARG BUILD_NUMBER=0
+ARG DEBUG=0
 
 ARG INSTALL_PATH=/usr/local/sysflow
 
@@ -36,7 +37,7 @@ ENV LIBRARY_PATH=/lib64
 
 RUN dnf install -y --disableplugin=subscription-manager http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.2-2.2004.0.1.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.2-2.2004.0.1.el8.x86_64.rpm
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-RUN dnf -y install --enablerepo=PowerTools --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos --disableplugin=subscription-manager gperftools-devel pprof
+RUN dnf -y install --enablerepo=PowerTools --disablerepo=ubi-8-codeready-builder  --disablerepo=ubi-8-appstream --disablerepo=ubi-8-baseos --disableplugin=subscription-manager jemalloc-devel
 
 # build sysporter
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
@@ -53,6 +54,7 @@ RUN cd /build/src && \
          SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
          FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
          SCHLOCALPREFIX=${MODPREFIX}/conf \
+	 DEBUG=${DEBUG} \
          install && \
     make clean && \
     rm -rf /build
@@ -132,10 +134,7 @@ COPY ./LICENSE.md /licenses/LICENSE.md
 # copy dependencies
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
-COPY --from=builder /usr/lib64/libprofiler.so* /usr/local/lib/
-COPY --from=builder /usr/lib64/libtcmalloc.so* /usr/local/lib/
-COPY --from=builder /usr/lib64/libunwind.so* /usr/local/lib/
-COPY --from=builder /usr/bin/pprof /usr/bin/
+COPY --from=builder /usr/lib64/libjemalloc.so* /usr/local/lib/
 COPY --from=builder /sysdigsrc/ /usr/src/
 COPY --from=builder ${MODPREFIX}/lib/*.so* ${MODPREFIX}/lib/
 COPY --from=builder ${MODPREFIX}/bin/ ${MODPREFIX}/bin/
@@ -150,8 +149,7 @@ COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 WORKDIR /usr/local/sysflow/bin/
 
 ENTRYPOINT ["/usr/local/sysflow/modules/bin/docker-entry-ubi.sh"]
-
-CMD CPUPROFILE=/tmp/profsyporter.out /usr/local/sysflow/bin/sysporter \
+CMD /usr/local/sysflow/bin/sysporter \
     ${INTERVAL:+-G} $INTERVAL \
     ${OUTPUT:+-w} $OUTPUT \
     ${EXPORTER_ID:+-e} "$EXPORTER_ID" \

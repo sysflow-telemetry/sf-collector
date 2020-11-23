@@ -188,7 +188,8 @@ int main(int argc, char **argv) {
       }
       break;
     case 'v':
-      cerr << " Version: " << SF_VERSION << "+" << SF_BUILD  << " Avro Schema Version: " << utils::getSchemaVersion() << endl;
+      cerr << " Version: " << SF_VERSION << "+" << SF_BUILD
+           << " Avro Schema Version: " << utils::getSchemaVersion() << endl;
       exit(0);
     case '?':
       if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' ||

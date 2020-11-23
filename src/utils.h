@@ -86,23 +86,23 @@ inline uint64_t getSysdigTime(context::SysFlowContext *cxt) {
 
 #define CHAR_MAP_STR "0123456789abcdef"
 
-inline char* itoa(int val, int base){
-	
-	static char buf[32] = {0};
-	
-	int i = 30;
-        bool neg = (val < 0);
-        if(neg) {
-           val = -val;
-        }
-	for(; val && i ; --i, val /= base) {
-		buf[i] = CHAR_MAP_STR[val % base];
-        }
-       if(neg) {
-         buf[i] = '-';
-	 return &buf[i];
-        }
-	return &buf[i+1];
+inline char *itoa(int val, int base) {
+
+  static char buf[32] = {0};
+
+  int i = 30;
+  bool neg = (val < 0);
+  if (neg) {
+    val = -val;
+  }
+  for (; val && i; --i, val /= base) {
+    buf[i] = CHAR_MAP_STR[val % base];
+  }
+  if (neg) {
+    buf[i] = '-';
+    return &buf[i];
+  }
+  return &buf[i + 1];
 }
 } // namespace utils
 #endif

@@ -23,10 +23,9 @@ using controlflow::ControlFlowProcessor;
 
 CREATE_LOGGER(ControlFlowProcessor, "sysflow.procflow");
 
-ControlFlowProcessor::ControlFlowProcessor(context::SysFlowContext *cxt,
-                                     writer::SysFlowWriter *writer,
-                                     process::ProcessContext *processCxt,
-                                     dataflow::DataFlowProcessor *dfPrcr) {
+ControlFlowProcessor::ControlFlowProcessor(
+    context::SysFlowContext *cxt, writer::SysFlowWriter *writer,
+    process::ProcessContext *processCxt, dataflow::DataFlowProcessor *dfPrcr) {
   m_cxt = cxt;
   m_processCxt = processCxt;
   m_writer = writer;
@@ -42,24 +41,23 @@ ControlFlowProcessor::~ControlFlowProcessor() {
   }
 }
 
-void ControlFlowProcessor::setUID(sinsp_evt *ev) {
-  m_procEvtPrcr->setUID(ev);	
-}
+void ControlFlowProcessor::setUID(sinsp_evt *ev) { m_procEvtPrcr->setUID(ev); }
 
 inline void ControlFlowProcessor::processFlow(sinsp_evt *ev, OpFlags flag) {
-  bool created = false;	
+  bool created = false;
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
-  ProcessFlowObj* pfo = proc->pfo;
+  ProcessFlowObj *pfo = proc->pfo;
   if (pfo == nullptr) {
-       //SF_INFO(m_logger, "Creating a new process flow")
-       processNewFlow(ev, proc, flag);
+    // SF_INFO(m_logger, "Creating a new process flow")
+    processNewFlow(ev, proc, flag);
   } else {
-       updateProcFlow(pfo, flag, ev);
+    updateProcFlow(pfo, flag, ev);
   }
 }
 
 inline void ControlFlowProcessor::processNewFlow(sinsp_evt *ev,
-                                                 ProcessObj *proc, OpFlags flag) {
+                                                 ProcessObj *proc,
+                                                 OpFlags flag) {
   auto *pf = new ProcessFlowObj();
   pf->exportTime = utils::getCurrentTime(m_cxt);
   pf->lastUpdate = utils::getCurrentTime(m_cxt);
@@ -69,9 +67,9 @@ inline void ControlFlowProcessor::processNewFlow(sinsp_evt *ev,
   m_pfSet->insert(proc);
 }
 
-inline void ControlFlowProcessor::populateProcFlow(ProcessFlowObj *pf, OpFlags flag,
-                                                  sinsp_evt *ev,
-                                                  ProcessObj *proc) {
+inline void ControlFlowProcessor::populateProcFlow(ProcessFlowObj *pf,
+                                                   OpFlags flag, sinsp_evt *ev,
+                                                   ProcessObj *proc) {
   pf->procflow.opFlags = flag;
   pf->procflow.ts = ev->get_ts();
   pf->procflow.endTs = 0;
@@ -82,15 +80,14 @@ inline void ControlFlowProcessor::populateProcFlow(ProcessFlowObj *pf, OpFlags f
   pf->procflow.numCloneErrors = 0;
 }
 
-
-inline void ControlFlowProcessor::updateProcFlow(ProcessFlowObj *pf, OpFlags flag,
-                                                sinsp_evt *ev) {
+inline void ControlFlowProcessor::updateProcFlow(ProcessFlowObj *pf,
+                                                 OpFlags flag, sinsp_evt *ev) {
   pf->procflow.opFlags |= flag;
   pf->lastUpdate = utils::getCurrentTime(m_cxt);
   if (flag == OP_CLONE) {
     int res = utils::getSyscallResult(ev);
     if (res == 0) {
-      //nf->netflow.numRRecvBytes += res;
+      // nf->netflow.numRRecvBytes += res;
       pf->procflow.numThreadsCloned++;
     } else if (res == -1) {
       pf->procflow.numCloneErrors++;
@@ -101,67 +98,61 @@ inline void ControlFlowProcessor::updateProcFlow(ProcessFlowObj *pf, OpFlags fla
 }
 
 inline void ControlFlowProcessor::removeAndWriteProcessFlow(ProcessObj *proc) {
-  //SF_INFO(m_logger, "removeAndWriteProcessFlow")		                                             
+  // SF_INFO(m_logger, "removeAndWriteProcessFlow")
   m_writer->writeProcessFlow(&((proc->pfo)->procflow));
   m_processCxt->removeProcessFromSet(proc, true);
   proc->pfo = nullptr;
 }
 
-
-
 int ControlFlowProcessor::handleProcEvent(sinsp_evt *ev, OpFlags flag) {
   sinsp_threadinfo *ti = ev->get_thread_info();
 
   switch (flag) {
-    case OP_EXIT:
-    {
-	    if(m_cxt->isProcessFlowEnabled() && !ti->is_main_thread()) {
-		    processFlow(ev, flag);
-	    }
-	    if(ti->is_main_thread() || !m_cxt->isProcessFlowEnabled()) {
-		    if(m_cxt->isProcessFlowEnabled()) {
-			    bool created = false;
-                            ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
-			    if(proc->pfo != nullptr) {
-                              proc->pfo->procflow.endTs = ev->get_ts();
-			      removeAndWriteProcessFlow(proc);
-			    }
-		    }
-		    m_procEvtPrcr->writeExitEvent(ev);
-	    }  
-           break;
+  case OP_EXIT: {
+    if (m_cxt->isProcessFlowEnabled() && !ti->is_main_thread()) {
+      processFlow(ev, flag);
     }
-    case OP_EXEC:
-    {
-        m_procEvtPrcr->writeExecEvent(ev);
-        break;  
+    if (ti->is_main_thread() || !m_cxt->isProcessFlowEnabled()) {
+      if (m_cxt->isProcessFlowEnabled()) {
+        bool created = false;
+        ProcessObj *proc =
+            m_processCxt->getProcess(ev, SFObjectState::REUP, created);
+        if (proc->pfo != nullptr) {
+          proc->pfo->procflow.endTs = ev->get_ts();
+          removeAndWriteProcessFlow(proc);
+        }
+      }
+      m_procEvtPrcr->writeExitEvent(ev);
     }
-    case OP_SETUID:
-    {
-        m_procEvtPrcr->writeSetUIDEvent(ev);
-        break;  
+    break;
+  }
+  case OP_EXEC: {
+    m_procEvtPrcr->writeExecEvent(ev);
+    break;
+  }
+  case OP_SETUID: {
+    m_procEvtPrcr->writeSetUIDEvent(ev);
+    break;
+  }
+  case OP_CLONE: {
+    if (!m_cxt->isProcessFlowEnabled()) {
+      m_procEvtPrcr->writeCloneEvent(ev);
+    } else {
+      int res = utils::getSyscallResult(ev);
+      if ((ti->is_main_thread() && res == 0) ||
+          (res > 0 && !utils::isCloneThreadSet(ev))) {
+        m_procEvtPrcr->writeCloneEvent(ev);
+      } else {
+        processFlow(ev, flag);
+      }
     }
-    case OP_CLONE:
-    {
-	    if(!m_cxt->isProcessFlowEnabled()) {
-              m_procEvtPrcr->writeCloneEvent(ev);
-	    } else {
-	      int res = utils::getSyscallResult(ev);
-	      if((ti->is_main_thread() && res == 0) || (res > 0 && !utils::isCloneThreadSet(ev))) {
-		    m_procEvtPrcr->writeCloneEvent(ev);
-	      } else {
-		    processFlow(ev, flag);
-	      }
-	    }
-	    break;
-    }
-    default:
-      SF_ERROR(m_logger, "Unsupported proc event: " << flag);
-
+    break;
+  }
+  default:
+    SF_ERROR(m_logger, "Unsupported proc event: " << flag);
   }
   return 2;
 }
-
 
 void ControlFlowProcessor::exportProcessFlow(ProcessFlowObj *pfo) {
   pfo->procflow.endTs = utils::getSysdigTime(m_cxt);
@@ -193,18 +184,21 @@ int ControlFlowProcessor::checkForExpiredRecords() {
   int i = 0;
   SF_DEBUG(m_logger, "Checking expired PROC Flows!!!....");
   for (auto it = m_pfSet->begin(); it != m_pfSet->end();) {
-    //SF_INFO(m_logger, "Checking flow with exportTime: " << (*it)->pfo->exportTime
-      //                                                   << " Now: " << now);
+    // SF_INFO(m_logger, "Checking flow with exportTime: " <<
+    // (*it)->pfo->exportTime
+    //                                                   << " Now: " << now);
     if (difftime(now, (*it)->pfo->exportTime) >= m_cxt->getNFExportInterval()) {
       SF_DEBUG(m_logger, "Exporting Proc flow!!! ");
-      if (difftime(now, (*it)->pfo->lastUpdate) >= m_cxt->getNFExpireInterval()) {
-//	SF_INFO(m_logger, "Deleting processflow...")
-//	SF_INFO(m_logger, "NOW: " << now << " LastUpdate: " <<  (*it)->pfo->lastUpdate);
+      if (difftime(now, (*it)->pfo->lastUpdate) >=
+          m_cxt->getNFExpireInterval()) {
+        //	SF_INFO(m_logger, "Deleting processflow...")
+        //	SF_INFO(m_logger, "NOW: " << now << " LastUpdate: " <<
+        //(*it)->pfo->lastUpdate);
         delete (*it)->pfo;
-	(*it)->pfo = nullptr;
+        (*it)->pfo = nullptr;
         it = m_pfSet->erase(it);
       } else {
-//	SF_INFO(m_logger, "Exporting processflow...checkForExpired")
+        //	SF_INFO(m_logger, "Exporting processflow...checkForExpired")
         exportProcessFlow((*it)->pfo);
         ProcessObj *p = (*it);
         it = m_pfSet->erase(it);

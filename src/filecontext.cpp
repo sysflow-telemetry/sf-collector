@@ -61,7 +61,7 @@ FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,
   created = true;
   string key;
   key.reserve(ti->m_container_id.length() + path.length());
-  key +=  ti->m_container_id;
+  key += ti->m_container_id;
   key += path;
   FileTable::iterator f = m_files.find(key);
   FileObj *file = nullptr;

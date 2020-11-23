@@ -46,19 +46,29 @@ AVRLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
 SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
 FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
 SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
+DEBUG ?= 0
 
 
 # Compiler options 
 CXX = g++
 LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
       $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a $(SDLOCALLIBPREFIX)/libgrpc++.a  $(SDLOCALLIBPREFIX)/libgrpc.a $(SDLOCALLIBPREFIX)/libgpr.a -lcares -lprotobuf \
-      -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl -lprofiler -ltcmalloc
+      -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl
 LDFLAGS = $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
-CFLAGS = -std=c++11 -Wall -ggdb -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
+CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/jsoncpp/
+
+$(info    DEBUG is $(DEBUG))
+ifeq ($(DEBUG), 1)
+	CFLAGS += -ggdb
+	LIBS += -lprofiler -ltcmalloc
+else
+	CFLAGS += -O3
+	LIBS += -ljemalloc
+endif
 
 .PHONY: all
 all: version $(TARGET)

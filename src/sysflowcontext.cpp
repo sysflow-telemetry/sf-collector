@@ -33,7 +33,8 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
       m_exporterID(std::move(expID)), m_nfExportInterval(30),
       m_nfExpireInterval(60), m_offline(false), m_filter(std::move(filter)),
       m_criPath(std::move(criPath)), m_criTO(criTO), m_stats(false),
-      m_statsInterval(30), m_domainSock(false), m_processFlow(true), m_nodeIP() {
+      m_statsInterval(30), m_domainSock(false), m_processFlow(false),
+      m_fileOnly(false), m_fileRead(0), m_nodeIP() {
   m_inspector = new sinsp();
   m_inspector->set_hostname_and_port_resolution_mode(false);
   if (!m_filter.empty()) {
@@ -56,11 +57,42 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
   }
   m_inspector->open(m_scapFile);
   const char *drop = std::getenv(ENABLE_DROP_MODE);
-  if(m_scapFile.empty() && drop != nullptr && std::strlen(drop) > 0) {
-    std::cout << "Starting dropping mode with sampling rate: " << samplingRatio << std::endl;
+  if (m_scapFile.empty() && drop != nullptr && std::strlen(drop) > 0) {
+    std::cout << "Starting dropping mode with sampling rate: " << samplingRatio
+              << std::endl;
     m_inspector->start_dropping_mode(m_samplingRatio);
   }
-  if(m_scapFile.empty()) {
+  const char *fileOnly = std::getenv(FILE_ONLY);
+  if (fileOnly != nullptr && strcmp(fileOnly, "1") == 0) {
+    std::cout << "Enabled file only mode!" << std::endl;
+    m_fileOnly = true;
+  }
+
+  const char *procflow = std::getenv(ENABLE_PROC_FLOW);
+  if (procflow != nullptr && strcmp(procflow, "1") == 0) {
+    std::cout << "Enabled process flow mode!" << std::endl;
+    m_processFlow = true;
+  }
+
+  const char *fileRead = std::getenv(FILE_READ_MODE);
+  if (fileRead == nullptr || strcmp(fileRead, "0") == 0) {
+    std::cout << "Enabled all file reads!" << std::endl;
+    m_fileRead = FILE_READS_ENABLED;
+  } else if (fileRead != nullptr && strcmp(fileRead, "1") == 0) {
+    std::cout << "Disabled all file reads!" << std::endl;
+    m_fileRead = FILE_READS_DISABLED;
+  } else if (fileRead != nullptr && strcmp(fileRead, "2") == 0) {
+    std::cout << "Disabled file reads to dirs: /proc/, /usr/lib/, /usr/lib64/, "
+                 "/lib64/, /dev/, /sys/"
+              << std::endl;
+    m_fileRead = FILE_READS_SELECT;
+  } else {
+    SF_WARN(
+        m_logger,
+        "FILE_READ_MODE must be set to 0 = enable all file reads, 1 = disable "
+        "all file reads, or 2 = disable file reads to certain directories")
+  }
+  if (m_scapFile.empty()) {
     m_inspector->set_snaplen(0);
   }
   m_offline = !sFile.empty();

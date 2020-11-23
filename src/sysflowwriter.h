@@ -19,19 +19,19 @@
 
 #ifndef __SF_WRITER_
 #define __SF_WRITER_
+#include "op_flags.h"
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "utils.h"
-#include "op_flags.h"
 
 using sysflow::Container;
 using sysflow::File;
 using sysflow::FileEvent;
 using sysflow::FileFlow;
 using sysflow::NetworkFlow;
-using sysflow::ProcessFlow;
 using sysflow::Process;
 using sysflow::ProcessEvent;
+using sysflow::ProcessFlow;
 using sysflow::SysFlow;
 
 namespace writer {

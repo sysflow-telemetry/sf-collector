@@ -88,7 +88,8 @@ void FileFlowProcessor::removeAndWriteRelatedFlows(ProcessObj *proc,
   for (auto it = ffobjs.begin(); it != ffobjs.end(); it++) {
     (*it)->fileflow.endTs = endTs;
     (*it)->fileflow.opFlags |= OP_TRUNCATE;
-    m_writer->writeFileFlow(&((*it)->fileflow));
+    // m_writer->writeFileFlow(&((*it)->fileflow));
+    SHOULD_WRITE((*it))
     removeFileFlowFromSet(&(*it), true);
   }
 }
@@ -132,7 +133,8 @@ inline void FileFlowProcessor::processNewFlow(sinsp_evt *ev, ProcessObj *proc,
   } else {
     removeAndWriteRelatedFlows(proc, ff, ev->get_ts());
     ff->fileflow.endTs = ev->get_ts();
-    m_writer->writeFileFlow(&(ff->fileflow));
+    // m_writer->writeFileFlow(&(ff->fileflow));
+    SHOULD_WRITE(ff)
     delete ff;
   }
 }
@@ -141,7 +143,8 @@ inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj *proc,
                                                       FileObj *file,
                                                       FileFlowObj **ff,
                                                       string flowkey) {
-  m_writer->writeFileFlow(&((*ff)->fileflow));
+  // m_writer->writeFileFlow(&((*ff)->fileflow));
+  SHOULD_WRITE((*ff))
   removeFileFlowFromSet(ff, false);
   removeFileFlow(proc, file, ff, std::move(flowkey));
 }
@@ -194,6 +197,9 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   }
   char restype = fdinfo->get_typechar();
 
+  if (m_cxt->isFileOnly() && !fdinfo->is_file()) {
+    return 1;
+  }
   switch (restype) {
   case SF_FILE:
   case SF_DIR:
@@ -212,8 +218,8 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   sinsp_threadinfo *ti = ev->get_thread_info();
   string flowkey;
   flowkey.reserve(ti->m_container_id.length() + fdinfo->m_name.length() + 32);
-  flowkey += ti->m_container_id;
   flowkey += fdinfo->m_name;
+  flowkey += ti->m_container_id;
   flowkey.append(utils::itoa(ti->m_tid, 10));
   flowkey.append(utils::itoa(fd, 10));
 
@@ -260,7 +266,8 @@ int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj *proc, int64_t tid) {
       }
       ffi->second->fileflow.opFlags |= OP_TRUNCATE;
       SF_DEBUG(m_logger, "Writing FILEFLOW!");
-      m_writer->writeFileFlow(&(ffi->second->fileflow));
+      SHOULD_WRITE(ffi->second)
+      // m_writer->writeFileFlow(&(ffi->second->fileflow));
       FileFlowObj *ffo = ffi->second;
       proc->fileflows.erase(ffi);
       SF_DEBUG(m_logger, "Set size: " << m_dfSet->size());
@@ -365,7 +372,8 @@ void FileFlowProcessor::exportFileFlow(DataFlowObj *dfo, time_t /*now*/) {
   ffo->fileflow.endTs = utils::getSysdigTime(m_cxt);
   m_processCxt->exportProcess(&(ffo->fileflow.procOID));
   m_fileCxt->exportFile(ffo->filekey);
-  m_writer->writeFileFlow(&(ffo->fileflow));
+  SHOULD_WRITE(ffo)
+  // m_writer->writeFileFlow(&(ffo->fileflow));
   SF_DEBUG(m_logger, "Reupping flow");
   ffo->fileflow.ts = utils::getSysdigTime(m_cxt);
   ffo->fileflow.endTs = 0;

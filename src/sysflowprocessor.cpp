@@ -46,8 +46,8 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
       new process::ProcessContext(m_cxt, m_containerCxt, m_fileCxt, m_writer);
   m_dfPrcr =
       new dataflow::DataFlowProcessor(m_cxt, m_writer, m_processCxt, m_fileCxt);
-  m_ctrlPrcr =
-      new controlflow::ControlFlowProcessor(m_cxt, m_writer, m_processCxt, m_dfPrcr);
+  m_ctrlPrcr = new controlflow::ControlFlowProcessor(m_cxt, m_writer,
+                                                     m_processCxt, m_dfPrcr);
 }
 
 SysFlowProcessor::~SysFlowProcessor() {
@@ -71,13 +71,13 @@ bool SysFlowProcessor::checkAndRotateFile() {
   time_t curTime = utils::getCurrentTime(m_cxt);
   if (m_writer->isExpired(curTime)) {
     SF_INFO(m_logger,
-            "Container Table: " << m_containerCxt->getSize()
-                                << " Process Table: " << m_processCxt->getSize()
-                                << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
-                                << " FileFlow Table: " << m_dfPrcr->getFFSize()
-                                << " ProcFlow Table: " << m_ctrlPrcr->getSize()
-                                << " Num Records Written: "
-                                << m_writer->getNumRecs());
+            "Container Table: "
+                << m_containerCxt->getSize()
+                << " Process Table: " << m_processCxt->getSize()
+                << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
+                << " FileFlow Table: " << m_dfPrcr->getFFSize()
+                << " ProcFlow Table: " << m_ctrlPrcr->getSize()
+                << " Num Records Written: " << m_writer->getNumRecs());
     m_writer->reset(curTime);
     clearTables();
     fileRotated = true;
@@ -163,13 +163,13 @@ int SysFlowProcessor::run() {
     }
     SF_INFO(m_logger, "Exiting scap loop... shutting down");
     SF_INFO(m_logger,
-            "Container Table: " << m_containerCxt->getSize()
-                                << " Process Table: " << m_processCxt->getSize()
-                                << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
-                                << " FileFlow Table: " << m_dfPrcr->getFFSize()
-                                << " ProcFlow Table: " << m_ctrlPrcr->getSize()
-                                << " Num Records Written: "
-                                << m_writer->getNumRecs());
+            "Container Table: "
+                << m_containerCxt->getSize()
+                << " Process Table: " << m_processCxt->getSize()
+                << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
+                << " FileFlow Table: " << m_dfPrcr->getFFSize()
+                << " ProcFlow Table: " << m_ctrlPrcr->getSize()
+                << " Num Records Written: " << m_writer->getNumRecs());
   } catch (sinsp_exception &e) {
     SF_ERROR(m_logger, "Sysdig exception " << e.what());
     return 1;
