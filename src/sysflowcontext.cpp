@@ -83,7 +83,7 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
     m_fileRead = FILE_READS_DISABLED;
   } else if (fileRead != nullptr && strcmp(fileRead, "2") == 0) {
     std::cout << "Disabled file reads to dirs: /proc/, /usr/lib/, /usr/lib64/, "
-                 "/lib64/, /dev/, /sys/"
+                 "/lib64/, /lib/, /dev/, /sys/, //sys/"
               << std::endl;
     m_fileRead = FILE_READS_SELECT;
   } else {

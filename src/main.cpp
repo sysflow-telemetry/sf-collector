@@ -116,6 +116,7 @@ int main(int argc, char **argv) {
   bool stats = false;
   bool domainSocket = false;
   bool writeFile = false;
+  bool breakout = false;
   string logProps = "/usr/local/sysflow/conf/log4cxx.properties";
 
   sigaction(SIGINT, &sigHandler, nullptr);
@@ -203,7 +204,12 @@ int main(int argc, char **argv) {
       }
       exit(1);
     default:
-      abort();
+      breakout = true;
+      break;
+    }
+    //hack to make collector work with PPC and Z
+    if (breakout) {
+      break;
     }
   }
 
