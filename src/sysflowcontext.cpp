@@ -25,11 +25,11 @@ using context::SysFlowContext;
 CREATE_LOGGER(SysFlowContext, "sysflow.sysflowcontext");
 
 SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
-                               const string &sFile, string schFile,
+                               const string &sFile, uint32_t samplingRatio,
                                string expID, string filter, string criPath,
                                int criTO)
     : m_filterCont(fCont), m_fileDuration(fDur), m_outputFile(oFile),
-      m_scapFile(sFile), m_schemaFile(std::move(schFile)),
+      m_scapFile(sFile), m_samplingRatio(samplingRatio),
       m_exporterID(std::move(expID)), m_nfExportInterval(30),
       m_nfExpireInterval(60), m_offline(false), m_filter(std::move(filter)),
       m_criPath(std::move(criPath)), m_criTO(criTO), m_stats(false),
@@ -55,6 +55,14 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
     m_nodeIP = std::string(ip);
   }
   m_inspector->open(m_scapFile);
+  const char *drop = std::getenv(ENABLE_DROP_MODE);
+  if(m_scapFile.empty() && drop != nullptr && std::strlen(drop) > 0) {
+    std::cout << "Starting dropping mode with sampling rate: " << samplingRatio << std::endl;
+    m_inspector->start_dropping_mode(m_samplingRatio);
+  }
+  if(m_scapFile.empty()) {
+    m_inspector->set_snaplen(0);
+  }
   m_offline = !sFile.empty();
   m_hasPrefix = (oFile.back() != '/');
 }
