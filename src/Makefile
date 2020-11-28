@@ -67,7 +67,6 @@ ifeq ($(DEBUG), 1)
 	LIBS += -lprofiler -ltcmalloc
 else
 	CFLAGS += -O3
-	LIBS += -ljemalloc
 endif
 
 .PHONY: all
