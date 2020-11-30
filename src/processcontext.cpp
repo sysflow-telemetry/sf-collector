@@ -567,7 +567,7 @@ int ProcessContext::removeProcessFromSet(ProcessObj *proc, bool checkForErr) {
   for (auto iter = m_pfSet.find(proc); iter != m_pfSet.end(); iter++) {
       auto *foundObj = static_cast<ProcessObj *>(*iter);
       if (*foundObj == *proc) {
-        SF_INFO(m_logger, "Removing procflow element from multiset.");
+        SF_DEBUG(m_logger, "Removing procflow element from multiset.");
         m_pfSet.erase(iter);
         removed++;
         found = true;
