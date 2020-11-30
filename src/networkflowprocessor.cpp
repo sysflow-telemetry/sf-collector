@@ -130,7 +130,7 @@ inline void NetworkFlowProcessor::processNewFlow(sinsp_evt *ev,
                                                  ProcessObj *proc, OpFlags flag,
                                                  NFKey key) {
   auto *nf = new NetFlowObj();
-  nf->exportTime = utils::getExportTime(m_cxt);
+  nf->exportTime = utils::getCurrentTime(m_cxt);
   nf->lastUpdate = utils::getCurrentTime(m_cxt);
   populateNetFlow(nf, flag, ev, proc);
   updateNetFlow(nf, flag, ev);

@@ -40,6 +40,7 @@ private:
   ProcessTable m_procs;
   file::FileContext *m_fileCxt;
   OIDQueue m_delProcQue;
+  ProcessFlowSet m_pfSet;
   time_t m_delProcTime;
   DEFINE_LOGGER();
   void writeProcessAndAncestors(ProcessObj *proc);
@@ -65,6 +66,7 @@ public:
   bool exportProcess(OID *oid);
   void printNetworkFlow(ProcessObj *proc);
   void printStats();
+  int removeProcessFromSet(ProcessObj *proc, bool checkForErr);
   inline int getSize() { return m_procs.size(); }
   inline int getNumNetworkFlows() {
     int total = 0;
@@ -109,6 +111,7 @@ public:
     }
     m_delProcTime = utils::getCurrentTime(m_cxt);
   }
+  ProcessFlowSet* getPFSet();
 };
 } // namespace process
 #endif

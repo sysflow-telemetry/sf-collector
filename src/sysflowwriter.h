@@ -19,10 +19,10 @@
 
 #ifndef __SF_WRITER_
 #define __SF_WRITER_
+#include "op_flags.h"
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "utils.h"
-#include "op_flags.h"
 
 using sysflow::Container;
 using sysflow::File;
@@ -31,6 +31,7 @@ using sysflow::FileFlow;
 using sysflow::NetworkFlow;
 using sysflow::Process;
 using sysflow::ProcessEvent;
+using sysflow::ProcessFlow;
 using sysflow::SysFlow;
 
 namespace writer {
@@ -68,6 +69,14 @@ public:
       return;
     }
     m_flow.rec.set_NetworkFlow(*nf);
+    m_numRecs++;
+    write(&m_flow);
+  }
+  inline void writeProcessFlow(ProcessFlow *pf) {
+    if (pf->opFlags == 0 || pf->opFlags == OP_TRUNCATE) {
+      return;
+    }
+    m_flow.rec.set_ProcessFlow(*pf);
     m_numRecs++;
     write(&m_flow);
   }

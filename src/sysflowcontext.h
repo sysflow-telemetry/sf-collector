@@ -24,6 +24,7 @@
 #include <ctime>
 
 #include "logger.h"
+#include "readonly.h"
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
@@ -33,6 +34,9 @@
 #define SYSDIG_LOG "SYSDIG_LOG"
 #define NODE_IP "NODE_IP"
 #define ENABLE_DROP_MODE "ENABLE_DROP_MODE"
+#define FILE_READ_MODE "FILE_READ_MODE"
+#define FILE_ONLY "FILE_ONLY"
+#define ENABLE_PROC_FLOW "ENABLE_PROC_FLOW"
 
 namespace context {
 class SysFlowContext {
@@ -55,6 +59,9 @@ private:
   bool m_stats;
   int m_statsInterval;
   bool m_domainSock;
+  bool m_processFlow;
+  bool m_fileOnly;
+  int m_fileRead;
   string m_nodeIP;
   DEFINE_LOGGER();
 
@@ -78,8 +85,11 @@ public:
   inline bool isStatsEnabled() { return m_stats; }
   inline void enableStats() { m_stats = true; }
   inline bool isDomainSock() { return m_domainSock; }
+  inline bool isProcessFlowEnabled() { return m_processFlow; }
   inline void enableDomainSock() { m_domainSock = true; }
   inline int getStatsInterval() { return m_statsInterval; }
+  inline bool isFileOnly() { return m_fileOnly; }
+  inline int getFileRead() { return m_fileRead; }
 };
 } // namespace context
 

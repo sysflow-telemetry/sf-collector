@@ -25,6 +25,7 @@
 #include "logger.h"
 #include "op_flags.h"
 #include "processcontext.h"
+#include "readonly.h"
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"

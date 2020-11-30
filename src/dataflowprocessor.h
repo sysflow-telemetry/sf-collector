@@ -41,7 +41,8 @@ private:
   DEFINE_LOGGER();
 
 public:
-  inline int getSize() { return m_netflowPrcr->getSize(); }
+  inline int getNFSize() { return m_netflowPrcr->getSize(); }
+  inline int getFFSize() { return m_fileflowPrcr->getSize(); }
   int handleDataEvent(sinsp_evt *ev, OpFlags flag);
   DataFlowProcessor(context::SysFlowContext *cxt, writer::SysFlowWriter *writer,
                     process::ProcessContext *processCxt,

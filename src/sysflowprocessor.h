@@ -20,11 +20,11 @@
 #ifndef __SF_PROCESSOR_
 #define __SF_PROCESSOR_
 #include "containercontext.h"
+#include "controlflowprocessor.h"
 #include "dataflowprocessor.h"
 #include "filecontext.h"
 #include "logger.h"
 #include "processcontext.h"
-#include "processeventprocessor.h"
 #include "sffilewriter.h"
 #include "sfsockwriter.h"
 #include "syscall_defs.h"
@@ -48,9 +48,10 @@ private:
   container::ContainerContext *m_containerCxt;
   file::FileContext *m_fileCxt;
   process::ProcessContext *m_processCxt;
-  processevent::ProcessEventProcessor *m_procEvtPrcr;
+  controlflow::ControlFlowProcessor *m_ctrlPrcr;
   dataflow::DataFlowProcessor *m_dfPrcr;
   void clearTables();
+  int checkForExpiredRecords();
   bool checkAndRotateFile();
   time_t m_statsTime;
 };

@@ -27,12 +27,14 @@ FROM sysflowtelemetry/ubi:mods-${SYSDIG_VER}-${UBI_VER} AS builder
 
 # environment and build args
 ARG BUILD_NUMBER=0
+ARG DEBUG=0
 
 ARG INSTALL_PATH=/usr/local/sysflow
 
 ARG MODPREFIX=${INSTALL_PATH}/modules
 
 ENV LIBRARY_PATH=/lib64
+
 
 # build sysporter
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
@@ -49,6 +51,7 @@ RUN cd /build/src && \
          SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
          FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
          SCHLOCALPREFIX=${MODPREFIX}/conf \
+	 DEBUG=${DEBUG} \
          install && \
     make clean && \
     rm -rf /build
@@ -127,6 +130,7 @@ COPY ./LICENSE.md /licenses/LICENSE.md
 
 # copy dependencies
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
+COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
 COPY --from=builder /sysdigsrc/ /usr/src/
 COPY --from=builder ${MODPREFIX}/lib/*.so* ${MODPREFIX}/lib/
 COPY --from=builder ${MODPREFIX}/bin/ ${MODPREFIX}/bin/
@@ -141,7 +145,6 @@ COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 WORKDIR /usr/local/sysflow/bin/
 
 ENTRYPOINT ["/usr/local/sysflow/modules/bin/docker-entry-ubi.sh"]
-
 CMD /usr/local/sysflow/bin/sysporter \
     ${INTERVAL:+-G} $INTERVAL \
     ${OUTPUT:+-w} $OUTPUT \
