@@ -41,7 +41,7 @@
   case PPME_SYSCALL_EXECVE_17_X:                                               \
   case PPME_SYSCALL_EXECVE_18_X:                                               \
   case PPME_SYSCALL_EXECVE_19_X: {                                             \
-    m_procEvtPrcr->writeExecEvent(EV);                                         \
+    m_ctrlPrcr->handleProcEvent(EV, OP_EXEC);                                  \
     break;                                                                     \
   }
 
@@ -56,7 +56,7 @@
   case PPME_SYSCALL_VFORK_17_X:                                                \
   case PPME_SYSCALL_FORK_20_X:                                                 \
   case PPME_SYSCALL_VFORK_20_X: {                                              \
-    m_procEvtPrcr->writeCloneEvent(EV);                                        \
+    m_ctrlPrcr->handleProcEvent(EV, OP_CLONE);                                 \
     break;                                                                     \
   }
 
@@ -65,7 +65,7 @@
   case PPME_PROCEXIT_X:                                                        \
   case PPME_PROCEXIT_1_E:                                                      \
   case PPME_PROCEXIT_1_X: {                                                    \
-    m_procEvtPrcr->writeExitEvent(EV);                                         \
+    m_ctrlPrcr->handleProcEvent(EV, OP_EXIT);                                  \
     break;                                                                     \
   }
 
@@ -199,14 +199,14 @@
 #define SF_SETUID_ENTER(EV)                                                    \
   case PPME_SYSCALL_SETUID_E:                                                  \
   case PPME_SYSCALL_SETRESUID_E: {                                             \
-    m_procEvtPrcr->setUID(EV);                                                 \
+    m_ctrlPrcr->setUID(EV);                                                    \
     break;                                                                     \
   }
 
 #define SF_SETUID_EXIT(EV)                                                     \
   case PPME_SYSCALL_SETUID_X:                                                  \
   case PPME_SYSCALL_SETRESUID_X: {                                             \
-    m_procEvtPrcr->writeSetUIDEvent(EV);                                       \
+    m_ctrlPrcr->handleProcEvent(EV, OP_SETUID);                                \
     break;                                                                     \
   }
 

@@ -29,6 +29,7 @@
 using sysflow::Container;
 using sysflow::FileFlow;
 using sysflow::NetworkFlow;
+using sysflow::ProcessFlow;
 using sysflow::OID;
 using sysflow::Process;
 
@@ -100,6 +101,18 @@ public:
             flowkey.compare(ffo.flowkey) == 0);
   }
   FileFlowObj() : DataFlowObj(false) {}
+};
+
+class ProcessFlowObj : public DataFlowObj {
+public:
+  ProcessFlow procflow;
+  bool operator==(const ProcessFlowObj &pfo) {
+    if (exportTime != pfo.exportTime) {
+      return false;
+    }
+    return (procflow.procOID.createTS == pfo.procflow.procOID.createTS && procflow.procOID.hpid == pfo.procflow.procOID.hpid);
+  }
+  ProcessFlowObj() : DataFlowObj(false) {}
 };
 
 // simple hash adapter for types without pointers
@@ -216,7 +229,8 @@ public:
   NetworkFlowTable netflows;
   FileFlowTable fileflows;
   ProcessSet children;
-  ProcessObj() : proc(), netflows(), fileflows(), children() {
+  ProcessFlowObj* pfo;
+  ProcessObj() : proc(), netflows(), fileflows(), children(), pfo(nullptr) {
     NFKey *emptykey = utils::getNFEmptyKey();
     NFKey *delkey = utils::getNFDelKey();
     OID *emptyoidkey = utils::getOIDEmptyKey();
@@ -228,8 +242,20 @@ public:
     children.set_empty_key(*emptyoidkey);
     children.set_deleted_key(*deloidkey);
   }
+  bool operator==(const ProcessObj &p) {
+    if (pfo != nullptr && p.pfo != nullptr && pfo->exportTime != p.pfo->exportTime) {
+      return false;
+    }
+    return (proc.oid.createTS == p.proc.oid.createTS && proc.oid.hpid == p.proc.oid.hpid);
+  }
 };
 
+struct eqpfobj {
+  bool operator()(const ProcessObj *p1, const ProcessObj *p2) const {
+    return (p1->pfo->exportTime < p2->pfo->exportTime);
+  }
+};
+typedef multiset<ProcessObj *, eqpfobj> ProcessFlowSet;
 typedef google::dense_hash_map<OID *, ProcessObj *, MurmurHasher<OID *>,
                                eqoidptr>
     ProcessTable;

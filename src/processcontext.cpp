@@ -47,6 +47,10 @@ ProcessContext::~ProcessContext() {
   }
 }
 
+ProcessFlowSet* ProcessContext::getPFSet() {
+  return &m_pfSet;
+}
+
 ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti,
                                           sinsp_evt *ev, SFObjectState state) {
   auto *p = new ProcessObj();
@@ -393,7 +397,7 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
 void ProcessContext::clearProcesses() {
   for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
     if (it->second->netflows.empty() && it->second->fileflows.empty() &&
-        it->second->children.empty()) {
+        it->second->children.empty() && it->second->pfo == nullptr) {
       ProcessObj *proc = it->second;
       Process::poid_t poid = proc->proc.poid;
       ProcessObj *curProc = proc;
@@ -405,7 +409,7 @@ void ProcessContext::clearProcesses() {
           ProcessObj *parentProc = p->second;
           parentProc->children.erase(curProc->proc.oid);
           if (parentProc->children.empty() && parentProc->netflows.empty() &&
-              parentProc->fileflows.empty()) {
+              parentProc->fileflows.empty() && parentProc->pfo == nullptr) {
             curProc = parentProc;
             poid = curProc->proc.poid;
           } else {
@@ -427,7 +431,7 @@ void ProcessContext::clearProcesses() {
   }
   for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
     if (it->second->netflows.empty() && it->second->fileflows.empty() &&
-        it->second->children.empty()) {
+        it->second->children.empty() && it->second->pfo == nullptr) {
       ProcessObj *proc = it->second;
       if (!proc->proc.containerId.is_null()) {
         m_containerCxt->derefContainer(proc->proc.containerId.get_string());
@@ -490,7 +494,7 @@ void ProcessContext::printNetworkFlow(ProcessObj *proc) {
 
 void ProcessContext::clearAllProcesses() {
   for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
-    if (((!it->second->netflows.empty()) || (!it->second->fileflows.empty())) &&
+    if (((!it->second->netflows.empty()) || (!it->second->fileflows.empty()) || (it->second->pfo != nullptr)) &&
         !it->second->written) {
       writeProcessAndAncestors(it->second);
     }
@@ -508,6 +512,14 @@ void ProcessContext::clearAllProcesses() {
       m_fileCxt->exportFile(ffi->second->filekey);
       m_writer->writeFileFlow(&(ffi->second->fileflow));
       delete ffi->second;
+    }
+    if(it->second->pfo != nullptr) {
+      it->second->pfo->procflow.opFlags |= OP_TRUNCATE;
+      it->second->pfo->procflow.endTs = utils::getSysdigTime(m_cxt);
+      SF_DEBUG(m_logger, "Writing processflow!")
+      m_writer->writeProcessFlow(&(it->second->pfo->procflow));
+      delete it->second->pfo;
+      it->second->pfo = nullptr;
     }
   }
 
@@ -540,7 +552,35 @@ void ProcessContext::deleteProcess(ProcessObj **proc) {
   if (!(*proc)->proc.containerId.is_null()) {
     m_containerCxt->derefContainer((*proc)->proc.containerId.get_string());
   }
+  if((*proc)->pfo != nullptr) {
+    removeProcessFromSet(*proc, false);
+  }
   m_procs.erase(&((*proc)->proc.oid));
   delete *proc;
   *proc = nullptr;
+}
+
+
+int ProcessContext::removeProcessFromSet(ProcessObj *proc, bool checkForErr) {
+  bool found = false;
+  int removed = 0;
+  for (auto iter = m_pfSet.find(proc); iter != m_pfSet.end(); iter++) {
+      auto *foundObj = static_cast<ProcessObj *>(*iter);
+      if (*foundObj == *proc) {
+        SF_INFO(m_logger, "Removing procflow element from multiset.");
+        m_pfSet.erase(iter);
+        removed++;
+        found = true;
+        break;
+      }
+  }
+  if (!found && checkForErr) {
+    SF_ERROR(m_logger, "Cannot find Procflow Object in proc flow set. Deleting. "
+                       "This should not happen");
+  }
+  if (proc->pfo != nullptr) {
+    delete proc->pfo;
+    proc->pfo = nullptr;
+  }
+  return removed;
 }

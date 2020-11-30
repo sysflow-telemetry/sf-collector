@@ -46,6 +46,7 @@ AVRLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
 SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
 FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
 SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
+DEBUG ?= 0
 
 
 # Compiler options 
@@ -55,10 +56,18 @@ LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIB
       -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl
 LDFLAGS = $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
-CFLAGS = -std=c++11 -Wall -ggdb -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
+CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
+
+$(info    DEBUG is $(DEBUG))
+ifeq ($(DEBUG), 1)
+	CFLAGS += -ggdb
+	LIBS += -lprofiler -ltcmalloc
+else
+	CFLAGS += -O3
+endif
 
 .PHONY: all
 all: version $(TARGET)
@@ -88,7 +97,7 @@ version:
 	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
 
 .PHONY: $(TARGET)
-$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .filecontext.o
+$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .filecontext.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .main.o: main.cpp
@@ -124,6 +133,9 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 .processeventprocessor.o: processeventprocessor.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
+.controlflowprocessor.o: controlflowprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
 .dataflowprocessor.o: dataflowprocessor.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
@@ -144,6 +156,9 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 
 .filecontext.o: filecontext.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
+
+#.xxhash.o: xxhash.c
+#	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .PHONY: clean
 clean:
