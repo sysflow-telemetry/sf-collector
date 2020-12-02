@@ -13,7 +13,33 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 > - **Fixed**: for any bug fixes.
 > - **Security**: in case of vulnerabilities.
 
-## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0...HEAD)]
+## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.2.0...HEAD)]
+
+## [[0.2.0](https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0...0.2.0)] - 2020-12-01
+
+### Added
+
+- Added optional enabling of ProcessFlow objects through `ENABLE_PROC_FLOW=1`.
+- Added enablement of sysdig syscall drop mode support through `ENABLE_DROP_MODE=1`.
+- Added ability to disable non-file related FileFlows with `FILE_ONLY=1`.
+- Added ability to disable, limit file read based fileflows with `FILE_READ_MODE=`. 
+    - `0` enable all file reads.
+    - `1` disable all file reads.
+    - `2` disable file reads to: `"/proc/", "/dev/", "/sys/", "//sys/", "/lib/", "/lib64/", "/usr/lib/", "/usr/lib64/"`
+- Added LLVM to support eBPF probes in future release.
+- Added Non-RHEL dependent developer build based on centos packages.
+- Added debug Dockerfile for performance profiling with google-perf-tools.
+
+### Changed
+
+- Port to sysdig probe 0.27.0.
+- `sysporter` now compiled with optimization 3.
+
+### Fixed
+
+- Fixed parenting issue for multi-thread applications.
+- Fixed performance bottlenecks around utils::getExportTime function.
+- Fixed command line parsing issue on PPC and Z platforms.
 
 ## [[0.1.0](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc4...0.1.0)] - 2020-10-30
 
