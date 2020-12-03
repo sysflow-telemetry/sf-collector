@@ -6,7 +6,7 @@
 
 # Supported tags and respective `Dockerfile` links
 
--	[`0.2.0`](https://github.com/sysflow-telemetry/sf-collector/blob/0.2.0/Dockerfile), [`latest`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile)
+-	[`0.2.1`](https://github.com/sysflow-telemetry/sf-collector/blob/0.2.1/Dockerfile), [`latest`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile)
 
 # Quick reference
 
