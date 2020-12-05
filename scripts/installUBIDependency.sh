@@ -31,7 +31,8 @@ echo "Install Dependency under mode: ${MODE}"
 # Clean up function
 #
 cleanup() {
-    dnf -y clean all && rm -rf /var/cache/dnf
+    dnf -y clean all
+    rm -rf /var/cache/{dnf,yum} || true
     subscription-manager unregister || true
     dnf -y remove \
         python3-subscription-manager-rhsm \
@@ -61,6 +62,7 @@ if [ "${MODE}" == "base" ] ; then
     # packages for base image
 
     subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms"
+    dnf -y update
     dnf -y install --disablerepo=epel \
         gcc \
         gcc-c++ \
