@@ -22,20 +22,22 @@
 # Usage
 #-----------------------
 #
-# 1. Modify scripts/build/secret.sh and add user/password for RHEL
-# 2. Build with Docker BuildKit:
+#    docker build --no-cache \
+#                 --target base \
+#                 -t ubi:base-dev \
+#                 -f Dockerfile.dev.amd64 .
 #
-#    DOCKER_BUILDKIT=1 docker build --no-cache \
-#                                   --secret id=rhsecret,src=scripts/build/secret.sh \
-#                                   --target mods \
-#                                   -t ubi:mods-0.0.0 \
-#                                   -f Dockerfile.ubi.amd64 .
+#    docker build --no-cache \
+#                 --target mods \
+#                 --cache-from ubi:base-dev \
+#                 -t ubi:mods-dev \
+#                 -f Dockerfile.dev.amd64 .
 #
 
 #-----------------------
 # Stage: base
 #-----------------------
-FROM centos:8 AS base
+FROM centos:8.3.2011 AS base
 
 # Install Packages
 COPY ./scripts/installUBIDependencyWoSubManager.sh /build/install.sh
