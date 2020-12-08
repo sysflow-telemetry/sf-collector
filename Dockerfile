@@ -18,7 +18,8 @@
 # limitations under the License.
 
 ARG SYSDIG_VER=0.27.0
-ARG UBI_VER=8.2.299
+#ARG UBI_VER=8.2.299
+ARG UBI_VER=bpf
 
 #-----------------------
 # Stage: builder
