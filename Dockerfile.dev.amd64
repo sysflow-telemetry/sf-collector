@@ -35,7 +35,7 @@
 #-----------------------
 # Stage: base
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi:8.2-299 AS base
+FROM centos:8 AS base
 
 # Install Packages
 COPY ./scripts/installUBIDependencyWoSubManager.sh /build/install.sh
