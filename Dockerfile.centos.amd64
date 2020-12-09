@@ -24,14 +24,14 @@
 #
 #    docker build --no-cache \
 #                 --target base \
-#                 -t ubi:base-dev \
-#                 -f Dockerfile.dev.amd64 .
+#                 -t sysflowtelemetry/ubi:base-0.27.1-centos-8.3.2011 \
+#                 -f Dockerfile.centos.amd64 .
 #
 #    docker build --no-cache \
 #                 --target mods \
-#                 --cache-from ubi:base-dev \
-#                 -t ubi:mods-dev \
-#                 -f Dockerfile.dev.amd64 .
+#                 --cache-from sysflowtelemetry/ubi:base-0.27.1-centos-8.3.2011 \
+#                 -t sysflowtelemetry/ubi:mods-0.27.1-centos-8.3.2011 \
+#                 -f Dockerfile.centos.amd64 .
 #
 
 #-----------------------
