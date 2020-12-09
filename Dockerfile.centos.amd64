@@ -40,6 +40,7 @@
 FROM centos:8.3.2011 AS base
 
 # Install Packages
+COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependencyWoSubManager.sh /build/install.sh
 RUN ( /build/install.sh base ) && rm -rf /build
 

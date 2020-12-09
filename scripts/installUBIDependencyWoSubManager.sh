@@ -37,9 +37,6 @@ trap cleanup EXIT
 
 if [ "${MODE}" == "base" ] ; then
     # packages for base image
-   # dnf -y install --disableplugin=subscription-manager \
-   #     http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-gpg-keys-8.2-2.2004.0.1.el8.noarch.rpm http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/centos-repos-8.2-2.2004.0.1.el8.x86_64.rpm
-    #dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     dnf -y update && \
     dnf -y install dnf-plugins-core epel-release
     dnf config-manager --set-enabled powertools
@@ -73,17 +70,20 @@ if [ "${MODE}" == "base" ] ; then
         snappy-devel \
         jsoncpp-devel \
         glog-devel \
-        llvm-toolset \
+        dkms \
         bc
 
-    dnf -y install \
-        --disableexcludes=all \
-        --disableplugin=subscription-manager \
-        --disablerepo=ubi-8-appstream \
-        --disablerepo=ubi-8-baseos \
-        --disablerepo=ubi-8-codeready-builder \
-        --enablerepo=epel \
-        dkms
+    DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
+    
+    #dnf -y install \
+    #    --disableexcludes=all \
+    #    --disableplugin=subscription-manager \
+    #    --disablerepo=ubi-8-appstream \
+    #    --disablerepo=ubi-8-baseos \
+    #    --disablerepo=ubi-8-codeready-builder \
+    #    --enablerepo=epel \
+    #    dkms
+
 
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing
