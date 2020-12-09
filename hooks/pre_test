@@ -6,4 +6,5 @@ echo "[***] Pre-test hook running"
 docker build \
     --cache-from $IMAGE_NAME \
     --target testing \
+    -f $DOCKERFILE_PATH \
     -t $IMAGE_NAME-testing .
