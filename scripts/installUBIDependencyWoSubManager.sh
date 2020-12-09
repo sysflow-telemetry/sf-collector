@@ -73,7 +73,8 @@ if [ "${MODE}" == "base" ] ; then
         snappy-devel \
         jsoncpp-devel \
         glog-devel \
-        llvm-toolset
+        llvm-toolset \
+        bc
 
     dnf -y install \
         --disableexcludes=all \
