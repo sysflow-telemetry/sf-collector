@@ -26,7 +26,7 @@ void ContainerContext::setContainer(ContainerObj **cont,
                                     sinsp_container_info::ptr_t container) {
   SF_DEBUG(m_logger, "Setting container info. Name: " << container->m_name)
   (*cont)->cont.name = container->m_name;
-  (*cont)->cont.image = container->m_image + ":" + container->m_imagetag;
+  (*cont)->cont.image = container->m_imagerepo + ":" + container->m_imagetag;
   (*cont)->cont.id = container->m_id;
   (*cont)->cont.imageid = container->m_imageid;
   (*cont)->cont.type = static_cast<ContainerType>(container->m_type);
