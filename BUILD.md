@@ -8,7 +8,7 @@ The sf-collector project has been tested primarily on Ubuntu 16.04 and 18.04.  T
 
 To build the project, first pull down the source code, with submodules:
 ```
-git clone --recursive git@github.com:sysflow-telemetry/sf-collector.git 
+git clone --recursive https://github.com/sysflow-telemetry/sf-collector.git 
 ```
 
 To checkout submodules on an already cloned repo:
@@ -31,7 +31,7 @@ The container is built in stages to enable caching of the intermediate steps of 
 
 First, install required dependencies:
 ```
-apt install patch base-files binutils bzip2 libdpkg-perl perl make xz-utils libncurses5-dev libncursesw5-dev cmake libboost-all-dev g++  flex bison wget libelf-dev liblog4cxx-dev libapr1 libaprutil1 libsparsehash-dev
+apt install patch base-files binutils bzip2 libdpkg-perl perl make xz-utils libncurses5-dev libncursesw5-dev cmake libboost-all-dev g++ flex bison wget libelf-dev liblog4cxx-dev libapr1 libaprutil1 libsparsehash-dev libsnappy-dev libgoogle-glog-dev libjsoncpp-dev
 ```
 
 To build the collector:
@@ -97,7 +97,7 @@ docker run -d --privileged --name sf-collector \
              -e EXPORTER_ID=${HOSTNAME} \
              -e OUTPUT=/mnt/data/    \
              -e FILTER="container.name!=sf-collector and container.name!=sf-exporter" \
-             --rm sysflow-telemetry/sf-collector
+             --rm sysflowtelemetry/sf-collector
 ```
 where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events. Note: append `container.type!=host` to FILTER expression to filter host events. 
 
