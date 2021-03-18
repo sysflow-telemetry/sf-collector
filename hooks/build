@@ -11,4 +11,5 @@ docker build \
     --build-arg VERSION=${SOURCE_BRANCH} \
     --build-arg RELEASE=$(git rev-parse --short HEAD) \
     --target runtime \
+    -f $DOCKERFILE_PATH \
     -t $IMAGE_NAME .

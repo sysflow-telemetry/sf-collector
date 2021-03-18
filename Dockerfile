@@ -35,7 +35,6 @@ ARG MODPREFIX=${INSTALL_PATH}/modules
 
 ENV LIBRARY_PATH=/lib64
 
-
 # build sysporter
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
 COPY ./modules/sysflow/c++/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c++/sysflow/sysflow.hh
@@ -140,7 +139,6 @@ COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 
-# RUN dnf install -y procps net-tools
 # entrypoint
 WORKDIR /usr/local/sysflow/bin/
 
