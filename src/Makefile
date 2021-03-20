@@ -51,7 +51,7 @@ DEBUG ?= 0
 
 # Compiler options 
 CXX = g++
-LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a \
+LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a $(SDLOCALLIBPREFIX)/libonig.a \
       $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a $(SDLOCALLIBPREFIX)/libgrpc++.a  $(SDLOCALLIBPREFIX)/libgrpc.a $(SDLOCALLIBPREFIX)/libgpr.a -lcares -lprotobuf \
       -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl
 LDFLAGS = $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
@@ -97,7 +97,7 @@ version:
 	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
 
 .PHONY: $(TARGET)
-$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .filecontext.o
+$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .filecontext.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .main.o: main.cpp
@@ -125,6 +125,9 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .sfsockwriter.o: sfsockwriter.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sfmultiwriter.o: sfmultiwriter.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .processcontext.o: processcontext.cpp
