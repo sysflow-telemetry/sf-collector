@@ -63,7 +63,7 @@ if [ "${MODE}" == "base" ] ; then
 
     subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms" && \
     dnf -y update && \
-    dnf -y install --disablerepo=epel \
+    dnf -y install \
         gcc \
         gcc-c++ \
         make \
@@ -91,6 +91,7 @@ if [ "${MODE}" == "base" ] ; then
         elfutils-libelf-devel \
         sparsehash-devel \
         snappy-devel \
+        bc \
         glog-devel
         #clang \
         #llvm
