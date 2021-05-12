@@ -32,6 +32,7 @@ using sysflow::NetworkFlow;
 using sysflow::ProcessFlow;
 using sysflow::OID;
 using sysflow::Process;
+using sysflow::Pod;
 
 struct NFKey {
   uint64_t tid;
@@ -259,5 +260,25 @@ typedef multiset<ProcessObj *, eqpfobj> ProcessFlowSet;
 typedef google::dense_hash_map<OID *, ProcessObj *, MurmurHasher<OID *>,
                                eqoidptr>
     ProcessTable;
+
+class PodObj {
+public:
+  bool written;
+  Pod pod;
+  uint32_t refs;
+  PodObj(std::string id, std::string name, std::string nodeName, std::string hostIP, std::string internalIP, std::string  ns, int64_t restartCount): written(false), pod(), refs(0) {
+    pod.id = id;
+    pod.name = name;
+    pod.nodeName = nodeName;
+    pod.hostIP = hostIP;
+    pod.internalIP = internalIP;
+    pod.namespace_ = ns;
+    pod.restartCount = restartCount;
+  }
+
+};
+
+
+typedef google::dense_hash_map<std::string, std::shared_ptr<PodObj>, MurmurHasher<std::string>, eqstr> PodTable;
 
 #endif

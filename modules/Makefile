@@ -62,6 +62,9 @@ sysdig/package:
 	cp -r protobuf-prefix/src/protobuf/src/google include/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbbmalloc.a lib/ && \
+	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
+	cp -r b64-prefix/src/b64/include/b64 include/ && \
+	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
 	cp userspace/libsinsp/libsinsp.a lib/ && \
 	cp userspace/libscap/libscap.a lib/ && \
 	cp -r ../driver/bpf driver/src/ && \

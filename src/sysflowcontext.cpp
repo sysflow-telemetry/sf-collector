@@ -34,7 +34,7 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
       m_nfExportInterval(30), m_nfExpireInterval(60), m_offline(false),
       m_filter(std::move(filter)), m_criPath(std::move(criPath)),
       m_criTO(criTO), m_stats(false), m_statsInterval(30), m_processFlow(false),
-      m_fileOnly(false), m_fileRead(0), m_nodeIP() {
+      m_fileOnly(false), m_fileRead(0), m_nodeIP(), m_k8sEnabled(false) {
   m_inspector = new sinsp();
   m_inspector->set_hostname_and_port_resolution_mode(false);
   if (!m_filter.empty()) {
@@ -92,6 +92,22 @@ SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
         "FILE_READ_MODE must be set to 0 = enable all file reads, 1 = disable "
         "all file reads, or 2 = disable file reads to certain directories")
   }
+
+  char *k8sAPIURL = getenv(SF_K8S_API_URL);
+  char *k8sAPICert = getenv(SF_K8S_API_CERT);
+  if(k8sAPIURL != nullptr) {
+    string* k8sURL = new string(k8sAPIURL);
+    string* k8sCert = nullptr;    
+    if(k8sAPICert != nullptr) {
+      k8sCert = new string(k8sAPICert);
+    }
+    std::cout << "Initing k8s client. URL: " << k8sURL << std::endl;
+    m_inspector->init_k8s_client(k8sURL, k8sCert, true);
+    m_inspector->set_internal_events_mode(true);
+    m_k8sEnabled = true;
+  }
+
+
   if (m_scapFile.empty()) {
     m_inspector->set_snaplen(0);
   }
