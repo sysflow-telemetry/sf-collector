@@ -18,7 +18,8 @@
 # limitations under the License.
 
 ARG SYSDIG_VER=0.27.1
-ARG UBI_VER=8.3-289
+ARG UBI_VER=8.4-199
+
 
 #-----------------------
 # Stage: builder
@@ -39,7 +40,7 @@ ENV LIBRARY_PATH=/lib64
 # build sysporter
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
 COPY ./modules/sysflow/c++/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c++/sysflow/sysflow.hh
-COPY ./modules/sysflow/c++/sysflow/avsc_sysflow2.hh ${MODPREFIX}/include/sysflow/c++/sysflow/avsc_sysflow2.hh
+COPY ./modules/sysflow/c++/sysflow/avsc_sysflow3.hh ${MODPREFIX}/include/sysflow/c++/sysflow/avsc_sysflow3.hh
 COPY ./src/ /build/src/
 RUN cd /build/src && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \

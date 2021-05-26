@@ -36,7 +36,7 @@
 # Stage: base
 #-----------------------
 #FROM registry.access.redhat.com/ubi8/ubi:8.2-299 AS base
-FROM registry.access.redhat.com/ubi8/ubi:8.3-289 AS base
+FROM registry.access.redhat.com/ubi8/ubi:8.4-199 AS base
 
 # Install Packages
 # Copy in llvm 9.0 rpms.  Sysdig's ebpf probe fails unless compiled with llvm 9.0 for now.

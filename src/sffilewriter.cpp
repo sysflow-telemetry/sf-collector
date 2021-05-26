@@ -39,6 +39,7 @@ int SFFileWriter::initialize() {
   m_dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), m_sysfSchema,
                                             COMPRESS_BLOCK_SIZE,
                                             avro::Codec::DEFLATE_CODEC);
+  setHeaderFile(ofile);
   writeHeader();
   return 0;
 }
@@ -63,6 +64,7 @@ string SFFileWriter::getFileName(time_t curTime) {
 
 void SFFileWriter::reset(time_t curTime) {
   string ofile = getFileName(curTime);
+  setHeaderFile(ofile);
   m_numRecs = 0;
   m_dfw->close();
   delete m_dfw;
