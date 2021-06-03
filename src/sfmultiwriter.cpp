@@ -38,4 +38,5 @@ void SFMultiWriter::reset(time_t curTime) {
   m_fileWriter.reset(curTime);
   m_sockWriter.setHeaderFile(m_fileWriter.getHeaderFile());
   m_sockWriter.reset(curTime);
+  m_start = curTime;
 }
