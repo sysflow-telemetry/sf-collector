@@ -18,7 +18,8 @@
 # limitations under the License.
 
 ARG SYSDIG_VER=0.27.1
-ARG UBI_VER=8.4-199
+ARG UBI_VER=8.4-203.1622660121
+
 
 
 #-----------------------

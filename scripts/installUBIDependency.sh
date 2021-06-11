@@ -100,7 +100,7 @@ if [ "${MODE}" == "base" ] ; then
     # ref: https://access.redhat.com/solutions/1132653
     dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     dnf -y install dkms jsoncpp-devel
-    dnf -y remove epel-release
+    dnf -y remove epel-release && dnf autoremove
     DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
 
 elif [ "${MODE}" == "test-extra" ] ; then
