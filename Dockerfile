@@ -117,9 +117,9 @@ ENV SAMPLING_RATE=$samplingRate
 ARG dropMode=
 ENV ENABLE_DROP_MODE=$dropMode
 
-# Update Label
+# Update Labels
 LABEL "name"="SysFlow Collector"
-LABEL "vendor"="IBM"
+LABEL "vendor"="SysFlow"
 LABEL "version"="${VERSION}"
 LABEL "release"="${RELEASE}"
 LABEL "summary"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
