@@ -25,15 +25,15 @@ using context::SysFlowContext;
 CREATE_LOGGER(SysFlowContext, "sysflow.sysflowcontext");
 
 SysFlowContext::SysFlowContext(bool fCont, int fDur, string oFile,
-                               const string &sFile, uint32_t samplingRatio,
-                               string expID, string filter, string criPath,
-                               int criTO)
+                               string socketFile, const string &sFile,
+                               uint32_t samplingRatio, string expID,
+                               string filter, string criPath, int criTO)
     : m_filterCont(fCont), m_fileDuration(fDur), m_outputFile(oFile),
-      m_scapFile(sFile), m_samplingRatio(samplingRatio),
-      m_exporterID(std::move(expID)), m_nfExportInterval(30),
-      m_nfExpireInterval(60), m_offline(false), m_filter(std::move(filter)),
-      m_criPath(std::move(criPath)), m_criTO(criTO), m_stats(false),
-      m_statsInterval(30), m_domainSock(false), m_processFlow(false),
+      m_socketFile(socketFile), m_scapFile(sFile),
+      m_samplingRatio(samplingRatio), m_exporterID(std::move(expID)),
+      m_nfExportInterval(30), m_nfExpireInterval(60), m_offline(false),
+      m_filter(std::move(filter)), m_criPath(std::move(criPath)),
+      m_criTO(criTO), m_stats(false), m_statsInterval(30), m_processFlow(false),
       m_fileOnly(false), m_fileRead(0), m_nodeIP() {
   m_inspector = new sinsp();
   m_inspector->set_hostname_and_port_resolution_mode(false);

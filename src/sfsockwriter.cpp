@@ -25,7 +25,7 @@ CREATE_LOGGER(SFSocketWriter, "sysflow.sfsocketwriter");
 
 SFSocketWriter::SFSocketWriter(context::SysFlowContext *cxt, time_t start)
     : writer::SysFlowWriter(cxt, start), m_sock(0) {
-  m_sockPath = m_cxt->getOutputFile();
+  m_sockPath = m_cxt->getSocketFile();
 }
 
 SFSocketWriter::~SFSocketWriter() { close(m_sock); }

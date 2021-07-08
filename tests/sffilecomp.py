@@ -47,7 +47,7 @@ def compareAttributes(att1, objtype1, att2, objtype2, exit, msgs):
         for attr in f1attrs:
             a1 = getattr(att1, attr)
             a2 = getattr(att2, attr)
-            if(not compareAttributes(a1, objtype1, a2, objtype2, exit, msgs)):
+            if(not compareAttributes(a1, objtype1, a2, objtype2, exit, msgs) and attr != "filename"):
                 msgs.append('Attribute: ' + attr + ' does not have matching values')
                 return False
     #if isinstance(att1, sysflow.schema_classes.SchemaClasses.sysflow.type.OIDClass):

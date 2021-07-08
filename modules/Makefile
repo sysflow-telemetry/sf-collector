@@ -64,6 +64,7 @@ sysdig/package:
 	cp tbb-prefix/src/tbb/build/lib_release/libtbbmalloc.a lib/ && \
 	cp userspace/libsinsp/libsinsp.a lib/ && \
 	cp userspace/libscap/libscap.a lib/ && \
+	cp -r ../driver/bpf driver/src/ && \
 	cp ../scripts/sysdig-probe-loader bin/ && \
 	cp ../docker/stable/docker-entrypoint.sh bin/ && \
 	cp grpc-prefix/src/grpc/libs/opt/*.a lib/ && \
@@ -71,7 +72,7 @@ sysdig/package:
 	cp c-ares-prefix/src/c-ares/.libs/* lib/ && \
 	cp b64-prefix/src/b64/src/libb64.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
-	cp jq-prefix/src/jq/.libs/libjq.a lib/ && \
+	cp jq-prefix/src/jq/target/lib/*.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
 	cp openssl-prefix/src/openssl/libcrypto.so.1.0.0 lib/libcrypto.so.1.0.0 && \
 	cd lib && ln -s libcrypto.so.1.0.0 libcrypto.so && cd .. && \

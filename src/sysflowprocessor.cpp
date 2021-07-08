@@ -35,10 +35,16 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
   } else {
     m_statsTime = 0;
   }
-  if (!m_cxt->isDomainSock()) {
+  if (m_cxt->isDomainSocket() && m_cxt->isOutputFile()) {
+    m_writer = new writer::SFMultiWriter(cxt, start);
+  } else if (m_cxt->isOutputFile()) {
     m_writer = new writer::SFFileWriter(cxt, start);
-  } else {
+  } else if (m_cxt->isDomainSocket()) {
     m_writer = new writer::SFSocketWriter(cxt, start);
+  } else {
+    SF_ERROR(m_logger, "Neither file output (-w) or (-u) were set. At least "
+                       "one must be specified.")
+    ::exit(EXIT_FAILURE);
   }
   m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
   m_fileCxt = new file::FileContext(m_containerCxt, m_writer);
