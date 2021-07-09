@@ -26,7 +26,7 @@ all: init \
 
 .PHONY: init
 init:
-	git submodule update --init --recursive
+	git submodule update --init --recursive --force
 	cd sysdig && git checkout $(SYSDIG_VERSION)
 	cd avro && git checkout $(AVRO_VERSION)
 

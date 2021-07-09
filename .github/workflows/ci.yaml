@@ -30,13 +30,16 @@ jobs:
     steps:      
       - name: Checkout
         uses: actions/checkout@v2  
+        with:
+          submodules: recursive 
+          fetch-depth: 0     
       - name: Init modules
         run: make -C modules init        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1            
       - name: Run tests
         run: |
-          docker build --target testing -t sf-collector:testing .
+          DOCKER_BUILDKIT=1 docker build --target testing -t sf-collector:testing .
           docker run --rm --name sftests -v "$(pwd)/tests:/usr/local/sysflow/tests" -e quiet=true sf-collector:testing -t tests/tests.bats            
   docker:    
     runs-on: ubuntu-latest
@@ -46,7 +49,10 @@ jobs:
       packages: write
     steps:      
       - name: Checkout
-        uses: actions/checkout@v2  
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive 
+          fetch-depth: 0         
       - name: Init modules
         run: make -C modules init
       - name: Build container
@@ -79,15 +85,25 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}    
+          password: ${{ secrets.GITHUB_TOKEN }}  
+      - name: Set build args
+        id: args
+        shell: bash
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"  
       - name: Build and push
         id: docker_build        
         uses: docker/build-push-action@v2        
         with:
           push: ${{ github.event_name != 'pull_request' }}
           tags: "${{ steps.meta.outputs.tags }}"
-          labels: "${{ steps.meta.outputs.labels }}"
+          labels: "${{ steps.meta.outputs.labels }}"          
           target: runtime
+          build-args: |
+            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+            VERSION=${{ steps.args.outputs.branch }}
+            RELEASE=${{ steps.args.outputs.sha_short }}
       - name: push README to Dockerhub
         uses: christian-korneck/update-container-description-action@v1
         if: ${{ github.ref == 'refs/heads/master' }}
