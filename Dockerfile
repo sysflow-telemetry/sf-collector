@@ -184,7 +184,7 @@ RUN mkdir /tmp/bats && cd /tmp/bats && \
 COPY modules/sysflow/py3 ${INSTALL_PATH}/utils
 
 RUN cd /usr/local/sysflow/utils && \
-    python3 setup.py install
+    python3 -m pip install .
 
 WORKDIR $wdir
 ENTRYPOINT ["/usr/local/bin/bats"]
