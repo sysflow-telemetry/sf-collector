@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Moved away from Dockerhub CI.
 - Upgraded to sysdig 0.27.1
 - Tracking latest sysflow APIs.
 
