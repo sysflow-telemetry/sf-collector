@@ -20,7 +20,7 @@
 #include "utils.h"
 #include "datatypes.h"
 #include "logger.h"
-#include "sysflow/avsc_sysflow2.hh"
+#include "sysflow/avsc_sysflow3.hh"
 #include "sysflowcontext.h"
 
 static NFKey s_nfdelkey;
@@ -149,7 +149,10 @@ bool utils::isMapAnonymous(sinsp_evt *ev) {
 
 int64_t utils::getIntParam(sinsp_evt *ev, string pname) {
   uint32_t n = ev->get_num_params();
-  for (uint32_t i = n; i >= 0; i--) {
+  if (n == 0) {
+    return -1;
+  }
+  for (uint32_t i = n - 1; i >= 0; i--) {
     string name = ev->get_param_name(i);
     if (name.compare(pname) == 0) {
       const ppm_param_info *param = ev->get_param_info(i);

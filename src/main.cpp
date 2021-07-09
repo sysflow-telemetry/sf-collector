@@ -98,6 +98,7 @@ CREATE_MAIN_LOGGER()
 int main(int argc, char **argv) {
   string scapFile = "";
   string outputDir;
+  string socketFile;
   string exporterID = "";
   char *duration;
   char c;
@@ -130,7 +131,7 @@ int main(int argc, char **argv) {
       break;
     case 'u':
       domainSocket = true;
-      outputDir = optarg;
+      socketFile = optarg;
       break;
     case 'e':
       exporterID = optarg;
@@ -207,7 +208,7 @@ int main(int argc, char **argv) {
       breakout = true;
       break;
     }
-    //hack to make collector work with PPC and Z
+    // hack to make collector work with PPC and Z
     if (breakout) {
       break;
     }
@@ -217,12 +218,11 @@ int main(int argc, char **argv) {
     usage(argv[0]);
     return 0;
   }
-  if (outputDir.empty()) {
+  if (outputDir.empty() && writeFile) {
     usage(argv[0]);
     return 1;
   }
-  if (writeFile && domainSocket) {
-    std::cout << "Cannot set both -w and -u" << endl;
+  if (socketFile.empty() && domainSocket) {
     usage(argv[0]);
     return 1;
   }
@@ -231,13 +231,10 @@ int main(int argc, char **argv) {
     CONFIGURE_LOGGER(logProps);
     SF_DEBUG(logger, "Starting sysporter...");
     auto *cxt = new context::SysFlowContext(filterCont, fileDuration, outputDir,
-                                            scapFile, samplingRatio, exporterID,
-                                            filter, criPath, criTO);
+                                            socketFile, scapFile, samplingRatio,
+                                            exporterID, filter, criPath, criTO);
     if (stats) {
       cxt->enableStats();
-    }
-    if (domainSocket) {
-      cxt->enableDomainSock();
     }
     s_prc = new SysFlowProcessor(cxt);
     int ret = s_prc->run();

@@ -46,6 +46,7 @@ private:
   int m_fileDuration;
   bool m_hasPrefix;
   string m_outputFile;
+  string m_socketFile;
   string m_scapFile;
   uint32_t m_samplingRatio;
   string m_exporterID;
@@ -58,7 +59,6 @@ private:
   int m_criTO;
   bool m_stats;
   int m_statsInterval;
-  bool m_domainSock;
   bool m_processFlow;
   bool m_fileOnly;
   int m_fileRead;
@@ -66,9 +66,9 @@ private:
   DEFINE_LOGGER();
 
 public:
-  SysFlowContext(bool fCont, int fDur, string oFile, const string &sFile,
-                 uint32_t samplingRatio, string exporterID, string filter,
-                 string criPath, int criTO);
+  SysFlowContext(bool fCont, int fDur, string oFile, string socketFile,
+                 const string &sFile, uint32_t samplingRatio, string exporterID,
+                 string filter, string criPath, int criTO);
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
   string getExporterID();
@@ -78,15 +78,16 @@ public:
   inline int getNFExportInterval() { return m_nfExportInterval; }
   inline int getNFExpireInterval() { return m_nfExpireInterval; }
   inline string getOutputFile() { return m_outputFile; }
+  inline string getSocketFile() { return m_socketFile; }
+  inline bool isDomainSocket() { return !m_socketFile.empty(); }
+  inline bool isOutputFile() { return !m_outputFile.empty(); }
   inline string getScapFile() { return m_scapFile; }
   inline bool hasPrefix() { return m_hasPrefix; }
   inline int getFileDuration() { return m_fileDuration; }
   inline bool isFilterContainers() { return m_filterCont; }
   inline bool isStatsEnabled() { return m_stats; }
   inline void enableStats() { m_stats = true; }
-  inline bool isDomainSock() { return m_domainSock; }
   inline bool isProcessFlowEnabled() { return m_processFlow; }
-  inline void enableDomainSock() { m_domainSock = true; }
   inline int getStatsInterval() { return m_statsInterval; }
   inline bool isFileOnly() { return m_fileOnly; }
   inline int getFileRead() { return m_fileRead; }
