@@ -107,6 +107,7 @@ elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing
 
     dnf -y --noplugins install python38 python38-devel python38-wheel
+    ln -s /usr/bin/python3 /usr/bin/python
     mkdir -p /usr/local/lib/python3.8/site-packages        
 
 else
