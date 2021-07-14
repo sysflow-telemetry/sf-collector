@@ -90,7 +90,7 @@ jobs:
         id: args
         shell: bash
         run: |
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
           echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"  
       - name: Build and push
         id: docker_build        
