@@ -83,7 +83,7 @@ jobs:
             UBI_VER=${{ env.UBI_VERSION }}
             BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
             VERSION=${{ steps.args.outputs.branch }}
-            RELEASE=${{ steps.args.outputs.sha_short }}
+            RELEASE=${{ steps.args.outputs.sha_short }}                        
           secrets: |
             REGISTER_USER=${{ secrets.RH_USERNAME }}
             REGISTER_PASSWORD=${{ secrets.RH_PASSWORD }}
