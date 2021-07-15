@@ -47,7 +47,9 @@ ARG REGISTER_PASSWORD
 # https://github.com/falcosecurity/libs/issues/4
 COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
-RUN if [[ -z "$REGISTER_USER" -o -z "$REGISTER_PASSWORD" ]] ; then \
+RUN --mount=type=secret,id=REGISTER_USER REGISTER_USER=$(cat /run/secrets/REGISTER_USER) \
+    --mount=type=secret,id=REGISTER_PASSWORD REGISTER_PASSWORD=$(cat /run/secrets/REGISTER_PASSWORD) \
+    if [[ -z "${REGISTER_USER}" -o -z "${REGISTER_PASSWORD}" ]] ; then \
     --mount=type=secret,id=rhsecret,dst=/secret/rh_register.sh \
     ( source /secret/rh_register.sh && bash /build/install.sh base ) && \
     rm -rf /build ; \
