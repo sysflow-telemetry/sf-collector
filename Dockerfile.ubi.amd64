@@ -39,7 +39,7 @@
 ARG UBI_VER=8.4-206
 FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 
-# Optional build argument; if not set, provide secrets to subscription manager using the secrets file described above.
+# Optional build argument; if set, provide secrets to subscription manager using the secrets file described above.
 ARG SECRETS_FILE 
 
 # Install Packages
@@ -48,13 +48,13 @@ ARG SECRETS_FILE
 COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
 RUN if [[ -z "${SECRETS_FILE}" ]] ; then \
-    --mount=type=secret,id=rhsecret,dst=/secret/rh_register.sh \
-    ( source /secret/rh_register.sh && bash /build/install.sh base ) && \
-    rm -rf /build ; \
-    else \
     --mount=type=secret,id=REGISTER_USER REGISTER_USER=$(cat /run/secrets/REGISTER_USER) \
     --mount=type=secret,id=REGISTER_PASSWORD REGISTER_PASSWORD=$(cat /run/secrets/REGISTER_PASSWORD) \
-    bash /build/install.sh base && rm -rf /build ; fi    
+    bash /build/install.sh base && rm -rf /build ; \
+    else \
+    --mount=type=secret,id=rhsecret,dst=/secret/rh_register.sh \
+    ( source /secret/rh_register.sh && bash /build/install.sh base ) && \
+    rm -rf /build ; fi    
 
 #-----------------------
 # Stage: mods
