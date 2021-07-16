@@ -1,16 +1,12 @@
 name: ubi
 
-on:  
-  push:
-    branches:
-      - master
-      - dev
+on:
   workflow_dispatch:
     
 env:
   SYSDIG_VERSION: 0.27.1  
-  # UBI_VERSION: 8.4-203.1622660121  
-  UBI_VERSION: 8.4-206
+  UBI_VERSION: 8.4-203.1622660121  
+  #UBI_VERSION: 8.4-206
   BASE_TAG: base-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }}
   MODS_TAG: mods-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }}
   DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/ubi
