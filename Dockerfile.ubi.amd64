@@ -26,7 +26,8 @@
 # 2. Build with Docker BuildKit:
 #
 #    DOCKER_BUILDKIT=1 docker build --no-cache \
-#                                   --secret id=rhsecret,src=scripts/build/secret.sh \
+#                                   --secret id=rhuser,src=scripts/build/rhuser \
+#                                   --secret id=rhpassword,src=scripts/build/rhpassword \                                   
 #                                   --target mods \
 #                                   -t ubi:mods-0.0.0 \
 #                                   -f Dockerfile.ubi.amd64 .
@@ -35,23 +36,18 @@
 #-----------------------
 # Stage: base
 #-----------------------
-ARG UBI_VER=8.4-206
+ARG UBI_VER=8.4-203
 FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
-
-# Optional build args; if not set, provide secrets to subscription manager using the secrets file described above.
-ARG REGISTER_USER
-ARG REGISTER_PASSWORD
 
 # Install Packages
 # Copy in llvm 9.0 rpms.  Sysdig's ebpf probe fails unless compiled with llvm 9.0 for now.
 # https://github.com/falcosecurity/libs/issues/4
 COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
-RUN if [ -z "$REGISTER_USER" -o -z "$REGISTER_PASSWORD" ] ; \
-    then --mount=type=secret,id=rhsecret,dst=/secret/rh_register.sh \
-    ( source /secret/rh_register.sh && bash /build/install.sh base ) && \
-    rm -rf /build ; \
-    else bash /build/install.sh base && rm -rf /build ; fi
+
+RUN --mount=type=secret,id=rhuser --mount=type=secret,id=rhpassword \
+     ( export REGISTER_USER=$(cat /run/secrets/rhuser) && export REGISTER_PASSWORD=$(cat /run/secrets/rhpassword) && bash /build/install.sh base ) && \
+     rm -rf /build
 
 #-----------------------
 # Stage: mods
