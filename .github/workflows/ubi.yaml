@@ -1,13 +1,11 @@
 name: ubi
 
-on:  
-  push:
+on:    
   workflow_dispatch:
     
 env:
-  SYSDIG_VERSION: 0.27.1  
-  #UBI_VERSION: 8.4-203.1622660121  
-  UBI_VERSION: 8.4-206
+  # SYSDIG_VERSION: 0.27.1    
+  # UBI_VERSION: 8.4-206
   BASE_TAG: base-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }}
   MODS_TAG: mods-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }}
   DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/ubi
@@ -19,6 +17,18 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Read manifest
+        id: manifest
+        shell: bash        
+        run: |   
+          echo "SYSDIG_VERSION=$(source makefile.manifest.inc && echo SYSDIG_VERSION)" >> $GITHUB_ENV        
+          echo "UBI_VERSION=$(source makefile.manifest.inc && echo UBI_VERSION)" >> $GITHUB_ENV                  
+      - name: Set image tags
+        id: manifest
+        shell: bash        
+        run: |           
+          echo "BASE_TAG=$(echo base-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV        
+          echo "MODS_TAG=$(echo mods-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV                  
       - name: Check package version
         id: checks
         shell: bash
@@ -59,47 +69,49 @@ jobs:
         if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
         run: | 
           echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
-          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"  
-      - name: Build and push base
-        id: base_docker_build        
-        uses: docker/build-push-action@v2        
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
-        with:
-          push: false
-          file: Dockerfile.ubi.amd64
-          tags: |
-            ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ env.BASE_TAG }}
-            ghcr.io/ubi:${{ env.BASE_TAG }}
-          target: base          
-          build-args: |
-            UBI_VER=${{ env.UBI_VERSION }}
-            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
-            VERSION=${{ steps.args.outputs.branch }}
-            RELEASE=${{ steps.args.outputs.sha_short }}                        
-          secrets: |
-            rhuser=${{ secrets.RH_USERNAME }}
-            rhpassword=${{ secrets.RH_PASSWORD }}
-      - name: Build and push mods
-        id: mods_docker_build        
-        uses: docker/build-push-action@v2    
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}    
-        with:
-          push: false
-          file: Dockerfile.ubi.amd64
-          tags: |
-            ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ env.MODS_TAG }}
-            ghcr.io/ubi:${{ env.MODS_TAG }}
-          target: mods          
-          build-args: |
-            UBI_VER=${{ env.UBI_VERSION }}
-            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
-            VERSION=${{ steps.args.outputs.branch }}
-            RELEASE=${{ steps.args.outputs.sha_short }}     
-          secrets: |
-            rhuser=${{ secrets.RH_USERNAME }}
-            rhpassword=${{ secrets.RH_PASSWORD }}
-      - name: Image digest
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
-        run: |
-          echo ${{ steps.base_docker_build.outputs.digest }}
-          echo ${{ steps.mods_docker_build.outputs.digest }}
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"      
+      # - name: Build and push base
+      #   id: base_docker_build        
+      #   uses: docker/build-push-action@v2        
+      #   if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+      #   with:
+      #     push: false
+      #     context: .
+      #     file: Dockerfile.ubi.amd64
+      #     tags: |
+      #       ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ env.BASE_TAG }}
+      #       ghcr.io/ubi:${{ env.BASE_TAG }}
+      #     target: base          
+      #     build-args: |
+      #       UBI_VER=${{ env.UBI_VERSION }}
+      #       BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+      #       VERSION=${{ steps.args.outputs.branch }}
+      #       RELEASE=${{ steps.args.outputs.sha_short }}                        
+      #     secrets: |
+      #       rhuser=${{ secrets.RH_USERNAME }}
+      #       rhpassword=${{ secrets.RH_PASSWORD }}
+      # - name: Build and push mods
+      #   id: mods_docker_build        
+      #   uses: docker/build-push-action@v2    
+      #   if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}    
+      #   with:
+      #     push: false
+      #     context: .
+      #     file: Dockerfile.ubi.amd64
+      #     tags: |
+      #       ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ env.MODS_TAG }}
+      #       ghcr.io/ubi:${{ env.MODS_TAG }}
+      #     target: mods          
+      #     build-args: |
+      #       UBI_VER=${{ env.UBI_VERSION }}
+      #       BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+      #       VERSION=${{ steps.args.outputs.branch }}
+      #       RELEASE=${{ steps.args.outputs.sha_short }}     
+      #     secrets: |
+      #       rhuser=${{ secrets.RH_USERNAME }}
+      #       rhpassword=${{ secrets.RH_PASSWORD }}
+      # - name: Image digest
+      #   if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+      #   run: |
+      #     echo ${{ steps.base_docker_build.outputs.digest }}
+      #     echo ${{ steps.mods_docker_build.outputs.digest }}
