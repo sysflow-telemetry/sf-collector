@@ -63,7 +63,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
         if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v1         
         if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -166,7 +166,7 @@ jobs:
           echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV    
       - name: Init modules
         run: make -C modules init
-      - name: Build container metadata
+      - name: Build image metadata
         id: meta
         uses: docker/metadata-action@v3
         with:          
@@ -188,11 +188,13 @@ jobs:
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
         uses: docker/login-action@v1 
+        if: ${{ github.event_name != 'pull_request' }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1 
+        if: ${{ github.event_name != 'pull_request' }}
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
