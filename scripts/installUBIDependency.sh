@@ -54,6 +54,8 @@ trap cleanup EXIT
         echo 'Assume build on RHEL machines or install packages only in UBI repositories.'
     else
         echo "Login RHEL..."
+        echo $REGISTER_USER
+        echo $REGISTER_PASSWORD
         subscription-manager register --username "$REGISTER_USER" --password "$REGISTER_PASSWORD" --auto-attach
     fi
 )
