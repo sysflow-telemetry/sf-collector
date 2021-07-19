@@ -17,10 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG SYSDIG_VER=0.27.1
-ARG UBI_VER=8.4-203.1622660121
-
-
+ARG SYSDIG_VER
+ARG UBI_VER
 
 #-----------------------
 # Stage: builder
