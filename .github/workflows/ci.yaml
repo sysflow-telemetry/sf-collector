@@ -145,7 +145,7 @@ jobs:
         uses: docker/setup-buildx-action@v1            
       - name: Run tests
         run: |
-          DOCKER_BUILDKIT=1 docker build --build-args UBI_VER=${{ env.UBI_VERSION }} --build-args SYSDIG_VER=${{ env.SYSDIG_VERSION }} --target testing -t sf-collector:testing .
+          DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg SYSDIG_VER=${{ env.SYSDIG_VERSION }} --target testing -t sf-collector:testing .
           docker run --rm --name sftests -v "$(pwd)/tests:/usr/local/sysflow/tests" -e quiet=true sf-collector:testing -t tests/tests.bats            
   docker:    
     runs-on: ubuntu-latest
