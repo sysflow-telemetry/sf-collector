@@ -45,9 +45,9 @@ FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
 
-RUN --mount=type=secret,id=REGISTER_USER REGISTER_USER=$(cat /run/secrets/REGISTER_USER)
+#RUN --mount=type=secret,id=REGISTER_USER REGISTER_USER=$(cat /run/secrets/REGISTER_USER)
 RUN --mount=type=secret,id=REGISTER_PASSWORD REGISTER_PASSWORD=$(cat /run/secrets/REGISTER_PASSWORD)
-RUN set +x; echo $REGISTER_USER
+RUN --mount=type=secret,id=REGISTER_USER REGISTER_USER=$(cat /run/secrets/REGISTER_USER) && set +x && echo $REGISTER_USER
 RUN bash /build/install.sh base && rm -rf /build
 # RUN --mount=type=secret,id=rhsecret,dst=/secret/rh_register.sh \
 #     ( source /secret/rh_register.sh && bash /build/install.sh base ) && \
