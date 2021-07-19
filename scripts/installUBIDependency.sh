@@ -53,9 +53,7 @@ trap cleanup EXIT
         echo 'Lack of RHEL credential.'
         echo 'Assume build on RHEL machines or install packages only in UBI repositories.'
     else
-        echo "Login RHEL..."
-        echo $REGISTER_USER
-        echo $REGISTER_PASSWORD
+        echo "Login RHEL..."        
         subscription-manager register --username "$REGISTER_USER" --password "$REGISTER_PASSWORD" --auto-attach
     fi
 )
