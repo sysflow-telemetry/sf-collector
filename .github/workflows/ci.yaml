@@ -24,6 +24,7 @@ on:
 env:
   DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/sf-collector  
   UBI_DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/ubi
+  GH_ORGANIZATION: sysflow-telemetry
 
 jobs:   
   ubi:    
@@ -92,7 +93,7 @@ jobs:
           file: Dockerfile.ubi.amd64
           tags: |
             ${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}:${{ env.BASE_TAG }}
-            ghcr.io/ubi:${{ env.BASE_TAG }}
+            ghcr.io/${{ env.GH_ORGANIZATION }}/ubi:${{ env.BASE_TAG }}
           target: base          
           build-args: |
             UBI_VER=${{ env.UBI_VERSION }}
@@ -112,7 +113,7 @@ jobs:
           file: Dockerfile.ubi.amd64
           tags: |
             ${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}:${{ env.MODS_TAG }}
-            ghcr.io/ubi:${{ env.MODS_TAG }}
+            ghcr.io/${{ env.GH_ORGANIZATION }}/ubi:${{ env.MODS_TAG }}
           target: mods          
           build-args: |
             UBI_VER=${{ env.UBI_VERSION }}
