@@ -88,6 +88,7 @@ jobs:
         if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
         with:          
           context: .
+          push: true
           file: Dockerfile.ubi.amd64
           tags: |
             ${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}:${{ env.BASE_TAG }}
@@ -107,6 +108,7 @@ jobs:
         if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}    
         with:          
           context: .
+          push: true
           file: Dockerfile.ubi.amd64
           tags: |
             ${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}:${{ env.MODS_TAG }}
