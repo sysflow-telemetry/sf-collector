@@ -91,6 +91,7 @@ if [ "${MODE}" == "base" ] ; then
         elfutils-libelf-devel \
         sparsehash-devel \
         snappy-devel \
+	bc \
         glog-devel
         #clang \
         #llvm
