@@ -44,6 +44,7 @@ protected:
   void writeHeader();
   time_t m_start;
   int64_t m_version;
+  std::string m_hdrFile;
   virtual void write(SysFlow *flow) = 0;
 
 public:
@@ -55,6 +56,8 @@ public:
     m_numRecs++;
     write(&m_flow);
   }
+  inline void setHeaderFile(std::string filename) { m_hdrFile = filename; }
+  inline std::string getHeaderFile() { return m_hdrFile; }
   inline void writeContainer(Container *container) {
     m_flow.rec.set_Container(*container);
     m_numRecs++;

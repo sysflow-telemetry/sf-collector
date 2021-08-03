@@ -1,0 +1,236 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+    tags:
+      - '*'     
+  pull_request:
+    branches:
+      - master
+      - dev
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+      - unlocked
+      - review_requested
+  workflow_dispatch:
+    
+env:
+  DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/sf-collector  
+  UBI_DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/ubi
+  GH_ORGANIZATION: sysflow-telemetry
+
+jobs:   
+  ubi:    
+    runs-on: ubuntu-latest    
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2        
+        with:
+          submodules: recursive 
+          fetch-depth: 0
+      - name: Read manifest        
+        shell: bash        
+        run: |   
+          echo "SYSDIG_VERSION=$(awk -F'=' '/SYSDIG_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV                  
+      - name: Set image tags        
+        shell: bash        
+        run: |           
+          echo "BASE_TAG=$(echo base-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV        
+          echo "MODS_TAG=$(echo mods-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV                  
+      - name: Check package version
+        id: checks
+        shell: bash
+        run: |
+          echo "##[set-output name=base_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.BASE_TAG }}/ > /dev/null && echo 1 || echo 0)"          
+          echo "##[set-output name=mods_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.MODS_TAG }}/ > /dev/null && echo 1 || echo 0)"                      
+      - name: Init modules
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        run: make -C modules init              
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1         
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}  
+      - name: Set build args
+        id: args
+        shell: bash
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        run: | 
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"      
+      - name: Build and push base
+        id: base_docker_build        
+        uses: docker/build-push-action@v2        
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:          
+          context: .
+          push: true
+          file: Dockerfile.ubi.amd64
+          tags: |
+            ${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}:${{ env.BASE_TAG }}
+            ghcr.io/${{ env.GH_ORGANIZATION }}/ubi:${{ env.BASE_TAG }}
+          target: base          
+          build-args: |
+            UBI_VER=${{ env.UBI_VERSION }}
+            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+            VERSION=${{ steps.args.outputs.branch }}
+            RELEASE=${{ steps.args.outputs.sha_short }}                        
+          secrets: |
+            rhuser=${{ secrets.RH_USERNAME }}
+            rhpassword=${{ secrets.RH_PASSWORD }}
+      - name: Build and push mods
+        id: mods_docker_build        
+        uses: docker/build-push-action@v2    
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}    
+        with:          
+          context: .
+          push: true
+          file: Dockerfile.ubi.amd64
+          tags: |
+            ${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}:${{ env.MODS_TAG }}
+            ghcr.io/${{ env.GH_ORGANIZATION }}/ubi:${{ env.MODS_TAG }}
+          target: mods          
+          build-args: |
+            UBI_VER=${{ env.UBI_VERSION }}
+            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+            VERSION=${{ steps.args.outputs.branch }}
+            RELEASE=${{ steps.args.outputs.sha_short }}     
+          secrets: |
+            rhuser=${{ secrets.RH_USERNAME }}
+            rhpassword=${{ secrets.RH_PASSWORD }}
+      - name: Image digest
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        run: |
+          echo ${{ steps.base_docker_build.outputs.digest }}
+          echo ${{ steps.mods_docker_build.outputs.digest }}  
+  tests:    
+    runs-on: ubuntu-latest  
+    needs: ubi
+    steps:      
+      - name: Checkout
+        uses: actions/checkout@v2  
+        with:
+          submodules: recursive 
+          fetch-depth: 0  
+      - name: Read manifest        
+        shell: bash        
+        run: |   
+          echo "SYSDIG_VERSION=$(awk -F'=' '/SYSDIG_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV   
+      - name: Init modules
+        run: make -C modules init        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1            
+      - name: Run tests
+        run: |
+          DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg SYSDIG_VER=${{ env.SYSDIG_VERSION }} --target testing -t sf-collector:testing .
+          docker run --rm --name sftests -v "$(pwd)/tests:/usr/local/sysflow/tests" -e quiet=true sf-collector:testing -t tests/tests.bats            
+  docker:    
+    runs-on: ubuntu-latest
+    needs: tests
+    permissions:
+      contents: read
+      packages: write
+    steps:      
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive 
+          fetch-depth: 0     
+      - name: Read manifest        
+        shell: bash        
+        run: |   
+          echo "SYSDIG_VERSION=$(awk -F'=' '/SYSDIG_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV    
+      - name: Init modules
+        run: make -C modules init
+      - name: Build image metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:          
+          images: |
+            ${{ env.DOCKER_REGISTRY_REPOSITORY }}
+            ghcr.io/${{ github.repository }}
+          tags: |            
+            type=edge,branch=master
+            type=ref,event=branch
+            type=ref,event=tag            
+            type=ref,event=pr         
+          labels: |
+            org.opencontainers.image.documentation=https://sysflow.readthedocs.io/
+            org.opencontainers.image.vendor=SysFlow
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}  
+      - name: Set build args
+        id: args
+        shell: bash
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"  
+      - name: Build and push
+        id: docker_build        
+        uses: docker/build-push-action@v2        
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: "${{ steps.meta.outputs.tags }}"
+          labels: "${{ steps.meta.outputs.labels }}"          
+          target: runtime
+          build-args: |
+            UBI_VER=${{ env.UBI_VERSION }}
+            SYSDIG_VER=${{ env.SYSDIG_VERSION }}
+            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+            VERSION=${{ steps.args.outputs.branch }}
+            RELEASE=${{ steps.args.outputs.sha_short }}
+      - name: Push README to Dockerhub
+        uses: christian-korneck/update-container-description-action@v1
+        if: ${{ github.ref == 'refs/heads/master' && github.event_name != 'pull_request' }}
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_PASS: ${{ secrets.DOCKERHUB_TOKEN }}
+        with:
+          destination_container_repo: ${{ env.DOCKER_REGISTRY_REPOSITORY }}
+          provider: dockerhub          
+          readme_file: "README.md"           
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}

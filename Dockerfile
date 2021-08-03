@@ -17,8 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG SYSDIG_VER=0.27.1
-ARG UBI_VER=8.3-289
+ARG SYSDIG_VER
+ARG UBI_VER
 
 #-----------------------
 # Stage: builder
@@ -39,7 +39,7 @@ ENV LIBRARY_PATH=/lib64
 # build sysporter
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
 COPY ./modules/sysflow/c++/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c++/sysflow/sysflow.hh
-COPY ./modules/sysflow/c++/sysflow/avsc_sysflow2.hh ${MODPREFIX}/include/sysflow/c++/sysflow/avsc_sysflow2.hh
+COPY ./modules/sysflow/c++/sysflow/avsc_sysflow3.hh ${MODPREFIX}/include/sysflow/c++/sysflow/avsc_sysflow3.hh
 COPY ./src/ /build/src/
 RUN cd /build/src && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
@@ -115,9 +115,9 @@ ENV SAMPLING_RATE=$samplingRate
 ARG dropMode=
 ENV ENABLE_DROP_MODE=$dropMode
 
-# Update Label
+# Update Labels
 LABEL "name"="SysFlow Collector"
-LABEL "vendor"="IBM"
+LABEL "vendor"="SysFlow"
 LABEL "version"="${VERSION}"
 LABEL "release"="${RELEASE}"
 LABEL "summary"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
@@ -182,7 +182,7 @@ RUN mkdir /tmp/bats && cd /tmp/bats && \
 COPY modules/sysflow/py3 ${INSTALL_PATH}/utils
 
 RUN cd /usr/local/sysflow/utils && \
-    python3 setup.py install
+    python3 -m pip install .
 
 WORKDIR $wdir
 ENTRYPOINT ["/usr/local/bin/bats"]

@@ -26,7 +26,7 @@
 # 2. Build with Docker BuildKit:
 #
 #    DOCKER_BUILDKIT=1 docker build --no-cache \
-#                                   --secret id=rhsecret,src=scripts/build/secret.sh \
+#                                   --build-arg UBI_VER=8.4-206
 #                                   --target mods \
 #                                   -t ubi:mods-0.0.0 \
 #                                   -f Dockerfile.ubi.amd64 .
@@ -35,7 +35,8 @@
 #-----------------------
 # Stage: base
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi:8.2-299 AS base
+ARG UBI_VER
+FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 
 # Install Packages
 COPY ./scripts/installUBIDependencyWoSubManager.sh /build/install.sh

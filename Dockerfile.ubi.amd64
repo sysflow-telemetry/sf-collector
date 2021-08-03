@@ -26,26 +26,30 @@
 # 2. Build with Docker BuildKit:
 #
 #    DOCKER_BUILDKIT=1 docker build --no-cache \
-#                                   --secret id=rhsecret,src=scripts/build/secret.sh \
+#                                   --build-arg UBI_VER=8.4-206
+#                                   --secret id=rhuser,src=scripts/build/rhuser \
+#                                   --secret id=rhpassword,src=scripts/build/rhpassword \                                   
 #                                   --target mods \
 #                                   -t ubi:mods-0.0.0 \
 #                                   -f Dockerfile.ubi.amd64 .
 #
 
+ARG UBI_VER
+
 #-----------------------
 # Stage: base
 #-----------------------
-#FROM registry.access.redhat.com/ubi8/ubi:8.2-299 AS base
-FROM registry.access.redhat.com/ubi8/ubi:8.3-289 AS base
+FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 
 # Install Packages
 # Copy in llvm 9.0 rpms.  Sysdig's ebpf probe fails unless compiled with llvm 9.0 for now.
 # https://github.com/falcosecurity/libs/issues/4
 COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
-RUN --mount=type=secret,id=rhsecret,dst=/secret/rh_register.sh \
-    ( source /secret/rh_register.sh && bash /build/install.sh base ) && \
-    rm -rf /build
+
+RUN --mount=type=secret,id=rhuser --mount=type=secret,id=rhpassword \
+     ( export REGISTER_USER=$(cat /run/secrets/rhuser) && export REGISTER_PASSWORD=$(cat /run/secrets/rhpassword) && bash /build/install.sh base ) && \
+     rm -rf /build
 
 #-----------------------
 # Stage: mods

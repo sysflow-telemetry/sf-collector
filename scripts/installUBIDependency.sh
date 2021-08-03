@@ -63,7 +63,7 @@ if [ "${MODE}" == "base" ] ; then
 
     subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms" && \
     dnf -y update && \
-    dnf -y install --disablerepo=epel \
+    dnf -y install \
         gcc \
         gcc-c++ \
         make \
@@ -91,7 +91,7 @@ if [ "${MODE}" == "base" ] ; then
         elfutils-libelf-devel \
         sparsehash-devel \
         snappy-devel \
-	bc \
+        bc \
         glog-devel
         #clang \
         #llvm
@@ -100,17 +100,15 @@ if [ "${MODE}" == "base" ] ; then
     # ref: https://access.redhat.com/solutions/1132653
     dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     dnf -y install dkms jsoncpp-devel
-    dnf -y remove epel-release
+    dnf -y remove epel-release && dnf autoremove
     DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
 
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing
 
-    dnf -y --noplugins install python3 python3-devel python3-wheel
-    mkdir -p /usr/local/lib/python3.6/site-packages
-    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install
+    dnf -y --noplugins install python38 python38-devel python38-wheel
     ln -s /usr/bin/python3 /usr/bin/python
-    ln -s /usr/bin/pip3 /usr/bin/pip
+    mkdir -p /usr/local/lib/python3.8/site-packages        
 
 else
     echo "Unsupported mode: ${MODE}"

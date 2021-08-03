@@ -28,12 +28,16 @@ SFMultiWriter::SFMultiWriter(context::SysFlowContext *cxt, time_t start)
 SFMultiWriter::~SFMultiWriter() {}
 
 int SFMultiWriter::initialize() {
-  m_sockWriter.initialize();
   m_fileWriter.initialize();
+  m_sockWriter.setHeaderFile(m_fileWriter.getHeaderFile());
+  m_sockWriter.initialize();
   return 0;
 }
 
 void SFMultiWriter::reset(time_t curTime) {
-  m_sockWriter.reset(curTime);
   m_fileWriter.reset(curTime);
+  m_sockWriter.setHeaderFile(m_fileWriter.getHeaderFile());
+  m_sockWriter.reset(curTime);
+  m_numRecs = 0;
+  m_start = curTime;
 }

@@ -13,7 +13,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 > - **Fixed**: for any bug fixes.
 > - **Security**: in case of vulnerabilities.
 
-## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.2.2...HEAD)]
+## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.3.0...HEAD)]
+
+## [[0.3.0](https://github.com/sysflow-telemetry/sf-collector/compare/0.2.2...0.3.0)] - 2021-07-09
+
+### Added
+
+- Trace file information to SysFlow header object
+- Concurrent export of SysFlow traces to socket and file
+
+### Changed
+
+- Moved away from Dockerhub CI.
+- Upgraded to sysdig 0.27.1
+- Tracking latest sysflow APIs.
 
 ## [[0.2.2](https://github.com/sysflow-telemetry/sf-collector/compare/0.2.1...0.2.2)] - 2020-12-07
 

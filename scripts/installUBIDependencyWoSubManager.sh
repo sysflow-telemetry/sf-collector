@@ -89,14 +89,9 @@ if [ "${MODE}" == "base" ] ; then
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing
 
-    dnf -y install --disableplugin=subscription-manager \
-        python3 \
-        python3-devel \
-        python3-wheel
-    mkdir -p /usr/local/lib/python3.6/site-packages
-    ln -s /usr/bin/easy_install-3 /usr/bin/easy_install
+    dnf -y --noplugins install python38 python38-devel python38-wheel
     ln -s /usr/bin/python3 /usr/bin/python
-    ln -s /usr/bin/pip3 /usr/bin/pip
+    mkdir -p /usr/local/lib/python3.8/site-packages
 
 else
     echo "Unsupported mode: ${MODE}"
