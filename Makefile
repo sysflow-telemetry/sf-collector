@@ -56,10 +56,12 @@ docker-testing-build:
 
 .PHONY: docker-base-build
 docker-base-build:
+	docker pull sysflowtelemetry/ubi:base-${SYSDIG_VERSION}-${UBI_VERSION} &> /dev/null || true
 	( DOCKER_BUILD_KIT=1 docker build --secret id=rhuser,src=${PWD}/scripts/build/rhuser --secret id=rhpassword,src=${PWD}/scripts/build/rhpassword --build-arg UBI_VER=${UBI_VERSION} --target base -t sysflowtelemetry/ubi:base-${SYSDIG_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
 
 .PHONY: docker-mods-build
 docker-mods-build:
+	docker pull sysflowtelemetry/ubi:base-${SYSDIG_VERSION}-${UBI_VERSION} &> /dev/null || true
 	( DOCKER_BUILD_KIT=1 docker build --cache-from sysflowtelemetry/ubi:base-${SYSDIG_VERSION}-${UBI_VERSION} --secret id=rhuser,src=${PWD}/scripts/build/rhuser --secret id=rhpassword,src=${PWD}/scripts/build/rhpassword --build-arg UBI_VER=${UBI_VERSION} --target mods -t sysflowtelemetry/ubi:mods-${SYSDIG_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
 
 .PHONY : help
@@ -71,3 +73,7 @@ help:
 	@echo "... sysporter"
 	@echo "... install"
 	@echo "... uninstall"
+	@echo "... docker-runtime-build"
+	@echo "... docker-testing-build"
+	@echo "... docker-base-build"
+	@echo "... docker-mods-build"
