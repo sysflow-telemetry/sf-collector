@@ -27,25 +27,25 @@ all: init \
 .PHONY: init
 init:
 	git submodule update --init --recursive --force
-	cd sysdig && git checkout $(SYSDIG_VERSION)
+	cd falco/libs && git checkout
 	cd avro && git checkout $(AVRO_VERSION)
 
 .PHONY: modules
-modules: sysdig/package \
+modules: falcolibs/package \
          avro/package
 
 .PHONY: install
 install: modules \
-	sysdig/install \
+	falcolibs/install \
 	avro/install \
 	sysflow/install \
 	fs/install
 
-.PHONY: sysdig/package
-sysdig/package: 
-	cd sysdig && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(SYSDIG_VERSION)\"/" CMakeLists.txt && sed -i '/ctext.cpp/d' userspace/libsinsp/CMakeLists.txt &&  sed -i '/table.cpp/d' userspace/libsinsp/CMakeLists.txt && \
-	sed -i "/#define CSYSDIG/d" userspace/libsinsp/settings.h &&  sed -i "/#define HAS_CHISELS/d" userspace/libsinsp/settings.h && mkdir -p build && cd build && \
-    cmake ../. && make tbb grpc c-ares zlib jq curl luajit protobuf b64 openssl scap sinsp && \
+.PHONY: falcolibs/package
+falcolibs/package: 
+	#cd falco/libs && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(SYSDIG_VERSION)\"/" CMakeLists.txt && sed -i '/ctext.cpp/d' userspace/libsinsp/CMakeLists.txt &&  sed -i '/table.cpp/d' userspace/libsinsp/CMakeLists.txt && \
+	cd falco/libs && mkdir -p build && cd build && \
+        cmake ../. && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
@@ -84,10 +84,10 @@ sysdig/package:
 	cp protobuf-prefix/src/protobuf/src/.libs/* lib && \
 	cp zlib-prefix/src/zlib/libz.so.1.2.11 lib/libz.so
 
-.PHONY: sysdig/install
-sysdig/install:	
+.PHONY: falcolibs/install
+falco/install:	
 	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(SYSDIG_VERSION)" && \
-	cd sysdig/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(SYSDIG_VERSION)"
+	cd falco/libs/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(SYSDIG_VERSION)"
 
 .PHONY: avro/package
 avro/package:
@@ -118,4 +118,4 @@ uninstall:
 
 .PHONY: clean
 clean:
-	rm -rf avro/lang/c++/build sysdig/build
+	rm -rf avro/lang/c++/build falco/libs/build
