@@ -25,7 +25,7 @@ using k8sevent::K8sEventProcessor;
 CREATE_LOGGER(K8sEventProcessor, "sysflow.k8sevent");
 
 K8sEventProcessor::K8sEventProcessor(writer::SysFlowWriter *writer,
-                                       sfk8s::K8sContext *k8sCxt) {
+                                     sfk8s::K8sContext *k8sCxt) {
   m_writer = writer;
   m_k8sCxt = k8sCxt;
 }
@@ -50,7 +50,8 @@ int K8sEventProcessor::handleK8sEvent(sinsp_evt *ev) {
   std::cout << "K8s Param length is: " << parinfo->m_len << std::endl;
   std::string payload(parinfo->m_val, parinfo->m_len);
   std::cout << "K8s payload: " << payload << std::endl;
-
-
+  m_k8sEvt.message = payload;
+  m_k8sEvt.ts = ev->get_ts();
+  m_writer->writeK8sEvent(&m_k8sEvt);
   return res;
 }

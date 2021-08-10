@@ -10,3 +10,9 @@
 [submodule "modules/filesystem"]
 	path = modules/filesystem
 	url = https://github.com/gulrak/filesystem.git
+[submodule "modules/falco"]
+	path = modules/falco
+	url = https://github.com/falcosecurity/falco
+[submodule "modules/falco-libs"]
+	path = modules/falco-libs
+	url = https://github.com/falcosecurity/libs

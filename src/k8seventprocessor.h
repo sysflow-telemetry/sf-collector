@@ -32,12 +32,12 @@ class K8sEventProcessor {
 private:
   sfk8s::K8sContext *m_k8sCxt;
   writer::SysFlowWriter *m_writer;
-  //K8sEvent m_k8sEvt;
+  sysflow::K8sEvent m_k8sEvt;
+  // K8sEvent m_k8sEvt;
   DEFINE_LOGGER();
 
 public:
-  K8sEventProcessor(writer::SysFlowWriter *writer,
-                     sfk8s::K8sContext *k8sCxt);
+  K8sEventProcessor(writer::SysFlowWriter *writer, sfk8s::K8sContext *k8sCxt);
   virtual ~K8sEventProcessor();
   int handleK8sEvent(sinsp_evt *ev);
 };

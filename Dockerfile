@@ -17,13 +17,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG SYSDIG_VER
+ARG FALCO_VER
+ARG FALCO_LIBS_VER
 ARG UBI_VER
 
 #-----------------------
 # Stage: builder
 #-----------------------
-FROM sysflowtelemetry/ubi:mods-${SYSDIG_VER}-${UBI_VER} AS builder
+FROM sysflowtelemetry/ubi:mods-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS builder
 
 # environment and build args
 ARG BUILD_NUMBER=0
@@ -59,7 +60,7 @@ RUN cd /build/src && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:base-${SYSDIG_VER}-${UBI_VER} AS runtime
+FROM sysflowtelemetry/ubi:base-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
 
 # environment variables
 ARG interval=30
@@ -95,7 +96,7 @@ ENV SYSDIG_LOG=$sysdig_log
 ARG INSTALL_PATH=/usr/local/sysflow
 
 ARG MODPREFIX=${INSTALL_PATH}/modules
-ENV SYSDIG_HOST_ROOT=/host
+ENV HOST_ROOT=/host
 
 ARG sockfile=
 ENV SOCK_FILE=
@@ -106,14 +107,18 @@ ARG RELEASE=dev
 ARG nodeip=
 ENV NODE_IP=$nodeip
 
-ARG SYSDIG_VER
-ENV SYSDIG_VERSION=${SYSDIG_VER}
+ENV FALCO_VERSION=${FALCO_VER}
+ENV FALCO_LIBS_VERSION=${FALCO_LIBS_VER}
+
+ENV DRIVER_NAME="falco"
 
 ARG samplingRate=
 ENV SAMPLING_RATE=$samplingRate
 
 ARG dropMode=
 ENV ENABLE_DROP_MODE=$dropMode
+
+ENV DRIVERS_REPO="https://download.falco.org/driver"
 
 # Update Labels
 LABEL "name"="SysFlow Collector"
@@ -131,14 +136,14 @@ COPY ./LICENSE.md /licenses/LICENSE.md
 # copy dependencies
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 COPY --from=builder /usr/local/sysflow/modules/ /usr/local/sysflow/modules/
-COPY --from=builder /sysdigsrc/ /usr/src/
+COPY --from=builder /falcosrc/ /usr/src/
 COPY --from=builder ${MODPREFIX}/lib/*.so* ${MODPREFIX}/lib/
 COPY --from=builder ${MODPREFIX}/bin/ ${MODPREFIX}/bin/
-RUN ln -s ${MODPREFIX}/bin/sysdig-probe-loader /usr/bin/sysdig-probe-loader
-RUN ln -s ${MODPREFIX}/bin/sysdig /usr/bin/sysdig
+RUN ln -s ${MODPREFIX}/bin/falco-driver-loader /usr/bin/falco-driver-loader
 COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
+#RUN chmod +x /usr/local/sysflow/modules/bin/docker-entrypoint.sh
 
 # RUN dnf install -y procps net-tools
 # entrypoint

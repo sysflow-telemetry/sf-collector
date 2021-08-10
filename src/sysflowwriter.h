@@ -29,8 +29,8 @@ using sysflow::File;
 using sysflow::FileEvent;
 using sysflow::FileFlow;
 using sysflow::NetworkFlow;
-using sysflow::Process;
 using sysflow::Pod;
+using sysflow::Process;
 using sysflow::ProcessEvent;
 using sysflow::ProcessFlow;
 using sysflow::SysFlow;
@@ -51,7 +51,7 @@ public:
   SysFlowWriter(context::SysFlowContext *cxt, time_t start);
   virtual ~SysFlowWriter() {}
   inline int getNumRecs() { return m_numRecs; }
-  inline void writePod(Pod* pod) {
+  inline void writePod(Pod *pod) {
     m_flow.rec.set_Pod(*pod);
     m_numRecs++;
     write(&m_flow);
@@ -104,6 +104,11 @@ public:
   }
   inline void writeFile(sysflow::File *f) {
     m_flow.rec.set_File(*f);
+    m_numRecs++;
+    write(&m_flow);
+  }
+  inline void writeK8sEvent(sysflow::K8sEvent *k) {
+    m_flow.rec.set_K8sEvent(*k);
     m_numRecs++;
     write(&m_flow);
   }

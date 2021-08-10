@@ -27,7 +27,8 @@ all: init \
 .PHONY: init
 init:
 	git submodule update --init --recursive --force
-	cd falco/libs && git checkout
+	cd falco && git checkout $(FALCO_VERSION)
+	cd falco-libs && git checkout $(FALCO_LIBS_VERSION)
 	cd avro && git checkout $(AVRO_VERSION)
 
 .PHONY: modules
@@ -43,9 +44,8 @@ install: modules \
 
 .PHONY: falcolibs/package
 falcolibs/package: 
-	#cd falco/libs && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(SYSDIG_VERSION)\"/" CMakeLists.txt && sed -i '/ctext.cpp/d' userspace/libsinsp/CMakeLists.txt &&  sed -i '/table.cpp/d' userspace/libsinsp/CMakeLists.txt && \
-	cd falco/libs && mkdir -p build && cd build && \
-        cmake ../. && \
+	cd falco-libs && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(FALCO_VERSION)\"/" CMakeLists.txt && mkdir -p build && cd build && \
+        cmake -DPROBE_NAME=falco ../. && make tbb grpc c-ares zlib jq curl protobuf b64 openssl scap sinsp && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
@@ -65,37 +65,38 @@ falcolibs/package:
 	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
 	cp -r b64-prefix/src/b64/include/b64 include/ && \
 	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
-	cp userspace/libsinsp/libsinsp.a lib/ && \
-	cp userspace/libscap/libscap.a lib/ && \
+	cp libsinsp/libsinsp.a lib/ && \
+	cp libscap/libscap.a lib/ && \
 	cp -r ../driver/bpf driver/src/ && \
-	cp ../scripts/sysdig-probe-loader bin/ && \
-	cp ../docker/stable/docker-entrypoint.sh bin/ && \
-	cp grpc-prefix/src/grpc/libs/opt/*.a lib/ && \
+	cp ../../falco/docker/driver-loader/docker-entrypoint.sh bin/ && \
+	cp ../../falco/scripts/falco-driver-loader bin/ && \
+	sed -i -E "s/@PROBE_VERSION@/\"$(FALCO_VERSION)\"/" bin/falco-driver-loader && \
+	sed -i -E "s#@DRIVERS_REPO@#\"$(DRIVERS_REPO)\"#" bin/falco-driver-loader && \
+	cp grpc-prefix/src/grpc/*.a lib/ && \
+	cp ./grpc-prefix/src/grpc/third_party/re2/libre2.a lib/ && \
+	cp -r grpc-prefix/src/grpc/third_party/abseil-cpp lib/ && \
 	cp protobuf-prefix/src/protobuf/src/.libs/* lib/ && \
 	cp c-ares-prefix/src/c-ares/.libs/* lib/ && \
 	cp b64-prefix/src/b64/src/libb64.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
 	cp jq-prefix/src/jq/target/lib/*.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
-	cp openssl-prefix/src/openssl/libcrypto.so.1.0.0 lib/libcrypto.so.1.0.0 && \
-	cd lib && ln -s libcrypto.so.1.0.0 libcrypto.so && cd .. && \
-	cp openssl-prefix/src/openssl/libssl.so.1.0.0 lib/libssl.so.1.0.0 && \
-	cd lib && ln -s libssl.so.1.0.0 libssl.so && cd .. &&  \
+        cp openssl-prefix/src/openssl/*.a lib/ && \
 	cp protobuf-prefix/src/protobuf/src/.libs/* lib && \
 	cp zlib-prefix/src/zlib/libz.so.1.2.11 lib/libz.so
 
 .PHONY: falcolibs/install
-falco/install:	
-	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(SYSDIG_VERSION)" && \
-	cd falco/libs/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(SYSDIG_VERSION)"
+falcolibs/install:	
+	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(FALCO_VERSION)" && \
+	cd falco-libs/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_VERSION)"
 
 .PHONY: avro/package
 avro/package:
 	cd avro/lang/c++ && mkdir -p build && cd build && \
-		cmake -DCMAKE_INSTALL_PREFIX=$(MODPREFIX) \
-		-DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-w" \
-		-DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" ../. && make && \
-		cp -a ../api avro
+	cmake -DCMAKE_INSTALL_PREFIX=$(MODPREFIX) \
+	-DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-w" \
+	-DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" ../. && make && \
+	cp -a ../api avro
 
 .PHONY: avro/install
 avro/install:
@@ -113,7 +114,7 @@ fs/install:
 .PHONY: uninstall
 uninstall:
 	rm -rf $(LIBPREFIX) $(INCPREFIX) $(CONFPREFIX) && \
-	rm -rf $(DRIVERPREFIX)$(SYSDIG_VERSION) && \
+	rm -rf $(DRIVERPREFIX)$(FALCO_VERSION) && \
 	find $(BINPREFIX) ! -name "sysporter" -type f -exec rm -f {} +
 
 .PHONY: clean
