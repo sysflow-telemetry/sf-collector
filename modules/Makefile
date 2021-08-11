@@ -44,7 +44,7 @@ install: modules \
 
 .PHONY: falcolibs/package
 falcolibs/package: 
-	cd falco-libs && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(FALCO_VERSION)\"/" CMakeLists.txt && mkdir -p build && cd build && \
+	cd falco-libs && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(FALCO_LIBS_VERSION)\"/" CMakeLists.txt && mkdir -p build && cd build && \
         cmake -DPROBE_NAME=falco ../. && make tbb grpc c-ares zlib jq curl protobuf b64 openssl scap sinsp && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
@@ -68,9 +68,10 @@ falcolibs/package:
 	cp libsinsp/libsinsp.a lib/ && \
 	cp libscap/libscap.a lib/ && \
 	cp -r ../driver/bpf driver/src/ && \
-	cp ../../falco/docker/driver-loader/docker-entrypoint.sh bin/ && \
+	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
 	cp ../../falco/scripts/falco-driver-loader bin/ && \
-	sed -i -E "s/@PROBE_VERSION@/\"$(FALCO_VERSION)\"/" bin/falco-driver-loader && \
+	sed -i -E "s/@PROBE_VERSION@/\"$(FALCO_LIBS_VERSION)\"/" bin/falco-driver-loader && \
+	sed -i -E "s/@FALCO_VERSION@/\"$(FALCO_VERSION)\"/" bin/falco-driver-loader && \
 	sed -i -E "s#@DRIVERS_REPO@#\"$(DRIVERS_REPO)\"#" bin/falco-driver-loader && \
 	cp grpc-prefix/src/grpc/*.a lib/ && \
 	cp ./grpc-prefix/src/grpc/third_party/re2/libre2.a lib/ && \
@@ -87,8 +88,8 @@ falcolibs/package:
 
 .PHONY: falcolibs/install
 falcolibs/install:	
-	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(FALCO_VERSION)" && \
-	cd falco-libs/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_VERSION)"
+	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)" && \
+	cd falco-libs/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)"
 
 .PHONY: avro/package
 avro/package:
@@ -114,7 +115,7 @@ fs/install:
 .PHONY: uninstall
 uninstall:
 	rm -rf $(LIBPREFIX) $(INCPREFIX) $(CONFPREFIX) && \
-	rm -rf $(DRIVERPREFIX)$(FALCO_VERSION) && \
+	rm -rf $(DRIVERPREFIX)$(FALCO_LIBS_VERSION) && \
 	find $(BINPREFIX) ! -name "sysporter" -type f -exec rm -f {} +
 
 .PHONY: clean

@@ -1,8 +1,8 @@
 #!/bin/bash
 set -x
 rm -fr /usr/src/kernels/ && rm -fr /usr/src/debug/
-rm -fr /lib/modules && ln -s $SYSDIG_HOST_ROOT/lib/modules /lib/modules
-rm -fr /boot && ln -s $SYSDIG_HOST_ROOT/boot /boot
+rm -fr /lib/modules && ln -s $HOST_ROOT/lib/modules /lib/modules
+rm -fr /boot && ln -s $HOST_ROOT/boot /boot
 if [ -S "/host/var/run/docker.sock" ] ; then
 echo "Docker Engine domain socket detected"
 fi
