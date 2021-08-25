@@ -44,7 +44,8 @@ install: modules \
 
 .PHONY: falcolibs/package
 falcolibs/package: 
-	cd falco-libs && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(FALCO_LIBS_VERSION)\"/" CMakeLists.txt && mkdir -p build && cd build && \
+	cd falco-libs && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(FALCO_LIBS_VERSION)\"/" CMakeLists.txt && \
+	patch -p1 -i ../falco/cmake/modules/falcosecurity-libs-repo/patch/libscap.patch && mkdir -p build && cd build && \
         cmake -DPROBE_NAME=falco ../. && make tbb grpc c-ares zlib jq curl protobuf b64 openssl scap sinsp && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \

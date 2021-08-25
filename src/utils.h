@@ -24,6 +24,7 @@
 #include "ghc/fs_std.hpp"
 #include "sysflow.h"
 #include "sysflowcontext.h"
+#include <arpa/inet.h>
 #include <ctime>
 #include <fstream>
 #include <json/json.h>
@@ -82,6 +83,22 @@ inline uint64_t getSysdigTime(context::SysFlowContext *cxt) {
     return cxt->timeStamp;
   }
   return sinsp_utils::get_current_time_ns();
+}
+
+inline void strToIP(const char *str, std::vector<int64_t> &ip) {
+  struct in_addr ipv4;
+  struct in6_addr ipv6;
+  if (inet_pton(AF_INET, str, &ipv4)) {
+    ip.push_back(static_cast<int64_t>(ipv4.s_addr));
+  } else if (inet_pton(AF_INET, str, &ipv6)) {
+    int64_t i64 =
+        static_cast<uint64_t>((((uint64_t)ipv6.s6_addr32[1]) << 32) |
+                              static_cast<uint64_t>(ipv6.s6_addr32[0]));
+    ip.push_back(i64);
+    i64 = static_cast<uint64_t>((((uint64_t)ipv6.s6_addr32[3]) << 32) |
+                                static_cast<int64_t>(ipv6.s6_addr32[2]));
+    ip.push_back(i64);
+  }
 }
 
 #define CHAR_MAP_STR "0123456789abcdef"

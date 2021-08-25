@@ -25,6 +25,7 @@
 #include "sysflow.h"
 #include "sysflowwriter.h"
 #include "utils.h"
+#include "json/json.h"
 #include <sinsp.h>
 
 namespace k8sevent {
@@ -40,6 +41,10 @@ public:
   K8sEventProcessor(writer::SysFlowWriter *writer, sfk8s::K8sContext *k8sCxt);
   virtual ~K8sEventProcessor();
   int handleK8sEvent(sinsp_evt *ev);
+
+private:
+  sysflow::K8sComponent getK8sComponent(Json::Value &root);
+  sysflow::K8sAction getAction(Json::Value &root);
 };
 } // namespace k8sevent
 #endif
