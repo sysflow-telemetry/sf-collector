@@ -92,7 +92,8 @@ if [ "${MODE}" == "base" ] ; then
         sparsehash-devel \
         snappy-devel \
         bc \
-        glog-devel
+        glog-devel \
+	kernel-devel
         #clang \
         #llvm
 
