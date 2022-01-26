@@ -1,9 +1,6 @@
 [submodule "avro"]
 	path = modules/avro
     url = https://github.com/apache/avro.git
-[submodule "sysdig"]
-	path = modules/sysdig
-    url = https://github.com/draios/sysdig.git
 [submodule "modules/sysflow"]
 	path = modules/sysflow
 	url = https://github.com/sysflow-telemetry/sf-apis.git
