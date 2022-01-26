@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.0-experimental
 #
-# Copyright (C) 2019 IBM Corporation.
+# Copyright (C) 2022 IBM Corporation.
 #
 # Authors:
 # Frederico Araujo <frederico.araujo@ibm.com>
@@ -74,7 +74,7 @@ COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  dnf -y install git && \
      cd /build/modules && \
      make INSTALL_PATH=${INSTALL_PATH} install && \
-     mkdir /sysdigsrc && cp -a /usr/src/sysdig-* /sysdigsrc/ && \
+     mkdir /falcosrc && cp -a /usr/src/falco-* /falcosrc/ && \
      make clean && rm -rf /build/modules && \
      dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
 

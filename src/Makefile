@@ -39,8 +39,8 @@ LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration
 LIBLOCALPREFIX ?= ../modules
-SDLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/sysdig/build/lib
-SDLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysdig/build/include
+SDLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/lib
+SDLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/include
 AVRLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
 AVRLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
 SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
@@ -52,8 +52,8 @@ DEBUG ?= 0
 # Compiler options 
 CXX = g++
 LIBS = $(SDLOCALLIBPREFIX)/libsinsp.a $(SDLOCALLIBPREFIX)/libscap.a $(SDLOCALLIBPREFIX)/libjq.a $(SDLOCALLIBPREFIX)/libonig.a \
-      $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a $(SDLOCALLIBPREFIX)/libgrpc++.a  $(SDLOCALLIBPREFIX)/libgrpc.a $(SDLOCALLIBPREFIX)/libgpr.a -lcares -lprotobuf \
-      -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl
+      $(SDLOCALLIBPREFIX)/libb64.a $(SDLOCALLIBPREFIX)/libcurl.a $(SDLOCALLIBPREFIX)/libtbb.a $(SDLOCALLIBPREFIX)/libgrpc++.a $(SDLOCALLIBPREFIX)/libgrpc++_alts.a $(SDLOCALLIBPREFIX)/libgrpc++_reflection.a  $(SDLOCALLIBPREFIX)/libgrpc++_error_details.a  $(SDLOCALLIBPREFIX)/libgrpc++_unsecure.a  $(SDLOCALLIBPREFIX)/libgrpc_plugin_support.a $(SDLOCALLIBPREFIX)/libgrpcpp_channelz.a   $(SDLOCALLIBPREFIX)/libgrpc.a $(SDLOCALLIBPREFIX)/libgpr.a -lcares -lprotobuf $(SDLOCALLIBPREFIX)/abseil-cpp/absl/synchronization/libabsl_synchronization.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/synchronization/libabsl_graphcycles_internal.a  $(SDLOCALLIBPREFIX)/abseil-cpp/absl/status/libabsl_status.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/status/libabsl_statusor.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/strings/libabsl_strings.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/strings/libabsl_strings_internal.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/strings/libabsl_cord.a  $(SDLOCALLIBPREFIX)/abseil-cpp/absl/strings/libabsl_str_format_internal.a  $(SDLOCALLIBPREFIX)/abseil-cpp/absl/base/libabsl_raw_logging_internal.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/base/libabsl_malloc_internal.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/base/libabsl_scoped_set_env.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/base/libabsl_base.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/base/libabsl_spinlock_wait.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/base/libabsl_throw_delegate.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/base/libabsl_log_severity.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/types/libabsl_bad_optional_access.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/time/libabsl_time.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/time/libabsl_time_zone.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/numeric/libabsl_int128.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/debugging/libabsl_stacktrace.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/debugging/libabsl_symbolize.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/debugging/libabsl_debugging_internal.a $(SDLOCALLIBPREFIX)/abseil-cpp/absl/debugging/libabsl_demangle_internal.a \
+      -lstdc++ -lelf -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -lavrocpp -lglog -ldl -lupb -laddress_sorting -lre2
 LDFLAGS = $(LIBS) -L/usr/local/lib/ -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ \
 	 -Wl,-rpath=/usr/local/lib -Wl,-rpath=$(LIBPREFIX) -Wl,-rpath=$(SDLOCALLIBPREFIX) -Wl,-rpath=$(AVRLOCALLIBPREFIX)
 CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
