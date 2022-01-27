@@ -22,7 +22,8 @@
 # Usage
 #-----------------------
 #
-# 1. Modify scripts/build/secret.sh and add user/password for RHEL
+# 1. Add scripts/build/rhpassword and scripts/build/rhuser and update them 
+#    with user/password for RHEL subscription manager
 # 2. Build with Docker BuildKit:
 #
 #    DOCKER_BUILDKIT=1 docker build --no-cache \

@@ -22,8 +22,7 @@
 # Usage
 #-----------------------
 #
-# 1. Modify scripts/build/secret.sh and add user/password for RHEL
-# 2. Build with Docker BuildKit:
+# 1. Build with Docker BuildKit:
 #
 #    DOCKER_BUILDKIT=1 docker build --no-cache \
 #                                   --build-arg UBI_VER=8.4-206
