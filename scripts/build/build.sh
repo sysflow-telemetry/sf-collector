@@ -1,11 +1,13 @@
 #!/bin/bash
-# Usage: build.sh version release target-image
-target_img=$3
-test_img="${target_img}-testing"
+# Usage: build.sh version release falcover libsver ubiver target
+target=$6
 docker build --build-arg BUILD_NUMBER=$2 \
              --build-arg VERSION=$1 \
              --build-arg RELEASE=$2 \
-             --target runtime \
-             -t $target_img \
+             --build-arg FALCO_VER=$3 \
+             --build-arg FALCO_LIBS_VER=$4 \
+             --build-arg UBI_VER=$5 \
+             --target $target \
+             -t sf-collector:$target \
              .
-docker build --cache-from $target_img --target testing -t $test_img .
+docker build --cache-from=sf-collector:$target --target=testing -t sf-collector:testing .
