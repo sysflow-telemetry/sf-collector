@@ -50,3 +50,7 @@ src/sysflow_config.h
 # others
 *DS_Store
 *.egg-info
+
+# secrets
+scripts/build/rhpassword
+scripts/build/rhuser
