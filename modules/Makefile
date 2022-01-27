@@ -121,4 +121,4 @@ uninstall:
 
 .PHONY: clean
 clean:
-	rm -rf avro/lang/c++/build falco/libs/build
+	rm -rf avro/lang/c++/build falco-libs/build
