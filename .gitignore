@@ -45,6 +45,7 @@ src/sysreader
 src/avro/py3/build/
 src/avro/py3/classes/*.egg-info
 src/avro/py3/dist
+src/sysflow_config.h
 
 # others
 *DS_Store
