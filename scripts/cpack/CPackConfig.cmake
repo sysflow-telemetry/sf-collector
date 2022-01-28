@@ -46,6 +46,7 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "dkms (>= 2.1.0.0), libelf1 (>= 0.170), libsnap
 set(CPACK_RPM_PACKAGE_LICENSE "Apache v2.0")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE, "${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_RPM_PACKAGE_URL "https://github.com/sysflow-telemetry/sf-collector")
+set(CPACK_RPM_PACKAGE_REQUIRES "dkms, kernel-devel, systemd")
 set(CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     /usr/src
