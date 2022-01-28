@@ -41,10 +41,16 @@ uninstall:
 	cd src && make uninstall
 	cd modules && make uninstall
 
+.PHONY: package
+package: 
+	docker run --rm --entrypoint=/bin/bash -v $(shell pwd)/scripts/cpack:$(INSTALL_PATH)/scripts/cpack sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage.sh
+	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION); cpack --config ./CPackConfig.cmake
+
 .PHONY: clean
 clean:
 	cd src && make clean
 	cd modules && make clean 
+	cd scripts/cpack && ./clean.sh
 
 .PHONY: docker-build
 docker-build:
@@ -75,6 +81,7 @@ help:
 	@echo "... clean"
 	@echo "... modules"
 	@echo "... sysporter"
+	@echo "... package"
 	@echo "... install"
 	@echo "... uninstall"
 	@echo "... docker-runtime-build"

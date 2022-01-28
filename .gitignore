@@ -54,3 +54,8 @@ src/sysflow_config.h
 # secrets
 scripts/build/rhpassword
 scripts/build/rhuser
+
+# cpack
+scripts/cpack/_CPack_Packages
+scripts/cpack/build
+scripts/cpack/sfcollector*
