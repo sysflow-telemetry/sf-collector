@@ -13,6 +13,3 @@
 [submodule "modules/falco"]
 	path = modules/falco
 	url = https://github.com/falcosecurity/falco.git
-[submodule "modules/boost"]
-	path = modules/boost
-	url = https://github.com/boostorg/boost.git
