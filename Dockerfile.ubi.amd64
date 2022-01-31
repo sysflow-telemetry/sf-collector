@@ -43,7 +43,7 @@ ARG UBI_VER
 FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 
 # Install Packages
-# Copy in llvm 9.0 rpms.  Sysdig's ebpf probe fails unless compiled with llvm 9.0 for now.
+# Copy in llvm 9.0 rpms. Falco's ebpf probe fails unless compiled with llvm 9.0 for now.
 # https://github.com/falcosecurity/libs/issues/4
 COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
@@ -64,7 +64,7 @@ ENV PATH="$PATH:"${INSTALL_PATH}"/modules/bin"
 
 ENV LIBRARY_PATH=/lib64
 
-ENV SYSDIG_HOST_ROOT=/host
+ENV HOST_ROOT=/host
 
 ENV HOME=/root
 
