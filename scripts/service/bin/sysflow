@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-SFPROCESSOR=/usr/bin/sfprocessor
-SFCOLLECTOR=/usr/bin/sysporter
-#SFENV=/etc/sysflow/conf/sysflow.env
+SYSFLOW=/usr/lib/systemd/system/sysflow.service
+SFPROCESSOR=/usr/lib/systemd/system/sysflow-processor.service
+SFPROCESSOR=/usr/lib/systemd/system/sysflow-collector.service
 
 status () {
     systemctl status sysflow*
@@ -13,24 +13,28 @@ start () {
     if test -f "$ENVFILE"; then
         echo "SysFlow service configuration file not found in $CONFIGPATH"
     fi
+    if test -f "$SYSFLOW"; then
+        systemctl enable sysflow
+    fi
     if test -f "$SFPROCESSOR"; then
-        systemctl enable sysflow sysflow-processor
+        systemctl enable sysflow-processor
     fi
     if test -f "$SFCOLLECTOR"; then
-        systemctl enable sysflow sysflow-collector
-        #if test -f ""$SFENV; then
-        #fi
+        systemctl enable sysflow
     fi
     systemctl start sysflow
 }
 
 stop () {
     systemctl stop sysflow
+    if test -f "$SYSFLOW"; then
+        systemctl disable sysflow
+    fi
     if test -f "$SFPROCESSOR"; then
-        systemctl disable sysflow sysflow-processor
+        systemctl disable sysflow-processor
     fi
     if test -f "$SFCOLLECTOR"; then
-        systemctl disable sysflow sysflow-collector
+        systemctl disable sysflow
     fi
     systemctl daemon-reload
     systemctl reset-failed
