@@ -43,7 +43,7 @@ uninstall:
 
 .PHONY: package
 package: 
-	docker run --rm --entrypoint=/bin/bash -v $(shell pwd)/scripts/cpack:$(INSTALL_PATH)/scripts/cpack sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage.sh
+	docker run --rm --entrypoint=/bin/bash -v $(shell pwd)/scripts:$(INSTALL_PATH)/scripts sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage.sh
 	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION); cpack --config ./CPackConfig.cmake
 
 .PHONY: clean

@@ -1,0 +1,55 @@
+#!/bin/bash
+set -e
+
+SYSFLOW=/usr/lib/systemd/system/sysflow.service
+SFPROCESSOR=/usr/lib/systemd/system/sysflow-processor.service
+SFPROCESSOR=/usr/lib/systemd/system/sysflow-collector.service
+
+status () {
+    systemctl status sysflow*
+}
+
+start () {
+    if test -f "$ENVFILE"; then
+        echo "SysFlow service configuration file not found in $CONFIGPATH"
+    fi
+    if test -f "$SYSFLOW"; then
+        systemctl enable sysflow
+    fi
+    if test -f "$SFPROCESSOR"; then
+        systemctl enable sysflow-processor
+    fi
+    if test -f "$SFCOLLECTOR"; then
+        systemctl enable sysflow
+    fi
+    systemctl start sysflow
+}
+
+stop () {
+    systemctl stop sysflow
+    if test -f "$SYSFLOW"; then
+        systemctl disable sysflow
+    fi
+    if test -f "$SFPROCESSOR"; then
+        systemctl disable sysflow-processor
+    fi
+    if test -f "$SFCOLLECTOR"; then
+        systemctl disable sysflow
+    fi
+    systemctl daemon-reload
+    systemctl reset-failed
+}
+
+systemctl daemon-reload
+if [ "$1" == "status" ]; then
+  status
+elif [ "$1" == "start" ]; then
+  echo "Starting SysFlow..."
+  start
+elif [ "$1" == "stop" ]; then
+  echo "Stopping SysFlow..."
+  stop
+else
+  echo "Usage: sysflow [status|start|stop]"
+fi
+

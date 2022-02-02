@@ -46,6 +46,7 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "dkms (>= 2.1.0.0), libelf1 (>= 0.170), libsnap
 set(CPACK_RPM_PACKAGE_LICENSE "Apache v2.0")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE, "${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_RPM_PACKAGE_URL "https://github.com/sysflow-telemetry/sf-collector")
+set(CPACK_RPM_PACKAGE_REQUIRES "dkms, kernel-devel, systemd")
 set(CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     /usr/src
@@ -59,5 +60,5 @@ set(CPACK_RPM_PACKAGE_RELOCATABLE "OFF")
 
 # Contents
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_PROCESSOR})
-set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build/resources" "/etc/sysflow")
+set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build/conf" "/etc/sysflow/conf" "${CMAKE_CURRENT_LIST_DIR}/build/driver" "/etc/sysflow/driver" "${CMAKE_CURRENT_LIST_DIR}/build/driver/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build/service" "/usr/lib/systemd/system")
 

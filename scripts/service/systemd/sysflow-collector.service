@@ -1,0 +1,28 @@
+[Unit]
+Description=SysFlow cloud-native system telemetry (collector)
+Documentation=https://sysflow.readthedocs.io
+PartOf=sysflow.service
+After=sysflow.service
+
+[Service]
+Type=simple
+User=root
+EnvironmentFile=/etc/sysflow/conf/sysflow.env
+PassEnvironment=NODE_ID FALCO_BPF_PROBE DRIVER_TYPE DRIVER_REPO DRIVER_NAME
+ExecStart=/etc/sysflow/driver/start
+ExecStopPost=/etc/sysflow/driver/cleanup
+UMask=0077
+TimeoutSec=30
+RestartSec=15s
+Restart=on-failure
+PrivateTmp=true
+NoNewPrivileges=yes
+ProtectHome=read-only
+ProtectSystem=full
+ReadWritePaths=/usr/src
+ProtectKernelTunables=true
+RestrictAddressFamilies=~AF_PACKET
+KillSignal=SIGKILL
+
+[Install]
+WantedBy=sysflow-processor.service
