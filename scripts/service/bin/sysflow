@@ -3,7 +3,7 @@ set -e
 
 SYSFLOW=/usr/lib/systemd/system/sysflow.service
 SFPROCESSOR=/usr/lib/systemd/system/sysflow-processor.service
-SFPROCESSOR=/usr/lib/systemd/system/sysflow-collector.service
+SFCOLLECTOR=/usr/lib/systemd/system/sysflow-collector.service
 
 status () {
     systemctl status sysflow*
@@ -20,7 +20,7 @@ start () {
         systemctl enable sysflow-processor
     fi
     if test -f "$SFCOLLECTOR"; then
-        systemctl enable sysflow
+        systemctl enable sysflow-collector
     fi
     systemctl start sysflow
 }
@@ -34,7 +34,7 @@ stop () {
         systemctl disable sysflow-processor
     fi
     if test -f "$SFCOLLECTOR"; then
-        systemctl disable sysflow
+        systemctl disable sysflow-collector
     fi
     systemctl daemon-reload
     systemctl reset-failed
