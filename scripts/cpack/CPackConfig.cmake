@@ -53,9 +53,13 @@ set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     /usr/share/man
     /usr/share/man/man8
     /etc
+    /etc/sysflow
     /usr
     /usr/bin
-    /usr/share)
+    /usr/share
+    /usr/lib
+    /usr/lib/systemd
+    /usr/lib/systemd/system)
 set(CPACK_RPM_PACKAGE_RELOCATABLE "OFF")
 
 # Contents
