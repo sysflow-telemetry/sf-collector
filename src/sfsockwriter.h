@@ -26,11 +26,16 @@
 #include "sysflowwriter.h"
 #include "utils.h"
 #include <netinet/in.h>
+#include <signal.h>
 #include <sstream>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <sys/un.h>
+#include <unistd.h>
 
 using sysflow::SysFlow;
+
+#define CONNECT_INTERVAL 10
 
 namespace writer {
 class SFSocketWriter : public writer::SysFlowWriter {
@@ -40,26 +45,58 @@ private:
   avro::EncoderPtr m_encoder;
   std::ostringstream m_stringStream;
   std::unique_ptr<avro::OutputStream> m_outStream;
+  time_t m_errTimer;
+  time_t m_reconnectInterval;
+  bool m_reset;
   DEFINE_LOGGER();
+  int connectSocket();
 
 public:
   SFSocketWriter(context::SysFlowContext *cxt, time_t start);
   virtual ~SFSocketWriter();
   inline void write(SysFlow *flow) {
-    avro::encode(*m_encoder, *flow);
-    m_encoder->flush();
-    if (send(m_sock, (const void *)m_stringStream.str().c_str(),
-             m_stringStream.str().size(), 0) < 0) {
-      SF_ERROR(m_logger, "Unable to send on domain socket:  "
-                             << m_sockPath
-                             << ". Error Code: " << std::strerror(errno));
+    if (m_errTimer == 0) {
+      avro::encode(*m_encoder, *flow);
+      m_encoder->flush();
+      if (send(m_sock, (const void *)m_stringStream.str().c_str(),
+               m_stringStream.str().size(), 0) < 0) {
+        SF_ERROR(m_logger, "Unable to send on domain socket:  "
+                               << m_sockPath
+                               << ". Error Code: " << std::strerror(errno));
+        m_errTimer = time(nullptr);
+      }
+      m_stringStream.str("");
+      m_stringStream.clear();
+    } else {
+      time_t curTime = time(nullptr);
+      double interval = difftime(curTime, m_errTimer);
+      if (interval >= m_reconnectInterval) {
+        SF_WARN(m_logger,
+                "Trying to reconnect to socket " << m_sockPath.c_str())
+        int res = connectSocket();
+        if (res == 0) {
+          SF_WARN(m_logger,
+                  "Successful reconnected to socket " << m_sockPath.c_str())
+          m_errTimer = 0;
+          m_reconnectInterval = CONNECT_INTERVAL;
+          m_reset = true;
+        } else {
+          m_reconnectInterval = 2 * m_reconnectInterval;
+          if (m_reconnectInterval > 8 * CONNECT_INTERVAL) {
+            SF_ERROR(
+                m_logger,
+                "Unable to connect to domain socket within interval. Exiting!");
+            // exit(EXIT_FAILURE);
+            pid_t myPid = getpid();
+            kill(myPid, SIGINT);
+          }
+        }
+      }
     }
-
-    m_stringStream.str("");
-    m_stringStream.clear();
   }
   int initialize();
   void reset(time_t curTime);
+  bool needsReset() { return m_reset; }
 };
 } // namespace writer
 #endif
