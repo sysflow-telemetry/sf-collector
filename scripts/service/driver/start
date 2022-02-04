@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-CHOME=${HOME} 
-export HOME=/run/sysflow && /etc/sysflow/driver/falco-driver-loader ${DRIVER_TYPE}
-HOME=${CHOME}
-/usr/bin/sysporter -e ${NODE_ID} -u /sock/sysflow.sock
+export HOME=/run/sysflow && \
+    /etc/sysflow/driver/falco-driver-loader ${DRIVER_TYPE:-bpf} && \
+    /usr/bin/sysporter -e ${NODE_ID:-localhost} -u ${SOCKET:-/sock/sysflow.sock}
