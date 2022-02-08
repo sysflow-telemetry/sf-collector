@@ -41,13 +41,14 @@ jobs:
       - name: Read manifest        
         shell: bash        
         run: |   
-          echo "SYSDIG_VERSION=$(awk -F'=' '/SYSDIG_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
           echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV                  
       - name: Set image tags        
         shell: bash        
         run: |           
-          echo "BASE_TAG=$(echo base-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV        
-          echo "MODS_TAG=$(echo mods-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV                  
+          echo "BASE_TAG=$(echo base-${{ env.FALCO_VERSION }}-${{ env.FALCO_LIBS_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV        
+          echo "MODS_TAG=$(echo mods-${{ env.FALCO_VERSION }}-${{ env.FALCO_LIBS_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV                  
       - name: Check package version
         id: checks
         shell: bash
@@ -140,7 +141,8 @@ jobs:
       - name: Read manifest        
         shell: bash        
         run: |   
-          echo "SYSDIG_VERSION=$(awk -F'=' '/SYSDIG_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV   
       - name: Init modules
         run: make -C modules init        
@@ -148,7 +150,7 @@ jobs:
         uses: docker/setup-buildx-action@v1            
       - name: Run tests
         run: |
-          DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg SYSDIG_VER=${{ env.SYSDIG_VERSION }} --target testing -t sf-collector:testing .
+          DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg FALCO_VER=${{ env.FALCO_VERSION }} --build-arg FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }} --target testing -t sf-collector:testing .
           docker run --rm --name sftests -v "$(pwd)/tests:/usr/local/sysflow/tests" -e quiet=true sf-collector:testing -t tests/tests.bats            
   docker:    
     runs-on: ubuntu-latest
@@ -165,7 +167,8 @@ jobs:
       - name: Read manifest        
         shell: bash        
         run: |   
-          echo "SYSDIG_VERSION=$(awk -F'=' '/SYSDIG_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
           echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV    
       - name: Init modules
         run: make -C modules init
@@ -218,7 +221,8 @@ jobs:
           target: runtime
           build-args: |
             UBI_VER=${{ env.UBI_VERSION }}
-            SYSDIG_VER=${{ env.SYSDIG_VERSION }}
+            FALCO_VER=${{ env.FALCO_VERSION }}
+            FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }}
             BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
             VERSION=${{ steps.args.outputs.branch }}
             RELEASE=${{ steps.args.outputs.sha_short }}
