@@ -27,8 +27,6 @@
 #include <ctime>
 #include <fstream>
 #include <json/json.h>
-#include <json/reader.h>
-#include <json/value.h>
 #include <openssl/sha.h>
 #include <sinsp.h>
 #include <sstream>

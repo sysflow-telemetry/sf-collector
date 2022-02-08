@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.0-experimental
 #
-# Copyright (C) 2019 IBM Corporation.
+# Copyright (C) 2022 IBM Corporation.
 #
 # Authors:
 # Frederico Araujo <frederico.araujo@ibm.com>
@@ -22,7 +22,8 @@
 # Usage
 #-----------------------
 #
-# 1. Modify scripts/build/secret.sh and add user/password for RHEL
+# 1. Add scripts/build/rhpassword and scripts/build/rhuser and update them 
+#    with user/password for RHEL subscription manager
 # 2. Build with Docker BuildKit:
 #
 #    DOCKER_BUILDKIT=1 docker build --no-cache \
@@ -42,7 +43,7 @@ ARG UBI_VER
 FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 
 # Install Packages
-# Copy in llvm 9.0 rpms.  Sysdig's ebpf probe fails unless compiled with llvm 9.0 for now.
+# Copy in llvm 9.0 rpms. Falco's ebpf probe fails unless compiled with llvm 9.0 for now.
 # https://github.com/falcosecurity/libs/issues/4
 COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
@@ -63,7 +64,7 @@ ENV PATH="$PATH:"${INSTALL_PATH}"/modules/bin"
 
 ENV LIBRARY_PATH=/lib64
 
-ENV SYSDIG_HOST_ROOT=/host
+ENV HOST_ROOT=/host
 
 ENV HOME=/root
 
@@ -74,7 +75,7 @@ COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  dnf -y install git && \
      cd /build/modules && \
      make INSTALL_PATH=${INSTALL_PATH} install && \
-     mkdir /sysdigsrc && cp -a /usr/src/sysdig-* /sysdigsrc/ && \
+     mkdir /falcosrc && cp -a /usr/src/falco-* /falcosrc/ && \
      make clean && rm -rf /build/modules && \
      dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
 

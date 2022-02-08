@@ -45,6 +45,7 @@ public:
   inline void write(SysFlow *flow) { m_dfw->write(*flow); }
   int initialize();
   void reset(time_t curTime);
+  bool needsReset() { return false; }
 };
 } // namespace writer
 #endif

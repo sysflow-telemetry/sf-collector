@@ -69,7 +69,7 @@ if [ "${MODE}" == "base" ] ; then
         flex \
         bison \
         libstdc++-static \
-        boost-devel \
+        boost-static \
         elfutils-libelf-devel \
         sparsehash-devel \
         snappy-devel \

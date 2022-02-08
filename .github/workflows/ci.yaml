@@ -41,13 +41,14 @@ jobs:
       - name: Read manifest        
         shell: bash        
         run: |   
-          echo "SYSDIG_VERSION=$(awk -F'=' '/SYSDIG_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
           echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV                  
       - name: Set image tags        
         shell: bash        
         run: |           
-          echo "BASE_TAG=$(echo base-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV        
-          echo "MODS_TAG=$(echo mods-${{ env.SYSDIG_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV                  
+          echo "BASE_TAG=$(echo base-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV        
+          echo "MODS_TAG=$(echo mods-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV                  
       - name: Check package version
         id: checks
         shell: bash
@@ -140,7 +141,8 @@ jobs:
       - name: Read manifest        
         shell: bash        
         run: |   
-          echo "SYSDIG_VERSION=$(awk -F'=' '/SYSDIG_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV   
       - name: Init modules
         run: make -C modules init        
@@ -148,7 +150,7 @@ jobs:
         uses: docker/setup-buildx-action@v1            
       - name: Run tests
         run: |
-          DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg SYSDIG_VER=${{ env.SYSDIG_VERSION }} --target testing -t sf-collector:testing .
+          DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg FALCO_VER=${{ env.FALCO_VERSION }} --build-arg FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }} --target testing -t sf-collector:testing .
           docker run --rm --name sftests -v "$(pwd)/tests:/usr/local/sysflow/tests" -e quiet=true sf-collector:testing -t tests/tests.bats            
   docker:    
     runs-on: ubuntu-latest
@@ -165,7 +167,8 @@ jobs:
       - name: Read manifest        
         shell: bash        
         run: |   
-          echo "SYSDIG_VERSION=$(awk -F'=' '/SYSDIG_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
+          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV        
           echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV    
       - name: Init modules
         run: make -C modules init
@@ -188,6 +191,8 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+        with:
+          version: v0.6.3
       - name: Login to DockerHub
         uses: docker/login-action@v1 
         if: ${{ github.event_name != 'pull_request' }}
@@ -218,7 +223,8 @@ jobs:
           target: runtime
           build-args: |
             UBI_VER=${{ env.UBI_VERSION }}
-            SYSDIG_VER=${{ env.SYSDIG_VERSION }}
+            FALCO_VER=${{ env.FALCO_VERSION }}
+            FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }}
             BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
             VERSION=${{ steps.args.outputs.branch }}
             RELEASE=${{ steps.args.outputs.sha_short }}
@@ -234,3 +240,51 @@ jobs:
           readme_file: "README.md"           
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+  release:    
+    needs: docker    
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest    
+    permissions:
+      contents: write      
+    steps:      
+      - name: Checkout
+        uses: actions/checkout@v2           
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1      
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.12
+        with:
+          cmake-version: '3.16.x'
+      - name: Get version from tag
+        id: tag_name
+        shell: bash
+        run: |          
+          GHREF=${GITHUB_REF#refs/tags/}; echo ::set-output name=current_version::${GHREF%-*}           
+          echo ::set-output name=current_tag::${GITHUB_REF#refs/tags/}                 
+      - name: Build Release Assets
+        id: build_release_assets
+        shell: bash
+        run: |
+          docker pull ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ steps.tag_name.outputs.current_tag }}
+          make package
+          echo "##[set-output name=deb;] $(ls scripts/cpack/*.deb)"          
+          echo "##[set-output name=rpm;] $(ls scripts/cpack/*.rpm)"          
+          echo "##[set-output name=targz;] $(ls scripts/cpack/*.tar.gz)"                  
+      - name: Get Changelog Entry
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:          
+          version: ${{ steps.tag_name.outputs.current_version }}
+          path: ./CHANGELOG.md      
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body: ${{ steps.changelog_reader.outputs.changes }}          
+          token: ${{ secrets.GITHUB_TOKEN }}          
+          prerelease: contains(steps.tag_name.outputs.current_version, '-rc')
+          draft: true
+          files: |
+            ${{ steps.build_release_assets.deb }}
+            ${{ steps.build_release_assets.rpm }}
+            ${{ steps.build_release_assets.targz }}

@@ -75,7 +75,7 @@ void SysFlowProcessor::clearTables() {
 bool SysFlowProcessor::checkAndRotateFile() {
   bool fileRotated = false;
   time_t curTime = utils::getCurrentTime(m_cxt);
-  if (m_writer->isExpired(curTime)) {
+  if (m_writer->isExpired(curTime) || m_writer->needsReset()) {
     SF_INFO(m_logger,
             "Container Table: "
                 << m_containerCxt->getSize()

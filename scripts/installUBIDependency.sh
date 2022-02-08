@@ -87,7 +87,7 @@ if [ "${MODE}" == "base" ] ; then
         flex \
         bison \
         libstdc++-static \
-        boost-devel \
+        boost-static \
         elfutils-libelf-devel \
         sparsehash-devel \
         snappy-devel \
@@ -96,10 +96,10 @@ if [ "${MODE}" == "base" ] ; then
         #clang \
         #llvm
 
-    # Install dkms and jsoncpp from EPEL.
+    # Install dkms from EPEL.
     # ref: https://access.redhat.com/solutions/1132653
     dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    dnf -y install dkms jsoncpp-devel
+    dnf -y install dkms
     dnf -y remove epel-release && dnf autoremove
     DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
 
