@@ -31,7 +31,7 @@
 #include <sinsp.h>
 #include <unistd.h>
 
-#define SYSDIG_LOG "SYSDIG_LOG"
+#define DRIVER_LOG "DRIVER_LOG"
 #define NODE_IP "NODE_IP"
 #define ENABLE_DROP_MODE "ENABLE_DROP_MODE"
 #define FILE_READ_MODE "FILE_READ_MODE"
