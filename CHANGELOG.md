@@ -13,13 +13,39 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 > - **Fixed**: for any bug fixes.
 > - **Security**: in case of vulnerabilities.
 
-## [[UNRELEASED](https://github.com/sysflow-telemetry/sf-collector/compare/0.3.0...HEAD)]
+## [Unreleased]
+
+## [0.4.0] - 2022-02-18
+
+### Added
+
+- Packaging in deb, rpm, and targz formats
 
 ### Changed
 
-- Update(ubi): Bumped UBI version to 8.4-211.
+- Updated to use falco-libs and falco pre-0.31.0
+- Compilies avro and json statically into syspoter
+- Updated collector usage string to document -u and -w flags
+- Collector now tries to reconnect when the processor socket connection is severed
+- Updated CI to automate packaging or release assets with release notes
+- Bumped UBI version to 8.5-226.
 
-## [[0.3.0](https://github.com/sysflow-telemetry/sf-collector/compare/0.2.2...0.3.0)] - 2021-09-20
+### Fixed
+
+- Removed header imports causing a conflict between validate-json and json libraries built by falco libs
+- Cleanup module paths and makefiles
+
+### Removed
+
+- Remove build dependency on sysdig (uses falco libs now)
+
+## [0.3.1] - 2021-09-29
+
+### Changed
+
+- Bumped UBI version to 8.4-211.
+
+## [0.3.0] - 2021-09-20
 
 ### Added
 
@@ -32,20 +58,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Upgraded to sysdig 0.27.1
 - Tracking latest sysflow APIs.
 
-## [[0.2.2](https://github.com/sysflow-telemetry/sf-collector/compare/0.2.1...0.2.2)] - 2020-12-07
+## [0.2.2] - 2020-12-07
 
 ### Changed
 
 - Upgraded system packages in base image
 - Tracking latest sysflow APIs.
 
-## [[0.2.1](https://github.com/sysflow-telemetry/sf-collector/compare/0.2.0...0.2.1)] - 2020-12-02
+## [0.2.1] - 2020-12-02
 
 ### Changed
 
 - Tracking latest sysflow APIs.
 
-## [[0.2.0](https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0...0.2.0)] - 2020-12-01
+## [0.2.0] - 2020-12-01
 
 ### Added
 
@@ -71,7 +97,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fixed performance bottlenecks around utils::getExportTime function.
 - Fixed command line parsing issue on PPC and Z platforms.
 
-## [[0.1.0](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc4...0.1.0)] - 2020-10-30
+## [0.1.0] - 2020-10-30
 
 ### Added
 
@@ -81,7 +107,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - Removed dependency to ncurses.
 
-## [[0.1.0-rc4](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc3...0.1.0-rc4)] - 2020-08-10
+## [0.1.0-rc4] - 2020-08-10
 
 ### Added
 
@@ -106,7 +132,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fixed container context to prevent a sysporter crash due to a null variable.
 - Fixed memory leak found in sysdig 0.26.4 [CRITICAL].
 
-## [[0.1-rc3](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc2...0.1-rc3)] - 2020-03-17
+## [0.1-rc3] - 2020-03-17
 
 ### Added
 
@@ -127,7 +153,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fixed issue [13](https://github.com/sysflow-telemetry/sf-docs/issues/13).
 - Fixed corrupt memory error that caused coredump when using domain socket interface.
 
-## [[0.1-rc2](https://github.com/sysflow-telemetry/sf-collector/compare/0.1-rc1...0.1-rc2)] - 2019-11-08
+## [0.1-rc2] - 2019-11-08
 
 ### Changed
 
@@ -143,3 +169,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - First release candidate of SysFlow Collector.
+
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.0-rc1...HEAD
+[0.4.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.3.1...0.4.0-rc1
+[0.3.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.3.0...0.3.1
+[0.3.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.2.2...0.3.0
+[0.2.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.2.1...0.2.2
+[0.2.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.2.0...0.2.1
+[0.2.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0...0.2.0
+[0.1.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0-rc4...0.1.0
+[0.1.0-rc4]: https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0-rc3...0.1.0-rc4
+[0.1.0-rc3]: https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0-rc2...0.1.0-rc3
+[0.1.0-rc2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.1.0-rc1...0.1.0-rc2
+[0.1.0-rc1]: https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.1.0-rc1

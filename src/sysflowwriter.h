@@ -113,6 +113,7 @@ public:
   }
   virtual int initialize() = 0;
   virtual void reset(time_t curTime) = 0;
+  virtual bool needsReset() = 0;
 };
 } // namespace writer
 #endif

@@ -41,6 +41,9 @@ public:
   }
   int initialize();
   void reset(time_t curTime);
+  bool needsReset() {
+    return m_sockWriter.needsReset() || m_fileWriter.needsReset();
+  }
 };
 } // namespace writer
 #endif

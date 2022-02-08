@@ -1,0 +1,11 @@
+[Unit]
+Description=SysFlow cloud-native system telemetry 
+Documentation=https://sysflow.readthedocs.io
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

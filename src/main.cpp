@@ -59,11 +59,13 @@ int str2int(int &i, char const *s, int base = 0) {
 
 static void usage(const std::string &name) {
   std::cerr
-      << "Usage: " << name << " [options] -w <file name/dir>\n"
+      << "Usage: " << name << " [options] {-u|-w} <path>\n"
       << "Options:\n"
       << "\t-h\t\t\tShow this help message and exit\n"
-      << "\t-w file name/dir\t(required) The file or directory to which "
-         "sysflow records are written\n"
+      << "\t-u unix socket path\tThe path to the unix socket in which "
+         "sysflow records are written (cannot be combined with -w)\n"
+      << "\t-w file name/dir\tThe file or directory to which "
+         "sysflow records are written (cannot be combined with -u)\n"
       << "\t\t\t\tIf a directory is specified (using a trailing slash), file "
          "name will be an epoch timestamp\n"
       << "\t\t\t\tIf -G is specified, then the file name specified will have "

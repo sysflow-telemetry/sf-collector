@@ -27,25 +27,26 @@ all: init \
 .PHONY: init
 init:
 	git submodule update --init --recursive --force
-	cd sysdig && git checkout $(SYSDIG_VERSION)
+	cd falco && git checkout $(FALCO_VERSION)
+	cd falco-libs && git checkout $(FALCO_LIBS_VERSION)
 	cd avro && git checkout $(AVRO_VERSION)
 
 .PHONY: modules
-modules: sysdig/package \
+modules: falcolibs/package \
          avro/package
 
 .PHONY: install
 install: modules \
-	sysdig/install \
+	falcolibs/install \
 	avro/install \
 	sysflow/install \
 	fs/install
 
-.PHONY: sysdig/package
-sysdig/package: 
-	cd sysdig && sed -i -E "s/SYSDIG_VERSION \".+\"/SYSDIG_VERSION \"$(SYSDIG_VERSION)\"/" CMakeLists.txt && sed -i '/ctext.cpp/d' userspace/libsinsp/CMakeLists.txt &&  sed -i '/table.cpp/d' userspace/libsinsp/CMakeLists.txt && \
-	sed -i "/#define CSYSDIG/d" userspace/libsinsp/settings.h &&  sed -i "/#define HAS_CHISELS/d" userspace/libsinsp/settings.h && mkdir -p build && cd build && \
-    cmake ../. && make tbb grpc c-ares zlib jq curl luajit protobuf b64 openssl scap sinsp && \
+.PHONY: falcolibs/package
+falcolibs/package: 
+	cd falco-libs && \
+	mkdir -p build && cd build && \
+        cmake -DPROBE_VERSION=${FALCO_LIBS_DRIVER_VERSION} -DDRIVER_PACKAGE_NAME=falco -DSCAP_BPF_PROBE_ENV_VAR_NAME=FALCO_BPF_PROBE -DCAP_HOST_ROOT_ENV_VAR_NAME=HOST_ROOT -DFALCOSECURITY_LIBS_VERSION=${FALCO_LIBS_VERSION} -DFALCOSECURITY_LIBS_CHECKSUM=${FALCO_LIBS_CHECKSUM} -DCMAKE_BUILD_TYPE=Release -DPROBE_NAME=falco -DBUILD_BPF=OFF  -DBUILD_DRIVER=OFF ../. && make && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
@@ -62,37 +63,42 @@ sysdig/package:
 	cp -r protobuf-prefix/src/protobuf/src/google include/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbbmalloc.a lib/ && \
-	cp userspace/libsinsp/libsinsp.a lib/ && \
-	cp userspace/libscap/libscap.a lib/ && \
+	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
+	cp -r b64-prefix/src/b64/include/b64 include/ && \
+	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
+	cp libsinsp/libsinsp.a lib/ && \
+	cp libscap/libscap.a lib/ && \
 	cp -r ../driver/bpf driver/src/ && \
-	cp ../scripts/sysdig-probe-loader bin/ && \
-	cp ../docker/stable/docker-entrypoint.sh bin/ && \
-	cp grpc-prefix/src/grpc/libs/opt/*.a lib/ && \
+	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
+	cp ../../falco/scripts/falco-driver-loader bin/ && \
+	sed -i -E "s/@PROBE_VERSION@/\"$(FALCO_LIBS_VERSION)\"/" bin/falco-driver-loader && \
+	sed -i -E "s/@FALCO_VERSION@/\"$(FALCO_VERSION)\"/" bin/falco-driver-loader && \
+	sed -i -E "s#@DRIVERS_REPO@#\"$(DRIVERS_REPO)\"#" bin/falco-driver-loader && \
+	cp grpc-prefix/src/grpc/*.a lib/ && \
+	cp ./grpc-prefix/src/grpc/third_party/re2/libre2.a lib/ && \
+	cp -r grpc-prefix/src/grpc/third_party/abseil-cpp lib/ && \
 	cp protobuf-prefix/src/protobuf/src/.libs/* lib/ && \
-	cp c-ares-prefix/src/c-ares/.libs/* lib/ && \
+	cp c-ares-prefix/src/c-ares/target/lib/libcares.a lib/ && \
 	cp b64-prefix/src/b64/src/libb64.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
 	cp jq-prefix/src/jq/target/lib/*.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
-	cp openssl-prefix/src/openssl/libcrypto.so.1.0.0 lib/libcrypto.so.1.0.0 && \
-	cd lib && ln -s libcrypto.so.1.0.0 libcrypto.so && cd .. && \
-	cp openssl-prefix/src/openssl/libssl.so.1.0.0 lib/libssl.so.1.0.0 && \
-	cd lib && ln -s libssl.so.1.0.0 libssl.so && cd .. &&  \
-	cp protobuf-prefix/src/protobuf/src/.libs/* lib && \
+        cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
+	cp protobuf-prefix/src/protobuf/target/lib/*.a lib && \
 	cp zlib-prefix/src/zlib/libz.so.1.2.11 lib/libz.so
 
-.PHONY: sysdig/install
-sysdig/install:	
-	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(SYSDIG_VERSION)" && \
-	cd sysdig/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(SYSDIG_VERSION)"
+.PHONY: falcolibs/install
+falcolibs/install:	
+	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)" && \
+	cd falco-libs/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)"
 
 .PHONY: avro/package
 avro/package:
 	cd avro/lang/c++ && mkdir -p build && cd build && \
-		cmake -DCMAKE_INSTALL_PREFIX=$(MODPREFIX) \
-		-DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-w" \
-		-DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" ../. && make && \
-		cp -a ../api avro
+	cmake -DCMAKE_INSTALL_PREFIX=$(MODPREFIX) \
+	-DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-w" \
+	-DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" ../. && make && \
+	cp -a ../api avro
 
 .PHONY: avro/install
 avro/install:
@@ -110,9 +116,9 @@ fs/install:
 .PHONY: uninstall
 uninstall:
 	rm -rf $(LIBPREFIX) $(INCPREFIX) $(CONFPREFIX) && \
-	rm -rf $(DRIVERPREFIX)$(SYSDIG_VERSION) && \
+	rm -rf $(DRIVERPREFIX)$(FALCO_LIBS_VERSION) && \
 	find $(BINPREFIX) ! -name "sysporter" -type f -exec rm -f {} +
 
 .PHONY: clean
 clean:
-	rm -rf avro/lang/c++/build sysdig/build
+	rm -rf avro/lang/c++/build falco-libs/build

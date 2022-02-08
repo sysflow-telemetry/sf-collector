@@ -6,7 +6,7 @@
 
 # Supported tags and respective `Dockerfile` links
 
--	[`0.3.0`, `latest`](https://github.com/sysflow-telemetry/sf-collector/blob/0.3.0/Dockerfile), [`edge`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile), [`dev`](https://github.com/sysflow-telemetry/sf-collector/blob/dev/Dockerfile)
+-	[`0.4.0`, `latest`](https://github.com/sysflow-telemetry/sf-collector/blob/0.4.0-rc1/Dockerfile), [`edge`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile), [`dev`](https://github.com/sysflow-telemetry/sf-collector/blob/dev/Dockerfile)
 
 # Quick reference
 
@@ -25,6 +25,9 @@
 -	**Docker images**:  
 	[docker hub](https://hub.docker.com/u/sysflowtelemetry) | [GHCR](https://github.com/orgs/sysflow-telemetry/packages)
 
+-	**Binary packages**:  
+	[deb](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0-rc1/sfcollector-0.4.0-x86_64.deb) | [rpm](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0-rc1/sfcollector-0.4.0-x86_64.rpm) | [tgz](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0-rc1/sfcollector-0.4.0-x86_64.tar.gz)
+
 # What is SysFlow?
 
 The SysFlow Telemetry Pipeline is a framework for monitoring cloud workloads and for creating performance and security analytics. The goal of this project is to build all the plumbing required for system telemetry so that users can focus on writing and sharing analytics on a scalable, common open-source platform. The backbone of the telemetry pipeline is a new data format called SysFlow, which lifts raw system event information into an abstraction that describes process behaviors, and their relationships with containers, files, and network. This object-relational format is highly compact, yet it provides broad visibility into container clouds. We have also built several APIs that allow users to process SysFlow with their favorite toolkits. Learn more about SysFlow in the [SysFlow specification document](https://sysflow.readthedocs.io/en/latest/spec.html).
@@ -33,7 +36,7 @@ The SysFlow framework consists of the following sub-projects:
 
 - [sf-apis](https://github.com/sysflow-telemetry/sf-apis) provides the SysFlow schema and programatic APIs in go, python, and C++.
 - [sf-collector](https://github.com/sysflow-telemetry/sf-collector) monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization.
-- [sf-processor](https://github.com/sysflow-telemetry/sf-processor) provides a performance optimized policy engine for processing, enriching, filtering SysFlow events, generating alerts, and exporting the processed data to various targets.
+- [sf-collector](https://github.com/sysflow-telemetry/sf-collector) provides a performance optimized policy engine for processing, enriching, filtering SysFlow events, generating alerts, and exporting the processed data to various targets.
 - [sf-exporter](https://github.com/sysflow-telemetry/sf-exporter) exports SysFlow traces to S3-compliant storage systems for archival purposes.
 - [sf-deployments](https://github.com/sysflow-telemetry/sf-deployments) contains deployment packages for SysFlow, including Docker, Helm, and OpenShift.
 - [sysflow](https://github.com/sysflow-telemetry/sysflow) is the documentation repository and issue tracker for the SysFlow framework.
@@ -63,10 +66,10 @@ docker run -d --privileged --name sf-collector \
 ```
 where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events. Note: append `container.type!=host` to FILTER expression to filter host events. 
 
-Instructions for `docker compose` and `helm` deployments are available in [here](https://sysflow.readthedocs.io/en/latest/deploy.html).
+Instructions for `docker compose`, `helm`, and `oc` deployments are available in [here](https://sysflow.readthedocs.io/en/latest/deploy.html). Alternatively, you can install the SysFlow Collector using its binary installers available in the release pages.
 
 ### Inspecting collected traces
-A [command line utilitiy](https://sysflow.readthedocs.io/en/latest/api-utils.html) is provided for inspecting collected traces or convert traces from SysFlow's compact binary format into human-readable JSON or CSV formats. 
+A [command line utilitiy](https://sysflow.readthedocs.io/en/latest/api-utils.html) is provided for inspecting collected traces or convert traces from SysFlow's compact binary format into human-readable JSON or CSV formats.
 
 ```
 docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint /mnt/data/<trace> 

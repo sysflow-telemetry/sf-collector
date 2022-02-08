@@ -22,8 +22,7 @@
 # Usage
 #-----------------------
 #
-# 1. Modify scripts/build/secret.sh and add user/password for RHEL
-# 2. Build with Docker BuildKit:
+# 1. Build with Docker BuildKit:
 #
 #    DOCKER_BUILDKIT=1 docker build --no-cache \
 #                                   --build-arg UBI_VER=8.4-206
@@ -54,7 +53,7 @@ ENV PATH="$PATH:"${INSTALL_PATH}"/modules/bin"
 
 ENV LIBRARY_PATH=/lib64
 
-ENV SYSDIG_HOST_ROOT=/host
+ENV HOST_ROOT=/host
 
 ENV HOME=/root
 
@@ -65,7 +64,7 @@ COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  dnf -y install git && \
      cd /build/modules && \
      make INSTALL_PATH=${INSTALL_PATH} install && \
-     mkdir /sysdigsrc && cp -a /usr/src/sysdig-* /sysdigsrc/ && \
+     mkdir /falcosrc && cp -a /usr/src/falco-* /falcosrc/ && \
      make clean && rm -rf /build/modules && \
      dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
 
