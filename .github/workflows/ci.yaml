@@ -251,6 +251,10 @@ jobs:
         uses: actions/checkout@v2           
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1      
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.12
+        with:
+          cmake-version: '3.16.x'
       - name: Get version from tag
         id: tag_name
         shell: bash
@@ -261,7 +265,7 @@ jobs:
         id: build_release_assets
         shell: bash
         run: |
-          docker pull ghcr.io/${{ github.repository }}:${{ steps.tag_name.outputs.current_tag }}
+          docker pull ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ steps.tag_name.outputs.current_tag }}
           make package
           echo "##[set-output name=deb;] $(ls scripts/cpack/*.deb)"          
           echo "##[set-output name=rpm;] $(ls scripts/cpack/*.rpm)"          
