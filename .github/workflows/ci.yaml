@@ -47,8 +47,8 @@ jobs:
       - name: Set image tags        
         shell: bash        
         run: |           
-          echo "BASE_TAG=$(echo base-${{ env.FALCO_VERSION }}-${{ env.FALCO_LIBS_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV        
-          echo "MODS_TAG=$(echo mods-${{ env.FALCO_VERSION }}-${{ env.FALCO_LIBS_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV                  
+          echo "BASE_TAG=$(echo base-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV        
+          echo "MODS_TAG=$(echo mods-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV                  
       - name: Check package version
         id: checks
         shell: bash
