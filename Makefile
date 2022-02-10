@@ -48,7 +48,7 @@ package:
 		-v $(shell pwd)/LICENSE.md:$(INSTALL_PATH)/LICENSE.md \
 		-v $(shell pwd)/README.md:$(INSTALL_PATH)/README.md \
 		sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage.sh
-	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION); cpack --config ./CPackConfig.cmake
+	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION) && cpack --config ./CPackConfig.cmake; cd ../..
 
 .PHONY: clean
 clean:
