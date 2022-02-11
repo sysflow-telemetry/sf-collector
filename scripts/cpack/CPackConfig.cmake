@@ -16,7 +16,7 @@ else()
     string(REGEX REPLACE "^v(.*)" "\\1" CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
 
     # Remove any release suffixes in case there is one
-    string(REGEX REPLACE "-.*" "" CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
+    # string(REGEX REPLACE "-.*" "" CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
 endif()
 # Parse version into its major, minor, patch components
 string(REGEX MATCH "^(0|[1-9][0-9]*)" CPACK_PACKAGE_VERSION_MAJOR "${CPACK_PACKAGE_VERSION}")
