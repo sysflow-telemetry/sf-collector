@@ -26,7 +26,7 @@
 	[docker hub](https://hub.docker.com/u/sysflowtelemetry) | [GHCR](https://github.com/orgs/sysflow-telemetry/packages)
 
 -	**Binary packages**:  
-	[deb](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0-rc1/sfcollector-0.4.0-x86_64.deb) | [rpm](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0-rc1/sfcollector-0.4.0-x86_64.rpm) | [tgz](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0-rc1/sfcollector-0.4.0-x86_64.tar.gz)
+	[deb](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0-rc1/sfcollector-0.4.0-rc1-x86_64.deb) | [rpm](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0-rc1/sfcollector-0.4.0-rc1-x86_64.rpm) | [tgz](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0-rc1/sfcollector-0.4.0-rc1-x86_64.tar.gz)
 
 # What is SysFlow?
 
