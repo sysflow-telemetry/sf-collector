@@ -267,9 +267,9 @@ jobs:
         run: |
           docker pull ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ steps.tag_name.outputs.current_tag }}
           make package
-          echo "##[set-output name=deb;] $(ls scripts/cpack/*.deb)"          
-          echo "##[set-output name=rpm;] $(ls scripts/cpack/*.rpm)"          
-          echo "##[set-output name=targz;] $(ls scripts/cpack/*.tar.gz)"                  
+          echo "##[set-output name=deb;] $(ls ${{ github.workspace }}/scripts/cpack/*.deb)"          
+          echo "##[set-output name=rpm;] $(ls ${{ github.workspace }}/scripts/cpack/*.rpm)"          
+          echo "##[set-output name=targz;] $(ls ${{ github.workspace }}/scripts/cpack/*.tar.gz)"                  
       - name: Get Changelog Entry
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2
@@ -277,14 +277,13 @@ jobs:
           version: ${{ steps.tag_name.outputs.current_version }}
           path: ./CHANGELOG.md      
       - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1        
         with:
           body: ${{ steps.changelog_reader.outputs.changes }}          
           token: ${{ secrets.GITHUB_TOKEN }}          
           prerelease: contains(steps.tag_name.outputs.current_version, '-rc')
           draft: true
           files: |
-            ${{ steps.build_release_assets.deb }}
-            ${{ steps.build_release_assets.rpm }}
-            ${{ steps.build_release_assets.targz }}
+            ${{ steps.build_release_assets.outputs.deb }}
+            ${{ steps.build_release_assets.outputs.rpm }}
+            ${{ steps.build_release_assets.outputs.targz }}
