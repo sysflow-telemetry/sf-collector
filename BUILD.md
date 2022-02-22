@@ -1,5 +1,3 @@
-# Installation and Usage
-
 ## Installation
 
 ### Cloning sources
