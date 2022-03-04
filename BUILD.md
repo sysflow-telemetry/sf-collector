@@ -76,15 +76,19 @@ The easiest way to run the SysFlow collector is from a Docker container, with ho
 
 ```bash
 docker run -d --privileged --name sf-collector \
-	     -v /var/run/docker.sock:/host/var/run/docker.sock \
-	     -v /dev:/host/dev -v /proc:/host/proc:ro \
-	     -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
-             -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
-             -e INTERVAL=60 \
-             -e EXPORTER_ID=${HOSTNAME} \
-             -e OUTPUT=/mnt/data/    \
-             -e FILTER="container.name!=sf-collector and container.name!=sf-exporter" \
-             --rm sysflowtelemetry/sf-collector
+		    -v /var/run/docker.sock:/host/var/run/docker.sock \
+			-v /dev:/host/dev \
+			-v /proc:/host/proc:ro \
+			-v /boot:/host/boot:ro \
+			-v /lib/modules:/host/lib/modules:ro \
+            -v /usr:/host/usr:ro \
+			-v /etc/:/host/etc:ro \
+			-v /mnt/data:/mnt/data \
+            -e INTERVAL=60 \
+            -e EXPORTER_ID=${HOSTNAME} \
+            -e OUTPUT=/mnt/data/    \
+            -e FILTER="container.name!=sf-collector and container.name!=sf-processor and container.name!=sf-exporter" \
+            --rm sysflowtelemetry/sf-collector
 ```
 
 where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events.
