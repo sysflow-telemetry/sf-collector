@@ -22,14 +22,14 @@
 # Usage
 #-----------------------
 #
-# 1. Add scripts/build/rhpassword and scripts/build/rhuser and update them 
+# 1. Add scripts/build/rhpassword and scripts/build/rhuser and update them
 #    with user/password for RHEL subscription manager
 # 2. Build with Docker BuildKit:
 #
 #    DOCKER_BUILDKIT=1 docker build --no-cache \
 #                                   --build-arg UBI_VER=8.4-206
 #                                   --secret id=rhuser,src=scripts/build/rhuser \
-#                                   --secret id=rhpassword,src=scripts/build/rhpassword \                                   
+#                                   --secret id=rhpassword,src=scripts/build/rhpassword \
 #                                   --target mods \
 #                                   -t ubi:mods-0.0.0 \
 #                                   -f Dockerfile.ubi.amd64 .
@@ -43,9 +43,6 @@ ARG UBI_VER
 FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 
 # Install Packages
-# Copy in llvm 9.0 rpms. Falco's ebpf probe fails unless compiled with llvm 9.0 for now.
-# https://github.com/falcosecurity/libs/issues/4
-COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
 
 RUN --mount=type=secret,id=rhuser --mount=type=secret,id=rhpassword \

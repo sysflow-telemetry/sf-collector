@@ -30,20 +30,32 @@ init:
 	cd falco && git checkout $(FALCO_VERSION)
 	cd falco-libs && git checkout $(FALCO_LIBS_VERSION)
 	cd avro && git checkout $(AVRO_VERSION)
+	cd elfutils && git checkout $(ELFUTILS_VERSION)
+	cd glog && git checkout $(GLOG_VERSION)
+	cd snappy && git checkout $(SNAPPY_VERSION)
+	cd dkms && git checkout $(DKMS_VERSION)
 
+# elfutils is a pre-requisite for libs.
 .PHONY: modules
-modules: falcolibs/package \
-         avro/package
+modules: elfutils/package \
+		 elfutils/install \
+		 falcolibs/package \
+         avro/package \
+		 glog/package \
+		 snappy/package
 
 .PHONY: install
 install: modules \
 	falcolibs/install \
 	avro/install \
 	sysflow/install \
-	fs/install
+	fs/install \
+	glog/install \
+	snappy/install \
+	dkms-rh/install
 
 .PHONY: falcolibs/package
-falcolibs/package: 
+falcolibs/package:
 	cd falco-libs && \
 	mkdir -p build && cd build && \
         cmake -DPROBE_VERSION=${FALCO_LIBS_DRIVER_VERSION} -DDRIVER_PACKAGE_NAME=falco -DSCAP_BPF_PROBE_ENV_VAR_NAME=FALCO_BPF_PROBE -DCAP_HOST_ROOT_ENV_VAR_NAME=HOST_ROOT -DFALCOSECURITY_LIBS_VERSION=${FALCO_LIBS_VERSION} -DFALCOSECURITY_LIBS_CHECKSUM=${FALCO_LIBS_CHECKSUM} -DCMAKE_BUILD_TYPE=Release -DPROBE_NAME=falco -DBUILD_BPF=OFF  -DBUILD_DRIVER=OFF ../. && make && \
@@ -88,7 +100,7 @@ falcolibs/package:
 	cp zlib-prefix/src/zlib/libz.so.1.2.11 lib/libz.so
 
 .PHONY: falcolibs/install
-falcolibs/install:	
+falcolibs/install:
 	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)" && \
 	cd falco-libs/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)"
 
@@ -113,6 +125,42 @@ sysflow/install:
 fs/install:
 	mkdir -p $(FSINCPREFIX) && cp -r filesystem/include/* $(FSINCPREFIX)/
 
+.PHONY: elfutils/package
+elfutils/package:
+	cd elfutils && autoreconf -i -f && \
+	./configure --enable-maintainer-mode && \
+	make && make install
+
+.PHONY: elfutils/install
+elfutils/install:
+	cd elfutils && make install
+
+.PHONY: glog/package
+glog/package:
+	cd glog && cmake -S . -B build -G "Unix Makefiles" -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DWITH_GFLAGS=OFF && \
+	cmake --build build
+
+.PHONY: glog/install
+glog/install:
+	cd glog/build && make install
+
+.PHONY: snappy/package
+snappy/package:
+	cd snappy && cmake -S . -B build -G "Unix Makefiles" -DSNAPPY_BUILD_BENCHMARKS=OFF -DSNAPPY_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=OFF && \
+	cmake --build build
+
+.PHONY: snappy/install
+snappy/install:
+	cd snappy/build && make install
+
+.PHONY: dkms-deb/install
+dkms-deb/install:
+	cd dkms && make install-debian
+
+.PHONY: dkms-rh/install
+dkms-rh/install:
+	cd dkms && make install-redhat
+
 .PHONY: uninstall
 uninstall:
 	rm -rf $(LIBPREFIX) $(INCPREFIX) $(CONFPREFIX) && \
@@ -121,4 +169,4 @@ uninstall:
 
 .PHONY: clean
 clean:
-	rm -rf avro/lang/c++/build falco-libs/build
+	rm -rf avro/lang/c++/build falco-libs/build glog/build snappy/build

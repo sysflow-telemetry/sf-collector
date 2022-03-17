@@ -17,7 +17,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# dependencies 
+# dependencies
 
 # Insatall required dependencies to the UBI base image.
 # Based on different purpose, we will install different stuff inside
@@ -88,27 +88,17 @@ if [ "${MODE}" == "base" ] ; then
         bison \
         libstdc++-static \
         boost-static \
-        elfutils-libelf-devel \
         sparsehash-devel \
-        snappy-devel \
         bc \
-        glog-devel
-        #clang \
-        #llvm
-
-    # Install dkms from EPEL.
-    # ref: https://access.redhat.com/solutions/1132653
-    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-    dnf -y install dkms
-    dnf -y remove epel-release && dnf autoremove
-    DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
+        llvm-toolset \
+    && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
 
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing
 
     dnf -y --noplugins install python38 python38-devel python38-wheel
     ln -s /usr/bin/python3 /usr/bin/python
-    mkdir -p /usr/local/lib/python3.8/site-packages        
+    mkdir -p /usr/local/lib/python3.8/site-packages
 
 else
     echo "Unsupported mode: ${MODE}"
