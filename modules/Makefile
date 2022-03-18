@@ -38,11 +38,11 @@ init:
 # elfutils is a pre-requisite for libs.
 .PHONY: modules
 modules: elfutils/package \
-		 elfutils/install \
-		 falcolibs/package \
-         avro/package \
-		 glog/package \
-		 snappy/package
+		elfutils/install \
+		falcolibs/package \
+		avro/package \
+		glog/package \
+		snappy/package
 
 .PHONY: install
 install: modules \
