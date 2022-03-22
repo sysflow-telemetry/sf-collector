@@ -4,6 +4,8 @@ set -e
 SYSFLOW=/usr/lib/systemd/system/sysflow.service
 SFPROCESSOR=/usr/lib/systemd/system/sysflow-processor.service
 SFCOLLECTOR=/usr/lib/systemd/system/sysflow-collector.service
+DKMS=/etc/sysflow/modules/src/dkms
+MAKE=/etc/sysflow/modules/bin/make
 
 status () {
     systemctl status sysflow*
@@ -12,6 +14,16 @@ status () {
 start () {
     if test -f "$ENVFILE"; then
         echo "SysFlow service configuration file not found in $CONFIGPATH"
+    fi
+    if ! command -v dkms &> /dev/null; then 
+        echo "dkms not found, installing..."
+        if [ "$(grep -Ei 'debian|buntu|mint' /etc/*release)" ]; then
+            $MAKE -C $DKMS install-debian
+        elif [ "$(grep -Ei 'fedora|redhat|cent' /etc/*release)" ]; then
+            $MAKE -C $DKMS install-redhat
+        else
+            echo "Cannot install dkms. Unrecognized Linux distribution."
+        fi
     fi
     if test -f "$SYSFLOW"; then
         systemctl enable sysflow
