@@ -6,27 +6,27 @@
 
 # Supported tags and respective `Dockerfile` links
 
--	[`0.4.0`, `latest`](https://github.com/sysflow-telemetry/sf-collector/blob/0.4.0/Dockerfile), [`edge`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile), [`dev`](https://github.com/sysflow-telemetry/sf-collector/blob/dev/Dockerfile)
+-	[`0.4.1-rc1`, `latest`](https://github.com/sysflow-telemetry/sf-collector/blob/0.4.1-rc1/Dockerfile), [`edge`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile), [`dev`](https://github.com/sysflow-telemetry/sf-collector/blob/dev/Dockerfile)
 
 # Quick reference
 
--	**Documentation**:  
+-	**Documentation**:
 	[the SysFlow Documentation](https://sysflow.readthedocs.io)
-  
--	**Where to get help**:  
+
+-	**Where to get help**:
 	[the SysFlow Community Slack](https://join.slack.com/t/sysflow-telemetry/shared_invite/enQtODA5OTA3NjE0MTAzLTlkMGJlZDQzYTc3MzhjMzUwNDExNmYyNWY0NWIwODNjYmRhYWEwNGU0ZmFkNGQ2NzVmYjYxMWFjYTM1MzA5YWQ)
 
--	**Where to file issues**:  
+-	**Where to file issues**:
 	[the github issue tracker](https://github.com/sysflow-telemetry/sysflow/issues) (include the `sf-collector` tag)
 
--	**Source of this description**:  
+-	**Source of this description**:
 	[repo's readme](https://github.com/sysflow-telemetry/sf-collector/edit/master/README.md) ([history](https://github.com/sysflow-telemetry/sf-collector/commits/master))
 
--	**Docker images**:  
+-	**Docker images**:
 	[docker hub](https://hub.docker.com/u/sysflowtelemetry) | [GHCR](https://github.com/orgs/sysflow-telemetry/packages)
 
--	**Binary packages**:  
-	[deb](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0/sfcollector-0.4.0-x86_64.deb) | [rpm](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0/sfcollector-0.4.0-x86_64.rpm) | [tgz](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.0/sfcollector-0.4.0-x86_64.tar.gz)
+-	**Binary packages**:
+	[deb](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.1-rc1/sfcollector-0.4.1-rc1-x86_64.deb) | [rpm](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.1-rc1/sfcollector-0.4.1-rc1-x86_64.rpm) | [tgz](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.1-rc1/sfcollector-0.4.1-rc1-x86_64.tar.gz)
 
 # What is SysFlow?
 
@@ -44,7 +44,7 @@ The SysFlow framework consists of the following sub-projects:
 # About This Image
 
 This image packages SysFlow Collector, which monitors and collects system call and event information from hosts
-and exports them in the SysFlow format using Apache Avro object serialization. The SysFlow Collector depends on [Sysdig](https://github.com/draios/sysdig) probe to passively collect system events and turn them into SysFlow. As a result, 
+and exports them in the SysFlow format using Apache Avro object serialization. The SysFlow Collector depends on [Sysdig](https://github.com/draios/sysdig) probe to passively collect system events and turn them into SysFlow. As a result,
 the collector supports Sysdig's powerful filtering capabilities. Please check the [Installation and Usage](https://sysflow.readthedocs.io/en/latest/build.html) for the complete set of options.
 
 # How to use this image
@@ -68,7 +68,7 @@ docker run -d --privileged --name sf-collector \
             -e FILTER="container.name!=sf-collector and container.name!=sf-processor and container.name!=sf-exporter" \
             --rm sysflowtelemetry/sf-collector
 ```
-where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events. Note: append `container.type!=host` to FILTER expression to filter host events. 
+where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events. Note: append `container.type!=host` to FILTER expression to filter host events.
 
 Instructions for `docker compose`, `helm`, and `oc` deployments are available in [here](https://sysflow.readthedocs.io/en/latest/deploy.html). Alternatively, you can install the SysFlow Collector using its binary installers available in the release pages.
 
@@ -76,9 +76,9 @@ Instructions for `docker compose`, `helm`, and `oc` deployments are available in
 A [command line utilitiy](https://sysflow.readthedocs.io/en/latest/api-utils.html) is provided for inspecting collected traces or convert traces from SysFlow's compact binary format into human-readable JSON or CSV formats.
 
 ```
-docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint /mnt/data/<trace> 
+docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint /mnt/data/<trace>
 ```
-where `trace` is the the name of the trace file inside `/mnt/data`. If empty, all files in `/mnt/data` are processed. By default, the traces are printed to 
+where `trace` is the the name of the trace file inside `/mnt/data`. If empty, all files in `/mnt/data` are processed. By default, the traces are printed to
 standard output with a default set of SysFlow attributes. For a complete list of options, run:
 ```
 docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint  -h
