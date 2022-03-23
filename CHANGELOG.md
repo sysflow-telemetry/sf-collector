@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - Bumped UBI version to 8.5-236.1647448331
 - Compiles from source and links libelf, glog, and snappy statically to sysporter
+- Packages dkms sources and installation script as part of binary packages
 - Removed binary package requirements from installers
 
 ## [0.4.0] - 2022-02-18
