@@ -40,13 +40,11 @@ if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
 endif()
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/sysflow-telemetry/sf-collector")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "linux-headers-generic")
 
 # RPM
 set(CPACK_RPM_PACKAGE_LICENSE "Apache v2.0")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE, "${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_RPM_PACKAGE_URL "https://github.com/sysflow-telemetry/sf-collector")
-set(CPACK_RPM_PACKAGE_REQUIRES "kernel-devel, systemd")
 set(CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     /usr/src
