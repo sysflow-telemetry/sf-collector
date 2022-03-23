@@ -45,6 +45,7 @@ uninstall:
 package: 
 	docker run --rm --entrypoint=/bin/bash \
 		-v $(shell pwd)/scripts:$(INSTALL_PATH)/scripts \
+		-v $(shell pwd)/modules/dkms:$(INSTALL_PATH)/modules/src/dkms \
 		-v $(shell pwd)/LICENSE.md:$(INSTALL_PATH)/LICENSE.md \
 		-v $(shell pwd)/README.md:$(INSTALL_PATH)/README.md \
 		sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage.sh

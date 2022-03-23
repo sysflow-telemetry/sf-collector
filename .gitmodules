@@ -13,3 +13,15 @@
 [submodule "modules/falco"]
 	path = modules/falco
 	url = https://github.com/falcosecurity/falco.git
+[submodule "modules/elfutils"]
+	path = modules/elfutils
+	url = https://github.com/cuviper/elfutils.git
+[submodule "modules/glog"]
+	path = modules/glog
+	url = https://github.com/google/glog.git
+[submodule "modules/snappy"]
+	path = modules/snappy
+	url = https://github.com/google/snappy.git
+[submodule "modules/dkms"]
+	path = modules/dkms
+	url = https://github.com/dell/dkms.git

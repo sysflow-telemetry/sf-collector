@@ -40,13 +40,11 @@ if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
 endif()
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/sysflow-telemetry/sf-collector")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "dkms (>= 2.1.0.0), libelf1 (>= 0.170), libsnappy1v5 (>= 1.1.7), libgoogle-glog0v5 (>= 0.3.5)")
 
 # RPM
 set(CPACK_RPM_PACKAGE_LICENSE "Apache v2.0")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE, "${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_RPM_PACKAGE_URL "https://github.com/sysflow-telemetry/sf-collector")
-set(CPACK_RPM_PACKAGE_REQUIRES "dkms, kernel-devel, systemd")
 set(CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     /usr/src
@@ -61,8 +59,10 @@ set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     /usr/lib/systemd
     /usr/lib/systemd/system)
 set(CPACK_RPM_PACKAGE_RELOCATABLE "OFF")
+# Since we package make to enable dkms install
+set(CPACK_RPM_SPEC_MORE_DEFINE "%define _build_id_links none")
 
 # Contents
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_PROCESSOR})
-set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build/conf" "/etc/sysflow/conf" "${CMAKE_CURRENT_LIST_DIR}/build/driver" "/etc/sysflow/driver" "${CMAKE_CURRENT_LIST_DIR}/build/driver/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build/service" "/usr/lib/systemd/system")
+set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build/conf" "/etc/sysflow/conf" "${CMAKE_CURRENT_LIST_DIR}/build/driver" "/etc/sysflow/driver" "${CMAKE_CURRENT_LIST_DIR}/build/driver/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build/service" "/usr/lib/systemd/system" "${CMAKE_CURRENT_LIST_DIR}/build/modules" "/etc/sysflow/modules")
 

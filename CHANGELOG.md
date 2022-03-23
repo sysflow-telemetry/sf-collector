@@ -15,6 +15,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.4.1] - 2022-03-31
+
+### CHANGED
+
+- Bumped UBI version to 8.5-236.1647448331
+- Compiles from source and links libelf, glog, and snappy statically to sysporter
+- Packages dkms sources and installation script as part of binary packages
+- Removed binary package requirements from installers
+
 ## [0.4.0] - 2022-02-18
 
 ### Added
@@ -78,7 +87,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Added optional enabling of ProcessFlow objects through `ENABLE_PROC_FLOW=1`.
 - Added enablement of sysdig syscall drop mode support through `ENABLE_DROP_MODE=1`.
 - Added ability to disable non-file related FileFlows with `FILE_ONLY=1`.
-- Added ability to disable, limit file read based fileflows with `FILE_READ_MODE=`. 
+- Added ability to disable, limit file read based fileflows with `FILE_READ_MODE=`.
     - `0` enable all file reads.
     - `1` disable all file reads.
     - `2` disable file reads to: `"/proc/", "/dev/", "/sys/", "//sys/", "/lib/", "/lib64/", "/usr/lib/", "/usr/lib64/"`
@@ -111,7 +120,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Added node IP field to the header.  
+- Added node IP field to the header.
 - Added entry field to the process object.
 - Implemented ProcessFlow object.
 - Added mmap support for files.
@@ -149,7 +158,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed ppid issue with children missing parent processes that terminate before a child is spawned.
-- Fixed issue [12](https://github.com/sysflow-telemetry/sf-docs/issues/12). 
+- Fixed issue [12](https://github.com/sysflow-telemetry/sf-docs/issues/12).
 - Fixed issue [13](https://github.com/sysflow-telemetry/sf-docs/issues/13).
 - Fixed corrupt memory error that caused coredump when using domain socket interface.
 
@@ -170,8 +179,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.0-rc1...HEAD
-[0.4.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.3.1...0.4.0-rc1
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1-rc1...HEAD
+[0.4.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.0...0.4.1-rc1
+[0.4.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.2.2...0.3.0
 [0.2.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.2.1...0.2.2
