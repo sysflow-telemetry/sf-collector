@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
 export HOME=/run/sysflow && \
-    /etc/sysflow/driver/falco-driver-loader ${DRIVER_TYPE:-bpf} && \
+    /etc/sysflow/driver/falco-driver-loader ${DRIVER_TYPE:-bpf} ${DRIVER_OPTS} && \
     /usr/bin/sysporter -e ${NODE_ID:-localhost} -u ${SOCKET:-/sock/sysflow.sock}

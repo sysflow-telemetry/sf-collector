@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Compiles from source and links libelf, glog, and snappy statically to sysporter
 - Packages dkms sources and installation script as part of binary packages
 - Removed binary package requirements from installers
+- Add DRIVER_OPTS binary packages configuration environment for the driver loader
 
 ## [0.4.0] - 2022-02-18
 
@@ -179,8 +180,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1-rc1...HEAD
-[0.4.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.0...0.4.1-rc1
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1-rc2...HEAD
+[0.4.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.0...0.4.1-rc2
 [0.4.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.2.2...0.3.0
