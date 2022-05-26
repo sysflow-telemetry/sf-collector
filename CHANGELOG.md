@@ -15,15 +15,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.4.1] - 2022-03-31
+## [0.4.1] - 2022-05-26
 
-### CHANGED
+### Changed
 
-- Bumped UBI version to 8.5-236.1647448331
+- Bumped UBI version to 8.6-754
 - Compiles from source and links libelf, glog, and snappy statically to sysporter
 - Packages dkms sources and installation script as part of binary packages
 - Removed binary package requirements from installers
 - Add DRIVER_OPTS binary packages configuration environment for the driver loader
+- Add optimization options defaults in binary package configuration
+- Update default configuration settings for binary package
 
 ## [0.4.0] - 2022-02-18
 
@@ -180,8 +182,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1-rc2...HEAD
-[0.4.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.0...0.4.1-rc2
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1...HEAD
+[0.4.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.2.2...0.3.0
