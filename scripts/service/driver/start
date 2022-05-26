@@ -1,5 +1,15 @@
 #!/bin/bash
 set -e
+
+if command -v hostname &> /dev/null
+then
+    export HOSTNAME=$(hostname)
+    if command -v awk &> /dev/null
+    then
+        export NODE_IP=$(hostname -I | awk '{print $1}')
+    fi
+fi
+
 export HOME=/run/sysflow && \
     /etc/sysflow/driver/falco-driver-loader ${DRIVER_TYPE:-bpf} ${DRIVER_OPTS} && \
-    /usr/bin/sysporter -e ${NODE_ID:-localhost} -u ${SOCKET:-/sock/sysflow.sock}
+    /usr/bin/sysporter -e ${NODE_ID:-${HOSTNAME}} -u ${SOCKET:-/sock/sysflow.sock} ${FILTER:+-f "$FILTER"}
