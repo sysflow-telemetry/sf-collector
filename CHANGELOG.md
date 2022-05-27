@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Packages dkms sources and installation script as part of binary packages
 - Removed binary package requirements from installers
 - Add DRIVER_OPTS binary packages configuration environment for the driver loader
-- Add optimization options defaults in binary package configuration
+- Add optimization options in binary package configuration
 - Update default configuration settings for binary package
 
 ## [0.4.0] - 2022-02-18
