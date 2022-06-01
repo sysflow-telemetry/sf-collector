@@ -8,7 +8,7 @@ DKMS=/etc/sysflow/modules/src/dkms
 MAKE=/etc/sysflow/modules/bin/make
 
 status () {
-    systemctl status sysflow*
+    systemctl status "sysflow*"
 }
 
 start () {
