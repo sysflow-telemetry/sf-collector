@@ -95,18 +95,17 @@ FileObj *FileContext::getFile(const string &key) {
   return nullptr;
 }
 
-bool FileContext::exportFile(const string &key) {
+FileObj *FileContext::exportFile(const string &key) {
   FileTable::iterator f = m_files.find(key);
-  bool exprt = false;
   if (f != m_files.end()) {
     if (!f->second->written) {
       f->second->file.state = SFObjectState::REUP;
       m_writer->writeFile(&(f->second->file));
       f->second->written = true;
-      exprt = true;
     }
+    return f->second;
   }
-  return exprt;
+  return nullptr;
 }
 
 void FileContext::clearFiles() {

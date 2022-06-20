@@ -42,7 +42,7 @@ inline bool prefix_match(std::string path, std::string match) {
   return true;
 }
 
-#define SHOULD_WRITE(ff)                                                       \
+#define SHOULD_WRITE(ff, proc, file)                                           \
   int readMode = m_cxt->getFileRead();                                         \
   bool match = false;                                                          \
   if ((readMode == FILE_READS_DISABLED || readMode == FILE_READS_SELECT) &&    \
@@ -62,6 +62,6 @@ inline bool prefix_match(std::string path, std::string match) {
     }                                                                          \
   }                                                                            \
   if (!match) {                                                                \
-    m_writer->writeFileFlow(&(ff->fileflow));                                  \
+    m_writer->writeFileFlow(&(ff->fileflow), proc, file);                      \
   }
 #endif

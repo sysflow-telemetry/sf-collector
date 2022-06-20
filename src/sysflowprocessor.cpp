@@ -18,12 +18,13 @@
  **/
 
 #include "sysflowprocessor.h"
+#include "sfcallbackwriter.h"
 
 using sysflowprocessor::SysFlowProcessor;
 
 CREATE_LOGGER(SysFlowProcessor, "sysflow.sysflowprocessor");
 
-SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
+SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt, writer::SysFlowWriter *writer)
     : m_exit(false) {
   m_cxt = cxt;
   time_t start = 0;
@@ -35,16 +36,22 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
   } else {
     m_statsTime = 0;
   }
-  if (m_cxt->isDomainSocket() && m_cxt->isOutputFile()) {
-    m_writer = new writer::SFMultiWriter(cxt, start);
-  } else if (m_cxt->isOutputFile()) {
-    m_writer = new writer::SFFileWriter(cxt, start);
-  } else if (m_cxt->isDomainSocket()) {
-    m_writer = new writer::SFSocketWriter(cxt, start);
-  } else {
-    SF_ERROR(m_logger, "Neither file output (-w) or (-u) were set. At least "
+  if (writer == nullptr) {
+    if (m_cxt->isDomainSocket() && m_cxt->isOutputFile()) {
+      m_writer = new writer::SFMultiWriter(cxt, start);
+    } else if (m_cxt->isOutputFile()) {
+      m_writer = new writer::SFFileWriter(cxt, start);
+    } else if (m_cxt->isDomainSocket()) {
+      m_writer = new writer::SFSocketWriter(cxt, start);
+    } else if (m_cxt->hasCallback()) {
+      m_writer = new writer::SFCallbackWriter(cxt, start, m_cxt->getCallback(), this);
+    } else {
+      SF_ERROR(m_logger, "Neither file output (-w) or (-u) were set. At least "
                        "one must be specified.")
-    ::exit(EXIT_FAILURE);
+      ::exit(EXIT_FAILURE);
+    }
+  } else {
+    m_writer = writer;
   }
   m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
   m_fileCxt = new file::FileContext(m_containerCxt, m_writer);
@@ -185,3 +192,13 @@ int SysFlowProcessor::run() {
   }
   return 0;
 }
+
+
+sysflow::Container* SysFlowProcessor::getContainer(const string& id) {
+  ContainerObj* cont = m_containerCxt->getContainer(id);
+  if (cont != nullptr) {
+    return &(cont->cont);
+  }
+  return nullptr;
+}
+

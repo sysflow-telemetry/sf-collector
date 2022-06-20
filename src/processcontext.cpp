@@ -110,11 +110,11 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti,
     }
     i++;
   }
-  p->proc.uid = mainthread->m_uid;
-  p->proc.gid = mainthread->m_gid;
-  p->proc.userName = utils::getUserName(m_cxt, mainthread->m_uid);
-  p->proc.groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
+  p->proc.uid = mainthread->m_user.uid;
+  p->proc.gid = mainthread->m_group.gid;
   ContainerObj *cont = m_containerCxt->getContainer(ti);
+  p->proc.userName = mainthread->m_user.name; //utils::getUserName(m_cxt, (cont != nullptr ? cont->cont.id : utils::EMPTY_STR), mainthread->m_uid);
+  p->proc.groupName = mainthread->m_group.name; //utils::getGroupName(m_cxt, (cont != nullptr ? cont->cont.id : utils::EMPTY_STR), mainthread->m_gid);
   if (cont != nullptr) {
     p->proc.containerId.set_string(cont->cont.id);
     cont->refs++;
@@ -349,13 +349,12 @@ ProcessObj *ProcessContext::getProcess(OID *oid) {
   return nullptr;
 }
 
-bool ProcessContext::exportProcess(OID *oid) {
+ProcessObj* ProcessContext::exportProcess(OID *oid) {
   ProcessObj *p = getProcess(oid);
-  bool expt = false;
   if (p == nullptr) {
     SF_ERROR(m_logger, "Can't find process to export! oid: " << oid->hpid << " "
                                                              << oid->createTS);
-    return expt;
+    return p;
   }
   if (!p->proc.containerId.is_null()) {
     m_containerCxt->exportContainer(p->proc.containerId.get_string());
@@ -363,9 +362,8 @@ bool ProcessContext::exportProcess(OID *oid) {
   if (!p->written) {
     m_writer->writeProcess(&(p->proc));
     p->written = true;
-    expt = true;
   }
-  return expt;
+  return p;
 }
 
 void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
@@ -388,10 +386,10 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
     }
     i++;
   }
-  proc->uid = mainthread->m_uid;
-  proc->gid = mainthread->m_gid;
-  proc->userName = utils::getUserName(m_cxt, mainthread->m_uid);
-  proc->groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
+  proc->uid = mainthread->m_user.uid;
+  proc->gid = mainthread->m_group.gid;
+  proc->userName = mainthread->m_user.name; //utils::getUserName(m_cxt, (proc->containerId.is_null() ? utils::EMPTY_STR : proc->containerId.get_string()), mainthread->m_uid);
+  proc->groupName = mainthread->m_group.name; //utils::getGroupName(m_cxt, (proc->containerId.is_null() ? utils::EMPTY_STR : proc->containerId.get_string()), mainthread->m_gid);
 }
 
 void ProcessContext::clearProcesses() {
@@ -502,22 +500,22 @@ void ProcessContext::clearAllProcesses() {
          nfi != it->second->netflows.end(); nfi++) {
       nfi->second->netflow.opFlags |= OP_TRUNCATE;
       nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
-      m_writer->writeNetFlow(&(nfi->second->netflow));
+      m_writer->writeNetFlow(&(nfi->second->netflow), &(it->second->proc));
       delete nfi->second;
     }
     for (FileFlowTable::iterator ffi = it->second->fileflows.begin();
          ffi != it->second->fileflows.end(); ffi++) {
       ffi->second->fileflow.opFlags |= OP_TRUNCATE;
       ffi->second->fileflow.endTs = utils::getSysdigTime(m_cxt);
-      m_fileCxt->exportFile(ffi->second->filekey);
-      m_writer->writeFileFlow(&(ffi->second->fileflow));
+      FileObj* file = m_fileCxt->exportFile(ffi->second->filekey);
+      m_writer->writeFileFlow(&(ffi->second->fileflow), &(it->second->proc), &(file->file));
       delete ffi->second;
     }
     if(it->second->pfo != nullptr) {
       it->second->pfo->procflow.opFlags |= OP_TRUNCATE;
       it->second->pfo->procflow.endTs = utils::getSysdigTime(m_cxt);
       SF_DEBUG(m_logger, "Writing processflow!")
-      m_writer->writeProcessFlow(&(it->second->pfo->procflow));
+      m_writer->writeProcessFlow(&(it->second->pfo->procflow), &(it->second->proc));
       delete it->second->pfo;
       it->second->pfo = nullptr;
     }
