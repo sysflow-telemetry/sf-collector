@@ -23,6 +23,7 @@
 
 #include <ctime>
 
+#include "sysflow.h"
 #include "logger.h"
 #include "readonly.h"
 #include <cerrno>
@@ -40,6 +41,8 @@
 #define SF_K8S_API_URL "SF_K8S_API_URL"
 #define SF_K8S_API_CERT "SF_K8S_API_CERT"
 
+//typedef void (*SysFlowCallback)(sysflow::SFHeader*, sysflow::Container*, sysflow::Process*, sysflow::File*, sysflow::File*, sysflow::SysFlow*);
+using SysFlowCallback = std::function<void(sysflow::SFHeader*, sysflow::Container*, sysflow::Process*, sysflow::File*, sysflow::File*, sysflow::SysFlow*)>;
 namespace context {
 class SysFlowContext {
 private:
@@ -66,6 +69,7 @@ private:
   int m_fileRead;
   string m_nodeIP;
   bool m_k8sEnabled;
+  SysFlowCallback m_callback;
   DEFINE_LOGGER();
 
 public:
@@ -76,7 +80,19 @@ public:
   uint64_t timeStamp{};
   string getExporterID();
   string getNodeIP();
+  SysFlowCallback getCallback() { return m_callback; }
+  inline void setNodeIP(string nodeIP) { m_nodeIP = nodeIP; }
+  inline void setReadFileMode(int readFile) { m_fileRead = readFile; }
+  inline void enableFileOnly() { m_fileOnly = true; }
+  inline void enableProcessFlow() { m_processFlow = true; }
+  inline void enableDropMode() { m_inspector->start_dropping_mode(m_samplingRatio); }
+  inline void enableDebugMode() {   
+    m_inspector->set_log_stderr();
+    m_inspector->set_min_log_severity(sinsp_logger::severity::SEV_DEBUG); 
+  }
+  inline void setCallback(SysFlowCallback callback) { m_callback = callback; }
   inline bool isOffline() { return m_offline; }
+  inline bool hasCallback() {return m_callback != nullptr; }
   inline sinsp *getInspector() { return m_inspector; }
   inline int getNFExportInterval() { return m_nfExportInterval; }
   inline int getNFExpireInterval() { return m_nfExpireInterval; }

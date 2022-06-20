@@ -140,7 +140,7 @@ inline void NetworkFlowProcessor::processNewFlow(sinsp_evt *ev,
   } else {
     removeAndWriteRelatedFlows(proc, &key, ev->get_ts());
     nf->netflow.endTs = ev->get_ts();
-    m_writer->writeNetFlow(&(nf->netflow));
+    m_writer->writeNetFlow(&(nf->netflow), &(proc->proc));
     delete nf;
   }
 }
@@ -148,7 +148,7 @@ inline void NetworkFlowProcessor::processNewFlow(sinsp_evt *ev,
 inline void NetworkFlowProcessor::removeAndWriteNetworkFlow(ProcessObj *proc,
                                                             NetFlowObj **nf,
                                                             NFKey *key) {
-  m_writer->writeNetFlow(&((*nf)->netflow));
+  m_writer->writeNetFlow(&((*nf)->netflow), &(proc->proc));
   removeNetworkFlowFromSet(nf, false);
   removeNetworkFlow(proc, nf, key);
 }
@@ -262,7 +262,7 @@ void NetworkFlowProcessor::removeAndWriteRelatedFlows(ProcessObj *proc,
   for (auto it = nfobjs.begin(); it != nfobjs.end(); it++) {
     (*it)->netflow.endTs = endTs;
     (*it)->netflow.opFlags |= OP_TRUNCATE;
-    m_writer->writeNetFlow(&((*it)->netflow));
+    m_writer->writeNetFlow(&((*it)->netflow), &(proc->proc));
     removeNetworkFlowFromSet(&(*it), true);
   }
 }
@@ -282,7 +282,7 @@ int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj *proc,
       }
       nfi->second->netflow.opFlags |= OP_TRUNCATE;
       SF_DEBUG(m_logger, "Writing NETFLOW!");
-      m_writer->writeNetFlow(&(nfi->second->netflow));
+      m_writer->writeNetFlow(&(nfi->second->netflow), &(proc->proc));
       NetFlowObj *nfo = nfi->second;
       proc->netflows.erase(nfi);
       SF_DEBUG(m_logger, "Set size: " << m_dfSet->size());
@@ -349,8 +349,8 @@ void NetworkFlowProcessor::removeNetworkFlow(DataFlowObj *dfo) {
 void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj *dfo, time_t /*now*/) {
   auto *nfo = static_cast<NetFlowObj *>(dfo);
   nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
-  m_processCxt->exportProcess(&(nfo->netflow.procOID));
-  m_writer->writeNetFlow(&(nfo->netflow));
+  ProcessObj* proc = m_processCxt->exportProcess(&(nfo->netflow.procOID));
+  m_writer->writeNetFlow(&(nfo->netflow), ((proc != nullptr) ? &(proc->proc) : nullptr ));
   SF_DEBUG(m_logger, "Reupping network flow");
   nfo->netflow.ts = utils::getSysdigTime(m_cxt);
   nfo->netflow.endTs = 0;

@@ -27,8 +27,6 @@ all: init \
 .PHONY: init
 init:
 	git submodule update --init --recursive --force
-	cd falco && git checkout $(FALCO_VERSION)
-	cd falco-libs && git checkout $(FALCO_LIBS_VERSION)
 	cd avro && git checkout $(AVRO_VERSION)
 	cd elfutils && git checkout $(ELFUTILS_VERSION)
 	cd glog && git checkout $(GLOG_VERSION)
@@ -39,14 +37,12 @@ init:
 .PHONY: modules
 modules: elfutils/package \
 		elfutils/install \
-		falcolibs/package \
 		avro/package \
 		glog/package \
 		snappy/package
 
 .PHONY: install
 install: modules \
-	falcolibs/install \
 	avro/install \
 	sysflow/install \
 	fs/install \

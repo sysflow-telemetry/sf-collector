@@ -48,7 +48,7 @@ void ProcessEventProcessor::writeCloneEvent(sinsp_evt *ev) {
   m_procEvt.tid = ti->m_tid;
   m_procEvt.ret = utils::getSyscallResult(ev);
   m_procEvt.args.clear();
-  m_writer->writeProcessEvent(&m_procEvt);
+  m_writer->writeProcessEvent(&m_procEvt, &(proc->proc));
 }
 
 void ProcessEventProcessor::writeSetUIDEvent(sinsp_evt *ev) {
@@ -69,7 +69,7 @@ void ProcessEventProcessor::writeSetUIDEvent(sinsp_evt *ev) {
   m_procEvt.ret = utils::getSyscallResult(ev);
   m_procEvt.args.clear();
   m_procEvt.args.push_back(m_uid);
-  m_writer->writeProcessEvent(&m_procEvt);
+  m_writer->writeProcessEvent(&m_procEvt, &(proc->proc));
   m_procEvt.args.clear();
 }
 
@@ -89,7 +89,7 @@ void ProcessEventProcessor::writeExitEvent(sinsp_evt *ev) {
     tid = ti->m_tid;
   }
   m_dfPrcr->removeAndWriteDFFromProc(proc, tid);
-  m_writer->writeProcessEvent(&m_procEvt);
+  m_writer->writeProcessEvent(&m_procEvt, &(proc->proc));
   // delete the process from the proc table after an exit
   if (ti->is_main_thread()) {
     // m_processCxt->deleteProcess(&proc);
@@ -121,5 +121,5 @@ void ProcessEventProcessor::writeExecEvent(sinsp_evt *ev) {
   m_procEvt.tid = ti->m_tid;
   m_procEvt.ret = utils::getSyscallResult(ev);
   m_procEvt.args.clear();
-  m_writer->writeProcessEvent(&m_procEvt);
+  m_writer->writeProcessEvent(&m_procEvt, &(proc->proc));
 }

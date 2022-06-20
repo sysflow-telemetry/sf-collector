@@ -80,27 +80,23 @@ OID *utils::getOIDDelKey() {
   return &s_oiddelkey;
 }
 
-string utils::getUserName(context::SysFlowContext *cxt, uint32_t uid) {
-  scap_userinfo *user = cxt->getInspector()->get_user(uid);
+// when querying users on the host, using an empty string for container id.
+std::string utils::getUserName(context::SysFlowContext *cxt, std::string& containerid, uint32_t uid) {
+  scap_userinfo *user = cxt->getInspector()->m_usergroup_manager.get_user(containerid, uid);
   if (user != nullptr) {
     return user->name;
   } else {
-    return string("");
+    return EMPTY_STR;
   }
 }
-
-string utils::getGroupName(context::SysFlowContext *cxt, uint32_t gid) {
-  unordered_map<uint32_t, scap_groupinfo *>::const_iterator it;
-  if (gid == 0xffffffff) {
-    return string("");
+// when querying groups on the host, using an empty string for container id.
+std::string utils::getGroupName(context::SysFlowContext *cxt, std::string& containerid, uint32_t gid) {
+  scap_groupinfo *group = cxt->getInspector()->m_usergroup_manager.get_group(containerid, gid);
+  if (group != nullptr) {
+    return group->name;
+  } else {
+    return EMPTY_STR;
   }
-
-  it = cxt->getInspector()->m_grouplist.find(gid);
-  if (it == cxt->getInspector()->m_grouplist.end()) {
-    return string("");
-  }
-
-  return it->second->name;
 }
 bool utils::isInContainer(sinsp_evt *ev) {
   sinsp_threadinfo *ti = ev->get_thread_info();

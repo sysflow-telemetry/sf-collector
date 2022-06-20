@@ -54,6 +54,10 @@ private:
 public:
   SFSocketWriter(context::SysFlowContext *cxt, time_t start);
   virtual ~SFSocketWriter();
+
+  inline void write(SysFlow *flow, sysflow::Process*, sysflow::File*, sysflow::File*) {
+    write(flow);
+  }
   inline void write(SysFlow *flow) {
     if (m_errTimer == 0) {
       avro::encode(*m_encoder, *flow);

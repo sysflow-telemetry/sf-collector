@@ -45,7 +45,7 @@ public:
   FileObj *getFile(const string &key);
   FileObj *createFile(sinsp_evt *ev, string path, char typechar,
                       SFObjectState state, string key);
-  bool exportFile(const string &key);
+  FileObj *exportFile(const string &key);
   void clearFiles();
   inline int getSize() { return m_files.size(); }
 };

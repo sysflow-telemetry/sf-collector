@@ -46,13 +46,14 @@ typedef std::array<uint8_t, 20> FOID;
 struct NFKey;
 
 namespace utils {
+static const std::string EMPTY_STR = "";
 int64_t getFlags(sinsp_evt *ev);
 bool isCloneThreadSet(sinsp_evt *ev);
 int64_t getFD(sinsp_evt *ev);
 bool isMapAnonymous(sinsp_evt *ev);
-int64_t getIntParam(sinsp_evt *ev, string pname);
-string getUserName(context::SysFlowContext *cxt, uint32_t uid);
-string getGroupName(context::SysFlowContext *cxt, uint32_t gid);
+int64_t getIntParam(sinsp_evt *ev, std::string pname);
+std::string getUserName(context::SysFlowContext *cxt, std::string& containerId, uint32_t uid);
+std::string getGroupName(context::SysFlowContext *cxt, std::string& containerId, uint32_t gid);
 bool isInContainer(sinsp_evt *ev);
 int64_t getSyscallResult(sinsp_evt *ev);
 avro::ValidSchema loadSchema();
@@ -62,12 +63,12 @@ NFKey *getNFEmptyKey();
 OID *getOIDDelKey();
 OID *getOIDEmptyKey();
 void generateFOID(const string &key, FOID *foid);
-string getPath(sinsp_evt *ev, const string &paraName);
-fs::path getCanonicalPath(const string &fileName);
-string getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
-                       const string &fileName);
-string getAbsolutePath(sinsp_threadinfo *ti, const string &fileName);
-int64_t getFD(sinsp_evt *ev, const string &paraName);
+std::string getPath(sinsp_evt *ev, const std::string &paraName);
+fs::path getCanonicalPath(const std::string &fileName);
+std::string getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
+                       const std::string &fileName);
+std::string getAbsolutePath(sinsp_threadinfo *ti, const std::string &fileName);
+int64_t getFD(sinsp_evt *ev, const std::string &paraName);
 int64_t getSchemaVersion();
 
 inline time_t getCurrentTime(context::SysFlowContext *cxt) {

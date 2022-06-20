@@ -19,14 +19,14 @@
 # limitations under the License.
 
 # Build environment configuration
-include ../makefile.manifest.inc
-include ../makefile.env.inc
+#include ../makefile.manifest.inc
+#include ../makefile.env.inc
 
 # Target configuration
-TARGET = sysporter
+TARGET = libsysflow.a 
+TARGET_TEST = test
 SYSFLOW_BUILD_NUMBER ?= 0
 LIB_TARGET = libsfcollector.a
-OBJS = .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o
 # Lint options
 LINT = clang-tidy-9
 LINTCHECKS = "bugprone-*"
@@ -39,7 +39,7 @@ LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
 LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration
-LIBLOCALPREFIX ?= ../modules
+LIBLOCALPREFIX ?= ../../modules
 SDLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/lib
 SDLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/include
 AVRLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
@@ -53,7 +53,7 @@ DEBUG ?= 0
 # Compiler options
 CXX = g++
 AR = ar
-LIBS = $(FALCOSECURITY_LIBS_LIB_PREFIX)/libsinsp.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libscap.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libjq.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libonig.a \
+LIBS = $(TARGET) ../libsfcollector.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libsinsp.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libscap.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libjq.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libonig.a \
        $(FALCOSECURITY_LIBS_LIB_PREFIX)/libb64.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libcurl.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libtbb.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++.a \
        $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_alts.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_reflection.a  $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_error_details.a \
        $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_unsecure.a  $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc_plugin_support.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpcpp_channelz.a \
@@ -87,6 +87,8 @@ CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json2/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
 
+OBJS = .sysflowlibs.o .sysflowlibs.o
+
 $(info    DEBUG is $(DEBUG))
 ifeq ($(DEBUG), 1)
 	CFLAGS += -ggdb
@@ -96,17 +98,15 @@ else
 endif
 
 .PHONY: all
-all: version $(TARGET) $(LIB_TARGET)
+all: $(TARGET)
 
 .PHONY: install
 install: all
-	mkdir -p $(INSTALL_PATH)/bin && cp sysporter $(INSTALL_PATH)/bin
-	mkdir -p $(INSTALL_PATH)/conf && cp $(SCHLOCALPREFIX)/SysFlow.avsc $(INSTALL_PATH)/conf
+	mkdir -p $(INSTALL_PATH)/lib && cp libsysflow.a $(INSTALL_PATH)/lib
 
 .PHONY: uninstall
 uninstall:
-	rm -rf $(INSTALL_PATH)/bin
-	rm -rf $(INSTALL_PATH)/conf
+	rm -rf $(INSTALL_PATH)/lib
 
 .PHONY: lint
 lint: $(LINTSRCS)
@@ -116,7 +116,6 @@ lint: $(LINTSRCS)
 lintfix: $(LINTSRCS)
 	$(LINT) -checks=$(LINTCHECKS) -format-style=llvm -header-filter=$(LINTHEADERS) -fix $^ -- $(CFLAGS)
 
-.PHONY: version
 version:
 	cp sysflow_config.h.in sysflow_config.h
 	sed -i -E "s/SYSFLOW_VERSION/\"$(SYSFLOW_VERSION)\"/" sysflow_config.h
@@ -124,87 +123,23 @@ version:
 
 .PHONY: $(TARGET)
 $(TARGET): $(OBJS) 
-	$(CXX) $^ -o $@ $(LDFLAGS)
-
-.PHONY: $(LIB_TARGET)
-$(LIB_TARGET): $(OBJS) 
 	$(AR) -r $@ $^
 
-.main.o: main.cpp
+.PHONY: $(TARGET_TEST)
+$(TARGET_TEST): $(OBJS) .test.o 
+	$(CXX) $^ -o $@ $(LDFLAGS)
+
+.sysflowlibs.o: sysflowlibs.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
-.sysflowfork.o: sysflowfork.cpp
+
+.test.o: test.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
-.MurmurHash3.o: MurmurHash3.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.utils.o: utils.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.k8scontext.o: k8scontext.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.k8seventprocessor.o: k8seventprocessor.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.containercontext.o: containercontext.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.sysflowprocessor.o: sysflowprocessor.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.sysflowwriter.o: sysflowwriter.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.sffilewriter.o: sffilewriter.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.sfsockwriter.o: sfsockwriter.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.sfcallbackwriter.o: sfcallbackwriter.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.sfmultiwriter.o: sfmultiwriter.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.processcontext.o: processcontext.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.processeventprocessor.o: processeventprocessor.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.controlflowprocessor.o: controlflowprocessor.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.dataflowprocessor.o: dataflowprocessor.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.networkflowprocessor.o: networkflowprocessor.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.networkflowprocessor.lint: networkflowprocessor.cpp
-	$(LINT) -checks=* $^ -- $(CFLAGS)
-
-.fileflowprocessor.o: fileflowprocessor.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.fileeventprocessor.o: fileeventprocessor.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.sysflowcontext.o: sysflowcontext.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-.filecontext.o: filecontext.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $^
-
-#.xxhash.o: xxhash.c
-#	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .PHONY: clean
 clean:
-	rm -f .[!.]*.o *.o *.so *.a $(TARGET) sysflow_config.h
+	rm -f .[!.]*.o *.o *.so *.a $(TARGET) 
 
 .PHONY : help
 help:

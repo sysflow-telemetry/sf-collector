@@ -63,7 +63,7 @@ public:
   void clearAllProcesses();
   void deleteProcess(ProcessObj **proc);
   void markForDeletion(ProcessObj **proc);
-  bool exportProcess(OID *oid);
+  ProcessObj* exportProcess(OID *oid);
   void printNetworkFlow(ProcessObj *proc);
   void printStats();
   int removeProcessFromSet(ProcessObj *proc, bool checkForErr);

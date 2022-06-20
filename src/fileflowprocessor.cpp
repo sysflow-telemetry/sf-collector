@@ -89,7 +89,8 @@ void FileFlowProcessor::removeAndWriteRelatedFlows(ProcessObj *proc,
     (*it)->fileflow.endTs = endTs;
     (*it)->fileflow.opFlags |= OP_TRUNCATE;
     // m_writer->writeFileFlow(&((*it)->fileflow));
-    SHOULD_WRITE((*it))
+    FileObj* file = m_fileCxt->getFile((*it)->filekey);
+    SHOULD_WRITE((*it), &(proc->proc), ((file != nullptr) ? &(file->file) : nullptr ))
     removeFileFlowFromSet(&(*it), true);
   }
 }
@@ -134,7 +135,7 @@ inline void FileFlowProcessor::processNewFlow(sinsp_evt *ev, ProcessObj *proc,
     removeAndWriteRelatedFlows(proc, ff, ev->get_ts());
     ff->fileflow.endTs = ev->get_ts();
     // m_writer->writeFileFlow(&(ff->fileflow));
-    SHOULD_WRITE(ff)
+    SHOULD_WRITE(ff, &(proc->proc), &(file->file))
     delete ff;
   }
 }
@@ -144,7 +145,7 @@ inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj *proc,
                                                       FileFlowObj **ff,
                                                       string flowkey) {
   // m_writer->writeFileFlow(&((*ff)->fileflow));
-  SHOULD_WRITE((*ff))
+  SHOULD_WRITE((*ff), &(proc->proc), &(file->file))
   removeFileFlowFromSet(ff, false);
   removeFileFlow(proc, file, ff, std::move(flowkey));
 }
@@ -266,7 +267,7 @@ int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj *proc, int64_t tid) {
       }
       ffi->second->fileflow.opFlags |= OP_TRUNCATE;
       SF_DEBUG(m_logger, "Writing FILEFLOW!");
-      SHOULD_WRITE(ffi->second)
+      SHOULD_WRITE(ffi->second, &(proc->proc), &(file->file))
       // m_writer->writeFileFlow(&(ffi->second->fileflow));
       FileFlowObj *ffo = ffi->second;
       proc->fileflows.erase(ffi);
@@ -370,9 +371,9 @@ void FileFlowProcessor::removeFileFlow(DataFlowObj *dfo) {
 void FileFlowProcessor::exportFileFlow(DataFlowObj *dfo, time_t /*now*/) {
   auto *ffo = static_cast<FileFlowObj *>(dfo);
   ffo->fileflow.endTs = utils::getSysdigTime(m_cxt);
-  m_processCxt->exportProcess(&(ffo->fileflow.procOID));
-  m_fileCxt->exportFile(ffo->filekey);
-  SHOULD_WRITE(ffo)
+  ProcessObj* proc = m_processCxt->exportProcess(&(ffo->fileflow.procOID));
+  FileObj* file = m_fileCxt->exportFile(ffo->filekey);
+  SHOULD_WRITE(ffo, ((proc != nullptr) ? &(proc->proc) : nullptr ), ((file != nullptr) ? &(file->file) : nullptr ))
   // m_writer->writeFileFlow(&(ffo->fileflow));
   SF_DEBUG(m_logger, "Reupping flow");
   ffo->fileflow.ts = utils::getSysdigTime(m_cxt);

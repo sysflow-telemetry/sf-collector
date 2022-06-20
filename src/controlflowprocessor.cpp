@@ -99,7 +99,7 @@ inline void ControlFlowProcessor::updateProcFlow(ProcessFlowObj *pf,
 
 inline void ControlFlowProcessor::removeAndWriteProcessFlow(ProcessObj *proc) {
   // SF_INFO(m_logger, "removeAndWriteProcessFlow")
-  m_writer->writeProcessFlow(&((proc->pfo)->procflow));
+  m_writer->writeProcessFlow(&((proc->pfo)->procflow), &(proc->proc));
   m_processCxt->removeProcessFromSet(proc, true);
   proc->pfo = nullptr;
 }
@@ -156,8 +156,8 @@ int ControlFlowProcessor::handleProcEvent(sinsp_evt *ev, OpFlags flag) {
 
 void ControlFlowProcessor::exportProcessFlow(ProcessFlowObj *pfo) {
   pfo->procflow.endTs = utils::getSysdigTime(m_cxt);
-  m_processCxt->exportProcess(&(pfo->procflow.procOID));
-  m_writer->writeProcessFlow(&(pfo->procflow));
+  ProcessObj* proc = m_processCxt->exportProcess(&(pfo->procflow.procOID));
+  m_writer->writeProcessFlow(&(pfo->procflow), ((proc != nullptr) ? &(proc->proc) : nullptr ));
   SF_DEBUG(m_logger, "Reupping proc flow");
   pfo->procflow.ts = utils::getSysdigTime(m_cxt);
   pfo->procflow.endTs = 0;
