@@ -34,10 +34,12 @@ void ContainerContext::setContainer(ContainerObj **cont,
 }
 
 ContainerContext::ContainerContext(context::SysFlowContext *cxt,
-                                   writer::SysFlowWriter *writer)
+                                   writer::SysFlowWriter *writer,
+                                   sfk8s::K8sContext *k8sCxt)
     : m_containers(CONT_TABLE_SIZE) {
   m_cxt = cxt;
   m_writer = writer;
+  m_k8sCxt = k8sCxt;
   m_containers.set_empty_key("0");
   m_containers.set_deleted_key("");
 }
@@ -69,6 +71,18 @@ ContainerObj *ContainerContext::createContainer(sinsp_threadinfo *ti) {
       cont->cont.image.compare(INCOMPLETE_IMAGE) == 0) {
     cont->incomplete = true;
   }
+  if (m_cxt->isK8sEnabled()) {
+    std::cout << "Get pod for container" << std::endl;
+    std::shared_ptr<PodObj> pod = m_k8sCxt->getPod(ti);
+    if (pod != nullptr) {
+      std::cout << "setting pod id to " << pod->pod.id << " for container "
+                << ti->m_container_id << std::endl;
+      cont->cont.podId.set_string(pod->pod.id);
+      pod->refs++;
+    } else {
+      cont->cont.podId.set_null();
+    }
+  }
   return cont;
 }
 
@@ -84,6 +98,9 @@ bool ContainerContext::exportContainer(const string &id) {
   bool exprt = false;
   ContainerTable::iterator cont = m_containers.find(id);
   if (cont != m_containers.end()) {
+    if (m_cxt->isK8sEnabled() && !cont->second->cont.podId.is_null()) {
+      m_k8sCxt->exportPod(cont->second->cont.podId.get_string());
+    }
     if (!cont->second->written) {
       m_writer->writeContainer(&(cont->second->cont));
       cont->second->written = true;
@@ -137,6 +154,10 @@ ContainerObj *ContainerContext::getContainer(sinsp_threadinfo *ti) {
   }
   if (ct == nullptr) {
     ct = createContainer(ti);
+  } else {
+    if (m_cxt->isK8sEnabled()) {
+      reupPod(ti, ct);
+    }
   }
   if (ct == nullptr) {
     return nullptr;
@@ -147,10 +168,36 @@ ContainerObj *ContainerContext::getContainer(sinsp_threadinfo *ti) {
   return ct;
 }
 
+void ContainerContext::reupPod(sinsp_threadinfo *ti, ContainerObj *cont) {
+  if (!m_cxt->isK8sEnabled()) {
+    return;
+  }
+  string podId = "";
+  if (!cont->cont.podId.is_null()) {
+    podId = cont->cont.podId.get_string();
+  }
+  if (!podId.empty()) {
+    auto pod1 = m_k8sCxt->getPod(podId);
+    if (pod1 != nullptr) {
+      pod1->refs--;
+    }
+  }
+  auto pod = m_k8sCxt->getPod(ti);
+  if (pod != nullptr) {
+    cont->cont.podId.set_string(pod->pod.id);
+    pod->refs++;
+  } else {
+    cont->cont.podId.set_null();
+  }
+}
+
 void ContainerContext::clearContainers() {
   for (ContainerTable::iterator it = m_containers.begin();
        it != m_containers.end(); ++it) {
     if (it->second->refs == 0) {
+      if (m_cxt->isK8sEnabled() && !it->second->cont.podId.is_null()) {
+        m_k8sCxt->derefPod(it->second->cont.podId.get_string());
+      }
       m_containers.erase(it);
       delete it->second;
     } else {

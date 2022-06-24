@@ -45,8 +45,8 @@ FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 # Install Packages
 COPY ./scripts/installUBIDependency.sh /build/install.sh
 
-RUN --mount=type=secret,id=rhuser --mount=type=secret,id=rhpassword \
-     ( export REGISTER_USER=$(cat /run/secrets/rhuser) && export REGISTER_PASSWORD=$(cat /run/secrets/rhpassword) && bash /build/install.sh base ) && \
+RUN --mount=type=secret,id=rhuser,dst=/secret/rhuser --mount=type=secret,id=rhpassword,dst=/secret/rhpassword \
+ ( export REGISTER_USER=$(cat /secret/rhuser) && export REGISTER_PASSWORD=$(cat /secret/rhpassword) && bash /build/install.sh base ) && \
      rm -rf /build
 
 #-----------------------
@@ -67,6 +67,7 @@ ENV HOME=/root
 
 #  build modules
 COPY ./modules /build/modules
+COPY ./scripts /build/scripts
 COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  dnf -y install git && \

@@ -58,7 +58,9 @@ install: modules \
 falcolibs/package:
 	cd falco-libs && \
 	mkdir -p build && cd build && \
-        cmake -DPROBE_VERSION=${FALCO_LIBS_DRIVER_VERSION} -DDRIVER_PACKAGE_NAME=falco -DSCAP_BPF_PROBE_ENV_VAR_NAME=FALCO_BPF_PROBE -DCAP_HOST_ROOT_ENV_VAR_NAME=HOST_ROOT -DFALCOSECURITY_LIBS_VERSION=${FALCO_LIBS_VERSION} -DFALCOSECURITY_LIBS_CHECKSUM=${FALCO_LIBS_CHECKSUM} -DCMAKE_BUILD_TYPE=Release -DPROBE_NAME=falco -DBUILD_BPF=OFF  -DBUILD_DRIVER=OFF ../. && make && \
+        cmake -DPROBE_VERSION=${FALCO_LIBS_DRIVER_VERSION} -DDRIVER_PACKAGE_NAME=falco -DSCAP_BPF_PROBE_ENV_VAR_NAME=FALCO_BPF_PROBE \
+		-DCAP_HOST_ROOT_ENV_VAR_NAME=HOST_ROOT -DFALCOSECURITY_LIBS_VERSION=${FALCO_LIBS_VERSION} -DFALCOSECURITY_LIBS_CHECKSUM=${FALCO_LIBS_CHECKSUM} \
+		-DCMAKE_BUILD_TYPE=Release -DPROBE_NAME=falco -DBUILD_BPF=OFF  -DBUILD_DRIVER=OFF ../. && make && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
@@ -95,7 +97,7 @@ falcolibs/package:
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
 	cp jq-prefix/src/jq/target/lib/*.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
-        cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
+    cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
 	cp protobuf-prefix/src/protobuf/target/lib/*.a lib && \
 	cp zlib-prefix/src/zlib/libz.so.1.2.11 lib/libz.so
 

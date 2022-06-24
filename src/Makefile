@@ -114,7 +114,7 @@ version:
 	sed -i -E "s/SYSFLOW_BUILD_NUMBER/\"$(SYSFLOW_BUILD_NUMBER)\"/" sysflow_config.h
 
 .PHONY: $(TARGET)
-$(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .filecontext.o
+$(TARGET): .main.o .MurmurHash3.o .utils.o .k8scontext.o .containercontext.o .processcontext.o .k8seventprocessor.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .filecontext.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .main.o: main.cpp
@@ -127,6 +127,12 @@ $(TARGET): .main.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .utils.o: utils.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.k8scontext.o: k8scontext.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.k8seventprocessor.o: k8seventprocessor.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .containercontext.o: containercontext.cpp

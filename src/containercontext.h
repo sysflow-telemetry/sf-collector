@@ -22,11 +22,11 @@
 #include <string>
 
 #include "datatypes.h"
+#include "k8scontext.h"
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
 #include <sinsp.h>
-
 #define CONT_TABLE_SIZE 100
 #define INCOMPLETE "incomplete"
 #define INCOMPLETE_IMAGE "incomplete:incomplete"
@@ -37,11 +37,14 @@ private:
   ContainerTable m_containers;
   context::SysFlowContext *m_cxt;
   writer::SysFlowWriter *m_writer;
+  sfk8s::K8sContext *m_k8sCxt;
   ContainerObj *createContainer(sinsp_threadinfo *ti);
   void setContainer(ContainerObj **cont, sinsp_container_info::ptr_t container);
+  void reupPod(sinsp_threadinfo *ti, ContainerObj *cont);
 
 public:
-  ContainerContext(context::SysFlowContext *cxt, writer::SysFlowWriter *writer);
+  ContainerContext(context::SysFlowContext *cxt, writer::SysFlowWriter *writer,
+                   sfk8s::K8sContext *k8sCxt);
   virtual ~ContainerContext();
   ContainerObj *getContainer(sinsp_threadinfo *ti);
   ContainerObj *getContainer(const string &id);

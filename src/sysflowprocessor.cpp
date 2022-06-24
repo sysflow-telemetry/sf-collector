@@ -46,7 +46,12 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
                        "one must be specified.")
     ::exit(EXIT_FAILURE);
   }
-  m_containerCxt = new container::ContainerContext(m_cxt, m_writer);
+  m_k8sCxt = nullptr;
+  if(m_cxt->isK8sEnabled()) {
+    m_k8sCxt = new sfk8s::K8sContext(m_cxt, m_writer);
+    m_k8sPrcr = new k8sevent::K8sEventProcessor(m_writer, m_k8sCxt);
+  }
+  m_containerCxt = new container::ContainerContext(m_cxt, m_writer, m_k8sCxt);
   m_fileCxt = new file::FileContext(m_containerCxt, m_writer);
   m_processCxt =
       new process::ProcessContext(m_cxt, m_containerCxt, m_fileCxt, m_writer);
@@ -59,6 +64,9 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt)
 SysFlowProcessor::~SysFlowProcessor() {
   delete m_dfPrcr;
   delete m_ctrlPrcr;
+  if (m_k8sCxt != nullptr) {
+    delete m_k8sCxt;
+  }
   delete m_containerCxt;
   delete m_processCxt;
   delete m_fileCxt;
@@ -69,6 +77,9 @@ SysFlowProcessor::~SysFlowProcessor() {
 void SysFlowProcessor::clearTables() {
   m_processCxt->clearProcesses();
   m_containerCxt->clearContainers();
+  if(m_cxt->isK8sEnabled()) {
+    m_k8sCxt->clearPods();
+  }
   m_fileCxt->clearFiles();
 }
 
@@ -79,6 +90,8 @@ bool SysFlowProcessor::checkAndRotateFile() {
     SF_INFO(m_logger,
             "Container Table: "
                 << m_containerCxt->getSize()
+		<< " K8s Enabled: " << m_cxt->isK8sEnabled()
+		<< " Pods Table: " << ( m_cxt->isK8sEnabled() ? m_k8sCxt->getSize() : 0 )
                 << " Process Table: " << m_processCxt->getSize()
                 << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
                 << " FileFlow Table: " << m_dfPrcr->getFFSize()
@@ -143,6 +156,10 @@ int SysFlowProcessor::run() {
       if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
         continue;
       }
+      if ( m_cxt->getInspector()->m_k8s_client != nullptr &&
+		      m_cxt->getInspector()->m_k8s_client->get_capture_events().size() > 0) {
+        SF_INFO(m_logger, "Events Count: " << m_cxt->getInspector()->m_k8s_client->get_capture_events().size());
+      }
       switch (ev->get_type()) {
         SF_EXECVE_ENTER()
         SF_EXECVE_EXIT(ev)
@@ -165,12 +182,22 @@ int SysFlowProcessor::run() {
         SF_SETUID_EXIT(ev)
         SF_SHUTDOWN_EXIT(ev)
         SF_MMAP_EXIT(ev)
-      }
+	case PPME_K8S_E:
+	{
+          std::cout << "Received a k8s event!!!" << std::endl;
+	  if(m_cxt->isK8sEnabled()) {
+	    m_k8sPrcr->handleK8sEvent(ev);
+	  }
+	  break;
+        }
+      }	
     }
     SF_INFO(m_logger, "Exiting scap loop... shutting down");
     SF_INFO(m_logger,
             "Container Table: "
                 << m_containerCxt->getSize()
+		<< " K8s Enabled: " << m_cxt->isK8sEnabled()
+		<< " Pods Table: " << ( m_cxt->isK8sEnabled() ? m_k8sCxt->getSize() : 0)
                 << " Process Table: " << m_processCxt->getSize()
                 << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
                 << " FileFlow Table: " << m_dfPrcr->getFFSize()

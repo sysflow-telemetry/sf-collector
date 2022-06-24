@@ -32,17 +32,17 @@ sysporter:
 	cd src && make
 
 .PHONY: install
-install: 
+install:
 	cd modules && make install
 	cd src && make install
 
 .PHONY: uninstall
-uninstall: 
+uninstall:
 	cd src && make uninstall
 	cd modules && make uninstall
 
 .PHONY: package
-package: 
+package:
 	docker run --rm --entrypoint=/bin/bash \
 		-v $(shell pwd)/scripts:$(INSTALL_PATH)/scripts \
 		-v $(shell pwd)/modules/dkms:$(INSTALL_PATH)/modules/src/dkms \
@@ -54,7 +54,7 @@ package:
 .PHONY: clean
 clean:
 	cd src && make clean
-	cd modules && make clean 
+	cd modules && make clean
 	cd scripts/cpack && ./clean.sh
 
 .PHONY: docker-build

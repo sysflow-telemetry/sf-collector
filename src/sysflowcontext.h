@@ -37,6 +37,8 @@
 #define FILE_READ_MODE "FILE_READ_MODE"
 #define FILE_ONLY "FILE_ONLY"
 #define ENABLE_PROC_FLOW "ENABLE_PROC_FLOW"
+#define SF_K8S_API_URL "SF_K8S_API_URL"
+#define SF_K8S_API_CERT "SF_K8S_API_CERT"
 
 namespace context {
 class SysFlowContext {
@@ -63,6 +65,7 @@ private:
   bool m_fileOnly;
   int m_fileRead;
   string m_nodeIP;
+  bool m_k8sEnabled;
   DEFINE_LOGGER();
 
 public:
@@ -91,6 +94,7 @@ public:
   inline int getStatsInterval() { return m_statsInterval; }
   inline bool isFileOnly() { return m_fileOnly; }
   inline int getFileRead() { return m_fileRead; }
+  inline bool isK8sEnabled() { return m_k8sEnabled; }
 };
 } // namespace context
 

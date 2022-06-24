@@ -22,6 +22,7 @@
 #include "containercontext.h"
 #include "controlflowprocessor.h"
 #include "dataflowprocessor.h"
+#include "k8seventprocessor.h"
 #include "filecontext.h"
 #include "logger.h"
 #include "processcontext.h"
@@ -30,6 +31,7 @@
 #include "sfsockwriter.h"
 #include "syscall_defs.h"
 #include "sysflowcontext.h"
+#include "k8scontext.h"
 #include <ctime>
 #include <stdlib.h>
 #include <string>
@@ -52,6 +54,8 @@ private:
   process::ProcessContext *m_processCxt;
   controlflow::ControlFlowProcessor *m_ctrlPrcr;
   dataflow::DataFlowProcessor *m_dfPrcr;
+  sfk8s::K8sContext *m_k8sCxt;
+  k8sevent::K8sEventProcessor *m_k8sPrcr;
   void clearTables();
   int checkForExpiredRecords();
   bool checkAndRotateFile();
