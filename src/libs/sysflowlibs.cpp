@@ -52,6 +52,7 @@ SysFlowDriver::SysFlowDriver(SysFlowConfig *conf) {
         m_cxt->setCallback(conf->callback);
     }
     m_cxt->setReadFileMode(conf->fileReadMode);
+    m_processor = new sysflowprocessor::SysFlowProcessor(m_cxt, nullptr);
 }
 
 SysFlowDriver::~SysFlowDriver() {
