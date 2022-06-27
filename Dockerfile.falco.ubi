@@ -43,7 +43,7 @@ RUN  apt-get update && apt-get install -y libboost-all-dev flex bison gawk libsp
 
 # environment and build args
 ARG BUILD_NUMBER=0
-ARG DEBUG=0
+ARG DEBUG=1
 
 ARG INSTALL_PATH=/usr/local/sysflow
 
@@ -79,7 +79,7 @@ RUN cd /build/src/libs && bash ./make.sh && bash ./maketest.sh
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM ghcr.io/sysflow-telemetry/libs-base-images/runtime:39ae7d40496793cf3d3e7890c9bbdc202263836b AS runtime
+FROM ghcr.io/sysflow-telemetry/libs-base-images/runtime-ubi:8.6-754-39ae7d40496793cf3d3e7890c9bbdc202263836b AS runtime
 
 ARG FALCO_VER
 ARG FALCO_LIBS_VER
