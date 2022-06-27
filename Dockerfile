@@ -40,7 +40,7 @@ ENV LIBRARY_PATH=/lib64
 # build sysporter
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
 COPY ./modules/sysflow/c\+\+/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/sysflow.hh
-COPY ./modules/sysflow/c\+\+/sysflow/avsc_sysflow3.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/avsc_sysflow4.hh
+COPY ./modules/sysflow/c\+\+/sysflow/avsc_sysflow4.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/avsc_sysflow4.hh
 COPY ./src/ /build/src/
 RUN cd /build/src && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
