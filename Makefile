@@ -64,6 +64,14 @@ docker-build:
 docker-falco-build:
 	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target builder -t sysflowtelemetry/sf-collector-falco:${SYSFLOW_VERSION} -f Dockerfile.falco . )
 
+.PHONY: docker-falco-runtime-build
+docker-falco-runtime-build:
+	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target runtime -t sysflowtelemetry/sf-test-falco:${SYSFLOW_VERSION} -f Dockerfile.falco . )
+
+.PHONY: docker-falco-runtime-ubi-build
+docker-falco-runtime-ubi-build:
+	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target runtime -t sysflowtelemetry/sf-test-falco-ubi:${SYSFLOW_VERSION} -f Dockerfile.falco.ubi . )
+
 .PHONY: docker-testing-build
 docker-testing-build:
 	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target testing -t sysflowtelemetry/testing:${SYSFLOW_VERSION} -f Dockerfile . )
