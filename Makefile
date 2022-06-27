@@ -69,6 +69,10 @@ docker-testing-build:
 docker-test:
 	docker run --rm --name sf-test -v $(shell pwd)/tests:/usr/local/sysflow/tests -e INTERVAL=300 -e EXPORTER_ID=tests -e OUTPUT=/mnt/data/ sysflowtelemetry/testing:${SYSFLOW_VERSION} tests/tests.bats
 
+.PHONY: docker-baseline-tests
+docker-baseline-tests:
+	docker run --rm --name sf-test -v $(shell pwd)/logs:/tmp -v $(shell pwd)/tests:/usr/local/sysflow/tests -e INTERVAL=300 -e EXPORTER_ID=tests -e OUTPUT=/mnt/data/ sysflowtelemetry/testing:${SYSFLOW_VERSION} tests/baseline.bats
+
 .PHONY: docker-base-build
 docker-base-build:
 	docker pull sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} &> /dev/null || true
@@ -91,5 +95,7 @@ help:
 	@echo "... uninstall"
 	@echo "... docker-runtime-build"
 	@echo "... docker-testing-build"
-	@echo "... docker-base-build"
+	@echo "... docker-base-build"i
 	@echo "... docker-mods-build"
+	@echo "... docker-test"
+	@echo "... docker-baseline-tests"
