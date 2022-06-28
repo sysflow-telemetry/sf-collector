@@ -72,8 +72,6 @@ RUN cd /build/src/libs && \
          SCHLOCALPREFIX=${MODPREFIX}/conf \
 	 DEBUG=${DEBUG} \
          install
-    #make clean && \
-    #rm -rf /build
 
 #-----------------------
 # Stage: Collector
@@ -109,7 +107,7 @@ RUN cd /build/src/collector && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM ghcr.io/sysflow-telemetry/libs-base-images/runtime:${FALCO_LIBS_DRIVER_VER} AS runtime
+FROM ghcr.io/sysflow-telemetry/libs-base-images/runtime-ubi:${UBI_VER}-${FALCO_LIBS_DRIVER_VER} AS runtime
 
 # environment variables
 ARG interval=30
@@ -172,9 +170,6 @@ ENV DRIVER_NAME="falco"
 ARG samplingRate=
 ENV SAMPLING_RATE=$samplingRate
 
-ARG dropMode=
-ENV ENABLE_DROP_MODE=$dropMode
-
 ENV DRIVERS_REPO="https://download.falco.org/driver"
 
 # Update Labels
@@ -184,6 +179,7 @@ LABEL "version"="${VERSION}"
 LABEL "release"="${RELEASE}"
 LABEL "falcolibs-version"="${FALCO_LIBS_VER}"
 LABEL "falcodriver-version"="${FALCO_LIBS_DRIVER_VER}"
+LABEL "ubi-version"="${UBI_VER}"
 LABEL "summary"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
 LABEL "description"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
 LABEL "io.k8s.display-name"="SysFlow Collector"
@@ -192,31 +188,8 @@ LABEL "io.k8s.description"="The SysFlow Collector monitors and collects system c
 # Update License
 COPY ./LICENSE.md /licenses/LICENSE.md
 
-#COPY --from=libs /usr/src/falco-${FALCO_LIBS_VERSION} /usr/src/falco-${FALCO_LIBS_VERSION}
-#COPY --from=libs /build/src/libs/test /usr/bin/sftest
-#RUN sed -i -E "s/@DRIVER_VERSION@/\"319368f1ad778691164d33d59945e00c5752cd27\"/" /usr/bin/falco-driver-loader
-# copy dependencies
-# COPY --from=libs /usr/local/lib/ /usr/local/lib/
-# COPY --from=libs /usr/local/sysflow/modules/bin /usr/local/sysflow/modules/bin
-# COPY --from=libs ${FALCOPREFIX}/driver/* "${DRIVERPREFIX}${FALCO_LIBS_VERSION}"
-# COPY --from=libs ${MODPREFIX}/lib/*.so* ${MODPREFIX}/lib/
-# COPY --from=libs ${MODPREFIX}/bin/ ${MODPREFIX}/bin/
-# #RUN ln -s ${MODPREFIX}/bin/falco-driver-loader /usr/bin/falco-driver-loader
-# COPY --from=libs ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 COPY --from=collector ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
-# COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
-# #RUN chmod +x /usr/local/sysflow/modules/bin/docker-entrypoint.sh
-# #COPY --from=libs /docker-entrypoint.sh /usr/local/sysflow/modules/bin/
-# COPY --from=libs /usr/lib/x86_64-linux-gnu/libglog.* /usr/lib/x86_64-linux-gnu/
- COPY --from=libs /usr/lib/x86_64-linux-gnu/libboost* /usr/lib/x86_64-linux-gnu/
-# COPY --from=libs /usr/lib/x86_64-linux-gnu/libsnappy* /usr/lib/x86_64-linux-gnu/
-# COPY --from=libs /usr/lib/x86_64-linux-gnu/libjsoncpp* /usr/lib/x86_64-linux-gnu/
-# COPY --from=libs /usr/lib/x86_64-linux-gnu/libgflags* /usr/lib/x86_64-linux-gnu/
-# COPY --from=libs /usr/lib/x86_64-linux-gnu/libunwind.so* /usr/lib/x86_64-linux-gnu/
-
-# # RUN dnf install -y procps net-tools
-# # entrypoint
-# WORKDIR /usr/local/sysflow/bin/
+COPY --from=libs /usr/lib/x86_64-linux-gnu/libboost* /usr/lib/x86_64-linux-gnu/
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
  CMD /usr/local/sysflow/bin/sysporter \
@@ -260,3 +233,4 @@ COPY --from=collector ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 
 WORKDIR $wdir
 ENTRYPOINT ["/usr/local/bin/bats"]
+
