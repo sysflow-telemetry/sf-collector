@@ -105,7 +105,8 @@ int FileEventProcessor::writeLinkEvent(sinsp_evt *ev, OpFlags flag) {
 
   SF_DEBUG(m_logger, "The Current working Directory of the "
                          << ev->get_name() << " event is " << ti->get_cwd());
-  m_writer->writeFileEvent(&m_fileEvt, &(proc->proc), &(file1->file), &(file2->file));
+  m_writer->writeFileEvent(&m_fileEvt, &(proc->proc), &(file1->file),
+                           &(file2->file));
   return 0;
 }
 

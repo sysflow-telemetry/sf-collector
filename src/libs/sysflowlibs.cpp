@@ -17,65 +17,34 @@
  * limitations under the License.
  **/
 
- #include "sysflowlibs.hpp"
+#include "sysflowlibs.hpp"
 
 using sysflowlibscpp::SysFlowDriver;
 
 SysFlowDriver::SysFlowDriver(SysFlowConfig *conf) {
-    m_cxt = new context::SysFlowContext(conf->filterContainers,
-                                        conf->rotateInterval,
-                                        std::string(conf->filePath),
-                                        std::string(conf->socketPath),
-                                        std::string(conf->scapInputPath),
-                                        conf->samplingRatio,
-                                        std::string(conf->exportID),
-                                        std::string(conf->falcoFilter), 
-                                        std::string(conf->criPath),
-                                        conf->criTO);
-    if(conf->enableStats) {
-        m_cxt->enableStats();
-    }
-    m_cxt->setNodeIP(std::string(conf->nodeIP));
-    if (conf->enableProcessFlow) {
-        m_cxt->enableProcessFlow();
-    }
-    if (conf->fileOnly) {
-        m_cxt->enableFileOnly();
-    }
-    if (conf->dropMode) {
-        m_cxt->enableDropMode();
-    }
-    if (conf->debugMode) {
-        m_cxt->enableDebugMode();
-    }
-    if (conf->callback != nullptr) {
-        m_cxt->setCallback(conf->callback);
-    }
-    m_cxt->setReadFileMode(conf->fileReadMode);
-    m_processor = new sysflowprocessor::SysFlowProcessor(m_cxt, nullptr);
+  m_cxt = new context::SysFlowContext(conf);
+  m_processor = new sysflowprocessor::SysFlowProcessor(m_cxt, nullptr);
 }
 
-SysFlowDriver::~SysFlowDriver() {
+SysFlowDriver::~SysFlowDriver() { delete m_processor; }
 
-}
-
-SysFlowConfig* sysflowlibscpp::InitializeSysFlowConfig() {
-   SysFlowConfig* conf = new SysFlowConfig();
-   conf->filterContainers = false;
-   conf->rotateInterval = 300;
-   conf->samplingRatio = 1;
-   conf->criTO = 30;
-   conf->enableStats = false;
-   conf->enableProcessFlow = true;
-   conf->fileOnly = true;
-   conf->fileReadMode = 2;
-   conf->dropMode = true;
-   conf->callback = nullptr;
-   conf->debugMode = false;
-   return conf;
+SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
+  SysFlowConfig *conf = new SysFlowConfig();
+  conf->filterContainers = false;
+  conf->rotateInterval = 300;
+  conf->samplingRatio = 1;
+  conf->criTO = 30;
+  conf->enableStats = false;
+  conf->enableProcessFlow = true;
+  conf->fileOnly = true;
+  conf->fileReadMode = 2;
+  conf->dropMode = true;
+  conf->callback = nullptr;
+  conf->debugMode = false;
+  return conf;
 }
 
 void DeleteSysFlowConfig(SysFlowConfig **conf) {
-    delete *conf;
-    *conf = nullptr;
+  delete *conf;
+  *conf = nullptr;
 }

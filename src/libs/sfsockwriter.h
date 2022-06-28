@@ -55,7 +55,8 @@ public:
   SFSocketWriter(context::SysFlowContext *cxt, time_t start);
   virtual ~SFSocketWriter();
 
-  inline void write(SysFlow *flow, sysflow::Process*, sysflow::File*, sysflow::File*) {
+  inline void write(SysFlow *flow, sysflow::Process *, sysflow::File *,
+                    sysflow::File *) {
     write(flow);
   }
   inline void write(SysFlow *flow) {

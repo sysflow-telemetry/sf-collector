@@ -22,8 +22,9 @@
 #include "containercontext.h"
 #include "controlflowprocessor.h"
 #include "dataflowprocessor.h"
-#include "k8seventprocessor.h"
 #include "filecontext.h"
+#include "k8scontext.h"
+#include "k8seventprocessor.h"
 #include "logger.h"
 #include "processcontext.h"
 #include "sffilewriter.h"
@@ -31,7 +32,6 @@
 #include "sfsockwriter.h"
 #include "syscall_defs.h"
 #include "sysflowcontext.h"
-#include "k8scontext.h"
 #include <ctime>
 #include <stdlib.h>
 #include <string>
@@ -39,11 +39,12 @@
 namespace sysflowprocessor {
 class SysFlowProcessor {
 public:
-  explicit SysFlowProcessor(context::SysFlowContext *cxt, writer::SysFlowWriter *writer = nullptr);
+  explicit SysFlowProcessor(context::SysFlowContext *cxt,
+                            writer::SysFlowWriter *writer = nullptr);
   virtual ~SysFlowProcessor();
   inline void exit() { m_exit = true; }
   int run();
-  sysflow::Container* getContainer(const std::string& containerId);
+  sysflow::Container *getContainer(const std::string &containerId);
 
 private:
   DEFINE_LOGGER();

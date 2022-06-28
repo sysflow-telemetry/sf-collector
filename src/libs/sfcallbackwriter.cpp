@@ -22,20 +22,19 @@
 
 using writer::SFCallbackWriter;
 
-SFCallbackWriter::SFCallbackWriter(context::SysFlowContext *cxt, time_t start, SysFlowCallback callback, sysflowprocessor::SysFlowProcessor* proc)
+SFCallbackWriter::SFCallbackWriter(context::SysFlowContext *cxt, time_t start,
+                                   SysFlowCallback callback,
+                                   sysflowprocessor::SysFlowProcessor *proc)
     : writer::SysFlowWriter(cxt, start) {
-      m_callback = callback;
-      m_sysflowProc = proc;
+  m_callback = callback;
+  m_sysflowProc = proc;
 }
 
-SFCallbackWriter::~SFCallbackWriter() {
-}
+SFCallbackWriter::~SFCallbackWriter() {}
 
 int SFCallbackWriter::initialize() {
   writeHeader();
   return 0;
 }
 
-void SFCallbackWriter::reset(time_t curTime) {
-  writeHeader();
-}
+void SFCallbackWriter::reset(time_t curTime) { writeHeader(); }

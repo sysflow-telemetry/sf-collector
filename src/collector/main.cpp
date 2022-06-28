@@ -22,16 +22,16 @@
 #include "driver_config.h"
 #include <fstream>
 #endif // HAS_CAPTURE
+#include "logger.h"
 #include "sysflow_config.h"
 #include "sysflowlibs.hpp"
-#include "logger.h"
 #include <csignal>
 #include <cstdio>
 #include <iostream>
 #include <string>
 #include <unistd.h>
 
-SysFlowConfig* g_config;
+SysFlowConfig *g_config;
 sysflowlibscpp::SysFlowDriver *g_driver;
 void signal_handler(int /*i*/) { g_driver->exit(); }
 
@@ -105,14 +105,12 @@ int main(int argc, char **argv) {
   sigHandler.sa_handler = signal_handler;
   sigemptyset(&sigHandler.sa_mask);
   sigHandler.sa_flags = 0;
-  bool filterCont = false;
   int fileDuration = 0;
   int criTO = 0;
   string criPath = "";
   char *criTimeout;
   string filter = "";
   bool help = false;
-  bool stats = false;
   bool domainSocket = false;
   bool writeFile = false;
   bool breakout = false;
@@ -134,7 +132,7 @@ int main(int argc, char **argv) {
       g_config->socketPath = optarg;
       break;
     case 'e':
-      g_config->exportID = optarg;
+      g_config->exporterID = optarg;
       break;
     case 'r':
       g_config->scapInputPath = optarg;
@@ -233,15 +231,7 @@ int main(int argc, char **argv) {
   try {
     CONFIGURE_LOGGER(logProps);
     SF_DEBUG(logger, "Starting sysporter...");
-    /*auto *cxt = new context::SysFlowContext(filterCont, fileDuration, outputDir,
-                                            socketFile, scapFile, samplingRatio,
-                                            exporterID, filter, criPath, criTO);
-    if (stats) {
-      cxt->enableStats();
-    }
-    s_prc = new SysFlowProcessor(cxt);
-    int ret = s_prc->run();*/
-    g_driver = new sysflowlibscpp::SysFlowDriver(g_config); 
+    g_driver = new sysflowlibscpp::SysFlowDriver(g_config);
     int ret = g_driver->run();
     delete g_driver;
     delete g_config;

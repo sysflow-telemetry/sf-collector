@@ -52,8 +52,10 @@ bool isCloneThreadSet(sinsp_evt *ev);
 int64_t getFD(sinsp_evt *ev);
 bool isMapAnonymous(sinsp_evt *ev);
 int64_t getIntParam(sinsp_evt *ev, std::string pname);
-std::string getUserName(context::SysFlowContext *cxt, std::string& containerId, uint32_t uid);
-std::string getGroupName(context::SysFlowContext *cxt, std::string& containerId, uint32_t gid);
+std::string getUserName(context::SysFlowContext *cxt, std::string &containerId,
+                        uint32_t uid);
+std::string getGroupName(context::SysFlowContext *cxt, std::string &containerId,
+                         uint32_t gid);
 bool isInContainer(sinsp_evt *ev);
 int64_t getSyscallResult(sinsp_evt *ev);
 avro::ValidSchema loadSchema();
@@ -66,7 +68,7 @@ void generateFOID(const string &key, FOID *foid);
 std::string getPath(sinsp_evt *ev, const std::string &paraName);
 fs::path getCanonicalPath(const std::string &fileName);
 std::string getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
-                       const std::string &fileName);
+                            const std::string &fileName);
 std::string getAbsolutePath(sinsp_threadinfo *ti, const std::string &fileName);
 int64_t getFD(sinsp_evt *ev, const std::string &paraName);
 int64_t getSchemaVersion();

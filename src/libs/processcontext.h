@@ -63,7 +63,7 @@ public:
   void clearAllProcesses();
   void deleteProcess(ProcessObj **proc);
   void markForDeletion(ProcessObj **proc);
-  ProcessObj* exportProcess(OID *oid);
+  ProcessObj *exportProcess(OID *oid);
   void printNetworkFlow(ProcessObj *proc);
   void printStats();
   int removeProcessFromSet(ProcessObj *proc, bool checkForErr);
@@ -111,7 +111,7 @@ public:
     }
     m_delProcTime = utils::getCurrentTime(m_cxt);
   }
-  ProcessFlowSet* getPFSet();
+  ProcessFlowSet *getPFSet();
 };
 } // namespace process
 #endif

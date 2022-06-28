@@ -89,8 +89,9 @@ void FileFlowProcessor::removeAndWriteRelatedFlows(ProcessObj *proc,
     (*it)->fileflow.endTs = endTs;
     (*it)->fileflow.opFlags |= OP_TRUNCATE;
     // m_writer->writeFileFlow(&((*it)->fileflow));
-    FileObj* file = m_fileCxt->getFile((*it)->filekey);
-    SHOULD_WRITE((*it), &(proc->proc), ((file != nullptr) ? &(file->file) : nullptr ))
+    FileObj *file = m_fileCxt->getFile((*it)->filekey);
+    SHOULD_WRITE((*it), &(proc->proc),
+                 ((file != nullptr) ? &(file->file) : nullptr))
     removeFileFlowFromSet(&(*it), true);
   }
 }
@@ -371,9 +372,10 @@ void FileFlowProcessor::removeFileFlow(DataFlowObj *dfo) {
 void FileFlowProcessor::exportFileFlow(DataFlowObj *dfo, time_t /*now*/) {
   auto *ffo = static_cast<FileFlowObj *>(dfo);
   ffo->fileflow.endTs = utils::getSysdigTime(m_cxt);
-  ProcessObj* proc = m_processCxt->exportProcess(&(ffo->fileflow.procOID));
-  FileObj* file = m_fileCxt->exportFile(ffo->filekey);
-  SHOULD_WRITE(ffo, ((proc != nullptr) ? &(proc->proc) : nullptr ), ((file != nullptr) ? &(file->file) : nullptr ))
+  ProcessObj *proc = m_processCxt->exportProcess(&(ffo->fileflow.procOID));
+  FileObj *file = m_fileCxt->exportFile(ffo->filekey);
+  SHOULD_WRITE(ffo, ((proc != nullptr) ? &(proc->proc) : nullptr),
+               ((file != nullptr) ? &(file->file) : nullptr))
   // m_writer->writeFileFlow(&(ffo->fileflow));
   SF_DEBUG(m_logger, "Reupping flow");
   ffo->fileflow.ts = utils::getSysdigTime(m_cxt);

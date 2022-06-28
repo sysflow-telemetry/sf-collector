@@ -46,7 +46,8 @@ protected:
   int64_t m_version;
   std::string m_hdrFile;
   virtual void write(SysFlow *flow) = 0;
-  virtual void write(SysFlow *flow, Process* proc, File* file1 = nullptr, File* file2 = nullptr) = 0;
+  virtual void write(SysFlow *flow, Process *proc, File *file1 = nullptr,
+                     File *file2 = nullptr) = 0;
 
 public:
   SysFlowWriter(context::SysFlowContext *cxt, time_t start);
@@ -69,12 +70,12 @@ public:
     m_numRecs++;
     write(&m_flow);
   }
-  inline void writeProcessEvent(ProcessEvent *pe, Process* proc) {
+  inline void writeProcessEvent(ProcessEvent *pe, Process *proc) {
     m_flow.rec.set_ProcessEvent(*pe);
     m_numRecs++;
     write(&m_flow, proc);
   }
-  inline void writeNetFlow(NetworkFlow *nf, Process* proc) {
+  inline void writeNetFlow(NetworkFlow *nf, Process *proc) {
     if (nf->opFlags == 0 || nf->opFlags == OP_TRUNCATE) {
       return;
     }
@@ -82,7 +83,7 @@ public:
     m_numRecs++;
     write(&m_flow, proc);
   }
-  inline void writeProcessFlow(ProcessFlow *pf, Process* proc) {
+  inline void writeProcessFlow(ProcessFlow *pf, Process *proc) {
     if (pf->opFlags == 0 || pf->opFlags == OP_TRUNCATE) {
       return;
     }
@@ -90,7 +91,7 @@ public:
     m_numRecs++;
     write(&m_flow, proc);
   }
-  inline void writeFileFlow(FileFlow *ff, Process* proc, File* file) {
+  inline void writeFileFlow(FileFlow *ff, Process *proc, File *file) {
     if (ff->opFlags == 0 || ff->opFlags == OP_TRUNCATE) {
       return;
     }
@@ -98,12 +99,13 @@ public:
     m_numRecs++;
     write(&m_flow, proc, file);
   }
-  inline void writeFileEvent(FileEvent *fe, Process* proc, File* file) {
+  inline void writeFileEvent(FileEvent *fe, Process *proc, File *file) {
     m_flow.rec.set_FileEvent(*fe);
     m_numRecs++;
     write(&m_flow, proc, file);
   }
-  inline void writeFileEvent(FileEvent *fe, Process* proc, File* file1, File* file2) {
+  inline void writeFileEvent(FileEvent *fe, Process *proc, File *file1,
+                             File *file2) {
     m_flow.rec.set_FileEvent(*fe);
     m_numRecs++;
     write(&m_flow, proc, file1, file2);

@@ -20,48 +20,46 @@
 #ifndef __SF_CALLBACK_WRITER_
 #define __SF_CALLBACK_WRITER_
 #include "sysflow.h"
-#include "sysflowcontext.h"
-#include "sysflowwriter.h"
 #include "sysflow/enums.hh"
+#include "sysflowcontext.h"
 #include "sysflowprocessor.h"
+#include "sysflowwriter.h"
 
 using sysflow::SysFlow;
-
 
 namespace writer {
 class SFCallbackWriter : public writer::SysFlowWriter {
 private:
-sysflowprocessor::SysFlowProcessor* m_sysflowProc;
-SysFlowCallback m_callback;
-sysflow::SFHeader m_header;
-
+  sysflowprocessor::SysFlowProcessor *m_sysflowProc;
+  SysFlowCallback m_callback;
+  sysflow::SFHeader m_header;
 
 public:
-  SFCallbackWriter(context::SysFlowContext *cxt, time_t start, SysFlowCallback callback, sysflowprocessor::SysFlowProcessor* proc);
+  SFCallbackWriter(context::SysFlowContext *cxt, time_t start,
+                   SysFlowCallback callback,
+                   sysflowprocessor::SysFlowProcessor *proc);
   virtual ~SFCallbackWriter();
-  inline void write(SysFlow *flow) { }
-  inline void write(SysFlow *flow, Process *proc, File* file1 = nullptr, File* file2 = nullptr) {
-    switch(flow->rec.idx()) {
-      case SF_HEADER:
-      {
-        m_header = flow->rec.get_SFHeader(); 
-        break;
+  inline void write(SysFlow *flow) {}
+  inline void write(SysFlow *flow, Process *proc, File *file1 = nullptr,
+                    File *file2 = nullptr) {
+    switch (flow->rec.idx()) {
+    case SF_HEADER: {
+      m_header = flow->rec.get_SFHeader();
+      break;
+    }
+    case SF_CONT:
+    case SF_FILE_OBJ:
+    case SF_PROC: {
+      break;
+    }
+    default: {
+      sysflow::Container *cont = nullptr;
+      if (!proc->containerId.is_null()) {
+        cont = m_sysflowProc->getContainer(proc->containerId.get_string());
       }
-      case SF_CONT:
-      case SF_FILE_OBJ:
-      case SF_PROC:
-      {
-        break;
-      }
-      default:
-      {
-        sysflow::Container *cont = nullptr;
-        if (!proc->containerId.is_null()) {
-          cont = m_sysflowProc->getContainer(proc->containerId.get_string());
-        }
-        m_callback(&m_header, cont, proc, file1, file2, flow);
-        break;
-      }
+      m_callback(&m_header, cont, proc, file1, file2, flow);
+      break;
+    }
     }
   }
   int initialize();

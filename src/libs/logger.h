@@ -23,21 +23,19 @@
 
 #include <iostream>
 
-
 #define CREATE_LOGGER(ClassName, logger)
 #define CREATE_LOGGER_2(logger)
 #define CREATE_MAIN_LOGGER()
 #define DEFINE_LOGGER()
 #define m_logger
 
-#define CONFIGURE_LOGGER(logConfig)                                            \
-	 google::InitGoogleLogging(argv[0]);
+#define CONFIGURE_LOGGER(logConfig) google::InitGoogleLogging(argv[0]);
 
 #define CATCH_LOGGER_EXCEPTION()
 
 #define SF_DEBUG(logger, message) VLOG(1) << message;
-#define SF_WARN(logger, message) LOG(WARNING) <<  message;
-#define SF_INFO(logger, message) LOG(INFO) <<  message;
+#define SF_WARN(logger, message) LOG(WARNING) << message;
+#define SF_INFO(logger, message) LOG(INFO) << message;
 #define SF_ERROR(logger, message) LOG(ERROR) << message;
 
 #define IS_DEBUG_ENABLED(logger) VLOG_IS_ON(1)

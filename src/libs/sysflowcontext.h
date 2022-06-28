@@ -23,9 +23,10 @@
 
 #include <ctime>
 
-#include "sysflow.h"
 #include "logger.h"
 #include "readonly.h"
+#include "sfconfig.h"
+#include "sysflow.h"
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
@@ -41,75 +42,63 @@
 #define SF_K8S_API_URL "SF_K8S_API_URL"
 #define SF_K8S_API_CERT "SF_K8S_API_CERT"
 
-//typedef void (*SysFlowCallback)(sysflow::SFHeader*, sysflow::Container*, sysflow::Process*, sysflow::File*, sysflow::File*, sysflow::SysFlow*);
-using SysFlowCallback = std::function<void(sysflow::SFHeader*, sysflow::Container*, sysflow::Process*, sysflow::File*, sysflow::File*, sysflow::SysFlow*)>;
+// typedef void (*SysFlowCallback)(sysflow::SFHeader*, sysflow::Container*,
+// sysflow::Process*, sysflow::File*, sysflow::File*, sysflow::SysFlow*);
 namespace context {
 class SysFlowContext {
 private:
-  bool m_filterCont;
   // time_t m_start{};
-  int m_fileDuration;
-  bool m_hasPrefix;
-  string m_outputFile;
-  string m_socketFile;
-  string m_scapFile;
-  uint32_t m_samplingRatio;
-  string m_exporterID;
-  sinsp *m_inspector;
   int m_nfExportInterval;
   int m_nfExpireInterval;
   bool m_offline;
-  string m_filter;
-  string m_criPath;
-  int m_criTO;
-  bool m_stats;
   int m_statsInterval;
-  bool m_processFlow;
-  bool m_fileOnly;
-  int m_fileRead;
   string m_nodeIP;
   bool m_k8sEnabled;
   SysFlowCallback m_callback;
+  SysFlowConfig *m_config;
+  bool m_hasPrefix;
+  sinsp *m_inspector;
   DEFINE_LOGGER();
 
 public:
-  SysFlowContext(bool fCont, int fDur, string oFile, string socketFile,
+  /*SysFlowContext(bool fCont, int fDur, string oFile, string socketFile,
                  const string &sFile, uint32_t samplingRatio, string exporterID,
-                 string filter, string criPath, int criTO);
+                 string filter, string criPath, int criTO);*/
+  SysFlowContext(SysFlowConfig *config);
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
   string getExporterID();
   string getNodeIP();
   SysFlowCallback getCallback() { return m_callback; }
   inline void setNodeIP(string nodeIP) { m_nodeIP = nodeIP; }
-  inline void setReadFileMode(int readFile) { m_fileRead = readFile; }
+  /*inline void setReadFileMode(int readFile) { m_fileRead = readFile; }
   inline void enableFileOnly() { m_fileOnly = true; }
   inline void enableProcessFlow() { m_processFlow = true; }
-  inline void enableDropMode() { m_inspector->start_dropping_mode(m_samplingRatio); }
-  inline void enableDebugMode() {   
-    m_inspector->set_log_stderr();
-    m_inspector->set_min_log_severity(sinsp_logger::severity::SEV_DEBUG); 
+  inline void enableDropMode() {
+  m_inspector->start_dropping_mode(m_samplingRatio); } inline void
+  enableDebugMode() { m_inspector->set_log_stderr();
+    m_inspector->set_min_log_severity(sinsp_logger::severity::SEV_DEBUG);
   }
-  inline void setCallback(SysFlowCallback callback) { m_callback = callback; }
+  inline void setCallback(SysFlowCallback callback) { m_callback = callback; }*/
   inline bool isOffline() { return m_offline; }
-  inline bool hasCallback() {return m_callback != nullptr; }
+  inline bool hasCallback() { return m_callback != nullptr; }
   inline sinsp *getInspector() { return m_inspector; }
   inline int getNFExportInterval() { return m_nfExportInterval; }
   inline int getNFExpireInterval() { return m_nfExpireInterval; }
-  inline string getOutputFile() { return m_outputFile; }
-  inline string getSocketFile() { return m_socketFile; }
-  inline bool isDomainSocket() { return !m_socketFile.empty(); }
-  inline bool isOutputFile() { return !m_outputFile.empty(); }
-  inline string getScapFile() { return m_scapFile; }
+  inline string getOutputFile() { return m_config->filePath; }
+  inline string getSocketFile() { return m_config->socketPath; }
+  inline bool isDomainSocket() { return !m_config->socketPath.empty(); }
+  inline bool isOutputFile() { return !m_config->filePath.empty(); }
+  inline string getScapFile() { return m_config->scapInputPath; }
   inline bool hasPrefix() { return m_hasPrefix; }
-  inline int getFileDuration() { return m_fileDuration; }
-  inline bool isFilterContainers() { return m_filterCont; }
-  inline bool isStatsEnabled() { return m_stats; }
-  inline void enableStats() { m_stats = true; }
-  inline bool isProcessFlowEnabled() { return m_processFlow; }
+  inline int getFileDuration() { return m_config->rotateInterval; }
+  inline bool isFilterContainers() { return m_config->filterContainers; }
+  inline bool isStatsEnabled() { return m_config->enableStats; }
+  /*inline void enableStats() { m_stats = true; }*/
+  inline bool isProcessFlowEnabled() { return m_config->enableProcessFlow; }
   inline int getStatsInterval() { return m_statsInterval; }
-  inline bool isFileOnly() { return m_fileOnly; }
-  inline int getFileRead() { return m_fileRead; }
+  inline bool isFileOnly() { return m_config->fileOnly; }
+  inline int getFileRead() { return m_config->fileReadMode; }
   inline bool isK8sEnabled() { return m_k8sEnabled; }
 };
 } // namespace context

@@ -349,8 +349,9 @@ void NetworkFlowProcessor::removeNetworkFlow(DataFlowObj *dfo) {
 void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj *dfo, time_t /*now*/) {
   auto *nfo = static_cast<NetFlowObj *>(dfo);
   nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
-  ProcessObj* proc = m_processCxt->exportProcess(&(nfo->netflow.procOID));
-  m_writer->writeNetFlow(&(nfo->netflow), ((proc != nullptr) ? &(proc->proc) : nullptr ));
+  ProcessObj *proc = m_processCxt->exportProcess(&(nfo->netflow.procOID));
+  m_writer->writeNetFlow(&(nfo->netflow),
+                         ((proc != nullptr) ? &(proc->proc) : nullptr));
   SF_DEBUG(m_logger, "Reupping network flow");
   nfo->netflow.ts = utils::getSysdigTime(m_cxt);
   nfo->netflow.endTs = 0;

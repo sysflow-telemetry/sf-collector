@@ -156,8 +156,9 @@ int ControlFlowProcessor::handleProcEvent(sinsp_evt *ev, OpFlags flag) {
 
 void ControlFlowProcessor::exportProcessFlow(ProcessFlowObj *pfo) {
   pfo->procflow.endTs = utils::getSysdigTime(m_cxt);
-  ProcessObj* proc = m_processCxt->exportProcess(&(pfo->procflow.procOID));
-  m_writer->writeProcessFlow(&(pfo->procflow), ((proc != nullptr) ? &(proc->proc) : nullptr ));
+  ProcessObj *proc = m_processCxt->exportProcess(&(pfo->procflow.procOID));
+  m_writer->writeProcessFlow(&(pfo->procflow),
+                             ((proc != nullptr) ? &(proc->proc) : nullptr));
   SF_DEBUG(m_logger, "Reupping proc flow");
   pfo->procflow.ts = utils::getSysdigTime(m_cxt);
   pfo->procflow.endTs = 0;
