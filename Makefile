@@ -50,61 +50,44 @@ package:
 		sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage.sh
 	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION) && cpack --config ./CPackConfig.cmake
 
+.PHONY: package-libs
+package:
+	docker run --rm --entrypoint=/bin/bash \
+		-v $(shell pwd)/scripts:$(INSTALL_PATH)/scripts \
+		-v $(shell pwd)/LICENSE.md:$(INSTALL_PATH)/LICENSE.md \
+		-v $(shell pwd)/README.md:$(INSTALL_PATH)/README.md \
+		sysflowtelemetry/sf-collector-libs:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage-libs.sh
+	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION) && cpack --config ./CPackConfig-libs.cmake
+
 .PHONY: clean
 clean:
 	cd src && make clean
 	cd modules && make clean
 	cd scripts/cpack && ./clean.sh
 
-.PHONY: docker-build
-docker-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target runtime -t sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -f Dockerfile . )
-
 .PHONY: docker-libs-build
 docker-libs-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target libs -t sysflowtelemetry/sf-collector-libs:${SYSFLOW_VERSION} -f Dockerfile.libs . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target libs -t sysflowtelemetry/sf-collector-libs:${SYSFLOW_VERSION} -f Dockerfile . )
 
-.PHONY: docker-libs-collector-build
+.PHONY: docker-collector-build
 docker-libs-collector-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target collector -t sysflowtelemetry/sf-collector-builder:${SYSFLOW_VERSION} -f Dockerfile.libs . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target collector -t sysflowtelemetry/sf-collector-builder:${SYSFLOW_VERSION} -f Dockerfile . )
 
-.PHONY: docker-libs-runtime-build
-docker-libs-runtime-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target runtime -t sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -f Dockerfile.libs . )
-
-.PHONY: docker-libs-testing-build
-docker-libs-testing-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target testing -t sysflowtelemetry/testing:${SYSFLOW_VERSION} -f Dockerfile.libs . )
-
-.PHONY: docker-falco-runtime-ubi-build
-docker-falco-runtime-ubi-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target runtime -t sysflowtelemetry/sf-test-falco-ubi:${SYSFLOW_VERSION} -f Dockerfile.falco.ubi . )
+.PHONY: docker-runtime-build
+docker-runtime-build:
+	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target runtime -t sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -f Dockerfile . )
 
 .PHONY: docker-testing-build
-docker-testing-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target testing -t sysflowtelemetry/testing:${SYSFLOW_VERSION} -f Dockerfile . )
+docker-libs-testing-build:
+	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target testing -t sysflowtelemetry/sf-collector-testing:${SYSFLOW_VERSION} -f Dockerfile . )
 
 .PHONY: docker-test
 docker-test:
-	docker run --rm --name sf-test -v $(shell pwd)/tests:/usr/local/sysflow/tests -e INTERVAL=300 -e EXPORTER_ID=tests -e OUTPUT=/mnt/data/ sysflowtelemetry/testing:${SYSFLOW_VERSION} tests/tests.bats
-
-docker-cli:
-	docker run -it --rm --name sf-test --entrypoint=/bin/bash -v $(shell pwd)/tests:/usr/local/sysflow/tests -e INTERVAL=300 -e EXPORTER_ID=tests -e OUTPUT=/mnt/data/ sysflowtelemetry/testing:${SYSFLOW_VERSION}
-
+	docker run --rm --name sf-test -v $(shell pwd)/tests:/usr/local/sysflow/tests -e INTERVAL=300 -e EXPORTER_ID=tests -e OUTPUT=/mnt/data/ sysflowtelemetry/sf-collector-testing:${SYSFLOW_VERSION} tests/tests.bats
 
 .PHONY: docker-baseline-tests
 docker-baseline-tests:
-	docker run --rm --name sf-test -v $(shell pwd)/logs:/tmp -v $(shell pwd)/tests:/usr/local/sysflow/tests -e INTERVAL=300 -e EXPORTER_ID=tests -e OUTPUT=/mnt/data/ sysflowtelemetry/testing:${SYSFLOW_VERSION} tests/baseline.bats
-
-.PHONY: docker-base-build
-docker-base-build:
-	docker pull sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} &> /dev/null || true
-	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg UBI_VER=${UBI_VERSION} --target base -t sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
-
-.PHONY: docker-mods-build
-docker-mods-build:
-	docker pull sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} &> /dev/null || true
-	( DOCKER_BUILDKIT=1 docker build --cache-from sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg UBI_VER=${UBI_VERSION} --target mods -t sysflowtelemetry/ubi:mods-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
+	docker run --rm --name sf-test -v $(shell pwd)/logs:/tmp -v $(shell pwd)/tests:/usr/local/sysflow/tests -e INTERVAL=300 -e EXPORTER_ID=tests -e OUTPUT=/mnt/data/ sysflowtelemetry/sf-collector-testing:${SYSFLOW_VERSION} tests/baseline.bats
 
 .PHONY : help
 help:
@@ -116,12 +99,9 @@ help:
 	@echo "... package"
 	@echo "... install"
 	@echo "... uninstall"
+	@echo "... docker-libs-build"
+	@echo "... docker-collector-build"
 	@echo "... docker-runtime-build"
 	@echo "... docker-testing-build"
-	@echo "... docker-base-build"i
-	@echo "... docker-mods-build"
 	@echo "... docker-test"
 	@echo "... docker-baseline-tests"
-	@echo "... docker-libs-build"
-	@echo "... docker-libs-collector-build"
-	@echo "... docker-libs-runtime-build"
