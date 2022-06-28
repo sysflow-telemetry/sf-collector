@@ -60,17 +60,17 @@ clean:
 docker-build:
 	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target runtime -t sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -f Dockerfile . )
 
-.PHONY: docker-falco-build
-docker-falco-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target builder -t sysflowtelemetry/sf-libs-falco:${SYSFLOW_VERSION} -f Dockerfile.falco . )
+.PHONY: docker-libs-build
+docker-libs-build:
+	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target libs -t sysflowtelemetry/sf-libs-falco:${SYSFLOW_VERSION} -f Dockerfile.libs . )
 
-.PHONY: docker-falco-collector-build
-docker-falco-collector-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target collector -t sysflowtelemetry/sf-collector-falco-build:${SYSFLOW_VERSION} -f Dockerfile.falco . )
+.PHONY: docker-libs-collector-build
+docker-libs-collector-build:
+	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target collector -t sysflowtelemetry/sf-collector-falco-build:${SYSFLOW_VERSION} -f Dockerfile.libs . )
 
-.PHONY: docker-falco-runtime-build
-docker-falco-runtime-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target runtime -t sysflowtelemetry/sf-collector-falco:${SYSFLOW_VERSION} -f Dockerfile.falco . )
+.PHONY: docker-libs-runtime-build
+docker-libs-runtime-build:
+	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target runtime -t sysflowtelemetry/sf-collector-falco:${SYSFLOW_VERSION} -f Dockerfile.libs . )
 
 .PHONY: docker-falco-runtime-ubi-build
 docker-falco-runtime-ubi-build:
@@ -114,3 +114,6 @@ help:
 	@echo "... docker-mods-build"
 	@echo "... docker-test"
 	@echo "... docker-baseline-tests"
+	@echo "... docker-libs-build"
+	@echo "... docker-libs-collector-build"
+	@echo "... docker-libs-runtime-build"
