@@ -22,22 +22,18 @@
 #include "driver_config.h"
 #include <fstream>
 #endif // HAS_CAPTURE
-#include "logger.h"
 #include "sysflow_config.h"
-#include "sysflowprocessor.h"
-#include "utils.h"
+#include "sysflowlibs.hpp"
+#include "logger.h"
 #include <csignal>
 #include <cstdio>
 #include <iostream>
-#include <sinsp.h>
 #include <string>
 #include <unistd.h>
 
-using sysflowprocessor::SysFlowProcessor;
-
-SysFlowProcessor *s_prc = nullptr;
-
-void signal_handler(int /*i*/) { s_prc->exit(); }
+SysFlowConfig* g_config;
+sysflowlibscpp::SysFlowDriver *g_driver;
+void signal_handler(int /*i*/) { g_driver->exit(); }
 
 int str2int(int &i, char const *s, int base = 0) {
   char *end;
@@ -120,30 +116,32 @@ int main(int argc, char **argv) {
   bool domainSocket = false;
   bool writeFile = false;
   bool breakout = false;
-  string logProps = "/usr/local/sysflow/conf/log4cxx.properties";
+  string logProps;
 
   sigaction(SIGINT, &sigHandler, nullptr);
   sigaction(SIGTERM, &sigHandler, nullptr);
+
+  g_config = sysflowlibscpp::InitializeSysFlowConfig();
 
   while ((c = static_cast<char>(
               getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:"))) != -1) {
     switch (c) {
     case 'd':
-      stats = true;
+      g_config->enableStats = true;
       break;
     case 'u':
       domainSocket = true;
-      socketFile = optarg;
+      g_config->socketPath = optarg;
       break;
     case 'e':
-      exporterID = optarg;
+      g_config->exportID = optarg;
       break;
     case 'r':
-      scapFile = optarg;
+      g_config->scapInputPath = optarg;
       break;
     case 'w':
       writeFile = true;
-      outputDir = optarg;
+      g_config->filePath = optarg;
       break;
     case 'G':
       duration = optarg;
@@ -155,9 +153,10 @@ int main(int argc, char **argv) {
         cout << "File duration must be higher than 0" << endl;
         exit(1);
       }
+      g_config->rotateInterval = fileDuration;
       break;
     case 'c':
-      filterCont = true;
+      g_config->filterContainers = true;
       break;
     case 's':
       char *sr;
@@ -166,9 +165,10 @@ int main(int argc, char **argv) {
         cout << "Unable to parse sampling ratio " << samplingRatio << endl;
         exit(1);
       }
+      g_config->samplingRatio = samplingRatio;
       break;
     case 'f':
-      filter = optarg;
+      g_config->falcoFilter = optarg;
       cout << "Configured filter: " << filter << endl;
       break;
     case 'l':
@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
       help = true;
       break;
     case 'p':
-      criPath = optarg;
+      g_config->criPath = optarg;
       break;
     case 't':
       criTimeout = optarg;
@@ -190,6 +190,7 @@ int main(int argc, char **argv) {
         cout << "CRI timeout must be higher than 0" << endl;
         exit(1);
       }
+      g_config->criTO = criTO;
       break;
     case 'v':
       cerr << " Version: " << SF_VERSION << "+" << SF_BUILD
@@ -220,11 +221,11 @@ int main(int argc, char **argv) {
     usage(argv[0]);
     return 0;
   }
-  if (outputDir.empty() && writeFile) {
+  if (g_config->filePath.empty() && writeFile) {
     usage(argv[0]);
     return 1;
   }
-  if (socketFile.empty() && domainSocket) {
+  if (g_config->socketPath.empty() && domainSocket) {
     usage(argv[0]);
     return 1;
   }
@@ -232,15 +233,18 @@ int main(int argc, char **argv) {
   try {
     CONFIGURE_LOGGER(logProps);
     SF_DEBUG(logger, "Starting sysporter...");
-    auto *cxt = new context::SysFlowContext(filterCont, fileDuration, outputDir,
+    /*auto *cxt = new context::SysFlowContext(filterCont, fileDuration, outputDir,
                                             socketFile, scapFile, samplingRatio,
                                             exporterID, filter, criPath, criTO);
     if (stats) {
       cxt->enableStats();
     }
     s_prc = new SysFlowProcessor(cxt);
-    int ret = s_prc->run();
-    delete s_prc;
+    int ret = s_prc->run();*/
+    g_driver = new sysflowlibscpp::SysFlowDriver(g_config); 
+    int ret = g_driver->run();
+    delete g_driver;
+    delete g_config;
     return ret;
   } catch (sinsp_exception &ex) {
     SF_ERROR(logger, "Runtime exception caught in main loop: " << ex.what());

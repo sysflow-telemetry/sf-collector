@@ -63,14 +63,7 @@ SysFlowConfig* sysflowlibscpp::InitializeSysFlowConfig() {
    SysFlowConfig* conf = new SysFlowConfig();
    conf->filterContainers = false;
    conf->rotateInterval = 300;
-   memset(conf->exportID, 0, 256);
-   memset(conf->nodeIP, 0, 256);
-   memset(conf->filePath, 0, 256);
-   memset(conf->socketPath, 0, 256);
-   memset(conf->scapInputPath, 0, 256);
-   memset(conf->falcoFilter, 0, 2048);
    conf->samplingRatio = 1;
-   memset(conf->criPath, 0, 256);
    conf->criTO = 30;
    conf->enableStats = false;
    conf->enableProcessFlow = true;

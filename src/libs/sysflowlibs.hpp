@@ -22,7 +22,7 @@
 #include "logger.h"
 #include "sysflowprocessor.h"
 #include "sysflowcontext.h"
-
+#include <string>
 
 struct SysFlowConfig {
   // Filter out all events related to containers.
@@ -31,28 +31,28 @@ struct SysFlowConfig {
   // Used for file rotations and also to clean caches to prevent leakages. 
   // Typically set to 300 secs (5 mins)
   int rotateInterval;
-  // ID for the host.  Current limit 256 characters. 
-  char exportID[256];
-  // IP for the host/node.  Current limit is 256 characters.
-  char nodeIP[256];
+  // ID for the host. 
+  std::string exportID;
+  // IP for the host/node. 
+  std::string nodeIP; 
   // SysFlow output file path.  If path ends with a '/', this will be treated as a directory.
   // If treated as directory, the name of the sysflow file will be a timestamp, and will be rotated.
   // every N seconds depending on the rotateInterval. If no '/' at end, and rotateInterval is set,
   // path is treated as a file prefix, and  timestamp is concatenated.
   // Set null if not using file output.
-  char filePath[256]; 
+  std::string filePath;
   // SysFlow unix socket file path.  Typically used in conjunction with the SysFlow processor to stream
   // SysFlow over a socket. Set null if not use socket streaming
-  char socketPath[256];
+  std::string socketPath;
   // Scap input file path.  Used in offline mode to read from raw scap rather than tapping the kernel.
   // Set null if using online kernel collection.
-  char scapInputPath[256];
+  std::string scapInputPath;
   // String to set BPF style filter on events being passed from the falco libs, to the SysFlow library.
-  char falcoFilter[2048];
+  std::string falcoFilter;
   // Sampling ratio used to determine which system calls to drop in the probe.
   int samplingRatio;
   // CRI-O runtime socket path, needed for monitoring cri-o/containered container runtimes such as k8s and OCP.
-  char criPath[256];
+  std::string criPath;
   // CRI-O timeout.  Timeout set when querying CRI-O socket for container metadata.
   int criTO;
   // Enable printout of object collection stats at intervals.
@@ -90,7 +90,7 @@ public:
   explicit SysFlowDriver(SysFlowConfig *conf);
   virtual ~SysFlowDriver();
   inline void exit() { m_processor->exit(); }
-  inline void run() { m_processor->run(); }
+  inline int run() { return m_processor->run(); }
 };
 
 }

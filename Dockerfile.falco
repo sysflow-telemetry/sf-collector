@@ -57,9 +57,9 @@ ENV LIBRARY_PATH=/lib64
 # build sysporter
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
 COPY ./modules/sysflow/c\+\+/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/sysflow.hh
-COPY ./modules/sysflow/c\+\+/sysflow/avsc_sysflow3.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/avsc_sysflow3.hh
+COPY ./modules/sysflow/c\+\+/sysflow/avsc_sysflow4.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/avsc_sysflow4.hh
 COPY ./src/ /build/src/
-RUN cd /build/src && \
+RUN cd /build/src/libs && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
          LIBLOCALPREFIX=${FALCOPREFIX} \
          SDLOCALLIBPREFIX=/usr/lib/x86_64-linux-gnu/falcosecurity/ \
@@ -70,11 +70,39 @@ RUN cd /build/src && \
          FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
          SCHLOCALPREFIX=${MODPREFIX}/conf \
 	 DEBUG=${DEBUG} \
-         install
+         install 
     #make clean && \
     #rm -rf /build
 
-RUN cd /build/src/libs && bash ./make.sh && bash ./maketest.sh
+
+FROM builder as collector
+
+# environment and build args
+ARG BUILD_NUMBER=0
+ARG DEBUG=0
+
+ARG INSTALL_PATH=/usr/local/sysflow
+
+ARG MODPREFIX=${INSTALL_PATH}/modules
+ARG falcoprefix=/usr/
+ENV FALCOPREFIX=$falcoprefix
+
+ENV LIBRARY_PATH=/lib64
+
+RUN cd /build/src/collector && \
+    make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
+         LIBLOCALPREFIX=${FALCOPREFIX} \
+         SDLOCALLIBPREFIX=/usr/lib/x86_64-linux-gnu/falcosecurity/ \
+         SDLOCALINCPREFIX=/usr/include/falcosecurity/ \
+         AVRLOCALLIBPREFIX=${MODPREFIX}/lib \
+         AVRLOCALINCPREFIX=${MODPREFIX}/include \
+         SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
+         FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
+         SCHLOCALPREFIX=${MODPREFIX}/conf \
+	 DEBUG=${DEBUG} \
+         install 
+
+
 
 #-----------------------
 # Stage: Runtime
@@ -158,7 +186,7 @@ COPY ./LICENSE.md /licenses/LICENSE.md
 
 
 #COPY --from=builder /usr/src/falco-${FALCO_LIBS_VERSION} /usr/src/falco-${FALCO_LIBS_VERSION}
-COPY --from=builder /build/src/libs/test /usr/bin/sftest
+#COPY --from=builder /build/src/libs/test /usr/bin/sftest
 #RUN sed -i -E "s/@DRIVER_VERSION@/\"319368f1ad778691164d33d59945e00c5752cd27\"/" /usr/bin/falco-driver-loader
 # copy dependencies
 # COPY --from=builder /usr/local/lib/ /usr/local/lib/
@@ -168,12 +196,12 @@ COPY --from=builder /build/src/libs/test /usr/bin/sftest
 # COPY --from=builder ${MODPREFIX}/bin/ ${MODPREFIX}/bin/
 # #RUN ln -s ${MODPREFIX}/bin/falco-driver-loader /usr/bin/falco-driver-loader
 # COPY --from=builder ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
-# COPY --from=builder ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
+COPY --from=collector ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 # COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 # #RUN chmod +x /usr/local/sysflow/modules/bin/docker-entrypoint.sh
 # #COPY --from=builder /docker-entrypoint.sh /usr/local/sysflow/modules/bin/
 # COPY --from=builder /usr/lib/x86_64-linux-gnu/libglog.* /usr/lib/x86_64-linux-gnu/
-# COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost* /usr/lib/x86_64-linux-gnu/
+ COPY --from=builder /usr/lib/x86_64-linux-gnu/libboost* /usr/lib/x86_64-linux-gnu/
 # COPY --from=builder /usr/lib/x86_64-linux-gnu/libsnappy* /usr/lib/x86_64-linux-gnu/
 # COPY --from=builder /usr/lib/x86_64-linux-gnu/libjsoncpp* /usr/lib/x86_64-linux-gnu/
 # COPY --from=builder /usr/lib/x86_64-linux-gnu/libgflags* /usr/lib/x86_64-linux-gnu/
@@ -183,17 +211,17 @@ COPY --from=builder /build/src/libs/test /usr/bin/sftest
 # # entrypoint
 # WORKDIR /usr/local/sysflow/bin/
 
-# ENTRYPOINT ["/usr/local/sysflow/modules/bin/docker-entry-ubi.sh"]
-# CMD /usr/local/sysflow/bin/sysporter \
-#     ${INTERVAL:+-G} $INTERVAL \
-#     ${OUTPUT:+-w} $OUTPUT \
-#     ${EXPORTER_ID:+-e} "$EXPORTER_ID" \
-#     ${FILTER:+-f} "$FILTER" \
-#     ${CRI_PATH:+-p} ${CRI_PATH} \
-#     ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
-#     ${SOCK_FILE:+-u} ${SOCK_FILE} \
-#     ${SAMPLING_RATE:+-s} ${SAMPLING_RATE} \
-#     ${DEBUG:+-d}
+ENTRYPOINT ["/docker-entrypoint.sh"]
+ CMD /usr/local/sysflow/bin/sysporter \
+     ${INTERVAL:+-G} $INTERVAL \
+     ${OUTPUT:+-w} $OUTPUT \
+     ${EXPORTER_ID:+-e} "$EXPORTER_ID" \
+     ${FILTER:+-f} "$FILTER" \
+     ${CRI_PATH:+-p} ${CRI_PATH} \
+     ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
+     ${SOCK_FILE:+-u} ${SOCK_FILE} \
+     ${SAMPLING_RATE:+-s} ${SAMPLING_RATE} \
+     ${DEBUG:+-d}
 
 #-----------------------
 # Stage: Testing

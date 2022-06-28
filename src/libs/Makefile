@@ -19,8 +19,8 @@
 # limitations under the License.
 
 # Build environment configuration
-#include ../makefile.manifest.inc
-#include ../makefile.env.inc
+include ../../makefile.manifest.inc
+include ../../makefile.env.inc
 
 # Target configuration
 TARGET = libsysflow.a 
@@ -53,7 +53,7 @@ DEBUG ?= 0
 # Compiler options
 CXX = g++
 AR = ar
-LIBS = $(TARGET) ../libsfcollector.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libsinsp.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libscap.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libjq.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libonig.a \
+LIBS = $(TARGET) $(FALCOSECURITY_LIBS_LIB_PREFIX)/libsinsp.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libscap.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libjq.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libonig.a \
        $(FALCOSECURITY_LIBS_LIB_PREFIX)/libb64.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libcurl.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libtbb.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++.a \
        $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_alts.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_reflection.a  $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_error_details.a \
        $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_unsecure.a  $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc_plugin_support.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpcpp_channelz.a \
@@ -87,7 +87,7 @@ CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json2/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
 
-OBJS = .sysflowlibs.o .sysflowlibs.o
+OBJS = .sysflowlibs.o .sysflowlibs.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o .k8scontext.o .k8seventprocessor.o
 
 $(info    DEBUG is $(DEBUG))
 ifeq ($(DEBUG), 1)
@@ -98,11 +98,12 @@ else
 endif
 
 .PHONY: all
-all: $(TARGET)
+all: version $(TARGET)
 
 .PHONY: install
 install: all
 	mkdir -p $(INSTALL_PATH)/lib && cp libsysflow.a $(INSTALL_PATH)/lib
+	mkdir -p $(INSTALL_PATH)/include/sysflow/ && cp *.h $(INSTALL_PATH)/include/sysflow/ && cp *.hpp $(INSTALL_PATH)/include/sysflow/
 
 .PHONY: uninstall
 uninstall:
@@ -136,6 +137,74 @@ $(TARGET_TEST): $(OBJS) .test.o
 .test.o: test.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
+.sysflowfork.o: sysflowfork.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.MurmurHash3.o: MurmurHash3.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.utils.o: utils.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.k8scontext.o: k8scontext.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.k8seventprocessor.o: k8seventprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.containercontext.o: containercontext.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sysflowprocessor.o: sysflowprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sysflowwriter.o: sysflowwriter.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sffilewriter.o: sffilewriter.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sfsockwriter.o: sfsockwriter.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sfcallbackwriter.o: sfcallbackwriter.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sfmultiwriter.o: sfmultiwriter.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.processcontext.o: processcontext.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.processeventprocessor.o: processeventprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.controlflowprocessor.o: controlflowprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.dataflowprocessor.o: dataflowprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.networkflowprocessor.o: networkflowprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.networkflowprocessor.lint: networkflowprocessor.cpp
+	$(LINT) -checks=* $^ -- $(CFLAGS)
+
+.fileflowprocessor.o: fileflowprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.fileeventprocessor.o: fileeventprocessor.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sysflowcontext.o: sysflowcontext.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.filecontext.o: filecontext.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+#.xxhash.o: xxhash.c
+#	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .PHONY: clean
 clean:
