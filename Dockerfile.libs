@@ -233,7 +233,7 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 #-----------------------
 # Stage: Testing
 #-----------------------
-FROM runtime AS testing
+FROM python:3.9-buster AS testing
 
 # environment and build args
 ARG BATS_VERSION=1.1.0
@@ -244,9 +244,6 @@ ENV WDIR=$wdir
 ARG INSTALL_PATH=/usr/local/sysflow
 
 # Install extra packages for tests
-COPY ./scripts/installUBIDependency.sh /
-RUN /installUBIDependency.sh test-extra && rm /installUBIDependency.sh
-
 RUN mkdir /tmp/bats && cd /tmp/bats && \
     wget https://github.com/bats-core/bats-core/archive/v${BATS_VERSION}.tar.gz && \
     tar -xzf v${BATS_VERSION}.tar.gz && rm -rf v${BATS_VERSION}.tar.gz && \
@@ -257,6 +254,9 @@ COPY modules/sysflow/py3 ${INSTALL_PATH}/utils
 
 RUN cd /usr/local/sysflow/utils && \
     python3 -m pip install .
+
+# copy the collector binary
+COPY --from=collector ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
 
 WORKDIR $wdir
 ENTRYPOINT ["/usr/local/bin/bats"]
