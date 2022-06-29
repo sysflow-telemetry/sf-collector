@@ -1,4 +1,4 @@
-# Example LibSysFlow consumer
+# Example: SysFlow consumer
 
 This [example](callback.cpp) shows how to implement, build, and run a SysFlow consumer using LibSysFlow.
 
