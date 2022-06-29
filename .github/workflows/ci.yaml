@@ -25,7 +25,7 @@ env:
   DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/sf-collector
 
 jobs:
-  lint:
+  libs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,9 +36,57 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+      - name: Read manifest
+        shell: bash
+        run: |
+          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCO_LIBS_DRIVER_VERSION=$(awk -F'=' '/FALCO_LIBS_DRIVER_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+      - name: Init modules
+        run: make -C modules init
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          version: v0.6.3
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx
+      - name: Set build args
+        id: args
+        shell: bash
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: ghcr.io/${{ github.repository }}/sf-collector-libs:latest
+          target: libs
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          build-args: |
+            UBI_VER=${{ env.UBI_VERSION }}
+            FALCO_VER=${{ env.FALCO_VERSION }}
+            FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }}
+            FALCO_LIBS_DRIVER_VER=${{ env.FALCO_LIBS_DRIVER_VERSION }}
+            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+            VERSION=${{ steps.args.outputs.branch }}
+            RELEASE=${{ steps.args.outputs.sha_short }}
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
   tests:
     runs-on: ubuntu-latest
-    needs: lint
+    needs: libs
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -56,6 +104,13 @@ jobs:
         run: make -C modules init
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx
       - name: Run tests
         run: |
           DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg FALCO_VER=${{ env.FALCO_VERSION }} --build-arg FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }} --build-arg FALCO_LIBS_DRIVER_VER=${{ env.FALCO_LIBS_DRIVER_VERSION }} --target testing -t sf-collector:testing .
@@ -102,6 +157,13 @@ jobs:
         uses: docker/setup-buildx-action@v1
         with:
           version: v0.6.3
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx
       - name: Login to DockerHub
         uses: docker/login-action@v1
         if: ${{ github.event_name != 'pull_request' }}
@@ -161,6 +223,13 @@ jobs:
         uses: actions/checkout@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v1.12
         with:
