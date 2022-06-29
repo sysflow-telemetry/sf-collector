@@ -82,8 +82,8 @@ install: all
 uninstall:
 	rm -rf $(INSTALL_PATH)/bin/$(TARGET)
 
-.PHONY: docker-build
-docker-build:
+.PHONY: build
+build:
 	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
@@ -105,3 +105,4 @@ help:
 	@echo "... clean"
 	@echo "... install"
 	@echo "... uninstall"
+	@echo "... build"

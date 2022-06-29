@@ -50,10 +50,14 @@ src/sysflow_config.h
 # others
 *DS_Store
 *.egg-info
+/logs/
 
 # secrets
 scripts/build/rhpassword
 scripts/build/rhuser
+
+# examples
+examples/callback
 
 # cpack
 scripts/cpack/_CPack_Packages
