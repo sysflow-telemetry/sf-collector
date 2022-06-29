@@ -19,9 +19,9 @@
 # limitations under the License.
 
 # Target configuration
+include manifest
 TARGET = callback
 INSTALL_PATH ?= /usr/local/example
-SYSFLOW_VERSION ?= 0.5.0-libsysflow-alpha.1
 
 # Dir structure configuration
 SYSFLOW_LIB_PREFIX = /usr/lib/sysflow

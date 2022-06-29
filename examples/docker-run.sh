@@ -1,4 +1,5 @@
 #!/bin/bash
+export $(grep -v '^#' manifest | xargs)
 docker run \
     --privileged \
     -v /tmp:/tmp \
@@ -10,4 +11,4 @@ docker run \
     -v /lib/modules:/host/lib/modules:ro \
     -v /usr:/host/usr:ro \
     -v /etc/:/host/etc:ro \
-    -it --rm callback:0.5.0-libsysflow-alpha.1
+    -it --rm callback:${SYSFLOW_VERSION}

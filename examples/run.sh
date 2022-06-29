@@ -1,3 +1,3 @@
 #!/bin/bash
 set -e
-/usr/bin/falco-driver-loader bpf && ./callback 
+/usr/bin/falco-driver-loader bpf && ./callback
