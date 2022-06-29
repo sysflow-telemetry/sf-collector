@@ -162,7 +162,7 @@ jobs:
         id: tag_name
         shell: bash
         run: |
-          GHREF=${GITHUB_REF#refs/tags/}; echo ::set-output name=current_version::${GHREF%-*}
+          GHREF=${GITHUB_REF#refs/tags/}; echo ::set-output name=current_version::${GHREF%%-*}
           echo ::set-output name=current_tag::${GITHUB_REF#refs/tags/}
       - name: Init modules
         run: make -C modules init
