@@ -193,7 +193,7 @@ jobs:
         with:
           body: ${{ steps.changelog_reader.outputs.changes }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: contains(steps.tag_name.outputs.current_version, '-rc')
+          prerelease: ( contains(steps.tag_name.outputs.current_version, '-rc') || contains(steps.tag_name.outputs.current_version, '-alpha') || contains(steps.tag_name.outputs.current_version, '-beta') )
           draft: true
           files: |
             ${{ steps.build_release_assets.outputs.deb }}
