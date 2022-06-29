@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2019 IBM Corporation.
+# Copyright (C) 2022 IBM Corporation.
 #
 # Authors:
 # Frederico Araujo <frederico.araujo@ibm.com>
@@ -19,71 +19,52 @@
 # limitations under the License.
 
 # Build environment configuration
-include ../../makefile.manifest.inc
-include ../../makefile.env.inc
+include ../makefile.manifest.inc
+include ../makefile.env.inc
 
 # Target configuration
 TARGET = callback
-SYSFLOW_BUILD_NUMBER ?= 0
-# Lint options
-LINT = clang-tidy-9
-LINTCHECKS = "bugprone-*"
-# To enable more checks, uncomment below
-#LINTCHECKS = "-abseil*,-android*,bugprone-*,cert-*,clang-*,cppcoreguidelines-*,google-*,hicpp-*,\
-	     -llvm-header-guard,misc-*,modernize-*,-modernize-use-trailing-return-type,-modernize-loop-convert,\
-	     -modernize-make-unique,-modernize-pass-by-value, performance-*,-readability-*,\
-	     -readability-convert-member-functions-to-static"
-LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
-LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
+INSTALL_PATH ?= /usr/local/example
 
 # Dir structure configuration
-LIBLOCALPREFIX ?= ../modules
-SDLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/lib
-SDLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/include
-AVRLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
-AVRLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
-SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
-SFLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/lib
-FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
-SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
-FALCOSECURITY_LIBS_LIB_PREFIX = $(SDLOCALLIBPREFIX)
-DEBUG ?= 0
+SYSFLOW_LIB_PREFIX = /usr/lib/sysflow
+SYSFLOW_INCLUDE_PREFIX = /usr/include/sysflow
+FALCO_LIBS_LIB_PREFIX = /usr/lib/falcosecurity
+FALCO_LIBS_INCLUDE_PREFIX = /usr/include/falcosecurity
 
 # Compiler options
+DEBUG ?= 0
 CXX = g++
-LIBS = ../libs/libsysflow.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libsinsp.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libscap.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libjq.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libonig.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libb64.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libcurl.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libtbb.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_alts.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_reflection.a  $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_error_details.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc++_unsecure.a  $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc_plugin_support.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpcpp_channelz.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgrpc.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libgpr.a -lcares -lprotobuf  \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libsinsp.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libscap.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libjq.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libonig.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_synchronization.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_graphcycles_internal.a  $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_status.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_statusor.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_strings.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_strings_internal.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_cord.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_cordz_functions.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_cord_internal.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_cordz_info.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_cordz_handle.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_hash.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_city.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_low_level_hash.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_raw_hash_set.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_hashtablez_sampler.a  $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_random_internal_pool_urbg.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_random_internal_randen.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_random_internal_randen_hwaes.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_random_internal_randen_hwaes_impl.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_random_internal_platform.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_random_internal_randen_slow.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_random_internal_seed_material.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_random_seed_gen_exception.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_exponential_biased.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_bad_variant_access.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_str_format_internal.a  \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_raw_logging_internal.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_malloc_internal.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_base.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_spinlock_wait.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_throw_delegate.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_log_severity.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_bad_optional_access.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_time.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_time_zone.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_int128.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_stacktrace.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_symbolize.a \
-       $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_debugging_internal.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libabsl_demangle_internal.a \
-       $(AVRLOCALLIBPREFIX)/libavrocpp_s.a \
+LIBS = $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(FALCO_LIBS_LIB_PREFIX)/libjq.a $(FALCO_LIBS_LIB_PREFIX)/libonig.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libb64.a $(FALCO_LIBS_LIB_PREFIX)/libcurl.a $(FALCO_LIBS_LIB_PREFIX)/libtbb.a $(FALCO_LIBS_LIB_PREFIX)/libgrpc++.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_alts.a $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_reflection.a  $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_error_details.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_unsecure.a  $(FALCO_LIBS_LIB_PREFIX)/libgrpc_plugin_support.a $(FALCO_LIBS_LIB_PREFIX)/libgrpcpp_channelz.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libgrpc.a $(FALCO_LIBS_LIB_PREFIX)/libgpr.a -lcares -lprotobuf  \
+       $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(FALCO_LIBS_LIB_PREFIX)/libjq.a $(FALCO_LIBS_LIB_PREFIX)/libonig.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_synchronization.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_graphcycles_internal.a  $(FALCO_LIBS_LIB_PREFIX)/libabsl_status.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_statusor.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_strings.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_strings_internal.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_cord.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_cordz_functions.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_cord_internal.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_cordz_info.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_cordz_handle.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_hash.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_city.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_low_level_hash.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_raw_hash_set.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_hashtablez_sampler.a  $(FALCO_LIBS_LIB_PREFIX)/libabsl_random_internal_pool_urbg.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_random_internal_randen.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_random_internal_randen_hwaes.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_random_internal_randen_hwaes_impl.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_random_internal_platform.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_random_internal_randen_slow.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_random_internal_seed_material.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_random_seed_gen_exception.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_exponential_biased.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_bad_variant_access.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_str_format_internal.a  \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_raw_logging_internal.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_malloc_internal.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_base.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_spinlock_wait.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_throw_delegate.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_log_severity.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_bad_optional_access.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_time.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_time_zone.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_int128.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_stacktrace.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_symbolize.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libabsl_debugging_internal.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_demangle_internal.a \
 	   $(shell find /usr/lib* -name "libboost_iostreams.a") \
-	   $(shell find /usr/local* -name "libsnappy.a") \
-	   $(shell find /usr/local* -name "libglog.a") \
-	   $(shell find /usr/local* -name "libelf.a") \
-	  -lstdc++ -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2
-LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ #-L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
-CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I../libs/ -I$(FSLOCALINCPREFIX)/ \
-		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
-	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json2/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
-		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
+	   $(SYSFLOW_LIB_PREFIX)/libsysflow.a $(SYSFLOW_LIB_PREFIX)/libavrocpp_s.a $(SYSFLOW_LIB_PREFIX)/libsnappy.a $(SYSFLOW_LIB_PREFIX)/libglog.a $(SYSFLOW_LIB_PREFIX)/libelf.a \
+	   -lstdc++ -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2
+LDFLAGS = $(LIBS)
+CFLAGS = -std=c++11 -Wall -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
+		-I$(SYSFLOW_INCLUDE_PREFIX)/ -I$(SYSFLOW_INCLUDE_PREFIX)/filesystem/ -I$(SYSFLOW_INCLUDE_PREFIX)/mods/ \
+		-I$(FALCO_LIBS_INCLUDE_PREFIX)/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/curl/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/json2/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/openssl/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/driver/ \
+		-I$(FALCO_LIBS_INCLUDE_PREFIX)/userspace/libsinsp/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/userspace/libscap/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/avro -I/usr/local/include/ -I/usr/include/
 
 $(info    DEBUG is $(DEBUG))
 ifeq ($(DEBUG), 1)
@@ -94,29 +75,20 @@ else
 endif
 
 .PHONY: all
-all: $(TARGET) $(LIB_TARGET)
+all: $(TARGET)
 
 .PHONY: install
 install: all
-	mkdir -p $(INSTALL_PATH)/bin && cp callback $(INSTALL_PATH)/bin
-	mkdir -p $(INSTALL_PATH)/conf && cp $(SCHLOCALPREFIX)/SysFlow.avsc $(INSTALL_PATH)/conf
+	mkdir -p $(INSTALL_PATH)/bin && cp $(TARGET) $(INSTALL_PATH)/bin
 
 .PHONY: uninstall
 uninstall:
-	rm -rf $(INSTALL_PATH)/bin
-	rm -rf $(INSTALL_PATH)/conf
+	rm -rf $(INSTALL_PATH)/bin/$(TARGET)
 
-.PHONY: docker-runtime-build
-docker-runtime-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${UBI_VERSION} --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target runtime -t sysflowtelemetry/sf-callback:${SYSFLOW_VERSION} -f Dockerfile . )
-
-.PHONY: lint
-lint: $(LINTSRCS)
-	$(LINT) -checks=$(LINTCHECKS) -header-filter=$(LINTHEADERS) $^ -- $(CFLAGS)
-
-.PHONY: lintfix
-lintfix: $(LINTSRCS)
-	$(LINT) -checks=$(LINTCHECKS) -format-style=llvm -header-filter=$(LINTHEADERS) -fix $^ -- $(CFLAGS)
+.PHONY: docker-build
+docker-build:
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
+       docker run --rm -v $(pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} /bin/bash -c "cp /usr/local/bin/callback /mnt/."
 
 .PHONY: $(TARGET)
 $(TARGET): .callback.o
@@ -124,7 +96,6 @@ $(TARGET): .callback.o
 
 .main.o: callback.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
-
 
 .PHONY: clean
 clean:

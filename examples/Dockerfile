@@ -17,127 +17,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG FALCO_VER
-ARG FALCO_LIBS_VER
 ARG FALCO_LIBS_DRIVER_VER
+
+#-----------------------
+# Stage: Builder
+#-----------------------
+FROM ubuntu:18.04 AS builder
+
+# sysflow release
 ARG SYSFLOW_VERSION
 
-#-----------------------
-# Stage: Callback
-#-----------------------
-FROM sysflowtelemetry/sf-collector-libs:${SYSFLOW_VERSION} as callback
+# setup build build requirements
+RUN apt-get update && apt-get install -y libboost-iostreams-dev flex bison gawk libsparsehash-dev
 
-# environment and build args
-ARG BUILD_NUMBER=0
-ARG DEBUG=0
+# install libsysflow
+RUN wget https://github.com/sysflow-telemetry/sf-collector/releases/download/${SYSFLOW_VERSION}/libsysflow-${SYSFLOW_VERSION}-x86_64.deb && \
+    dpkg -i libsysflow-${SYSFLOW_VERSION}-x86_64.deb
 
-ARG INSTALL_PATH=/usr/local/sysflow
-
-ARG MODPREFIX=${INSTALL_PATH}/modules
-ARG falcoprefix=/usr/
-ENV FALCOPREFIX=$falcoprefix
-
-ENV LIBRARY_PATH=/lib64
-
-# build the callback program
-RUN cd /build/src/samples && \
-    make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
-         LIBLOCALPREFIX=${FALCOPREFIX} \
-         SDLOCALLIBPREFIX=/usr/lib/x86_64-linux-gnu/falcosecurity/ \
-         SDLOCALINCPREFIX=/usr/include/falcosecurity/ \
-         AVRLOCALLIBPREFIX=${MODPREFIX}/lib \
-         AVRLOCALINCPREFIX=${MODPREFIX}/include \
-         SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
-         FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
-         SCHLOCALPREFIX=${MODPREFIX}/conf \
-	 DEBUG=${DEBUG} \
-         install
+# build the example program
+COPY callback /build/.
+COPY Makefile /build/.
+RUN make -C /build install
 
 #-----------------------
 # Stage: Runtime
 #-----------------------
 FROM ghcr.io/sysflow-telemetry/libs-base-images/runtime:${FALCO_LIBS_DRIVER_VER} AS runtime
 
-# environment variables
-ARG interval=30
-ENV INTERVAL=$interval
-
-ARG filter=
-ENV FILTER=$filter
-
-ARG falcoprefix=/usr/local/falcolibs/
-ENV FALCOPREFIX=$falcoprefix
-
-ENV DRIVERPREFIX=/usr/src/falco-
-
-ARG exporterid="local"
-ENV EXPORTER_ID=$exporterid
-
-ARG output=
-ENV OUTPUT=$output
-
-ARG cripath=
-ENV CRI_PATH=$cripath
-
-ARG critimeout=
-ENV CRI_TIMEOUT=$critimeout
-
-ARG debug=
-ENV DEBUG=$debug
-
-ARG gllogtostderr=1
-ENV GLOG_logtostderr=$gllogtostderr
-
-ARG glv=
-ENV GLOG_v=$glv
-
-ARG INSTALL_PATH=/usr/local/sysflow
-
-ARG MODPREFIX=${INSTALL_PATH}/modules
-ENV HOST_ROOT=/host
-
-ARG sockfile=
-ENV SOCK_FILE=
-
-ARG VERSION=dev
-ARG RELEASE=dev
-
-ARG nodeip=
-ENV NODE_IP=$nodeip
-
-ARG FALCO_VER
-ENV FALCO_VERSION=${FALCO_VER}
-
-ARG FALCO_LIBS_VER
-ENV FALCO_LIBS_VERSION=${FALCO_LIBS_VER}
-
-ARG FALCO_LIBS_DRIVER_VER
-ENV FALCO_LIBS_DRIVER_VERSION=${FALCO_LIBS_DRIVER_VER}
-
-ENV DRIVER_NAME="falco"
-
-ARG samplingRate=
-ENV SAMPLING_RATE=$samplingRate
-
-ENV DRIVERS_REPO="https://download.falco.org/driver"
-
-# Update Labels
-LABEL "name"="SysFlow Collector"
-LABEL "vendor"="SysFlow"
-LABEL "version"="${VERSION}"
-LABEL "release"="${RELEASE}"
-LABEL "falcolibs-version"="${FALCO_LIBS_VER}"
-LABEL "falcodriver-version"="${FALCO_LIBS_DRIVER_VER}"
-LABEL "summary"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
-LABEL "description"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
-LABEL "io.k8s.display-name"="SysFlow Collector"
-LABEL "io.k8s.description"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
-
-# Update License
-#COPY ./LICENSE.md /licenses/LICENSE.md
-
-COPY --from=callback /build/src/samples/callback ${INSTALL_PATH}/bin/callback
-COPY --from=libs /usr/lib/x86_64-linux-gnu/libboost* /usr/lib/x86_64-linux-gnu/
+# copy example program from builder phase
+COPY --from=builder /build/callback /usr/local/bin/callback
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
- CMD /usr/local/sysflow/bin/callback 
+ CMD /usr/local/bin/callback
