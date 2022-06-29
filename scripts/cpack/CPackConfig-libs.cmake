@@ -1,10 +1,10 @@
-set(CPACK_PACKAGE_NAME "sfcollector")
+set(CPACK_PACKAGE_NAME "libsysflow")
 set(CPACK_PACKAGE_CONTACT "sysflow.io")
 set(CPACK_PACKAGE_VENDOR "SysFlow")
-set(CPACK_PACKAGE_DESCRIPTION "The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SysFlow collector agent")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_LIST_DIR}/build/LICENSE.md")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_LIST_DIR}/build/README.md")
+set(CPACK_PACKAGE_DESCRIPTION "LibSysFlow exposes a programmatic API to monitor and collect system call and event information from hosts and export them in the entity-relational, flow-based SysFlow format")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SysFlow library for implementing userspace consumers")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_LIST_DIR}/build-libs/LICENSE.md")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_LIST_DIR}/build-libs/README.md")
 set(CPACK_STRIP_FILES "ON")
 set(CPACK_PACKAGE_RELOCATABLE "OFF")
 
@@ -27,7 +27,7 @@ if(NOT CPACK_GENERATOR)
     set(CPACK_GENERATOR DEB RPM TGZ)
 endif()
 
-message(STATUS "Packaging SysFlow ${CPACK_PACKAGE_VERSION}")
+message(STATUS "Packaging LibSysFlow ${CPACK_PACKAGE_VERSION}")
 message(STATUS "Using package generators: ${CPACK_GENERATOR}")
 message(STATUS "Package architecture: ${CMAKE_SYSTEM_PROCESSOR}")
 
@@ -48,21 +48,23 @@ set(CPACK_RPM_PACKAGE_URL "https://github.com/sysflow-telemetry/sf-collector")
 set(CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     /usr/src
+    /usr/src/dkms
     /usr/share/man
     /usr/share/man/man8
-    /etc
-    /etc/sysflow
+    /usr/lib
+    /usr/lib/falcosecurity
+    /usr/lib/sysflow
+    /usr/include
+    /usr/include/falcosecurity
+    /usr/include/sysflow
     /usr
     /usr/bin
-    /usr/share
-    /usr/lib
-    /usr/lib/systemd
-    /usr/lib/systemd/system)
+    /usr/share)
 set(CPACK_RPM_PACKAGE_RELOCATABLE "OFF")
 # Since we package make to enable dkms install
 set(CPACK_RPM_SPEC_MORE_DEFINE "%define _build_id_links none")
 
 # Contents
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_PROCESSOR})
-set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build/conf" "/etc/sysflow/conf" "${CMAKE_CURRENT_LIST_DIR}/build/driver" "/etc/sysflow/driver" "${CMAKE_CURRENT_LIST_DIR}/build/driver/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build/service" "/usr/lib/systemd/system" "${CMAKE_CURRENT_LIST_DIR}/build/modules" "/etc/sysflow/modules")
+set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build-driver/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build-driver/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build-libs/include" "/usr/include" "${CMAKE_CURRENT_LIST_DIR}/build-libs/lib" "/usr/lib")
 

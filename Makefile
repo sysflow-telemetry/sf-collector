@@ -45,24 +45,30 @@ uninstall:
 package:
 	docker run --rm --entrypoint=/bin/bash \
 		-v $(shell pwd)/scripts:$(INSTALL_PATH)/scripts \
+		-v $(shell pwd)/modules:$(INSTALL_PATH)/modules/src \
 		-v $(shell pwd)/LICENSE.md:$(INSTALL_PATH)/LICENSE.md \
 		-v $(shell pwd)/README.md:$(INSTALL_PATH)/README.md \
 		sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage.sh
 	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION) && cpack --config ./CPackConfig.cmake
 
 .PHONY: package-libs
-package:
+package-libs:
 	docker run --rm --entrypoint=/bin/bash \
 		-v $(shell pwd)/scripts:$(INSTALL_PATH)/scripts \
 		-v $(shell pwd)/LICENSE.md:$(INSTALL_PATH)/LICENSE.md \
 		-v $(shell pwd)/README.md:$(INSTALL_PATH)/README.md \
 		sysflowtelemetry/sf-collector-libs:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage-libs.sh
+	docker run --rm --entrypoint=/bin/bash \
+		-v $(shell pwd)/scripts:$(INSTALL_PATH)/scripts \
+		-v $(shell pwd)/modules:$(INSTALL_PATH)/modules/src \
+		sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage-driver.sh
 	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION) && cpack --config ./CPackConfig-libs.cmake
 
 .PHONY: clean
 clean:
-	cd src && make clean
-	cd modules && make clean
+	make -C src/collector clean
+	make -C src/libs clean
+	make -C modules clean
 	cd scripts/cpack && ./clean.sh
 
 .PHONY: docker-libs-build
