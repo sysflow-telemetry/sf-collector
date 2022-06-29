@@ -8,7 +8,7 @@ void printFile(sysflow::File* file) {
 
 void process_sysflow(sysflow::SFHeader* header, sysflow::Container* cont, sysflow::Process* proc, sysflow::File* f1, sysflow::File* f2, sysflow::SysFlow* flow) {
   printf("**************************************************************************************\n");
-  printf("Header: Exporter %s, IP %s, File name %s\n", header->exporter.c_str(), header->ip.c_str(), header->filename.c_str());
+  //printf("Header: Exporter %s, IP %s, File name %s\n", header->exporter.c_str(), header->ip.c_str(), header->filename.c_str());
 
   if (cont != nullptr) {
     printf("Container: Id %s, Name %s, Image %s, ImageId %s, Type, %d\n", cont->id.c_str(), cont->name.c_str(), cont->image.c_str(), cont->imageid.c_str(), (int)cont->type);

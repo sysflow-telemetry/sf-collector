@@ -17,35 +17,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG FALCO_LIBS_DRIVER_VER
-
-#-----------------------
-# Stage: Builder
-#-----------------------
-FROM ubuntu:18.04 AS builder
+FROM debian:buster
 
 # sysflow release
 ARG SYSFLOW_VERSION
 
 # setup build build requirements
-RUN apt-get update && apt-get install -y libboost-iostreams-dev flex bison gawk libsparsehash-dev
+RUN apt-get update && apt-get install -y make wget g++ libboost-iostreams-dev flex bison gawk libsparsehash-dev
 
 # install libsysflow
 RUN wget https://github.com/sysflow-telemetry/sf-collector/releases/download/${SYSFLOW_VERSION}/libsysflow-${SYSFLOW_VERSION}-x86_64.deb && \
     dpkg -i libsysflow-${SYSFLOW_VERSION}-x86_64.deb
 
 # build the example program
-COPY callback /build/.
-COPY Makefile /build/.
+COPY callback.cpp /build/
+COPY Makefile /build/
 RUN make -C /build install
 
-#-----------------------
-# Stage: Runtime
-#-----------------------
-FROM ghcr.io/sysflow-telemetry/libs-base-images/runtime:${FALCO_LIBS_DRIVER_VER} AS runtime
+ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
+CMD /usr/local/example/bin/callback
 
-# copy example program from builder phase
-COPY --from=builder /build/callback /usr/local/bin/callback
-
-ENTRYPOINT ["/docker-entrypoint.sh"]
- CMD /usr/local/bin/callback

@@ -18,13 +18,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Build environment configuration
-include ../makefile.manifest.inc
-include ../makefile.env.inc
-
 # Target configuration
 TARGET = callback
 INSTALL_PATH ?= /usr/local/example
+SYSFLOW_VERSION ?= 0.5.0-libsysflow-alpha.1
 
 # Dir structure configuration
 SYSFLOW_LIB_PREFIX = /usr/lib/sysflow
@@ -39,7 +36,7 @@ LIBS = $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(
        $(FALCO_LIBS_LIB_PREFIX)/libb64.a $(FALCO_LIBS_LIB_PREFIX)/libcurl.a $(FALCO_LIBS_LIB_PREFIX)/libtbb.a $(FALCO_LIBS_LIB_PREFIX)/libgrpc++.a \
        $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_alts.a $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_reflection.a  $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_error_details.a \
        $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_unsecure.a  $(FALCO_LIBS_LIB_PREFIX)/libgrpc_plugin_support.a $(FALCO_LIBS_LIB_PREFIX)/libgrpcpp_channelz.a \
-       $(FALCO_LIBS_LIB_PREFIX)/libgrpc.a $(FALCO_LIBS_LIB_PREFIX)/libgpr.a -lcares -lprotobuf  \
+       $(FALCO_LIBS_LIB_PREFIX)/libgrpc.a $(FALCO_LIBS_LIB_PREFIX)/libgpr.a  \
        $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(FALCO_LIBS_LIB_PREFIX)/libjq.a $(FALCO_LIBS_LIB_PREFIX)/libonig.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_synchronization.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_graphcycles_internal.a  $(FALCO_LIBS_LIB_PREFIX)/libabsl_status.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_statusor.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_strings.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_strings_internal.a \
@@ -57,21 +54,21 @@ LIBS = $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_bad_optional_access.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_time.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_time_zone.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_int128.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_stacktrace.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_symbolize.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_debugging_internal.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_demangle_internal.a \
-	   $(shell find /usr/lib* -name "libboost_iostreams.a") \
-	   $(SYSFLOW_LIB_PREFIX)/libsysflow.a $(SYSFLOW_LIB_PREFIX)/libavrocpp_s.a $(SYSFLOW_LIB_PREFIX)/libsnappy.a $(SYSFLOW_LIB_PREFIX)/libglog.a $(SYSFLOW_LIB_PREFIX)/libelf.a \
-	   -lstdc++ -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2
-LDFLAGS = $(LIBS)
+       $(SYSFLOW_LIB_PREFIX)/libsysflow.a $(SYSFLOW_LIB_PREFIX)/libavrocpp_s.a $(SYSFLOW_LIB_PREFIX)/libsnappy.a $(SYSFLOW_LIB_PREFIX)/libglog.a $(SYSFLOW_LIB_PREFIX)/libelf.a \
+       $(shell find /usr/lib* -name "libboost_iostreams.a") \
+      -lstdc++ -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf
+LDFLAGS = $(LIBS) -L$(FALCO_LIBS_LIB_PREFIX) -L$(SYSFLOW_LIB_PREFIX)
 CFLAGS = -std=c++11 -Wall -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
-		-I$(SYSFLOW_INCLUDE_PREFIX)/ -I$(SYSFLOW_INCLUDE_PREFIX)/filesystem/ -I$(SYSFLOW_INCLUDE_PREFIX)/mods/ \
-		-I$(FALCO_LIBS_INCLUDE_PREFIX)/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/curl/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/json2/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/openssl/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/driver/ \
-		-I$(FALCO_LIBS_INCLUDE_PREFIX)/userspace/libsinsp/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/userspace/libscap/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/avro -I/usr/local/include/ -I/usr/include/
+                -I$(SYSFLOW_INCLUDE_PREFIX)/ -I$(SYSFLOW_INCLUDE_PREFIX)/filesystem/ -I$(SYSFLOW_INCLUDE_PREFIX)/mods/ \
+                -I$(FALCO_LIBS_INCLUDE_PREFIX)/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/curl/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/json2/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/openssl/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/driver/ \
+                -I$(FALCO_LIBS_INCLUDE_PREFIX)/userspace/libsinsp/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/userspace/libscap/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/avro -I/usr/local/include/ -I/usr/include/
 
 $(info    DEBUG is $(DEBUG))
 ifeq ($(DEBUG), 1)
-	CFLAGS += -ggdb
-	LIBS += -lprofiler -ltcmalloc
+        CFLAGS += -ggdb
+        LIBS += -lprofiler -ltcmalloc
 else
-	CFLAGS += -O3
+        CFLAGS += -O3
 endif
 
 .PHONY: all
@@ -87,14 +84,14 @@ uninstall:
 
 .PHONY: docker-build
 docker-build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
-       docker run --rm -v $(pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} /bin/bash -c "cp /usr/local/bin/callback /mnt/."
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
+	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: $(TARGET)
-$(TARGET): .callback.o
+$(TARGET): callback.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
-.main.o: callback.cpp
+callback.o: callback.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .PHONY: clean
