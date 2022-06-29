@@ -45,21 +45,14 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-      - name: Read manifest
-        shell: bash
-        run: |
-          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
-          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
-          echo "FALCO_LIBS_DRIVER_VERSION=$(awk -F'=' '/FALCO_LIBS_DRIVER_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
-          echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
       - name: Init modules
         run: make -C modules init
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Run tests
         run: |
-          docker buildx build --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg FALCO_VER=${{ env.FALCO_VERSION }} --build-arg FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }} --build-arg FALCO_LIBS_DRIVER_VER=${{ env.FALCO_LIBS_DRIVER_VERSION }} --target testing -t sf-collector:testing .
-          docker run --rm --name sftests -v "$(pwd)/tests:/usr/local/sysflow/tests" -e quiet=true sf-collector:testing -t tests/tests.bats
+          make docker-testing-build
+          make docker-test
   docker:
     runs-on: ubuntu-latest
     needs: tests
