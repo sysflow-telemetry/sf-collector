@@ -247,6 +247,7 @@ jobs:
         shell: bash
         run: |
           docker pull ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ steps.tag_name.outputs.current_tag }}
+          make docker-libs-build
           make package
           make package-libs
           echo "##[set-output name=deb;] $(ls ${{ github.workspace }}/scripts/cpack/*.deb)"
