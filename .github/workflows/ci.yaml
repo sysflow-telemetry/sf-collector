@@ -113,7 +113,7 @@ jobs:
             ${{ runner.os }}-buildx
       - name: Run tests
         run: |
-          DOCKER_BUILDKIT=1 docker build --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg FALCO_VER=${{ env.FALCO_VERSION }} --build-arg FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }} --build-arg FALCO_LIBS_DRIVER_VER=${{ env.FALCO_LIBS_DRIVER_VERSION }} --target testing -t sf-collector:testing .
+          docker buildx build --cache-from type=local,src=/tmp/.buildx-cache --cache-to type=local,dest=/tmp/.buildx-cache-new --build-arg UBI_VER=${{ env.UBI_VERSION }} --build-arg FALCO_VER=${{ env.FALCO_VERSION }} --build-arg FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }} --build-arg FALCO_LIBS_DRIVER_VER=${{ env.FALCO_LIBS_DRIVER_VERSION }} --target testing -t sf-collector:testing .
           docker run --rm --name sftests -v "$(pwd)/tests:/usr/local/sysflow/tests" -e quiet=true sf-collector:testing -t tests/tests.bats
   docker:
     runs-on: ubuntu-latest
@@ -192,6 +192,8 @@ jobs:
           tags: "${{ steps.meta.outputs.tags }}"
           labels: "${{ steps.meta.outputs.labels }}"
           target: runtime
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
           build-args: |
             UBI_VER=${{ env.UBI_VERSION }}
             FALCO_VER=${{ env.FALCO_VERSION }}

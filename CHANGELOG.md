@@ -15,6 +15,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2022-06-30
+
+### Added
+
+- Add initial version of libsysflow
+
+### Changed
+
+- Build pipeline using sysflow-telemetry/libs-base-images
+
 ## [0.4.3] - 2022-06-21
 
 ### Changed
@@ -195,6 +205,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - First release candidate of SysFlow Collector.
 
 [Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...HEAD
+[0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...0.5.0
 [0.4.3]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.0...0.4.1
