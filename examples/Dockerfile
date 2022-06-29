@@ -23,7 +23,7 @@ FROM debian:buster
 ARG SYSFLOW_VERSION
 
 # setup build build requirements
-RUN apt-get update && apt-get install -y make wget g++ libboost-iostreams-dev flex bison gawk libsparsehash-dev
+RUN apt-get update && apt-get install -y make wget g++ libboost-iostreams-dev flex bison gawk libsparsehash-dev && rm -rf /var/lib/apt/lists/*
 
 # install libsysflow
 RUN wget https://github.com/sysflow-telemetry/sf-collector/releases/download/${SYSFLOW_VERSION}/libsysflow-${SYSFLOW_VERSION}-x86_64.deb && \
@@ -32,6 +32,7 @@ RUN wget https://github.com/sysflow-telemetry/sf-collector/releases/download/${S
 # build the example program
 COPY callback.cpp /build/
 COPY Makefile /build/
+COPY manifest /build/
 RUN make -C /build install
 
 ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
