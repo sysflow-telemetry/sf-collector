@@ -32,6 +32,7 @@ FALCO_LIBS_INCLUDE_PREFIX = /usr/include/falcosecurity
 
 # Compiler options
 DEBUG ?= 0
+CLANG_FORMAT = clang-format-12
 CXX = g++
 LIBS = $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(FALCO_LIBS_LIB_PREFIX)/libjq.a $(FALCO_LIBS_LIB_PREFIX)/libonig.a \
        $(FALCO_LIBS_LIB_PREFIX)/libb64.a $(FALCO_LIBS_LIB_PREFIX)/libcurl.a $(FALCO_LIBS_LIB_PREFIX)/libtbb.a $(FALCO_LIBS_LIB_PREFIX)/libgrpc++.a \
@@ -88,6 +89,10 @@ build:
 	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
+.PHONY: format
+format:
+	$(CLANG_FORMAT) -i --style=file *.cpp
+
 .PHONY: $(TARGET)
 $(TARGET): callback.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
@@ -107,3 +112,4 @@ help:
 	@echo "... install"
 	@echo "... uninstall"
 	@echo "... build"
+	@echo "... format"
