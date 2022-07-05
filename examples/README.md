@@ -22,9 +22,22 @@ int main(int argc, char **argv) {
 ## Pre-requisites
 
 - docker (for building the application)
-- llvm 12+ (if running the eBPF driver)
 
-**Note:** SysFlow requires the kernel headers to be installed on the environment. You can check if kernel headers are installed by checking `/usr/src` in your closed environment. In debian systems, the package name is `linux-headers-generic` or `linux-headers-$(uname -r)`, and in rhel systems, the package name is `kernel-devel` or `kernel-devel-$(uname -r)`.
+### Falco drivers and driver loader requirements
+
+Debian-based systems:
+
+```bash
+apt-get install -y apt-get install -y --no-install-recommends bash-completion bc bison clang ca-certificates curl dkms	flex gnupg2 gcc jq libc6-dev libelf-dev libmpx2 libssl-dev llvm	netcat xz-utils
+```
+
+RPM-based systems:
+
+```bash
+dnf install -y gcc gcc-c++ wget binutils bzip2 perl glibc-static diffutils kmod xz apr-devel apr-util-devel openssl-devel flex bison libstdc++-static bc llvm-toolset
+```
+
+**Note:** The Falco driver requires the kernel headers to be installed on the environment. You can check if kernel headers are installed by checking `/usr/src` in your closed environment. In debian systems, the package name is `linux-headers-generic` or `linux-headers-$(uname -r)`, and in rhel systems, the package name is `kernel-devel` or `kernel-devel-$(uname -r)`.
 
 ## Build
 
@@ -45,5 +58,7 @@ Otherwise, to launch the application in a container, run:
 ```bash
 docker-run.sh
 ```
+
+**Note:** The example uses the eBPF probe by default. To use the kmod probe, remove `-e FALCO_BPF_PROBE=""` from `docker-run.sh` and remove argument `bpf` passed to the falco-driver-loader in `run.sh`.
 
 

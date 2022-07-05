@@ -1,6 +1,14 @@
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <csignal>
+#include <functional>
 #include "sysflowlibs.hpp"
 #include "sysflow/enums.hh"
+
+namespace {
+std::function<void()> shutdown_handler;
+void signal_handler(int /*i*/) { shutdown_handler(); }
+}
 
 void printFile(sysflow::File* file) {
   printf("File: Type %d, Path %s\n", file->restype, file->path.c_str());
@@ -62,8 +70,20 @@ void process_sysflow(sysflow::SFHeader* header, sysflow::Container* cont, sysflo
 }
 
 int main(int argc, char **argv) {
+    // configure event collection (using defaults)
     SysFlowConfig* config = sysflowlibscpp::InitializeSysFlowConfig();
     config->callback = process_sysflow;
     sysflowlibscpp::SysFlowDriver *driver = new sysflowlibscpp::SysFlowDriver(config);
+
+    // register signal handlers to stop event collection
+    shutdown_handler = [&]() -> void { driver->exit(); };
+    std::signal(SIGINT, signal_handler);
+    std::signal(SIGTERM, signal_handler);
+
+    // start event collection
     driver->run();
+
+    // clean up resources
+    delete driver;
+    delete config;
 }

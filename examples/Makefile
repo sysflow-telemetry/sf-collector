@@ -85,7 +85,7 @@ uninstall:
 
 .PHONY: build
 build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: $(TARGET)

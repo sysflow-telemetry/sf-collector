@@ -1,9 +1,8 @@
 #!/bin/bash
-export $(grep -v '^#' manifest | xargs)
+DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+export $(grep -v '^#' $DIR/manifest | xargs)
 docker run \
     --privileged \
-    -v /tmp:/tmp \
-    -v /tmp/docker-entrypoint.sh:/docker-entrypoint.sh \
     -v /var/run/docker.sock:/host/var/run/docker.sock \
     -v /dev:/host/dev \
     -v /proc:/host/proc:ro \
@@ -11,4 +10,5 @@ docker run \
     -v /lib/modules:/host/lib/modules:ro \
     -v /usr:/host/usr:ro \
     -v /etc/:/host/etc:ro \
-    -it --rm callback:${SYSFLOW_VERSION}
+    -e FALCO_BPF_PROBE="" \
+    --rm callback:${SYSFLOW_VERSION}

@@ -1,3 +1,4 @@
 #!/bin/bash
 set -e
-/usr/bin/falco-driver-loader bpf && ./callback
+DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+/usr/bin/falco-driver-loader bpf && $DIR/callback
