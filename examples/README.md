@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 Debian-based systems:
 
 ```bash
-apt-get install -y apt-get install -y --no-install-recommends bash-completion bc bison clang ca-certificates curl dkms	flex gnupg2 gcc jq libc6-dev libelf-dev libmpx2 libssl-dev llvm	netcat xz-utils
+apt-get install -y --no-install-recommends bash-completion bc bison clang ca-certificates curl dkms	flex gnupg2 gcc jq libc6-dev libelf-dev libmpx2 libssl-dev llvm	netcat xz-utils
 ```
 
 RPM-based systems:
