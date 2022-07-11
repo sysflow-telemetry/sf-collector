@@ -182,9 +182,9 @@ jobs:
           make docker-libs-build
           make package
           make package-libs
-          echo "##[set-output name=deb;] $(ls ${{ github.workspace }}/scripts/cpack/*.deb)"
-          echo "##[set-output name=rpm;] $(ls ${{ github.workspace }}/scripts/cpack/*.rpm)"
-          echo "##[set-output name=targz;] $(ls ${{ github.workspace }}/scripts/cpack/*.tar.gz)"
+          echo "##[set-output name=deb;] $(ls ${{ github.workspace }}/scripts/cpack/*.deb | tr ' ' '\n')"
+          echo "##[set-output name=rpm;] $(ls ${{ github.workspace }}/scripts/cpack/*.rpm | tr ' ' '\n')"
+          echo "##[set-output name=targz;] $(ls ${{ github.workspace }}/scripts/cpack/*.tar.gz | tr ' ' '\n')"
       - name: Get Changelog Entry
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2
