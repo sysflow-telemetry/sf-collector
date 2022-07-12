@@ -15,11 +15,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.5.0] - 2022-06-30
+## [0.5.0] - 2022-07-31
 
 ### Added
 
 - Add initial version of libsysflow
+- Add example consumer of libsysflow
 
 ### Changed
 
