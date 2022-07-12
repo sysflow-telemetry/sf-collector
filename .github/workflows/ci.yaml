@@ -92,8 +92,10 @@ jobs:
           tags: |
             type=edge,branch=master
             type=ref,event=branch
-            type=ref,event=tag
+            type=match,pattern=^\d.\d.\d$
             type=ref,event=pr
+            type=sha,prefix=
+            type=sha,format=long,prefix=
           labels: |
             org.opencontainers.image.documentation=https://sysflow.readthedocs.io/
             org.opencontainers.image.vendor=SysFlow
