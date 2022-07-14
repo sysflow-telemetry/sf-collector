@@ -30,12 +30,20 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        path:
+          - 'src/collector'
+          - 'src/libs'
+          - 'examples'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-          fetch-depth: 0
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Run clang-format style check
+      uses: jidicula/clang-format-action@v4.5.0
+      with:
+        clang-format-version: '12'
+        check-path: ${{ matrix.path }}
   tests:
     runs-on: ubuntu-latest
     needs: lint
@@ -84,8 +92,10 @@ jobs:
           tags: |
             type=edge,branch=master
             type=ref,event=branch
-            type=ref,event=tag
+            type=match,pattern=^\d.\d.\d$
             type=ref,event=pr
+            type=sha,prefix=
+            type=sha,format=long,prefix=
           labels: |
             org.opencontainers.image.documentation=https://sysflow.readthedocs.io/
             org.opencontainers.image.vendor=SysFlow
@@ -174,9 +184,9 @@ jobs:
           make docker-libs-build
           make package
           make package-libs
-          echo "##[set-output name=deb;] $(ls ${{ github.workspace }}/scripts/cpack/*.deb)"
-          echo "##[set-output name=rpm;] $(ls ${{ github.workspace }}/scripts/cpack/*.rpm)"
-          echo "##[set-output name=targz;] $(ls ${{ github.workspace }}/scripts/cpack/*.tar.gz)"
+          echo "##[set-output name=deb;] $(ls ${{ github.workspace }}/scripts/cpack/*.deb | tr ' ' '\n')"
+          echo "##[set-output name=rpm;] $(ls ${{ github.workspace }}/scripts/cpack/*.rpm | tr ' ' '\n')"
+          echo "##[set-output name=targz;] $(ls ${{ github.workspace }}/scripts/cpack/*.tar.gz | tr ' ' '\n')"
       - name: Get Changelog Entry
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2

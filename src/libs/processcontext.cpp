@@ -126,11 +126,12 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
     p->proc.containerId.set_string(cont->cont.id);
     cont->refs++;
     // std::cout << "Cont Exists: " << p->proc.oid.hpid << " " << p->proc.exe <<
-    // " " << p->proc.exeArgs << " " << mainthread->m_container_id <<  std::endl;
+    // " " << p->proc.exeArgs << " " << mainthread->m_container_id << std::endl;
   } else {
     p->proc.containerId.set_null();
     // std::cout << "Cont doesn't Exists: " << p->proc.oid.hpid << " " <<
-    // p->proc.exe << " " << p->proc.exeArgs << " " << mainthread->m_container_id
+    // p->proc.exe << " " << p->proc.exeArgs << " " <<
+    // mainthread->m_container_id
     // <<  std::endl;
   }
   return p;
