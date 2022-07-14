@@ -180,7 +180,8 @@ jobs:
         id: build_release_assets
         shell: bash
         run: |
-          docker pull ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ steps.tag_name.outputs.current_tag }}
+          docker pull ${{ env.DOCKER_REGISTRY_REPOSITORY }}:$GITHUB_SHA
+          docker tag ${{ env.DOCKER_REGISTRY_REPOSITORY }}:$GITHUB_SHA ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ steps.tag_name.outputs.current_tag }}
           make docker-libs-build
           make package
           make package-libs
