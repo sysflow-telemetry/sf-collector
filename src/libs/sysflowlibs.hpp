@@ -19,10 +19,18 @@
 
 #ifndef __SYSFLOW_LIBS_C_PLUS_PLUS_API__
 #define __SYSFLOW_LIBS_C_PLUS_PLUS_API__
-#include "logger.h"
-#include "sysflowcontext.h"
-#include "sysflowprocessor.h"
 #include <string>
+#include "sfconfig.h"
+namespace writer {
+  class SysFlowWriter;
+}
+namespace context {
+  class SysFlowContext;
+}
+
+namespace sysflowprocessor {
+  class SysFlowProcessor;
+}
 
 namespace sysflowlibscpp {
 
@@ -30,7 +38,6 @@ SysFlowConfig *InitializeSysFlowConfig();
 
 class SysFlowDriver {
 private:
-  DEFINE_LOGGER();
   context::SysFlowContext *m_cxt;
   writer::SysFlowWriter *m_writer;
   sysflowprocessor::SysFlowProcessor *m_processor;
@@ -38,8 +45,8 @@ private:
 public:
   explicit SysFlowDriver(SysFlowConfig *conf);
   virtual ~SysFlowDriver();
-  inline void exit() { m_processor->exit(); }
-  inline int run() { return m_processor->run(); }
+  void exit();
+  int run();
 };
 
 } // namespace sysflowlibscpp

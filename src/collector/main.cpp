@@ -30,6 +30,7 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include "utils.h"
 
 SysFlowConfig *g_config;
 sysflowlibscpp::SysFlowDriver *g_driver;
@@ -94,10 +95,10 @@ static void usage(const std::string &name) {
 
 CREATE_MAIN_LOGGER()
 int main(int argc, char **argv) {
-  string scapFile = "";
-  string outputDir;
-  string socketFile;
-  string exporterID = "";
+  std::string scapFile = "";
+  std::string outputDir;
+  std::string socketFile;
+  std::string exporterID = "";
   char *duration;
   char c;
   struct sigaction sigHandler {};
@@ -107,14 +108,14 @@ int main(int argc, char **argv) {
   sigHandler.sa_flags = 0;
   int fileDuration = 0;
   int criTO = 0;
-  string criPath = "";
+  std::string criPath = "";
   char *criTimeout;
-  string filter = "";
+  std::string filter = "";
   bool help = false;
   bool domainSocket = false;
   bool writeFile = false;
   bool breakout = false;
-  string logProps;
+  std::string logProps;
 
   sigaction(SIGINT, &sigHandler, nullptr);
   sigaction(SIGTERM, &sigHandler, nullptr);
@@ -191,7 +192,7 @@ int main(int argc, char **argv) {
       g_config->criTO = criTO;
       break;
     case 'v':
-      cerr << " Version: " << SF_VERSION << "+" << SF_BUILD
+      std::cerr << " Version: " << SF_VERSION << "+" << SF_BUILD
            << " Avro Schema Version: " << utils::getSchemaVersion() << endl;
       exit(0);
     case '?':

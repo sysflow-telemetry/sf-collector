@@ -18,6 +18,8 @@
  **/
 
 #include "sysflowlibs.hpp"
+#include "sysflowcontext.h"
+#include "sysflowprocessor.h"
 
 using sysflowlibscpp::SysFlowDriver;
 
@@ -47,4 +49,12 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
 void DeleteSysFlowConfig(SysFlowConfig **conf) {
   delete *conf;
   *conf = nullptr;
+}
+
+void SysFlowDriver::exit() {
+  m_processor->exit();
+}
+
+int SysFlowDriver::run() {
+  return m_processor->run();
 }
