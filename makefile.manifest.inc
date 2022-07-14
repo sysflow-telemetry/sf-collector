@@ -17,7 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SYSFLOW_VERSION?=0.5.0-libsysflow-alpha.1
+SYSFLOW_VERSION?=0.5.0-libsysflow-alpha.2
 SYSFLOW_BUILD_NUMBER?=1
 FALCO_VERSION=0.32.0
 FALCO_LIBS_VERSION=39ae7d40496793cf3d3e7890c9bbdc202263836b
