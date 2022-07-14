@@ -34,12 +34,12 @@ FALCO_LIBS_INCLUDE_PREFIX = /usr/include/falcosecurity
 DEBUG ?= 0
 CLANG_FORMAT = clang-format-12
 CXX = g++
-LIBS = $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(FALCO_LIBS_LIB_PREFIX)/libjq.a $(FALCO_LIBS_LIB_PREFIX)/libonig.a \
+LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow.a \
+	   $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(FALCO_LIBS_LIB_PREFIX)/libjq.a $(FALCO_LIBS_LIB_PREFIX)/libonig.a \
        $(FALCO_LIBS_LIB_PREFIX)/libb64.a $(FALCO_LIBS_LIB_PREFIX)/libcurl.a $(FALCO_LIBS_LIB_PREFIX)/libtbb.a $(FALCO_LIBS_LIB_PREFIX)/libgrpc++.a \
        $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_alts.a $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_reflection.a  $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_error_details.a \
        $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_unsecure.a  $(FALCO_LIBS_LIB_PREFIX)/libgrpc_plugin_support.a $(FALCO_LIBS_LIB_PREFIX)/libgrpcpp_channelz.a \
        $(FALCO_LIBS_LIB_PREFIX)/libgrpc.a $(FALCO_LIBS_LIB_PREFIX)/libgpr.a  \
-       $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(FALCO_LIBS_LIB_PREFIX)/libjq.a $(FALCO_LIBS_LIB_PREFIX)/libonig.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_synchronization.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_graphcycles_internal.a  $(FALCO_LIBS_LIB_PREFIX)/libabsl_status.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_statusor.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_strings.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_strings_internal.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_cord.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_cordz_functions.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_cord_internal.a \
@@ -56,7 +56,7 @@ LIBS = $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_bad_optional_access.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_time.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_time_zone.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_int128.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_stacktrace.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_symbolize.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_debugging_internal.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_demangle_internal.a \
-       $(SYSFLOW_LIB_PREFIX)/libsysflow.a $(SYSFLOW_LIB_PREFIX)/libavrocpp_s.a $(SYSFLOW_LIB_PREFIX)/libsnappy.a $(SYSFLOW_LIB_PREFIX)/libglog.a $(SYSFLOW_LIB_PREFIX)/libelf.a \
+       $(SYSFLOW_LIB_PREFIX)/libavrocpp_s.a $(SYSFLOW_LIB_PREFIX)/libsnappy.a $(SYSFLOW_LIB_PREFIX)/libglog.a $(SYSFLOW_LIB_PREFIX)/libelf.a \
        $(shell find /usr/lib* -name "libboost_iostreams.a") \
       -lstdc++ -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf
 LDFLAGS = $(LIBS) -L$(FALCO_LIBS_LIB_PREFIX) -L$(SYSFLOW_LIB_PREFIX)
@@ -87,6 +87,11 @@ uninstall:
 .PHONY: build
 build:
 	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
+	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
+
+.PHONY: build.dev
+build.dev:
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.dev . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: format
