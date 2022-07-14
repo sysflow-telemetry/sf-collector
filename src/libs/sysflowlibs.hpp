@@ -19,17 +19,17 @@
 
 #ifndef __SYSFLOW_LIBS_C_PLUS_PLUS_API__
 #define __SYSFLOW_LIBS_C_PLUS_PLUS_API__
-#include <string>
 #include "sfconfig.h"
+#include <string>
 namespace writer {
-  class SysFlowWriter;
+class SysFlowWriter;
 }
 namespace context {
-  class SysFlowContext;
+class SysFlowContext;
 }
 
 namespace sysflowprocessor {
-  class SysFlowProcessor;
+class SysFlowProcessor;
 }
 
 namespace sysflowlibscpp {

@@ -25,12 +25,12 @@
 #include "logger.h"
 #include "sysflow_config.h"
 #include "sysflowlibs.hpp"
+#include "utils.h"
 #include <csignal>
 #include <cstdio>
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include "utils.h"
 
 SysFlowConfig *g_config;
 sysflowlibscpp::SysFlowDriver *g_driver;
@@ -193,7 +193,8 @@ int main(int argc, char **argv) {
       break;
     case 'v':
       std::cerr << " Version: " << SF_VERSION << "+" << SF_BUILD
-           << " Avro Schema Version: " << utils::getSchemaVersion() << endl;
+                << " Avro Schema Version: " << utils::getSchemaVersion()
+                << endl;
       exit(0);
     case '?':
       if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' ||

@@ -51,10 +51,6 @@ void DeleteSysFlowConfig(SysFlowConfig **conf) {
   *conf = nullptr;
 }
 
-void SysFlowDriver::exit() {
-  m_processor->exit();
-}
+void SysFlowDriver::exit() { m_processor->exit(); }
 
-int SysFlowDriver::run() {
-  return m_processor->run();
-}
+int SysFlowDriver::run() { return m_processor->run(); }
