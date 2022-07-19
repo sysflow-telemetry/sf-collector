@@ -187,9 +187,16 @@ jobs:
           make package
           make package-libs
           make package-libs/musl
-          echo "##[set-output name=deb;] $(ls ${{ github.workspace }}/scripts/cpack/*.deb | tr ' ' '\n')"
-          echo "##[set-output name=rpm;] $(ls ${{ github.workspace }}/scripts/cpack/*.rpm | tr ' ' '\n')"
-          echo "##[set-output name=targz;] $(ls ${{ github.workspace }}/scripts/cpack/*.tar.gz | tr ' ' '\n')"
+          export $(grep -v '^#' makefile.manifest.inc | xargs)
+          echo "##[set-output name=bindeb;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.deb)"
+          echo "##[set-output name=libdeb;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.deb)"
+          echo "##[set-output name=libmusldeb;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.deb)"
+          echo "##[set-output name=binrpm;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.rpm)"
+          echo "##[set-output name=librpm;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.rpm)"
+          echo "##[set-output name=libmuslrpm;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.rpm)"
+          echo "##[set-output name=bintgz;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.tgz)"
+          echo "##[set-output name=libtgz;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.tgz)"
+          echo "##[set-output name=libmusltgz;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.tgz)"
       - name: Get Changelog Entry
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2
@@ -204,6 +211,13 @@ jobs:
           prerelease: ( contains(steps.tag_name.outputs.current_version, '-rc') || contains(steps.tag_name.outputs.current_version, '-alpha') || contains(steps.tag_name.outputs.current_version, '-beta') )
           draft: true
           files: |
-            ${{ steps.build_release_assets.outputs.deb }}
-            ${{ steps.build_release_assets.outputs.rpm }}
-            ${{ steps.build_release_assets.outputs.targz }}
+            ${{ steps.build_release_assets.outputs.bindeb }}
+            ${{ steps.build_release_assets.outputs.libdeb }}
+            ${{ steps.build_release_assets.outputs.libmusldeb }}
+            ${{ steps.build_release_assets.outputs.binrpm }}
+            ${{ steps.build_release_assets.outputs.librpm }}
+            ${{ steps.build_release_assets.outputs.libmuslrpm }}
+            ${{ steps.build_release_assets.outputs.bintgz }}
+            ${{ steps.build_release_assets.outputs.libtgz }}
+            ${{ steps.build_release_assets.outputs.libmusltgz }}
+
