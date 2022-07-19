@@ -30,7 +30,7 @@ If using the provided dockerfiles, all the requirements are installed in the `bu
 For debian-based builds: 
 
 ```bash
-apt-get update && apt-get install -y make wget g++ libboost-iostreams-dev flex bison gawk libsparsehash-dev 
+apt-get install -y make wget g++ libboost-iostreams-dev flex bison gawk libsparsehash-dev 
 ```
 
 For musl-based builds, on Alpine:
