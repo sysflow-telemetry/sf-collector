@@ -187,7 +187,7 @@ jobs:
           make package
           make package-libs
           make package-libs/musl
-          export $(grep -v '^#' makefile.manifest.inc | xargs)
+          export $(sed 's/\?//g' makefile.manifest.inc | grep -v '^#' | xargs)
           echo "##[set-output name=bindeb;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.deb)"
           echo "##[set-output name=libdeb;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.deb)"
           echo "##[set-output name=libmusldeb;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.deb)"
