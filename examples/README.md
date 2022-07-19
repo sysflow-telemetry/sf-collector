@@ -23,6 +23,22 @@ int main(int argc, char **argv) {
 
 - docker (for building the application)
 
+### Build requirements
+
+If using the provided dockerfiles, all the requirements are installed in the `builder` target. 
+
+For debian-based builds: 
+
+```bash
+apt-get update && apt-get install -y make wget g++ libboost-iostreams-dev flex bison gawk libsparsehash-dev 
+```
+
+For musl-based builds, on Alpine:
+
+```bash
+apk add make g++ boost-dev boost-static flex bison gawk sparsehash
+```
+
 ### Falco drivers and driver loader requirements
 
 Debian-based systems:
@@ -43,6 +59,12 @@ dnf install -y gcc gcc-c++ wget binutils bzip2 perl glibc-static diffutils kmod 
 
 ```bash
 make build
+```
+
+Or, to build the example using a musl toolchain, run:
+
+```bash
+make build/musl
 ```
 
 ## Running
