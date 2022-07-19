@@ -48,6 +48,7 @@ FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
 SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
 FALCOSECURITY_LIBS_LIB_PREFIX = $(SDLOCALLIBPREFIX)
 DEBUG ?= 0
+MUSL ?= 0
 
 # Compiler options
 CXX = g++
@@ -77,13 +78,22 @@ LIBS = ../libs/libsysflow.a $(FALCOSECURITY_LIBS_LIB_PREFIX)/libsinsp.a $(FALCOS
 	   $(shell find /usr/lib* -name "libboost_iostreams.a") \
 	   $(shell find /usr/local* -name "libsnappy.a") \
 	   $(shell find /usr/local* -name "libglog.a") \
-	   $(shell find /usr/local* -name "libelf.a") \
-	  -lstdc++ -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2
+	   $(shell find /usr/lib* -name "libelf.a") \
+	   -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2
+MUSLFLAGS = -static -Os
 LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ #-L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I../libs/ -I$(FSLOCALINCPREFIX)/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json2/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
+
+$(info    MUSL is $(MUSL))
+ifeq ($(MUSL), 1)
+	CFLAGS += $(MUSLFLAGS) -fPIE -pie -DHAVE_STRLCPY
+	LDFLAGS += $(MUSLFLAGS)
+else 
+	LIBS += -lrt -lanl
+endif
 
 $(info    DEBUG is $(DEBUG))
 ifeq ($(DEBUG), 1)

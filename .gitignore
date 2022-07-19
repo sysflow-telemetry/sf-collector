@@ -63,6 +63,7 @@ examples/callback
 scripts/cpack/_CPack_Packages
 scripts/cpack/build
 scripts/cpack/build-libs
+scripts/cpack/build-libs-musl
 scripts/cpack/build-driver
 scripts/cpack/sfcollector*
 scripts/cpack/libsysflow*

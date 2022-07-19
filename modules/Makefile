@@ -41,6 +41,11 @@ modules: elfutils/package \
 		glog/package \
 		snappy/package
 
+.PHONY: modules/no-elfutils
+modules/no-elfutils: avro/package \
+		glog/package \
+		snappy/package
+
 .PHONY: install
 install: modules \
 	avro/install \
@@ -49,6 +54,16 @@ install: modules \
 	glog/install \
 	snappy/install \
 	dkms-rh/install
+
+.PHONY: install/no-elfutils
+install/no-elfutils: modules/no-elfutils \
+	avro/install \
+	sysflow/install \
+	fs/install \
+	glog/install \
+	snappy/install \
+	dkms-rh/install
+
 
 .PHONY: falcolibs/package
 falcolibs/package:
@@ -126,7 +141,7 @@ fs/install:
 .PHONY: elfutils/package
 elfutils/package:
 	cd elfutils && autoreconf -i -f && \
-	./configure --enable-maintainer-mode && \
+	./configure --enable-maintainer-mode --disable-debuginfod && \
 	make && make install
 
 .PHONY: elfutils/install

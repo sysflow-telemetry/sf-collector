@@ -49,10 +49,12 @@ FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
 SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
 FALCOSECURITY_LIBS_LIB_PREFIX = $(SDLOCALLIBPREFIX)
 DEBUG ?= 0
+MUSL ?= 0
 
 # Compiler options
 CXX = g++
 AR = ar
+MUSLFLAGS = -static -Os 
 LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ #-L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
 CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
@@ -60,6 +62,12 @@ CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
 		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
 
 OBJS = .sysflowlibs.o .sysflowlibs.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o .k8scontext.o .k8seventprocessor.o
+
+$(info    MUSL is $(MUSL))
+ifeq ($(MUSL), 1)
+	CFLAGS += $(MUSLFLAGS) -DHAVE_STRLCPY
+	LDFLAGS += $(MUSLFLAGS)
+endif
 
 $(info    DEBUG is $(DEBUG))
 ifeq ($(DEBUG), 1)

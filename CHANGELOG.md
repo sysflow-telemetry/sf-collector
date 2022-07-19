@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - Add initial version of libsysflow
 - Add example consumer of libsysflow
+- Add build pipeline and static libraries based on musl
 
 ### Changed
 

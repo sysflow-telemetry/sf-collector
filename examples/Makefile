@@ -32,6 +32,7 @@ FALCO_LIBS_INCLUDE_PREFIX = /usr/include/falcosecurity
 
 # Compiler options
 DEBUG ?= 0
+MUSL ?= 0
 CLANG_FORMAT = clang-format-12
 CXX = g++
 LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow.a \
@@ -58,12 +59,21 @@ LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow.a \
        $(FALCO_LIBS_LIB_PREFIX)/libabsl_debugging_internal.a $(FALCO_LIBS_LIB_PREFIX)/libabsl_demangle_internal.a \
        $(SYSFLOW_LIB_PREFIX)/libavrocpp_s.a $(SYSFLOW_LIB_PREFIX)/libsnappy.a $(SYSFLOW_LIB_PREFIX)/libglog.a $(SYSFLOW_LIB_PREFIX)/libelf.a \
        $(shell find /usr/lib* -name "libboost_iostreams.a") \
-      -lstdc++ -lz -lrt -lanl -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf
+      -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf
+MUSLFLAGS = -static -Os
 LDFLAGS = $(LIBS) -L$(FALCO_LIBS_LIB_PREFIX) -L$(SYSFLOW_LIB_PREFIX)
 CFLAGS = -std=c++11 -Wall -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
                 -I$(SYSFLOW_INCLUDE_PREFIX)/ -I$(SYSFLOW_INCLUDE_PREFIX)/filesystem/ -I$(SYSFLOW_INCLUDE_PREFIX)/mods/ \
                 -I$(FALCO_LIBS_INCLUDE_PREFIX)/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/curl/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/json2/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/openssl/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/driver/ \
                 -I$(FALCO_LIBS_INCLUDE_PREFIX)/userspace/libsinsp/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/userspace/libscap/ -I$(FALCO_LIBS_INCLUDE_PREFIX)/avro -I/usr/local/include/ -I/usr/include/
+
+$(info    MUSL is $(MUSL))
+ifeq ($(MUSL), 1)
+	CFLAGS += $(MUSLFLAGS) -fPIE -pie -DHAVE_STRLCPY
+	LDFLAGS += $(MUSLFLAGS)
+else 
+	LIBS += -lrt -lanl
+endif
 
 $(info    DEBUG is $(DEBUG))
 ifeq ($(DEBUG), 1)
@@ -89,9 +99,14 @@ build:
 	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
-.PHONY: build.dev
-build.dev:
+.PHONY: build/dev
+build/dev:
 	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.dev . )
+	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
+
+.PHONY: build/musl
+build/musl:
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: format

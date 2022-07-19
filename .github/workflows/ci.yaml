@@ -183,8 +183,10 @@ jobs:
           docker pull ${{ env.DOCKER_REGISTRY_REPOSITORY }}:$GITHUB_SHA
           docker tag ${{ env.DOCKER_REGISTRY_REPOSITORY }}:$GITHUB_SHA ${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ steps.tag_name.outputs.current_tag }}
           make docker-libs-build
+          make docker-libs-build/musl
           make package
           make package-libs
+          make package-libs/musl
           echo "##[set-output name=deb;] $(ls ${{ github.workspace }}/scripts/cpack/*.deb | tr ' ' '\n')"
           echo "##[set-output name=rpm;] $(ls ${{ github.workspace }}/scripts/cpack/*.rpm | tr ' ' '\n')"
           echo "##[set-output name=targz;] $(ls ${{ github.workspace }}/scripts/cpack/*.tar.gz | tr ' ' '\n')"
