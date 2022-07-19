@@ -194,9 +194,9 @@ jobs:
           echo "##[set-output name=binrpm;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.rpm)"
           echo "##[set-output name=librpm;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.rpm)"
           echo "##[set-output name=libmuslrpm;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.rpm)"
-          echo "##[set-output name=bintgz;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.tgz)"
-          echo "##[set-output name=libtgz;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.tgz)"
-          echo "##[set-output name=libmusltgz;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.tgz)"
+          echo "##[set-output name=bintgz;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.tar.gz)"
+          echo "##[set-output name=libtgz;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.tar.gz)"
+          echo "##[set-output name=libmusltgz;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.tar.gz)"
       - name: Get Changelog Entry
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2
