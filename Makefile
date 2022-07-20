@@ -48,7 +48,7 @@ package:
 		-v $(shell pwd)/modules:$(INSTALL_PATH)/modules/src \
 		-v $(shell pwd)/LICENSE.md:$(INSTALL_PATH)/LICENSE.md \
 		-v $(shell pwd)/README.md:$(INSTALL_PATH)/README.md \
-		sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage.sh
+		sysflowtelemetry/sf-collector-musl:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage.sh
 	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION) && cpack --config ./CPackConfig.cmake
 
 .PHONY: package-libs
@@ -74,7 +74,7 @@ package-libs/musl:
 	docker run --rm --entrypoint=/bin/bash \
 		-v $(shell pwd)/scripts:$(INSTALL_PATH)/scripts \
 		-v $(shell pwd)/modules:$(INSTALL_PATH)/modules/src \
-		sysflowtelemetry/sf-collector:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage-driver.sh
+		sysflowtelemetry/sf-collector-musl:${SYSFLOW_VERSION} -- $(INSTALL_PATH)/scripts/cpack/prepackage-driver.sh
 	cd scripts/cpack && export SYSFLOW_VERSION=$(SYSFLOW_VERSION) && cpack --config ./CPackConfig-libs-musl.cmake
 
 .PHONY: clean
