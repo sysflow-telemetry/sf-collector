@@ -89,7 +89,7 @@ if [ "${MODE}" == "base" ] ; then
         libstdc++-static \
         boost-static \
         sparsehash-devel \
-        bc
+        bc \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
 
 # Install llvm 9
