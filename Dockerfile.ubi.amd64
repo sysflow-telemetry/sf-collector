@@ -43,6 +43,9 @@ ARG UBI_VER
 FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 
 # Install Packages
+# Copy in llvm 9.0 rpms.  Sysdig's ebpf probe fails unless compiled with llvm 9.0 for now.
+# https://github.com/falcosecurity/libs/issues/4
+COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
 
 RUN --mount=type=secret,id=rhuser --mount=type=secret,id=rhpassword \
