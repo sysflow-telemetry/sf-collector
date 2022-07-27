@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - Refactor the src directory to separate the collector and libsysflow
 - Build pipeline using sysflow-telemetry/libs-base-images
+- Package static linked binary (based on musl build) into binary packages
 
 ## [0.4.3] - 2022-06-21
 
