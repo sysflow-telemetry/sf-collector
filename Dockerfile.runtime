@@ -1,0 +1,119 @@
+# syntax = docker/dockerfile:1.0-experimental
+#
+# Copyright (C) 2022 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+FROM docker.io/sysflowtelemetry/builder:cmake-0.32.1 AS builder
+
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.6-902 AS runtime
+
+# environment variables
+ARG interval=30
+ENV INTERVAL=$interval
+
+ARG filter=
+ENV FILTER=$filter
+
+ARG exporterid="local"
+ENV EXPORTER_ID=$exporterid
+
+ARG output=
+ENV OUTPUT=$output
+
+ARG cripath=
+ENV CRI_PATH=$cripath
+
+ARG critimeout=
+ENV CRI_TIMEOUT=$critimeout
+
+ARG debug=
+ENV DEBUG=$debug
+
+ARG gllogtostderr=1
+ENV GLOG_logtostderr=$gllogtostderr
+
+ARG glv=
+ENV GLOG_v=$glv
+
+ARG INSTALL_PATH=/usr/local/sysflow
+
+ARG MODPREFIX=${INSTALL_PATH}/modules
+ENV HOST_ROOT=/host
+
+ARG sockfile=
+ENV SOCK_FILE=
+
+ARG VERSION=dev
+ARG RELEASE=dev
+
+ARG nodeip=
+ENV NODE_IP=$nodeip
+
+ARG FALCO_VER
+ENV FALCO_VERSION=${FALCO_VER}
+
+ARG FALCO_LIBS_VER
+ENV FALCO_LIBS_VERSION=${FALCO_LIBS_VER}
+
+ARG FALCO_LIBS_DRIVER_VER
+ENV FALCO_LIBS_DRIVER_VERSION=${FALCO_LIBS_DRIVER_VER}
+
+ENV DRIVER_NAME="falco"
+
+ARG samplingRate=
+ENV SAMPLING_RATE=$samplingRate
+
+ARG dropMode=
+ENV ENABLE_DROP_MODE=$dropMode
+
+ENV DRIVERS_REPO="https://download.falco.org/driver"
+
+COPY --from=builder /usr/local/sysflow/bin/sysporter /usr/local/sysflow/bin/sysporter
+COPY --from=builder /usr/local/sysflow/bin/docker-entrypoint.sh /usr/local/sysflow/bin/docker-entrypoint.sh
+COPY --from=builder /usr/local/sysflow/bin/falco-driver-loader /usr/bin/falco-driver-loader
+COPY --from=builder /usr/local/sysflow/src /usr/src
+COPY --from=builder /usr/local/sysflow/var/run/target/usr/sbin/dkms /usr/sbin/dkms
+COPY --from=builder /usr/local/sysflow/var/run/target/usr/lib/dkms /usr/lib/dkms
+COPY --from=builder /usr/local/sysflow/var/run/target/usr/lib/systemd/system/dkms.service /usr/lib/systemd/system/dkms.service
+COPY --from=builder /usr/local/sysflow/var/run/target/usr/share/bash-completion/completions/dkms /usr/share/bash-completion/completions/dkms
+COPY --from=builder /usr/local/sysflow/var/run/target/usr/share/man/man8 /usr/share/man/man8/dkms.8.gz
+COPY --from=builder /usr/local/sysflow/var/run/target/etc/dkms /etc/dkms
+COPY --from=builder /usr/local/sysflow/var/run/target/etc/kernel /etc/kernel
+COPY --from=builder /usr/local/sysflow/src/falco-2.0.0+driver /usr/src/falco-2.0.0+driver
+COPY --from=builder /usr/lib64/libboost_iostreams.* /usr/lib64/
+COPY ./docker-entry-ubi.sh /usr/local/sysflow/bin/docker-entry-ubi.sh
+
+
+RUN mkdir -p /var/lib/dkms && microdnf update && microdnf install which findutils kmod gcc make llvm-toolset && chmod +x /usr/local/sysflow/bin/docker-entrypoint.sh && \
+    chmod +x /usr/bin/falco-driver-loader && chmod +x /usr/sbin/dkms && ln -s /usr/bin/gcc /usr/bin/gcc-8
+
+# RUN dnf install -y procps net-tools
+# entrypoint
+WORKDIR /usr/local/sysflow/bin/
+
+ENTRYPOINT ["/usr/local/sysflow/bin/docker-entry-ubi.sh"]
+CMD /usr/local/sysflow/bin/sysporter \
+    ${INTERVAL:+-G} $INTERVAL \
+    ${OUTPUT:+-w} $OUTPUT \
+    ${EXPORTER_ID:+-e} "$EXPORTER_ID" \
+    ${FILTER:+-f} "$FILTER" \
+    ${CRI_PATH:+-p} ${CRI_PATH} \
+    ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
+    ${SOCK_FILE:+-u} ${SOCK_FILE} \
+    ${SAMPLING_RATE:+-s} ${SAMPLING_RATE} \
+    ${DEBUG:+-d}
