@@ -51,6 +51,7 @@ src/sysflow_config.h
 *DS_Store
 *.egg-info
 /logs/
+docker-run*
 
 # secrets
 scripts/build/rhpassword

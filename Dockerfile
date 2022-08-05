@@ -20,56 +20,37 @@
 ARG FALCO_VER
 ARG FALCO_LIBS_VER
 ARG FALCO_LIBS_DRIVER_VER
+ARG UBI_VER
 
 #-----------------------
 # Stage: Libs
 #-----------------------
-FROM  ghcr.io/sysflow-telemetry/libs-base-images/libs:${FALCO_LIBS_VER} as libs
+FROM sysflowtelemetry/ubi:mods-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS libs
 
-# install path build arg
+# install path build args
 ARG INSTALL_PATH=/usr/local/sysflow
-
-# copy sources and install deps
-COPY ./modules/avro /build/modules/avro
-COPY ./modules/filesystem /build/modules/filesystem
-COPY ./modules/sysflow /build/modules/sysflow
-COPY ./modules/dkms /build/modules/dkms
-COPY ./modules/elfutils /build/modules/elfutils
-COPY ./modules/glog /build/modules/glog
-COPY ./modules/snappy /build/modules/snappy
-COPY ./modules/Makefile /build/modules/Makefile
-COPY ./makefile.* /build/
-RUN  apt-get update && apt-get install -y libboost-all-dev flex bison gawk libsparsehash-dev && cd /build/modules && \
-     make INSTALL_PATH=${INSTALL_PATH} install
+ARG MODPREFIX=${INSTALL_PATH}/modules
 
 # environment and build args
 ARG BUILD_NUMBER=0
 ARG DEBUG=0
 
-ARG INSTALL_PATH=/usr/local/sysflow
-ARG MODPREFIX=${INSTALL_PATH}/modules
-
-ARG falcoprefix=/usr/
-ENV FALCOPREFIX=$falcoprefix
-
-ENV LIBRARY_PATH=/lib64
-
 # build libsysflow
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
 COPY ./modules/sysflow/c\+\+/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/sysflow.hh
 COPY ./modules/sysflow/c\+\+/sysflow/avsc_sysflow4.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/avsc_sysflow4.hh
-COPY ./src/ /build/src/
-RUN cd /build/src/libs && \
-    make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
-         LIBLOCALPREFIX=${FALCOPREFIX} \
-         SDLOCALLIBPREFIX=/usr/lib/x86_64-linux-gnu/falcosecurity/ \
-         SDLOCALINCPREFIX=/usr/include/falcosecurity/ \
+COPY ./src/libs /build/src/libs
+RUN make -C /build/src/libs \
+         SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
+         LIBLOCALPREFIX=${MODPREFIX} \
+         FALCOLOCALLIBPREFIX=${MODPREFIX}/lib/falcosecurity \
+         FALCOLOCALINCPREFIX=${MODPREFIX}/include/falcosecurity \
          AVRLOCALLIBPREFIX=${MODPREFIX}/lib \
          AVRLOCALINCPREFIX=${MODPREFIX}/include \
          SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
          FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
          SCHLOCALPREFIX=${MODPREFIX}/conf \
-	 DEBUG=${DEBUG} \
+         DEBUG=${DEBUG} \
          install
 
 #-----------------------
@@ -81,32 +62,29 @@ FROM libs as collector
 ARG BUILD_NUMBER=0
 ARG DEBUG=0
 
+# install path build args
 ARG INSTALL_PATH=/usr/local/sysflow
-
 ARG MODPREFIX=${INSTALL_PATH}/modules
-ARG falcoprefix=/usr/
-ENV FALCOPREFIX=$falcoprefix
-
-ENV LIBRARY_PATH=/lib64
 
 # build the collector (sysporter)
+COPY ./src/collector /build/src/collector
 RUN cd /build/src/collector && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
-         LIBLOCALPREFIX=${FALCOPREFIX} \
-         SDLOCALLIBPREFIX=/usr/lib/x86_64-linux-gnu/falcosecurity/ \
-         SDLOCALINCPREFIX=/usr/include/falcosecurity/ \
+         LIBLOCALPREFIX=${MODPREFIX} \
+         FALCOLOCALLIBPREFIX=${MODPREFIX}/lib/falcosecurity \
+         FALCOLOCALINCPREFIX=${MODPREFIX}/include/falcosecurity \
          AVRLOCALLIBPREFIX=${MODPREFIX}/lib \
          AVRLOCALINCPREFIX=${MODPREFIX}/include \
          SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
          FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
          SCHLOCALPREFIX=${MODPREFIX}/conf \
-	 DEBUG=${DEBUG} \
+         DEBUG=${DEBUG} \
          install
 
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM ghcr.io/sysflow-telemetry/libs-base-images/runtime:${FALCO_LIBS_DRIVER_VER} AS runtime
+FROM sysflowtelemetry/ubi:base-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
 
 # environment variables
 ARG interval=30
@@ -114,9 +92,6 @@ ENV INTERVAL=$interval
 
 ARG filter=
 ENV FILTER=$filter
-
-ARG falcoprefix=/usr/local/falcolibs/
-ENV FALCOPREFIX=$falcoprefix
 
 ENV DRIVERPREFIX=/usr/src/falco-
 
@@ -171,7 +146,7 @@ ENV SAMPLING_RATE=$samplingRate
 
 ENV DRIVERS_REPO="https://download.falco.org/driver"
 
-# Update Labels
+# update labels
 LABEL "name"="SysFlow Collector"
 LABEL "vendor"="SysFlow"
 LABEL "version"="${VERSION}"
@@ -183,14 +158,20 @@ LABEL "description"="The SysFlow Collector monitors and collects system call and
 LABEL "io.k8s.display-name"="SysFlow Collector"
 LABEL "io.k8s.description"="The SysFlow Collector monitors and collects system call and event information from hosts and exports them in the SysFlow format using Apache Avro object serialization"
 
-# Update License
+# update license
 COPY ./LICENSE.md /licenses/LICENSE.md
 
-COPY --from=collector ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/
-COPY --from=libs /usr/lib/x86_64-linux-gnu/libboost* /usr/lib/x86_64-linux-gnu/
+# copy resources
+COPY --from=collector ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/sysporter
+COPY --from=collector ${INSTALL_PATH}/modules/bin/docker-entry-ubi.sh /docker-entrypoint.sh
+COPY --from=collector ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh
+COPY --from=collector ${INSTALL_PATH}/modules/bin/falco-driver-loader /usr/bin/falco-driver-loader
+COPY --from=collector /falcosrc/ /usr/src/
+COPY --from=collector ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
+COPY --from=collector /usr/sbin/dkms /usr/sbin/dkms
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
- CMD /usr/local/sysflow/bin/sysporter \
+CMD /usr/local/sysflow/bin/sysporter \
      ${INTERVAL:+-G} $INTERVAL \
      ${OUTPUT:+-w} $OUTPUT \
      ${EXPORTER_ID:+-e} "$EXPORTER_ID" \

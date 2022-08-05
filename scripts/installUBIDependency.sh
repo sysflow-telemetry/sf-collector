@@ -90,8 +90,10 @@ if [ "${MODE}" == "base" ] ; then
         boost-static \
         sparsehash-devel \
         bc \
-        llvm-toolset \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
+
+    # Install llvm 9
+    DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
 
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing

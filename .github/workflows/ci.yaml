@@ -23,6 +23,9 @@ on:
 
 env:
   DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/sf-collector
+  UBI_DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/ubi
+  ALPINE_DOCKER_REGISTRY_REPOSITORY: sysflowtelemetry/alpine
+  GH_ORGANIZATION: sysflow-telemetry
 
 jobs:
   lint:
@@ -44,9 +47,207 @@ jobs:
       with:
         clang-format-version: '12'
         check-path: ${{ matrix.path }}
+  ubi:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Read manifest
+        shell: bash
+        run: |
+          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+      - name: Set image tags
+        shell: bash
+        run: |
+          echo "BASE_TAG=$(echo base-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV
+          echo "MODS_TAG=$(echo mods-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.UBI_VERSION }})" >> $GITHUB_ENV
+      - name: Check package version
+        id: checks
+        shell: bash
+        run: |
+          echo "##[set-output name=base_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.BASE_TAG }}/ > /dev/null && echo 1 || echo 0)"
+          echo "##[set-output name=mods_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.MODS_TAG }}/ > /dev/null && echo 1 || echo 0)"
+      - name: Init modules
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        run: make -C modules init
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set build args
+        id: args
+        shell: bash
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Build and push base
+        id: base_docker_build
+        uses: docker/build-push-action@v2
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          context: .
+          push: true
+          file: Dockerfile.ubi.amd64
+          tags: |
+            ${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}:${{ env.BASE_TAG }}
+            ghcr.io/${{ env.GH_ORGANIZATION }}/ubi:${{ env.BASE_TAG }}
+          target: base
+          build-args: |
+            UBI_VER=${{ env.UBI_VERSION }}
+            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+            VERSION=${{ steps.args.outputs.branch }}
+            RELEASE=${{ steps.args.outputs.sha_short }}
+          secrets: |
+            rhuser=${{ secrets.RH_USERNAME }}
+            rhpassword=${{ secrets.RH_PASSWORD }}
+      - name: Build and push mods
+        id: mods_docker_build
+        uses: docker/build-push-action@v2
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          context: .
+          push: true
+          file: Dockerfile.ubi.amd64
+          tags: |
+            ${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}:${{ env.MODS_TAG }}
+            ghcr.io/${{ env.GH_ORGANIZATION }}/ubi:${{ env.MODS_TAG }}
+          target: mods
+          build-args: |
+            UBI_VER=${{ env.UBI_VERSION }}
+            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+            VERSION=${{ steps.args.outputs.branch }}
+            RELEASE=${{ steps.args.outputs.sha_short }}
+          secrets: |
+            rhuser=${{ secrets.RH_USERNAME }}
+            rhpassword=${{ secrets.RH_PASSWORD }}
+      - name: Image digest
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        run: |
+          echo ${{ steps.base_docker_build.outputs.digest }}
+          echo ${{ steps.mods_docker_build.outputs.digest }}
+  alpine:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Read manifest
+        shell: bash
+        run: |
+          echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "ALPINE_VERSION=$(awk -F'=' '/ALPINE_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+      - name: Set image tags
+        shell: bash
+        run: |
+          echo "BASE_TAG=$(echo base-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.ALPINE_VERSION }})" >> $GITHUB_ENV
+          echo "MODS_TAG=$(echo mods-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.ALPINE_VERSION }})" >> $GITHUB_ENV
+      - name: Check package version
+        id: checks
+        shell: bash
+        run: |
+          echo "##[set-output name=base_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.BASE_TAG }}/ > /dev/null && echo 1 || echo 0)"
+          echo "##[set-output name=mods_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.MODS_TAG }}/ > /dev/null && echo 1 || echo 0)"
+      - name: Init modules
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        run: make -C modules init
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set build args
+        id: args
+        shell: bash
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Build and push base
+        id: base_docker_build
+        uses: docker/build-push-action@v2
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          context: .
+          push: true
+          file: Dockerfile.alpine.amd64
+          tags: |
+            ${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}:${{ env.BASE_TAG }}
+            ghcr.io/${{ env.GH_ORGANIZATION }}/alpine:${{ env.BASE_TAG }}
+          target: base
+          build-args: |
+            ALPINE_VER=${{ env.ALPINE_VERSION }}
+            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+            VERSION=${{ steps.args.outputs.branch }}
+            RELEASE=${{ steps.args.outputs.sha_short }}
+      - name: Build and push mods
+        id: mods_docker_build
+        uses: docker/build-push-action@v2
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        with:
+          context: .
+          push: true
+          file: Dockerfile.alpine.amd64
+          tags: |
+            ${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}:${{ env.MODS_TAG }}
+            ghcr.io/${{ env.GH_ORGANIZATION }}/alpine:${{ env.MODS_TAG }}
+          target: mods
+          build-args: |
+            ALPINE_VER=${{ env.ALPINE_VERSION }}
+            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
+            VERSION=${{ steps.args.outputs.branch }}
+            RELEASE=${{ steps.args.outputs.sha_short }}
+      - name: Image digest
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        run: |
+          echo ${{ steps.base_docker_build.outputs.digest }}
+          echo ${{ steps.mods_docker_build.outputs.digest }}
   tests:
     runs-on: ubuntu-latest
-    needs: lint
+    needs: [lint, ubi] 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -154,7 +355,7 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   release:
-    needs: docker
+    needs: [docker, alpine]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:

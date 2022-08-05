@@ -27,6 +27,7 @@ TARGET = libsysflow.a
 TARGET_TEST = test
 SYSFLOW_BUILD_NUMBER ?= 0
 LIB_TARGET = libsfcollector.a
+
 # Lint options
 LINT = clang-tidy-9
 LINTCHECKS = "bugprone-*"
@@ -40,14 +41,13 @@ LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration
 LIBLOCALPREFIX ?= ../../modules
-SDLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/lib
-SDLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/include
+FALCOLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/lib
+FALCOLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/include
 AVRLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
 AVRLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
 SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
 FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
 SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
-FALCOSECURITY_LIBS_LIB_PREFIX = $(SDLOCALLIBPREFIX)
 DEBUG ?= 0
 MUSL ?= 0
 
@@ -55,11 +55,13 @@ MUSL ?= 0
 CXX = g++
 AR = ar
 MUSLFLAGS = -static -Os 
-LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(SDLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ #-L/usr/lib/x86_64-linux-gnu -Wl,-rpath=/usr/lib/x86_64-linux-gnu
+LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(FALCOLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/
 CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
-		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
-	 	-I$(SDLOCALINCPREFIX)/ -I$(SDLOCALINCPREFIX)/curl/ -I$(SDLOCALINCPREFIX)/json2/ -I$(SDLOCALINCPREFIX)/openssl/ -I$(SDLOCALINCPREFIX)/driver/ \
-		-I$(SDLOCALINCPREFIX)/userspace/libsinsp/ -I$(SDLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
+		 -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
+	 	 -I$(FALCOLOCALINCPREFIX)/ -I$(FALCOLOCALINCPREFIX)/curl/ -I$(FALCOLOCALINCPREFIX)/json2/ \
+		 -I$(FALCOLOCALINCPREFIX)/openssl/ -I$(FALCOLOCALINCPREFIX)/driver/ \
+		 -I$(FALCOLOCALINCPREFIX)/userspace/libsinsp/ -I$(FALCOLOCALINCPREFIX)/userspace/libscap/ \
+		 -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
 
 OBJS = .sysflowlibs.o .sysflowlibs.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o .k8scontext.o .k8seventprocessor.o
 

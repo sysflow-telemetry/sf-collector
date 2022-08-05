@@ -111,17 +111,11 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
     }
     i++;
   }
-  p->proc.uid = mainthread->m_user.uid;
-  p->proc.gid = mainthread->m_group.gid;
+  p->proc.uid = mainthread->m_uid;
+  p->proc.gid = mainthread->m_gid;
+  p->proc.userName = utils::getUserName(m_cxt, mainthread->m_uid);
+  p->proc.groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
   ContainerObj *cont = m_containerCxt->getContainer(ti);
-  p->proc.userName =
-      mainthread->m_user
-          .name; // utils::getUserName(m_cxt, (cont != nullptr ? cont->cont.id :
-                 // utils::EMPTY_STR), mainthread->m_uid);
-  p->proc.groupName =
-      mainthread->m_group
-          .name; // utils::getGroupName(m_cxt, (cont != nullptr ? cont->cont.id
-                 // : utils::EMPTY_STR), mainthread->m_gid);
   if (cont != nullptr) {
     p->proc.containerId.set_string(cont->cont.id);
     cont->refs++;
@@ -404,18 +398,10 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
     }
     i++;
   }
-  proc->uid = mainthread->m_user.uid;
-  proc->gid = mainthread->m_group.gid;
-  proc->userName =
-      mainthread->m_user
-          .name; // utils::getUserName(m_cxt, (proc->containerId.is_null() ?
-                 // utils::EMPTY_STR : proc->containerId.get_string()),
-                 // mainthread->m_uid);
-  proc->groupName =
-      mainthread->m_group
-          .name; // utils::getGroupName(m_cxt, (proc->containerId.is_null() ?
-                 // utils::EMPTY_STR : proc->containerId.get_string()),
-                 // mainthread->m_gid);
+  proc->uid = mainthread->m_uid;
+  proc->gid = mainthread->m_gid;
+  proc->userName = utils::getUserName(m_cxt, mainthread->m_uid);
+  proc->groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
 }
 
 void ProcessContext::clearProcesses() {

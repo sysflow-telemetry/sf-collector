@@ -43,6 +43,9 @@ ARG UBI_VER
 FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
 
 # Install Packages
+# Copy in llvm 9.0 rpms. Falco's ebpf probe fails unless compiled with llvm 7 to 12 for now.
+# https://github.com/falcosecurity/libs/issues/4
+COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
 
 RUN --mount=type=secret,id=rhuser,dst=/secret/rhuser --mount=type=secret,id=rhpassword,dst=/secret/rhpassword \
@@ -59,22 +62,21 @@ ARG INSTALL_PATH=/usr/local/sysflow
 
 ENV PATH="$PATH:"${INSTALL_PATH}"/modules/bin"
 
-ENV LIBRARY_PATH=/lib64
-
 ENV HOST_ROOT=/host
 
 ENV HOME=/root
 
+ARG MAKE_JOBS=1
+
 #  build modules
 COPY ./modules /build/modules
-COPY ./scripts /build/scripts
+#COPY ./scripts /build/scripts
 COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  dnf -y install git && \
      cd /build/modules && \
-     make INSTALL_PATH=${INSTALL_PATH} install && \
+     make INSTALL_PATH=${INSTALL_PATH} MAKE_JOBS=${MAKE_JOBS} install && \
      mkdir /falcosrc && cp -a /usr/src/falco-* /falcosrc/ && \
      make clean && rm -rf /build/modules && \
      dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
 
-ENTRYPOINT ["/usr/local/sysflow/modules/bin/docker-entry-ubi.sh"]

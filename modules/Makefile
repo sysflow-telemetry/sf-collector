@@ -20,6 +20,13 @@
 include ../makefile.manifest.inc
 include ../makefile.env.inc
 
+MAKE_JOBS ?= 1
+
+$(info    MUSL is $(MUSL))
+ifeq ($(MUSL), 1)
+	MUSL_FLAG = -DMUSL_OPTIMIZED_BUILD=ON
+endif
+
 .PHONY: all
 all: init \
 	 modules
@@ -27,6 +34,8 @@ all: init \
 .PHONY: init
 init:
 	git submodule update --init --recursive --force
+	cd falco && git checkout $(FALCO_VERSION)
+	cd falco-libs && git checkout $(FALCO_LIBS_VERSION)
 	cd avro && git checkout $(AVRO_VERSION)
 	cd elfutils && git checkout $(ELFUTILS_VERSION)
 	cd glog && git checkout $(GLOG_VERSION)
@@ -37,41 +46,56 @@ init:
 .PHONY: modules
 modules: elfutils/package \
 		elfutils/install \
+		falcolibs/package \
 		avro/package \
-		glog/package \
-		snappy/package
-
-.PHONY: modules/no-elfutils
-modules/no-elfutils: avro/package \
 		glog/package \
 		snappy/package
 
 .PHONY: install
 install: modules \
+	falcolibs/install \
 	avro/install \
 	sysflow/install \
 	fs/install \
 	glog/install \
 	snappy/install \
 	dkms-rh/install
+
+.PHONY: modules/no-elfutils
+modules/no-elfutils: falcolibs/package \
+		avro/package \
+		glog/package \
+		snappy/package
 
 .PHONY: install/no-elfutils
 install/no-elfutils: modules/no-elfutils \
+	falcolibs/install \
 	avro/install \
 	sysflow/install \
 	fs/install \
 	glog/install \
 	snappy/install \
 	dkms-rh/install
-
 
 .PHONY: falcolibs/package
 falcolibs/package:
 	cd falco-libs && \
 	mkdir -p build && cd build && \
-        cmake -DPROBE_VERSION=${FALCO_LIBS_DRIVER_VERSION} -DDRIVER_PACKAGE_NAME=falco -DSCAP_BPF_PROBE_ENV_VAR_NAME=FALCO_BPF_PROBE \
-		-DCAP_HOST_ROOT_ENV_VAR_NAME=HOST_ROOT -DFALCOSECURITY_LIBS_VERSION=${FALCO_LIBS_VERSION} -DFALCOSECURITY_LIBS_CHECKSUM=${FALCO_LIBS_CHECKSUM} \
-		-DCMAKE_BUILD_TYPE=Release -DPROBE_NAME=falco -DBUILD_BPF=OFF  -DBUILD_DRIVER=OFF ../. && make && \
+        cmake \
+			-DDRIVER_VERSION=${FALCO_LIBS_DRIVER_VERSION} \
+			-DDRIVER_PACKAGE_NAME=falco \
+			-DSCAP_BPF_PROBE_ENV_VAR_NAME=FALCO_BPF_PROBE \
+			-DCAP_HOST_ROOT_ENV_VAR_NAME=HOST_ROOT \
+			-DFALCOSECURITY_LIBS_VERSION=${FALCO_LIBS_VERSION} \
+			-DFALCOSECURITY_LIBS_CHECKSUM=${FALCO_LIBS_CHECKSUM} \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DDRIVER_NAME=falco \
+			-DBUILD_BPF=OFF \
+			-DBUILD_DRIVER=OFF \
+			-DUSE_BUNDLED_GTEST=ON \
+			-DUSE_BUNDLED_DEPS=ON \
+			-DCREATE_TEST_TARGETS=OFF \
+			${MUSL_FLAG} ../. && make -j${MAKE_JOBS} && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
@@ -85,7 +109,9 @@ falcolibs/package:
 	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
 	cp -r tbb-prefix/src/tbb/include/serial  include/ && \
 	cp -r tbb-prefix/src/tbb/include/tbb include/ && \
-	cp -r protobuf-prefix/src/protobuf/src/google include/ && \
+	cp -r protobuf-prefix/src/protobuf/target/include/google include/ && \
+	cp protobuf-prefix/src/protobuf/target/lib/libprotobuf.a lib && \
+	cp protobuf-prefix/src/protobuf/target/lib/libprotoc.a lib && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbbmalloc.a lib/ && \
 	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
@@ -96,26 +122,24 @@ falcolibs/package:
 	cp -r ../driver/bpf driver/src/ && \
 	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
 	cp ../../falco/scripts/falco-driver-loader bin/ && \
-	sed -i -E "s/@PROBE_VERSION@/\"$(FALCO_LIBS_VERSION)\"/" bin/falco-driver-loader && \
+	sed -i -E "s/@DRIVER_VERSION@/\"$(FALCO_LIBS_VERSION)\"/" bin/falco-driver-loader && \
 	sed -i -E "s/@FALCO_VERSION@/\"$(FALCO_VERSION)\"/" bin/falco-driver-loader && \
 	sed -i -E "s#@DRIVERS_REPO@#\"$(DRIVERS_REPO)\"#" bin/falco-driver-loader && \
 	cp grpc-prefix/src/grpc/*.a lib/ && \
-	cp ./grpc-prefix/src/grpc/third_party/re2/libre2.a lib/ && \
-	cp -r grpc-prefix/src/grpc/third_party/abseil-cpp lib/ && \
-	cp protobuf-prefix/src/protobuf/src/.libs/* lib/ && \
+	cp grpc-prefix/src/grpc/third_party/re2/libre2.a lib/ && \
+	find grpc-prefix/src/grpc/third_party/abseil-cpp -name '*.a' -exec cp '{}' lib \; && \
 	cp c-ares-prefix/src/c-ares/target/lib/libcares.a lib/ && \
 	cp b64-prefix/src/b64/src/libb64.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
 	cp jq-prefix/src/jq/target/lib/*.a lib/ && \
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
-    cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
-	cp protobuf-prefix/src/protobuf/target/lib/*.a lib && \
-	cp zlib-prefix/src/zlib/libz.so.1.2.11 lib/libz.so
+	cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
+	cp zlib-prefix/src/zlib/libz.a lib/libz.a
 
 .PHONY: falcolibs/install
 falcolibs/install:
-	mkdir -p $(SDINCPREFIX) && mkdir -p $(LIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)" && \
-	cd falco-libs/build && cp -r include/* $(SDINCPREFIX)/ && cp -a lib/* $(LIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)"
+	mkdir -p $(FALCOINCPREFIX) && mkdir -p $(FALCOLIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)" && \
+	cd falco-libs/build && cp -r include/* $(FALCOINCPREFIX)/ && cp -a lib/* $(FALCOLIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)"
 
 .PHONY: avro/package
 avro/package:
@@ -141,7 +165,7 @@ fs/install:
 .PHONY: elfutils/package
 elfutils/package:
 	cd elfutils && autoreconf -i -f && \
-	./configure --enable-maintainer-mode --disable-debuginfod && \
+	./configure --prefix=/usr --enable-maintainer-mode --disable-debuginfod && \
 	make && make install
 
 .PHONY: elfutils/install
