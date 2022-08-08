@@ -31,6 +31,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Package static linked binary (based on musl build) into binary packages
 - Bumped Falco libs to 51c1ee3
 
+## [0.4.4] - 2022-07-26
+
+### Changed
+
+- Bumped UBI version to 8.6-855
+
+### Fixed
+
+- Copies dkms to runtime image
+- Revert clang version to clang-9 in docker image (eBPF prove is failing checks on clang-13)
+
 ## [0.4.3] - 2022-06-21
 
 ### Changed
@@ -211,7 +222,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - First release candidate of SysFlow Collector.
 
 [Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0-rc1...HEAD
-[0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...0.5.0-rc1
+[0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0-rc1
+[0.4.4]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.0...0.4.1

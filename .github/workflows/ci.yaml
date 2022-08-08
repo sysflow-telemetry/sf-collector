@@ -247,7 +247,7 @@ jobs:
           echo ${{ steps.mods_docker_build.outputs.digest }}
   tests:
     runs-on: ubuntu-latest
-    needs: [lint, ubi] 
+    needs: [lint, ubi]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
