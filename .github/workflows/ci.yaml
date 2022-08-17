@@ -147,7 +147,7 @@ jobs:
             rhuser=${{ secrets.RH_USERNAME }}
             rhpassword=${{ secrets.RH_PASSWORD }}
       - name: Build and push driver
-        id: base_docker_build
+        id: driver_docker_build
         uses: docker/build-push-action@v2
         if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
         with:
@@ -167,10 +167,11 @@ jobs:
             rhuser=${{ secrets.RH_USERNAME }}
             rhpassword=${{ secrets.RH_PASSWORD }}
       - name: Image digest
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
         run: |
           echo ${{ steps.base_docker_build.outputs.digest }}
           echo ${{ steps.mods_docker_build.outputs.digest }}
+          echo ${{ steps.driver_docker_build.outputs.digest }}
   alpine:
     runs-on: ubuntu-latest
     permissions:
