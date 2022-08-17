@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.5.0] - 2022-07-31
+## [0.5.0] - 2022-08-17
 
 ### Added
 
@@ -29,7 +29,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Refactor the src directory to separate the collector and libsysflow
 - Build pipeline using sysflow-telemetry/libs-base-images
 - Package static linked binary (based on musl build) into binary packages
-- Bumped Falco libs to 51c1ee3
+- Bumped Falco libs to 7495e15
+
+### Fixed
+
+- Fix stop condition for traversing process tree
 
 ## [0.4.4] - 2022-07-26
 

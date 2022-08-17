@@ -70,13 +70,45 @@ ARG MAKE_JOBS=1
 
 #  build modules
 COPY ./modules /build/modules
-#COPY ./scripts /build/scripts
 COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  dnf -y install git && \
      cd /build/modules && \
-     make INSTALL_PATH=${INSTALL_PATH} MAKE_JOBS=${MAKE_JOBS} install && \
-     mkdir /falcosrc && cp -a /usr/src/falco-* /falcosrc/ && \
-     make clean && rm -rf /build/modules && \
-     dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
+     make INSTALL_PATH=${INSTALL_PATH} MAKE_JOBS=${MAKE_JOBS} install 
+     #&& \
+     #make clean && rm -rf /build/modules && \
+     #dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
+
+#-----------------------
+# Stage: driver
+#-----------------------
+FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS driver 
+
+# environment and args
+ARG INSTALL_PATH=/usr/local/sysflow
+ARG DRIVER_PACKAGE_NAME=falco
+ENV DRIVER_NAME=falco
+ENV DRIVERS_REPO="https://download.falco.org/driver"
+ENV HOST_ROOT=/host
+ENV HOME=/root
+
+
+# Install Packages
+# Copy in llvm 9.0 rpms. Falco's ebpf probe fails unless compiled with llvm 7 to 12 for now.
+# https://github.com/falcosecurity/libs/issues/4
+COPY ./scripts/dev/rpms /build/rpms
+COPY ./scripts/installUBIDependency.sh /build/install.sh
+
+RUN --mount=type=secret,id=rhuser,dst=/secret/rhuser --mount=type=secret,id=rhpassword,dst=/secret/rhpassword \
+ ( export REGISTER_USER=$(cat /secret/rhuser) && export REGISTER_PASSWORD=$(cat /secret/rhpassword) && bash /build/install.sh driver ) && \
+ rm -rf /build
+
+# copy resources
+COPY --from=mods ${INSTALL_PATH}/modules/bin/docker-entry-ubi.sh /docker-entrypoint.sh
+COPY --from=mods ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh
+COPY --from=mods ${INSTALL_PATH}/modules/bin/falco-driver-loader /usr/bin/falco-driver-loader
+COPY --from=mods /usr/src/falco-* /usr/src/
+COPY --from=mods /usr/sbin/dkms /usr/sbin/dkms
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
 

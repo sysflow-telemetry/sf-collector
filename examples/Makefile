@@ -36,7 +36,10 @@ MUSL ?= 0
 CLANG_FORMAT = clang-format-12
 CXX = g++
 LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow.a \
-	   $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(FALCO_LIBS_LIB_PREFIX)/libjq.a $(FALCO_LIBS_LIB_PREFIX)/libonig.a \
+	   $(FALCO_LIBS_LIB_PREFIX)/libsinsp.a $(FALCO_LIBS_LIB_PREFIX)/libscap.a $(FALCO_LIBS_LIB_PREFIX)/libscap_engine_bpf.a $(FALCO_LIBS_LIB_PREFIX)/libscap_engine_kmod.a \
+	   $(FALCO_LIBS_LIB_PREFIX)/libscap_engine_noop.a $(FALCO_LIBS_LIB_PREFIX)/libscap_engine_source_plugin.a $(FALCO_LIBS_LIB_PREFIX)/libscap_engine_gvisor.a \
+	   $(FALCO_LIBS_LIB_PREFIX)/libscap_engine_nodriver.a $(FALCO_LIBS_LIB_PREFIX)/libscap_engine_udig.a $(FALCO_LIBS_LIB_PREFIX)/libscap_event_schema.a \
+       $(FALCO_LIBS_LIB_PREFIX)/libscap_engine_util.a $(FALCO_LIBS_LIB_PREFIX)/libjq.a $(FALCO_LIBS_LIB_PREFIX)/libonig.a \
        $(FALCO_LIBS_LIB_PREFIX)/libb64.a $(FALCO_LIBS_LIB_PREFIX)/libcurl.a $(FALCO_LIBS_LIB_PREFIX)/libtbb.a $(FALCO_LIBS_LIB_PREFIX)/libgrpc++.a \
        $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_alts.a $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_reflection.a  $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_error_details.a \
        $(FALCO_LIBS_LIB_PREFIX)/libgrpc++_unsecure.a  $(FALCO_LIBS_LIB_PREFIX)/libgrpc_plugin_support.a $(FALCO_LIBS_LIB_PREFIX)/libgrpcpp_channelz.a \
@@ -96,17 +99,22 @@ uninstall:
 
 .PHONY: build
 build:
-	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: build/dev
 build/dev:
-	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.dev . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.dev . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: build/musl
 build/musl:
-	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl . )
+	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
+
+.PHONY: build/musldev
+build/musldev:
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl.dev . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: format
@@ -132,4 +140,7 @@ help:
 	@echo "... install"
 	@echo "... uninstall"
 	@echo "... build"
+	@echo "... build/musl"
+	@echo "... build/dev"
+	@echo "... build/musldev"
 	@echo "... format"

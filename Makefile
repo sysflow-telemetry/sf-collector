@@ -88,23 +88,23 @@ clean:
 
 .PHONY: docker-base-build
 docker-base-build:
-	docker pull sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} &> /dev/null || true
 	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg UBI_VER=${UBI_VERSION} --target base -t sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
 
 .PHONY: docker-base-build/musl
 docker-base-build/musl:
-	docker pull sysflowtelemetry/alpine:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${ALPINE_VERSION} &> /dev/null || true
 	( DOCKER_BUILDKIT=1 docker build --build-arg ALPINE_VER=${ALPINE_VERSION} --target base -t sysflowtelemetry/alpine:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${ALPINE_VERSION} -f Dockerfile.alpine.amd64 . )
 
 .PHONY: docker-mods-build
 docker-mods-build:
-	docker pull sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} &> /dev/null || true
-	( DOCKER_BUILDKIT=1 docker build --cache-from sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg UBI_VER=${UBI_VERSION} --target mods -t sysflowtelemetry/ubi:mods-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
+	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg UBI_VER=${UBI_VERSION} --target mods -t sysflowtelemetry/ubi:mods-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
 
 .PHONY: docker-mods-build/musl
 docker-mods-build/musl:
-	docker pull sysflowtelemetry/alpine:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${ALPINE_VERSION} &> /dev/null || true
-	( DOCKER_BUILDKIT=1 docker build --cache-from sysflowtelemetry/alpine:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${ALPINE_VERSION} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg ALPINE_VER=${ALPINE_VERSION} --target mods -t sysflowtelemetry/alpine:mods-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${ALPINE_VERSION} -f Dockerfile.alpine.amd64 . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg ALPINE_VER=${ALPINE_VERSION} --target mods -t sysflowtelemetry/alpine:mods-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${ALPINE_VERSION} -f Dockerfile.alpine.amd64 . )
+
+.PHONY: docker-driver-build
+docker-driver-build:
+	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg UBI_VER=${UBI_VERSION} --target driver -t sysflowtelemetry/ubi:driver-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
 
 .PHONY: docker-libs-build
 docker-libs-build:
@@ -168,6 +168,7 @@ help:
 	@echo "... docker-base-build/musl"
 	@echo "... docker-mods-build"
 	@echo "... docker-mods-build/musl"
+	@echo "... docker-driver-build"
 	@echo "... docker-libs-build"
 	@echo "... docker-libs-build/musl"
 	@echo "... docker-collector-build"

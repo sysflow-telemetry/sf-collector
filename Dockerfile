@@ -34,6 +34,7 @@ ARG MODPREFIX=${INSTALL_PATH}/modules
 # environment and build args
 ARG BUILD_NUMBER=0
 ARG DEBUG=0
+ARG ASAN=0
 
 # build libsysflow
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
@@ -51,6 +52,7 @@ RUN make -C /build/src/libs \
          FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
          SCHLOCALPREFIX=${MODPREFIX}/conf \
          DEBUG=${DEBUG} \
+         ASAN=${ASAN} \
          install
 
 #-----------------------
@@ -61,6 +63,7 @@ FROM libs as collector
 # environment and build args
 ARG BUILD_NUMBER=0
 ARG DEBUG=0
+ARG ASAN=0
 
 # install path build args
 ARG INSTALL_PATH=/usr/local/sysflow
@@ -79,12 +82,13 @@ RUN cd /build/src/collector && \
          FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
          SCHLOCALPREFIX=${MODPREFIX}/conf \
          DEBUG=${DEBUG} \
+         ASAN=${ASAN} \
          install
 
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:base-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
+FROM sysflowtelemetry/ubi:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
 
 # environment variables
 ARG interval=30
@@ -163,14 +167,8 @@ COPY ./LICENSE.md /licenses/LICENSE.md
 
 # copy resources
 COPY --from=collector ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/sysporter
-COPY --from=collector ${INSTALL_PATH}/modules/bin/docker-entry-ubi.sh /docker-entrypoint.sh
-COPY --from=collector ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh
-COPY --from=collector ${INSTALL_PATH}/modules/bin/falco-driver-loader /usr/bin/falco-driver-loader
-COPY --from=collector /falcosrc/ /usr/src/
 COPY --from=collector ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
-COPY --from=collector /usr/sbin/dkms /usr/sbin/dkms
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD /usr/local/sysflow/bin/sysporter \
      ${INTERVAL:+-G} $INTERVAL \
      ${OUTPUT:+-w} $OUTPUT \

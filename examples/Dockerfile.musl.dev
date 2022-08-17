@@ -41,9 +41,8 @@ RUN apk add \
 	sparsehash
 
 # install libsysflow
-RUN wget -qO- https://github.com/sysflow-telemetry/sf-collector/releases/download/${SYSFLOW_VERSION}/libsysflow-musl-${SYSFLOW_VERSION}-x86_64.tar.gz | tar xz --strip-components=2  -C /usr
-#COPY libsysflow-musl-${SYSFLOW_VERSION}-x86_64.tar.gz .  
-#RUN tar xzf libsysflow-musl-${SYSFLOW_VERSION}-x86_64.tar.gz && cp -r libsysflow-musl-${SYSFLOW_VERSION}-x86_64/usr/* /usr/.
+COPY libsysflow-musl-${SYSFLOW_VERSION}-x86_64.tar.gz .  
+RUN tar xzf libsysflow-musl-${SYSFLOW_VERSION}-x86_64.tar.gz && cp -r libsysflow-musl-${SYSFLOW_VERSION}-x86_64/usr/* /usr/.
 
 # build the example program
 COPY callback.cpp /build/

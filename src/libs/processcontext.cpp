@@ -111,10 +111,10 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
     }
     i++;
   }
-  p->proc.uid = mainthread->m_uid;
-  p->proc.gid = mainthread->m_gid;
-  p->proc.userName = utils::getUserName(m_cxt, mainthread->m_uid);
-  p->proc.groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
+  p->proc.uid = mainthread->m_user.uid;
+  p->proc.gid = mainthread->m_group.gid;
+  p->proc.userName = mainthread->m_user.name;
+  p->proc.groupName = mainthread->m_group.name;
   ContainerObj *cont = m_containerCxt->getContainer(ti);
   if (cont != nullptr) {
     p->proc.containerId.set_string(cont->cont.id);
@@ -274,7 +274,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   sinsp_threadinfo *ct = mt;
   mt = mt->get_parent_thread();
 
-  while (mt != nullptr) {
+  while (mt != nullptr && mt->m_tid != -1) {
     mt = mt->is_main_thread() ? mt : mt->get_main_thread();
     if (mt->m_clone_ts == 0 && mt->m_pid == 0) {
       ct = mt;
@@ -398,10 +398,10 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
     }
     i++;
   }
-  proc->uid = mainthread->m_uid;
-  proc->gid = mainthread->m_gid;
-  proc->userName = utils::getUserName(m_cxt, mainthread->m_uid);
-  proc->groupName = utils::getGroupName(m_cxt, mainthread->m_gid);
+  proc->uid = mainthread->m_user.uid;
+  proc->gid = mainthread->m_group.gid;
+  proc->userName = mainthread->m_user.name;
+  proc->groupName = mainthread->m_group.name;
 }
 
 void ProcessContext::clearProcesses() {

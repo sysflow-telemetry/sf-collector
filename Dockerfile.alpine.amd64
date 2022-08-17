@@ -69,11 +69,9 @@ ARG MAKE_JOBS=1
 #  build modules
 RUN echo "1"
 COPY ./modules /build/modules
-COPY ./scripts /build/scripts
 COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  cd /build/modules && \
      make INSTALL_PATH=${INSTALL_PATH} MUSL=1 MAKE_JOBS=${MAKE_JOBS} install/no-elfutils && \
-     mkdir /falcosrc && cp -a /usr/src/falco-* /falcosrc/ && \
      make clean && rm -rf /build/modules
 

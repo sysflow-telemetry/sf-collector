@@ -95,6 +95,7 @@ falcolibs/package:
 			-DUSE_BUNDLED_GTEST=ON \
 			-DUSE_BUNDLED_DEPS=ON \
 			-DCREATE_TEST_TARGETS=OFF \
+			-DCMD_MAKE="make -j${MAKE_JOBS}" \
 			${MUSL_FLAG} ../. && make -j${MAKE_JOBS} && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
@@ -106,7 +107,7 @@ falcolibs/package:
 	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
 	mkdir -p include/userspace/libsinsp/filter && cp ../userspace/libsinsp/filter/*.h include/userspace/libsinsp/filter/ && \
 	mkdir -p include/userspace/libsinsp/include && cp ../userspace/libsinsp/include/*.h include/userspace/libsinsp/include/ && \
-	mkdir -p include/userspace/libscap && cp ../userspace/libscap/*.h include/userspace/libscap && \
+	mkdir -p include/userspace/libscap && cd .. && find userspace/libscap -name '*.h' -exec cp -r --parents '{}' build/include \; && cd build && \
 	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
 	cp -r tbb-prefix/src/tbb/include/serial  include/ && \
 	cp -r tbb-prefix/src/tbb/include/tbb include/ && \
@@ -119,7 +120,7 @@ falcolibs/package:
 	cp -r b64-prefix/src/b64/include/b64 include/ && \
 	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
 	cp libsinsp/libsinsp.a lib/ && \
-	cp libscap/libscap.a lib/ && \
+	find libscap -name '*.a' -exec cp '{}' lib \; && \
 	cp -r ../driver/bpf driver/src/ && \
 	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
 	cp ../../falco/scripts/falco-driver-loader bin/ && \
@@ -147,7 +148,7 @@ avro/package:
 	cd avro/lang/c++ && mkdir -p build && cd build && \
 	cmake -DCMAKE_INSTALL_PREFIX=$(MODPREFIX) \
 	-DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-w" \
-	-DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" ../. && make && \
+	-DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" ../. && make -j${MAKE_JOBS} && \
 	cp -a ../api avro
 
 .PHONY: avro/install
@@ -167,7 +168,7 @@ fs/install:
 elfutils/package:
 	cd elfutils && autoreconf -i -f && \
 	./configure --prefix=/usr --enable-maintainer-mode --disable-debuginfod && \
-	make && make install
+	make -j${MAKE_JOBS} && make install
 
 .PHONY: elfutils/install
 elfutils/install:
@@ -176,7 +177,7 @@ elfutils/install:
 .PHONY: glog/package
 glog/package:
 	cd glog && cmake -S . -B build -G "Unix Makefiles" -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DWITH_GFLAGS=OFF && \
-	cmake --build build
+	cmake --build build -- -j${MAKE_JOBS}
 
 .PHONY: glog/install
 glog/install:
@@ -185,7 +186,7 @@ glog/install:
 .PHONY: snappy/package
 snappy/package:
 	cd snappy && cmake -S . -B build -G "Unix Makefiles" -DSNAPPY_BUILD_BENCHMARKS=OFF -DSNAPPY_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=OFF && \
-	cmake --build build
+	cmake --build build -- -j${MAKE_JOBS}
 
 .PHONY: snappy/install
 snappy/install:

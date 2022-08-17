@@ -52,8 +52,10 @@ bool isCloneThreadSet(sinsp_evt *ev);
 int64_t getFD(sinsp_evt *ev);
 bool isMapAnonymous(sinsp_evt *ev);
 int64_t getIntParam(sinsp_evt *ev, std::string pname);
-std::string getUserName(context::SysFlowContext *cxt, uint32_t uid);
-std::string getGroupName(context::SysFlowContext *cxt, uint32_t gid);
+std::string getUserName(context::SysFlowContext *cxt, std::string &containerId,
+                        uint32_t uid);
+std::string getGroupName(context::SysFlowContext *cxt, std::string &containerId,
+                         uint32_t gid);
 bool isInContainer(sinsp_evt *ev);
 int64_t getSyscallResult(sinsp_evt *ev);
 avro::ValidSchema loadSchema();

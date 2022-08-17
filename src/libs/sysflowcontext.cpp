@@ -28,6 +28,9 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     : m_nfExportInterval(30), m_nfExpireInterval(60), m_offline(false),
       m_statsInterval(30), m_nodeIP(), m_k8sEnabled(false) {
   m_inspector = new sinsp();
+
+  m_inspector->set_buffer_format(sinsp_evt::PF_NORMAL);
+
   m_inspector->set_hostname_and_port_resolution_mode(false);
   if (!config->falcoFilter.empty()) {
     m_inspector->set_filter(config->falcoFilter);

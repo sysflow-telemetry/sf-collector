@@ -48,12 +48,16 @@ SFLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/lib
 FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
 SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
 DEBUG ?= 0
+ASAN ?= 0
 MUSL ?= 0
 
 # Compiler options
 CXX = g++
 LIBS = ../libs/libsysflow.a \
-	   $(FALCOLOCALLIBPREFIX)/libsinsp.a $(FALCOLOCALLIBPREFIX)/libscap.a $(FALCOLOCALLIBPREFIX)/libjq.a $(FALCOLOCALLIBPREFIX)/libonig.a \
+	   $(FALCOLOCALLIBPREFIX)/libsinsp.a $(FALCOLOCALLIBPREFIX)/libscap.a $(FALCOLOCALLIBPREFIX)/libscap_engine_bpf.a $(FALCOLOCALLIBPREFIX)/libscap_engine_kmod.a \
+	   $(FALCOLOCALLIBPREFIX)/libscap_engine_noop.a $(FALCOLOCALLIBPREFIX)/libscap_engine_source_plugin.a $(FALCOLOCALLIBPREFIX)/libscap_engine_gvisor.a \
+	   $(FALCOLOCALLIBPREFIX)/libscap_engine_nodriver.a $(FALCOLOCALLIBPREFIX)/libscap_engine_udig.a $(FALCOLOCALLIBPREFIX)/libscap_event_schema.a \
+       $(FALCOLOCALLIBPREFIX)/libscap_engine_util.a $(FALCOLOCALLIBPREFIX)/libjq.a $(FALCOLOCALLIBPREFIX)/libonig.a \
        $(FALCOLOCALLIBPREFIX)/libb64.a $(FALCOLOCALLIBPREFIX)/libcurl.a $(FALCOLOCALLIBPREFIX)/libtbb.a $(FALCOLOCALLIBPREFIX)/libgrpc++.a \
        $(FALCOLOCALLIBPREFIX)/libgrpc++_alts.a $(FALCOLOCALLIBPREFIX)/libgrpc++_reflection.a  $(FALCOLOCALLIBPREFIX)/libgrpc++_error_details.a \
        $(FALCOLOCALLIBPREFIX)/libgrpc++_unsecure.a  $(FALCOLOCALLIBPREFIX)/libgrpc_plugin_support.a $(FALCOLOCALLIBPREFIX)/libgrpcpp_channelz.a \
@@ -81,11 +85,11 @@ LIBS = ../libs/libsysflow.a \
 	   $(shell find /usr/lib* -name "libelf.a") \
 	   -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf
 MUSLFLAGS = -static -Os
-LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(FALCOLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/
+LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(FALCOLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ 
 CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I../libs/ -I$(FSLOCALINCPREFIX)/ \
 		-DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	-I$(FALCOLOCALINCPREFIX)/ -I$(FALCOLOCALINCPREFIX)/curl/ -I$(FALCOLOCALINCPREFIX)/json2/ -I$(FALCOLOCALINCPREFIX)/openssl/ -I$(FALCOLOCALINCPREFIX)/driver/ \
-		-I$(FALCOLOCALINCPREFIX)/userspace/libsinsp/ -I$(FALCOLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
+		-I$(FALCOLOCALINCPREFIX)/userspace/libsinsp/ -I$(FALCOLOCALINCPREFIX)/userspace/libscap/ -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/ 
 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
@@ -101,6 +105,12 @@ ifeq ($(DEBUG), 1)
 	LIBS += -lprofiler -ltcmalloc
 else
 	CFLAGS += -O3
+endif
+
+$(info    ASAN is $(ASAN))
+ifeq ($(ASAN), 1)
+	CFLAGS += -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fsanitize=leak
+	LIBS += -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fsanitize=leak
 endif
 
 .PHONY: all
@@ -130,7 +140,6 @@ $(TARGET): .main.o
 
 .main.o: main.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
-
 
 .PHONY: clean
 clean:

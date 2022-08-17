@@ -59,6 +59,7 @@ scripts/build/rhuser
 
 # examples
 examples/callback
+examples/libsysflow-*
 
 # cpack
 scripts/cpack/_CPack_Packages

@@ -17,7 +17,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG FALCO_LIBS_DRIVER_VER
+ARG FALCO_LIBS_VER
+ARG FALCO_VER
+ARG UBI_VER
 
 #-----------------------
 # Stage: Builder
@@ -52,7 +54,7 @@ RUN make -C /build install
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM ghcr.io/sysflow-telemetry/libs-base-images/runtime:${FALCO_LIBS_DRIVER_VER}  AS runtime
+FROM sysflowtelemetry/ubi:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
 
 COPY --from=builder /usr/local/example/bin/callback /usr/local/example/bin/callback
 

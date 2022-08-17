@@ -24,9 +24,7 @@ include ../../makefile.env.inc
 
 # Target configuration
 TARGET = libsysflow.a 
-TARGET_TEST = test
 SYSFLOW_BUILD_NUMBER ?= 0
-LIB_TARGET = libsfcollector.a
 
 # Lint options
 LINT = clang-tidy-9
@@ -49,34 +47,37 @@ SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
 FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
 SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
 DEBUG ?= 0
+ASAN ?= 0
 MUSL ?= 0
 
 # Compiler options
 CXX = g++
 AR = ar
 MUSLFLAGS = -static -Os 
-LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(FALCOLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/
 CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
 		 -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 	 	 -I$(FALCOLOCALINCPREFIX)/ -I$(FALCOLOCALINCPREFIX)/curl/ -I$(FALCOLOCALINCPREFIX)/json2/ \
 		 -I$(FALCOLOCALINCPREFIX)/openssl/ -I$(FALCOLOCALINCPREFIX)/driver/ \
 		 -I$(FALCOLOCALINCPREFIX)/userspace/libsinsp/ -I$(FALCOLOCALINCPREFIX)/userspace/libscap/ \
-		 -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/
+		 -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/ 
 
 OBJS = .sysflowlibs.o .sysflowlibs.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o .k8scontext.o .k8seventprocessor.o
 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
 	CFLAGS += $(MUSLFLAGS) -DHAVE_STRLCPY
-	LDFLAGS += $(MUSLFLAGS)
 endif
 
 $(info    DEBUG is $(DEBUG))
 ifeq ($(DEBUG), 1)
 	CFLAGS += -ggdb
-	LIBS += -lprofiler -ltcmalloc
 else
 	CFLAGS += -O3
+endif
+
+$(info    ASAN is $(ASAN))
+ifeq ($(ASAN), 1)
+	CFLAGS += -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fsanitize=leak
 endif
 
 .PHONY: all
@@ -107,10 +108,6 @@ version:
 .PHONY: $(TARGET)
 $(TARGET): $(OBJS) 
 	$(AR) -r $@ $^
-
-.PHONY: $(TARGET_TEST)
-$(TARGET_TEST): $(OBJS) .test.o 
-	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .sysflowlibs.o: sysflowlibs.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
@@ -184,9 +181,6 @@ $(TARGET_TEST): $(OBJS) .test.o
 
 .filecontext.o: filecontext.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
-
-#.xxhash.o: xxhash.c
-#	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .PHONY: clean
 clean:
