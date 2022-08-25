@@ -47,6 +47,10 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     m_inspector->set_log_stderr();
     m_inspector->set_min_log_severity(sinsp_logger::severity::SEV_DEBUG);
   }
+  const char *statsEnv = std::getenv(ENABLE_STATS);
+  if (statsEnv != nullptr && strcmp(statsEnv, "1") == 0) {
+    config->enableStats = true;
+  }
   const char *ip = std::getenv(NODE_IP);
   if (ip != nullptr && std::strlen(ip) > 0) {
     m_nodeIP = std::string(ip);

@@ -32,11 +32,12 @@ SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt,
   if (m_cxt->getFileDuration() > 0) {
     start = utils::getCurrentTime(m_cxt);
   }
-  if (m_cxt->isStatsEnabled()) {
+  /*if (m_cxt->isStatsEnabled()) {
     m_statsTime = utils::getCurrentTime(m_cxt);
   } else {
     m_statsTime = 0;
-  }
+  }*/
+  m_statsTime = 0;
   if (writer == nullptr) {
     if (m_cxt->isDomainSocket() && m_cxt->isOutputFile()) {
       std::cout << "Multi-writer (socket + file writer) loaded." << std::endl;
@@ -101,7 +102,8 @@ bool SysFlowProcessor::checkAndRotateFile() {
   bool fileRotated = false;
   time_t curTime = utils::getCurrentTime(m_cxt);
   if (m_writer->isExpired(curTime) || m_writer->needsReset()) {
-    SF_INFO(m_logger,
+    if (m_cxt->isStatsEnabled()) {
+      SF_INFO(m_logger,
             "Container Table: "
                 << m_containerCxt->getSize()
                 << " K8s Enabled: " << m_cxt->isK8sEnabled() << " Pods Table: "
@@ -111,6 +113,7 @@ bool SysFlowProcessor::checkAndRotateFile() {
                 << " FileFlow Table: " << m_dfPrcr->getFFSize()
                 << " ProcFlow Table: " << m_ctrlPrcr->getSize()
                 << " Num Records Written: " << m_writer->getNumRecs());
+    }
     m_writer->reset(curTime);
     clearTables();
     fileRotated = true;
@@ -201,7 +204,7 @@ int SysFlowProcessor::run() {
         SF_SHUTDOWN_EXIT(ev)
         SF_MMAP_EXIT(ev)
       case PPME_K8S_E: {
-        std::cout << "Received a k8s event!!!" << std::endl;
+        //std::cout << "Received a k8s event!!!" << std::endl;
         if (m_cxt->isK8sEnabled()) {
           m_k8sPrcr->handleK8sEvent(ev);
         }
@@ -210,7 +213,9 @@ int SysFlowProcessor::run() {
       }
     }
     SF_INFO(m_logger, "Exiting scap loop... shutting down");
-    SF_INFO(m_logger,
+
+    if (m_cxt->isStatsEnabled()) {
+      SF_INFO(m_logger,
             "Container Table: "
                 << m_containerCxt->getSize()
                 << " K8s Enabled: " << m_cxt->isK8sEnabled() << " Pods Table: "
@@ -220,6 +225,7 @@ int SysFlowProcessor::run() {
                 << " FileFlow Table: " << m_dfPrcr->getFFSize()
                 << " ProcFlow Table: " << m_ctrlPrcr->getSize()
                 << " Num Records Written: " << m_writer->getNumRecs());
+    }
   } catch (sinsp_exception &e) {
     SF_ERROR(m_logger, "Sysdig exception " << e.what());
     return 1;
