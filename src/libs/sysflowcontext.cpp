@@ -18,6 +18,8 @@
  **/
 
 #include "sysflowcontext.h"
+#include "engine/bpf/bpf_public.h"
+#include "modutils.h"
 #include <utility>
 
 using context::SysFlowContext;
@@ -26,7 +28,13 @@ CREATE_LOGGER(SysFlowContext, "sysflow.sysflowcontext");
 
 SysFlowContext::SysFlowContext(SysFlowConfig *config)
     : m_nfExportInterval(30), m_nfExpireInterval(60), m_offline(false),
-      m_statsInterval(30), m_nodeIP(), m_k8sEnabled(false) {
+      m_statsInterval(30), m_nodeIP(), m_k8sEnabled(false),
+      m_probeType(NO_PROBE) {
+  m_offline = !config->scapInputPath.empty();
+  if (!m_offline) {
+    detectProbeType();
+    checkModule();
+  }
   m_inspector = new sinsp();
 
   m_inspector->set_buffer_format(sinsp_evt::PF_NORMAL);
@@ -163,3 +171,41 @@ string SysFlowContext::getExporterID() {
 }
 
 string SysFlowContext::getNodeIP() { return m_nodeIP; }
+
+void SysFlowContext::checkModule() {
+  switch (m_probeType) {
+  case KMOD: {
+    modutils::checkForFalcoKernMod();
+    break;
+  }
+  case EBPF: {
+    modutils::checkProbeExistsPermits(m_ebpfProbe);
+    break;
+  }
+  default: {
+    SF_WARN(m_logger, "Probe type currently "
+                          << m_probeType
+                          << " not handled by check module operation")
+    break;
+  }
+  }
+}
+
+void SysFlowContext::detectProbeType() {
+  const char *probe = std::getenv(SF_BPF_ENV_VARIABLE);
+  if (probe == nullptr) {
+    m_probeType = KMOD;
+  } else {
+    m_probeType = EBPF;
+    if (strlen(probe) != 0) {
+      m_ebpfProbe = std::string(probe);
+    } else {
+      const char *home = getenv("HOME");
+      if (!home) {
+        return;
+      }
+      m_ebpfProbe = std::string(home) + std::string("/") +
+                    std::string(SF_PROBE_BPF_FILEPATH);
+    }
+  }
+}
