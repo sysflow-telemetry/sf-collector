@@ -21,6 +21,7 @@
 #define _SF_CONFIG_LIBS_
 
 #include "sysflow.h"
+#include <stdint.h>
 
 using SysFlowCallback = std::function<void(
     sysflow::SFHeader *, sysflow::Container *, sysflow::Process *,
@@ -93,6 +94,13 @@ struct SysFlowConfig {
   // Consumer mode - no reads/writes/sends/recvs/closes are collected for TCP
   // and file sessions
   bool enableConsumerMode;
+  // This is the dimension that a single buffer in our drivers will have. (BPF,
+  // kmod, modern BPF) Please note:
+  // - This number is expressed in bytes.
+  // - This number must be a multiple of your system page size, otherwise the
+  // allocation will fail.
+  // - If you leave `0`, every driver will set its internal default dimension.
+  uint64_t singleBufferDimension;
 }; // SysFlowConfig
 
 #endif

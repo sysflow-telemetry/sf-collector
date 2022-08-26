@@ -42,6 +42,7 @@ public:
 
 private:
   SysFlowError m_code;
+  void setErrorCode(std::string message);
 };
 
 } // namespace sfexception

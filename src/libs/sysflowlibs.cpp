@@ -44,6 +44,7 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   conf->callback = nullptr;
   conf->debugMode = false;
   conf->enableConsumerMode = false;
+  conf->singleBufferDimension = 0;
   return conf;
 }
 
