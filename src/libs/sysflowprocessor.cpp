@@ -104,15 +104,15 @@ bool SysFlowProcessor::checkAndRotateFile() {
   if (m_writer->isExpired(curTime) || m_writer->needsReset()) {
     if (m_cxt->isStatsEnabled()) {
       SF_INFO(m_logger,
-            "Container Table: "
-                << m_containerCxt->getSize()
-                << " K8s Enabled: " << m_cxt->isK8sEnabled() << " Pods Table: "
-                << (m_cxt->isK8sEnabled() ? m_k8sCxt->getSize() : 0)
-                << " Process Table: " << m_processCxt->getSize()
-                << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
-                << " FileFlow Table: " << m_dfPrcr->getFFSize()
-                << " ProcFlow Table: " << m_ctrlPrcr->getSize()
-                << " Num Records Written: " << m_writer->getNumRecs());
+              "Container Table: "
+                  << m_containerCxt->getSize() << " K8s Enabled: "
+                  << m_cxt->isK8sEnabled() << " Pods Table: "
+                  << (m_cxt->isK8sEnabled() ? m_k8sCxt->getSize() : 0)
+                  << " Process Table: " << m_processCxt->getSize()
+                  << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
+                  << " FileFlow Table: " << m_dfPrcr->getFFSize()
+                  << " ProcFlow Table: " << m_ctrlPrcr->getSize()
+                  << " Num Records Written: " << m_writer->getNumRecs());
     }
     m_writer->reset(curTime);
     clearTables();
@@ -204,7 +204,7 @@ int SysFlowProcessor::run() {
         SF_SHUTDOWN_EXIT(ev)
         SF_MMAP_EXIT(ev)
       case PPME_K8S_E: {
-        //std::cout << "Received a k8s event!!!" << std::endl;
+        // std::cout << "Received a k8s event!!!" << std::endl;
         if (m_cxt->isK8sEnabled()) {
           m_k8sPrcr->handleK8sEvent(ev);
         }
@@ -216,15 +216,15 @@ int SysFlowProcessor::run() {
 
     if (m_cxt->isStatsEnabled()) {
       SF_INFO(m_logger,
-            "Container Table: "
-                << m_containerCxt->getSize()
-                << " K8s Enabled: " << m_cxt->isK8sEnabled() << " Pods Table: "
-                << (m_cxt->isK8sEnabled() ? m_k8sCxt->getSize() : 0)
-                << " Process Table: " << m_processCxt->getSize()
-                << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
-                << " FileFlow Table: " << m_dfPrcr->getFFSize()
-                << " ProcFlow Table: " << m_ctrlPrcr->getSize()
-                << " Num Records Written: " << m_writer->getNumRecs());
+              "Container Table: "
+                  << m_containerCxt->getSize() << " K8s Enabled: "
+                  << m_cxt->isK8sEnabled() << " Pods Table: "
+                  << (m_cxt->isK8sEnabled() ? m_k8sCxt->getSize() : 0)
+                  << " Process Table: " << m_processCxt->getSize()
+                  << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
+                  << " FileFlow Table: " << m_dfPrcr->getFFSize()
+                  << " ProcFlow Table: " << m_ctrlPrcr->getSize()
+                  << " Num Records Written: " << m_writer->getNumRecs());
     }
   } catch (sinsp_exception &e) {
     SF_ERROR(m_logger, "Sysdig exception " << e.what());
