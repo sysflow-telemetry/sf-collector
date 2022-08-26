@@ -19,9 +19,5 @@
 
 #include "sysflowexception.h"
 
-sfexception::SysFlowException(std::string message) { setErrorCode(message); }
-
-void sfexception::setErrorCode(std::string message) {
-  /*std::size_t found = str.find(str2);
-  if (found!=std::string::npos)*/
-}
+sfexception::SysFlowException::SysFlowException(std::string message) { setErrorCode(message); }
+void sfexception::SysFlowException::setErrorCode(std::string message) {}

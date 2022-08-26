@@ -35,10 +35,10 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     detectProbeType();
     checkModule();
   }
+
+  m_config = config;
   m_inspector = new sinsp();
-
   m_inspector->set_buffer_format(sinsp_evt::PF_NORMAL);
-
   m_inspector->set_hostname_and_port_resolution_mode(false);
   if (!config->falcoFilter.empty()) {
     m_inspector->set_filter(config->falcoFilter);
@@ -65,7 +65,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
   } else if (ip == nullptr && !config->nodeIP.empty()) {
     m_nodeIP = config->nodeIP;
   }
-  m_inspector->open(config->scapInputPath);
+  openInspector();
   const char *drop = std::getenv(ENABLE_DROP_MODE);
   if (config->scapInputPath.empty() &&
       ((drop != nullptr && strcmp(drop, "1") == 0) ||
@@ -141,7 +141,6 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
   m_offline = !config->scapInputPath.empty();
   m_hasPrefix = (config->filePath.back() != '/');
   m_callback = config->callback;
-  m_config = config;
 }
 
 SysFlowContext::~SysFlowContext() {
@@ -188,6 +187,23 @@ void SysFlowContext::checkModule() {
                           << " not handled by check module operation")
     break;
   }
+  }
+}
+
+void SysFlowContext::openInspector() {
+  switch (m_probeType) {
+  case KMOD:
+    m_inspector->open_kmod(m_config->singleBufferDimension);
+    break;
+  case EBPF:
+    std::cout << "XXX: EBPF PROBE!!! " << m_ebpfProbe << std::endl;
+    m_inspector->open_bpf(m_config->singleBufferDimension, m_ebpfProbe.c_str());
+    break;
+  case NO_PROBE:
+    m_inspector->open_savefile(m_config->scapInputPath.c_str(), 0);
+  default:
+    SF_WARN(m_logger, "Unsupported driver " << m_probeType)
+    break;
   }
 }
 

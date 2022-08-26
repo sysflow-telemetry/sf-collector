@@ -69,6 +69,7 @@ private:
   DEFINE_LOGGER();
   void detectProbeType();
   void checkModule();
+  void openInspector();
 
 public:
   /*SysFlowContext(bool fCont, int fDur, string oFile, string socketFile,
