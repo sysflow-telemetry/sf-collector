@@ -43,6 +43,7 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   conf->dropMode = true;
   conf->callback = nullptr;
   conf->debugMode = false;
+  conf->enableConsumerMode = false;
   return conf;
 }
 

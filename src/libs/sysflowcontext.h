@@ -38,13 +38,19 @@
 #define ENABLE_DROP_MODE "ENABLE_DROP_MODE"
 #define FILE_READ_MODE "FILE_READ_MODE"
 #define FILE_ONLY "FILE_ONLY"
+#define ENABLE_STATS "ENABLE_STATS"
 #define ENABLE_PROC_FLOW "ENABLE_PROC_FLOW"
 #define SF_K8S_API_URL "SF_K8S_API_URL"
 #define SF_K8S_API_CERT "SF_K8S_API_CERT"
+#define SF_PROBE_BPF_FILEPATH ".falco/falco-bpf.o"
+#define SF_BPF_ENV_VARIABLE "FALCO_BPF_PROBE"
 
 // typedef void (*SysFlowCallback)(sysflow::SFHeader*, sysflow::Container*,
 // sysflow::Process*, sysflow::File*, sysflow::File*, sysflow::SysFlow*);
 namespace context {
+
+enum ProbeType { EBPF, KMOD, NO_PROBE };
+
 class SysFlowContext {
 private:
   // time_t m_start{};
@@ -57,8 +63,12 @@ private:
   SysFlowCallback m_callback;
   SysFlowConfig *m_config;
   bool m_hasPrefix;
+  ProbeType m_probeType;
+  std::string m_ebpfProbe;
   sinsp *m_inspector;
   DEFINE_LOGGER();
+  void detectProbeType();
+  void checkModule();
 
 public:
   /*SysFlowContext(bool fCont, int fDur, string oFile, string socketFile,
