@@ -45,6 +45,7 @@ public:
   inline void exit() { m_exit = true; }
   int run();
   sysflow::Container *getContainer(const std::string &containerId);
+  sysflow::Process *getProcess(sysflow::OID &oid);
 
 private:
   DEFINE_LOGGER();

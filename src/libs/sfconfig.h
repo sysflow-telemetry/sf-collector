@@ -90,6 +90,9 @@ struct SysFlowConfig {
   std::string k8sAPIURL;
   // Path to K8s API Certificate (experimental).
   std::string k8sAPICert;
+  // Consumer mode - no reads/writes/sends/recvs/closes are collected for TCP
+  // and file sessions
+  bool enableConsumerMode;
 }; // SysFlowConfig
 
 #endif

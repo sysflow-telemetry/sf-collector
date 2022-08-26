@@ -243,3 +243,11 @@ sysflow::Container *SysFlowProcessor::getContainer(const string &id) {
   }
   return nullptr;
 }
+
+sysflow::Process *SysFlowProcessor::getProcess(sysflow::OID &oid) {
+  ProcessObj *procObj = m_processCxt->getProcess(&oid);
+  if (procObj != nullptr) {
+    return &(procObj->proc);
+  }
+  return nullptr;
+}
