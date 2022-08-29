@@ -86,8 +86,12 @@ clean:
 	make -C modules clean
 	cd scripts/cpack && ./clean.sh
 
+.PHONY: init
+init: 
+	make -C modules init
+
 .PHONY: build
-build: docker-base-build docker-mods-build docker-driver-build docker-libs-build docker-collector-build docker-runtime-build
+build: init docker-base-build docker-mods-build docker-driver-build docker-libs-build docker-collector-build docker-runtime-build
 
 .PHONY: docker-base-build
 docker-base-build:
@@ -167,6 +171,8 @@ help:
 	@echo "... package"
 	@echo "... install"
 	@echo "... uninstall"
+	@echo "... init"
+	@echo "... build"
 	@echo "... docker-base-build"
 	@echo "... docker-base-build/musl"
 	@echo "... docker-mods-build"
