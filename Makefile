@@ -86,6 +86,9 @@ clean:
 	make -C modules clean
 	cd scripts/cpack && ./clean.sh
 
+.PHONY: build
+build: docker-base-build docker-mods-build docker-driver-build docker-libs-build docker-collector-build docker-runtime-build
+
 .PHONY: docker-base-build
 docker-base-build:
 	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg UBI_VER=${UBI_VERSION} --target base -t sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
