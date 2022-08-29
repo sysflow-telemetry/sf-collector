@@ -19,5 +19,7 @@
 
 #include "sysflowexception.h"
 
-sfexception::SysFlowException::SysFlowException(std::string message) { setErrorCode(message); }
+sfexception::SysFlowException::SysFlowException(std::string message) {
+  setErrorCode(message);
+}
 void sfexception::SysFlowException::setErrorCode(std::string message) {}

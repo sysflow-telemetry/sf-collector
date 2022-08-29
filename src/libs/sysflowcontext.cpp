@@ -196,7 +196,6 @@ void SysFlowContext::openInspector() {
     m_inspector->open_kmod(m_config->singleBufferDimension);
     break;
   case EBPF:
-    std::cout << "XXX: EBPF PROBE!!! " << m_ebpfProbe << std::endl;
     m_inspector->open_bpf(m_config->singleBufferDimension, m_ebpfProbe.c_str());
     break;
   case NO_PROBE:
