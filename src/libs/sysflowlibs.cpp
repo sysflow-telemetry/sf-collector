@@ -18,14 +18,21 @@
  **/
 
 #include "sysflowlibs.hpp"
+#include "scap_open_exception.h"
+#include "sinsp_exception.h"
 #include "sysflowcontext.h"
 #include "sysflowprocessor.h"
 
 using sysflowlibscpp::SysFlowDriver;
 
 SysFlowDriver::SysFlowDriver(SysFlowConfig *conf) {
-  m_cxt = new context::SysFlowContext(conf);
-  m_processor = new sysflowprocessor::SysFlowProcessor(m_cxt, nullptr);
+  try {
+    m_cxt = new context::SysFlowContext(conf);
+    m_processor = new sysflowprocessor::SysFlowProcessor(m_cxt, nullptr);
+  } catch (const sinsp_exception &ex) {
+    SF_ERROR(logger, "Runtime exception on module load: " << ex.what());
+    throw sfexception::SysFlowException(ex.what());
+  }
 }
 
 SysFlowDriver::~SysFlowDriver() { delete m_processor; }
@@ -44,6 +51,7 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   conf->callback = nullptr;
   conf->debugMode = false;
   conf->enableConsumerMode = false;
+  conf->moduleChecks = true;
   return conf;
 }
 
@@ -54,4 +62,16 @@ void DeleteSysFlowConfig(SysFlowConfig **conf) {
 
 void SysFlowDriver::exit() { m_processor->exit(); }
 
-int SysFlowDriver::run() { return m_processor->run(); }
+int SysFlowDriver::run() {
+  try {
+    return m_processor->run();
+  } catch (const sinsp_exception &ex) {
+    SF_ERROR(logger, "Runtime exception caught in main loop: " << ex.what());
+    throw sfexception::SysFlowException(ex.what());
+  } catch (const avro::Exception &aex) {
+    SF_ERROR(logger,
+             "Runtime avro exception caught in main loop: " << aex.what());
+    throw sfexception::SysFlowException(aex.what());
+  }
+  return 0;
+}

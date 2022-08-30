@@ -238,8 +238,9 @@ int main(int argc, char **argv) {
     delete g_driver;
     delete g_config;
     return ret;
-  } catch (sinsp_exception &ex) {
-    SF_ERROR(logger, "Runtime exception caught in main loop: " << ex.what());
+  } catch (sfexception::SysFlowException &ex) {
+    SF_ERROR(logger, "Runtime exception caught in main loop: "
+                         << ex.what() << " Error Code: " << ex.getErrorCode());
     return 1;
   }
 }

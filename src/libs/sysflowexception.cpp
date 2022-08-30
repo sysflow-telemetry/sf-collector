@@ -18,10 +18,73 @@
  **/
 
 #include "sysflowexception.h"
+#include "scap.h"
 
-sfexception::SysFlowException(std::string message) { setErrorCode(message); }
+sfexception::SysFlowException::SysFlowException(std::string message)
+    : std::runtime_error(message) {
+  setErrorCode(message);
+}
 
-void sfexception::setErrorCode(std::string message) {
-  /*std::size_t found = str.find(str2);
-  if (found!=std::string::npos)*/
+void sfexception::SysFlowException::setErrorCode(std::string message) {
+  m_code = LibsError;
+  std::size_t found = message.find("Driver supports API version");
+  if (found != std::string::npos) {
+    m_code = DriverLibsMismatch;
+    return;
+  }
+
+  found = message.find("missing api_version section");
+  if (found != std::string::npos) {
+    m_code = DriverLibsMismatch;
+    return;
+  }
+
+  found = message.find("Make sure you have root credentials and that the falco "
+                       "module is loaded.");
+  if (found != std::string::npos) {
+    m_code = ProbeAccessDenied;
+    return;
+  }
+}
+
+/*
+#define SCAP_SUCCESS 0
+#define SCAP_FAILURE 1
+#define SCAP_TIMEOUT -1
+#define SCAP_ILLEGAL_INPUT 3
+#define SCAP_NOTFOUND 4
+#define SCAP_INPUT_TOO_SMALL 5
+#define SCAP_EOF 6
+#define SCAP_UNEXPECTED_BLOCK 7
+#define SCAP_VERSION_MISMATCH 8
+#define SCAP_NOT_SUPPORTED 9
+#define SCAP_FILTERED_EVENT 10
+*/
+
+sfexception::SysFlowError sfexception::getErrorCodeFromScap(int32_t ec) {
+  SysFlowError err = LibsError;
+  switch (ec) {
+  case SCAP_SUCCESS:
+  case SCAP_FAILURE:
+  case SCAP_TIMEOUT:
+  case SCAP_EOF:
+    break;
+  case SCAP_ILLEGAL_INPUT:
+  case SCAP_INPUT_TOO_SMALL:
+  case SCAP_UNEXPECTED_BLOCK:
+    err = EventParsingError;
+    break;
+  case SCAP_NOTFOUND:
+    err = ProcResourceNotFound;
+    break;
+  case SCAP_VERSION_MISMATCH:
+    err = DriverLibsMismatch;
+    break;
+  case SCAP_NOT_SUPPORTED:
+    err = OperationNotSupported;
+    break;
+  default:
+    break;
+  }
+  return err;
 }

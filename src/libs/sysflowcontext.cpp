@@ -30,6 +30,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     : m_nfExportInterval(30), m_nfExpireInterval(60), m_offline(false),
       m_statsInterval(30), m_nodeIP(), m_k8sEnabled(false),
       m_probeType(NO_PROBE) {
+  m_config = config;
   m_offline = !config->scapInputPath.empty();
   if (!m_offline) {
     detectProbeType();
@@ -141,7 +142,6 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
   m_offline = !config->scapInputPath.empty();
   m_hasPrefix = (config->filePath.back() != '/');
   m_callback = config->callback;
-  m_config = config;
 }
 
 SysFlowContext::~SysFlowContext() {
@@ -173,6 +173,9 @@ string SysFlowContext::getExporterID() {
 string SysFlowContext::getNodeIP() { return m_nodeIP; }
 
 void SysFlowContext::checkModule() {
+  if (!m_config->moduleChecks) {
+    return;
+  }
   switch (m_probeType) {
   case KMOD: {
     modutils::checkForFalcoKernMod();

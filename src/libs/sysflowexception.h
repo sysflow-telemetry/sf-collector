@@ -24,25 +24,34 @@
 #include <string>
 
 namespace sfexception {
+
 enum SysFlowError {
+  LibsError,
   ProbeAccessDenied,
   ProbeNotExist,
   ErrorReadingFileSystem,
   NameTooLong,
   ProbeCheckError,
-  ProbeNotLoaded
+  ProbeNotLoaded,
+  DriverLibsMismatch,
+  EventParsingError,
+  ProcResourceNotFound,
+  OperationNotSupported
 };
 
 class SysFlowException : public std::runtime_error {
+private:
+  SysFlowError m_code;
+  void setErrorCode(std::string message);
+
 public:
   SysFlowException(std::string message);
   SysFlowException(std::string message, SysFlowError code)
       : std::runtime_error(message), m_code(code) {}
   SysFlowError getErrorCode() { return m_code; }
-
-private:
-  SysFlowError m_code;
 };
+
+SysFlowError getErrorCodeFromScap(int32_t ec);
 
 } // namespace sfexception
 

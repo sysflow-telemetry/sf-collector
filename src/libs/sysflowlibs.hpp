@@ -20,6 +20,7 @@
 #ifndef __SYSFLOW_LIBS_C_PLUS_PLUS_API__
 #define __SYSFLOW_LIBS_C_PLUS_PLUS_API__
 #include "sfconfig.h"
+#include "sysflowexception.h"
 #include <string>
 namespace writer {
 class SysFlowWriter;
