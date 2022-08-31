@@ -172,10 +172,9 @@ void K8sContext::updateAndWritePodState(std::string &uid) {
   if (pod != nullptr) {
     std::shared_ptr<PodObj> podO = getPod(uid);
     if (podO == nullptr) {
-      SF_DEBUG(
-          m_logger,
-          << "Unable to find pod object in cache. Ignoring pod modification: "
-          << uid)
+      SF_DEBUG(m_logger,
+               "Unable to find pod object in cache. Ignoring pod modification: "
+                   << uid)
       return;
     }
 
