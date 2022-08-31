@@ -65,9 +65,8 @@ COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
 
 RUN --mount=type=secret,id=rhuser,dst=/secret/rhuser --mount=type=secret,id=rhpassword,dst=/secret/rhpassword \
- ( export REGISTER_USER=$(cat /secret/rhuser) && export REGISTER_PASSWORD=$(cat /secret/rhpassword) && bash /build/install.sh driver ) 
- #&& \
- #rm -rf /build
+ ( export REGISTER_USER=$(cat /secret/rhuser) && export REGISTER_PASSWORD=$(cat /secret/rhpassword) && bash /build/install.sh driver ) && \
+ rm -rf /build
 
 # copy resources
 COPY --from=mods ${INSTALL_PATH}/modules/bin/docker-entry-ubi.sh /docker-entrypoint.sh
