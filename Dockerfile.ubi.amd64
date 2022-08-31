@@ -74,8 +74,7 @@ COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  dnf -y install git && \
      cd /build/modules && \
-     make INSTALL_PATH=${INSTALL_PATH} MAKE_JOBS=${MAKE_JOBS} install 
-     #&& \
-     #make clean && rm -rf /build/modules && \
-     #dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
+     make INSTALL_PATH=${INSTALL_PATH} MAKE_JOBS=${MAKE_JOBS} install && \
+     make clean && rm -rf /build/modules && \
+     dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
 
