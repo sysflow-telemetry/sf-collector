@@ -1,4 +1,4 @@
-/** Copyright (C) 2021 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -24,6 +24,7 @@
 #include "json/json.h"
 
 #include "datatypes.h"
+#include "logger.h"
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
@@ -31,8 +32,6 @@
 #include <sinsp.h>
 
 #define K8S_TABLE_SIZE 100
-//#define INCOMPLETE "incomplete"
-//#define INCOMPLETE_IMAGE "incomplete:incomplete"
 
 namespace sfk8s {
 class K8sContext {
@@ -58,6 +57,7 @@ public:
 
 private:
   void updateAndWritePodState(std::string &uid);
+  DEFINE_LOGGER();
 };
 } // namespace sfk8s
 #endif

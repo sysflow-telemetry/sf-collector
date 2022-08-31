@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -48,7 +48,6 @@ inline void ControlFlowProcessor::processFlow(sinsp_evt *ev, OpFlags flag) {
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
   ProcessFlowObj *pfo = proc->pfo;
   if (pfo == nullptr) {
-    // SF_INFO(m_logger, "Creating a new process flow")
     processNewFlow(ev, proc, flag);
   } else {
     updateProcFlow(pfo, flag, ev);
@@ -87,7 +86,6 @@ inline void ControlFlowProcessor::updateProcFlow(ProcessFlowObj *pf,
   if (flag == OP_CLONE) {
     int res = utils::getSyscallResult(ev);
     if (res == 0) {
-      // nf->netflow.numRRecvBytes += res;
       pf->procflow.numThreadsCloned++;
     } else if (res == -1) {
       pf->procflow.numCloneErrors++;
@@ -98,7 +96,6 @@ inline void ControlFlowProcessor::updateProcFlow(ProcessFlowObj *pf,
 }
 
 inline void ControlFlowProcessor::removeAndWriteProcessFlow(ProcessObj *proc) {
-  // SF_INFO(m_logger, "removeAndWriteProcessFlow")
   m_writer->writeProcessFlow(&((proc->pfo)->procflow), &(proc->proc));
   m_processCxt->removeProcessFromSet(proc, true);
   proc->pfo = nullptr;
@@ -169,7 +166,7 @@ void ControlFlowProcessor::exportProcessFlow(ProcessFlowObj *pfo) {
 }
 
 void ControlFlowProcessor::printFlowStats() {
-  SF_INFO(m_logger, "CF Set: " << m_pfSet->size());
+  SF_DEBUG(m_logger, "CF Set: " << m_pfSet->size());
 }
 
 int ControlFlowProcessor::checkForExpiredRecords() {
@@ -185,21 +182,14 @@ int ControlFlowProcessor::checkForExpiredRecords() {
   int i = 0;
   SF_DEBUG(m_logger, "Checking expired PROC Flows!!!....");
   for (auto it = m_pfSet->begin(); it != m_pfSet->end();) {
-    // SF_INFO(m_logger, "Checking flow with exportTime: " <<
-    // (*it)->pfo->exportTime
-    //                                                   << " Now: " << now);
     if (difftime(now, (*it)->pfo->exportTime) >= m_cxt->getNFExportInterval()) {
       SF_DEBUG(m_logger, "Exporting Proc flow!!! ");
       if (difftime(now, (*it)->pfo->lastUpdate) >=
           m_cxt->getNFExpireInterval()) {
-        //	SF_INFO(m_logger, "Deleting processflow...")
-        //	SF_INFO(m_logger, "NOW: " << now << " LastUpdate: " <<
-        //(*it)->pfo->lastUpdate);
         delete (*it)->pfo;
         (*it)->pfo = nullptr;
         it = m_pfSet->erase(it);
       } else {
-        //	SF_INFO(m_logger, "Exporting processflow...checkForExpired")
         exportProcessFlow((*it)->pfo);
         ProcessObj *p = (*it);
         it = m_pfSet->erase(it);
