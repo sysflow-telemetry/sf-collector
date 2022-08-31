@@ -93,6 +93,9 @@ init:
 .PHONY: build
 build: init docker-base-build docker-mods-build docker-driver-build docker-libs-build docker-collector-build docker-runtime-build
 
+.PHONY: build/musl
+build/musl: init docker-base-build/musl docker-mods-build/musl docker-driver-build docker-libs-build/musl docker-collector-build/musl docker-runtime-build/musl
+
 .PHONY: docker-base-build
 docker-base-build:
 	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg UBI_VER=${UBI_VERSION} --target base -t sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
@@ -173,6 +176,7 @@ help:
 	@echo "... uninstall"
 	@echo "... init"
 	@echo "... build"
+	@echo "... build/musl"
 	@echo "... docker-base-build"
 	@echo "... docker-base-build/musl"
 	@echo "... docker-mods-build"
