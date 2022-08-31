@@ -1,4 +1,4 @@
-/** Copyright (C) 2021 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -33,8 +33,7 @@ class K8sEventProcessor {
 private:
   sfk8s::K8sContext *m_k8sCxt;
   writer::SysFlowWriter *m_writer;
-  sysflow::K8sEvent m_k8sEvt;
-  // K8sEvent m_k8sEvt;
+  sysflow::K8sEvent m_k8sEvt;  
   DEFINE_LOGGER();
 
 public:

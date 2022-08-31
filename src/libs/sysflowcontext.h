@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -44,9 +44,8 @@
 #define SF_K8S_API_CERT "SF_K8S_API_CERT"
 #define SF_PROBE_BPF_FILEPATH ".falco/falco-bpf.o"
 #define SF_BPF_ENV_VARIABLE "FALCO_BPF_PROBE"
+#define DRIVER_HOME "HOME"
 
-// typedef void (*SysFlowCallback)(sysflow::SFHeader*, sysflow::Container*,
-// sysflow::Process*, sysflow::File*, sysflow::File*, sysflow::SysFlow*);
 namespace context {
 
 enum ProbeType { EBPF, KMOD, NO_PROBE };
@@ -71,26 +70,14 @@ private:
   void checkModule();
   void openInspector();
 
-public:
-  /*SysFlowContext(bool fCont, int fDur, string oFile, string socketFile,
-                 const string &sFile, uint32_t samplingRatio, string exporterID,
-                 string filter, string criPath, int criTO);*/
+public:  
   SysFlowContext(SysFlowConfig *config);
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
   string getExporterID();
   string getNodeIP();
   SysFlowCallback getCallback() { return m_callback; }
-  inline void setNodeIP(string nodeIP) { m_nodeIP = nodeIP; }
-  /*inline void setReadFileMode(int readFile) { m_fileRead = readFile; }
-  inline void enableFileOnly() { m_fileOnly = true; }
-  inline void enableProcessFlow() { m_processFlow = true; }
-  inline void enableDropMode() {
-  m_inspector->start_dropping_mode(m_samplingRatio); } inline void
-  enableDebugMode() { m_inspector->set_log_stderr();
-    m_inspector->set_min_log_severity(sinsp_logger::severity::SEV_DEBUG);
-  }
-  inline void setCallback(SysFlowCallback callback) { m_callback = callback; }*/
+  inline void setNodeIP(string nodeIP) { m_nodeIP = nodeIP; }  
   inline bool isOffline() { return m_offline; }
   inline bool hasCallback() { return m_callback != nullptr; }
   inline sinsp *getInspector() { return m_inspector; }

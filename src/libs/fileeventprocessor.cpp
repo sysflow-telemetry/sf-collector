@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -36,6 +36,7 @@ FileEventProcessor::~FileEventProcessor() = default;
 
 int FileEventProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   int res = 1;
+
   if (flag == OP_MKDIR || flag == OP_RMDIR || flag == OP_UNLINK) {
     res = writeFileEvent(ev, flag);
   } else if (flag == OP_LINK || flag == OP_SYMLINK || flag == OP_RENAME) {
@@ -115,6 +116,7 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
   bool created = false;
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
   sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+  
   FileObj *file = nullptr;
   if (fdinfo != nullptr) {
     file = m_fileCxt->getFile(ev, fdinfo, SFObjectState::CREATED, created);
@@ -136,6 +138,7 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
     file = m_fileCxt->getFile(ev, fileName, fileType, SFObjectState::CREATED,
                               created);
   }
+
   m_fileEvt.opFlags = flag;
   m_fileEvt.ts = ev->get_ts();
   m_fileEvt.procOID.hpid = proc->proc.oid.hpid;

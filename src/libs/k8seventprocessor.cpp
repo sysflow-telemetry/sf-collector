@@ -1,4 +1,4 @@
-/** Copyright (C) 2021 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -101,27 +101,15 @@ sysflow::K8sAction K8sEventProcessor::getAction(Json::Value &root) {
 }
 
 int K8sEventProcessor::handleK8sEvent(sinsp_evt *ev) {
-  int res = 1;
-  /*int len = ev->len;
-  int headerLen = sizeof(struct ppm_evt_hdr);
-  int hdrPayloadLen = headerLen + sizeof(uint16_t);
-  if(len > hdrPayloadLen) {
-    uint16_t* payloadLen = (uint16_t*)((char*)ev + headerLen);
-    if(len >= hdrPayloadLen + *payloadLen) {
-       char* p = (char*)((char*) ev + hdrPayloadLen);
-       std::string payload(&p[0], &p[0] + *payloadLen);
-       std::cout << "K8s payload: " << payload << std::endl;
-    }
+  int res = 1;  
 
-  }*/
-  sinsp_evt_param *parinfo = ev->get_param(0);
-  std::cout << "K8s Param length is: " << parinfo->m_len << std::endl;
-  std::string payload(parinfo->m_val, parinfo->m_len);
-  std::cout << "K8s payload: " << payload << std::endl;
+  sinsp_evt_param *parinfo = ev->get_param(0);  
+  std::string payload(parinfo->m_val, parinfo->m_len);  
   m_k8sEvt.message = payload;
   m_k8sEvt.ts = ev->get_ts();
+  
   Json::Value root;
-  Json::Reader reader;
+  Json::Reader reader;  
   if (reader.parse(payload, root, false)) {
     m_k8sEvt.action = this->getAction(root);
     m_k8sEvt.kind = this->getK8sComponent(root);
@@ -133,6 +121,6 @@ int K8sEventProcessor::handleK8sEvent(sinsp_evt *ev) {
     }
   }
 
-  m_writer->writeK8sEvent(&m_k8sEvt);
+  m_writer->writeK8sEvent(&m_k8sEvt);  
   return res;
 }

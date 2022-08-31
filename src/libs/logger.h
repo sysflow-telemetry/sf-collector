@@ -30,7 +30,6 @@
 #define m_logger
 
 #define CONFIGURE_LOGGER(logConfig) google::InitGoogleLogging(argv[0]);
-
 #define CATCH_LOGGER_EXCEPTION()
 
 #define SF_DEBUG(logger, message) VLOG(1) << message;
