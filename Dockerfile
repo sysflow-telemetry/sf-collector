@@ -193,6 +193,11 @@ ENV WDIR=$wdir
 
 ARG INSTALL_PATH=/usr/local/sysflow
 
+ENV ENABLE_DROP_MODE=0
+ENV ENABLE_PROC_FLOW=0
+ENV FILE_ONLY=0
+ENV FILE_READ_MODE=0
+
 # Install extra packages for tests
 RUN mkdir /tmp/bats && cd /tmp/bats && \
     wget https://github.com/bats-core/bats-core/archive/v${BATS_VERSION}.tar.gz && \
