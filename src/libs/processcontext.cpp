@@ -62,7 +62,7 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
 
   p->proc.tty = mainthread->m_tty;
   sinsp_threadinfo *parent = mainthread->get_parent_thread();
-  
+
   if (parent != nullptr) {
     OID poid;
     parent = parent->is_main_thread() ? parent : parent->get_main_thread();
@@ -117,9 +117,9 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
   ContainerObj *cont = m_containerCxt->getContainer(ti);
   if (cont != nullptr) {
     p->proc.containerId.set_string(cont->cont.id);
-    cont->refs++;    
+    cont->refs++;
   } else {
-    p->proc.containerId.set_null();    
+    p->proc.containerId.set_null();
   }
   return p;
 }
@@ -133,9 +133,9 @@ void ProcessContext::printAncestors(Process *proc) {
     if (p != m_procs.end()) {
       poid = p->second->proc.poid;
       SF_DEBUG(m_logger, "-->" << p->second->proc.oid.hpid << " "
-                              << p->second->proc.oid.createTS << " "
-                              << p->second->proc.exe << " "
-                              << p->second->proc.exeArgs);
+                               << p->second->proc.oid.createTS << " "
+                               << p->second->proc.exe << " "
+                               << p->second->proc.exeArgs);
     } else {
       break;
     }
@@ -184,15 +184,15 @@ void ProcessContext::reupContainer(sinsp_threadinfo *ti, ProcessObj *proc) {
   }
 }
 
-ProcessObj *ProcessContext::getProcess(int64_t pid) {  
+ProcessObj *ProcessContext::getProcess(int64_t pid) {
   ProcessTable::iterator it;
-  
+
   for (it = m_procs.begin(); it != m_procs.end(); it++) {
-    if (it->first->hpid == pid) {  
+    if (it->first->hpid == pid) {
       return it->second;
     }
   }
- 
+
   return nullptr;
 }
 
@@ -204,17 +204,16 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   key.createTS = mt->m_clone_ts;
   key.hpid = mt->m_pid;
   created = true;
-  
-  SF_DEBUG(m_logger, "Get process - PID: " << mt->m_pid << " ts: "
-                                         << mt->m_clone_ts
-                                         << " Exepath: " << mt->m_exepath
-                                         << " Exe: " << mt->m_exe
-                                         << " MTCI " << mt->m_container_id
-                                         << " TICI: " << ti->m_container_id)  
+
+  SF_DEBUG(m_logger,
+           "Get process - PID: " << mt->m_pid << " ts: " << mt->m_clone_ts
+                                 << " Exepath: " << mt->m_exepath << " Exe: "
+                                 << mt->m_exe << " MTCI " << mt->m_container_id
+                                 << " TICI: " << ti->m_container_id)
   ProcessTable::iterator proc = m_procs.find(&key);
   ProcessObj *process = nullptr;
   if (proc != m_procs.end()) {
-    created = false;    
+    created = false;
 
     if (proc->second->written) {
       return proc->second;
@@ -223,7 +222,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     process = proc->second;
     process->proc.state = SFObjectState::REUP;
   }
-  
+
   std::vector<ProcessObj *> processes;
   if (process == nullptr) {
     // use the curretn thread here rather than the main thread because it
@@ -232,7 +231,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   } else { // must make sure the container is in the sysflow file..
     reupContainer(ti, process);
   }
-  
+
   SF_DEBUG(m_logger, "Creating process for writing - PID: "
                          << mt->m_pid << " ts: " << mt->m_clone_ts
                          << " Exepath: " << mt->m_exepath
@@ -251,15 +250,16 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     }
     key.createTS = mt->m_clone_ts;
     key.hpid = mt->m_pid;
-    
-    SF_DEBUG(m_logger, "Parent - PID: " << mt->m_pid << " ts: " << mt->m_clone_ts
+
+    SF_DEBUG(m_logger, "Parent - PID: " << mt->m_pid
+                                        << " ts: " << mt->m_clone_ts
                                         << " Exepath: " << mt->m_exepath
                                         << " Exe: " << mt->m_exe)
     ProcessObj *parent = nullptr;
     ProcessTable::iterator proc2 = m_procs.find(&key);
     if (proc2 != m_procs.end()) {
-      SF_DEBUG(m_logger, "Found parent - PID: " << mt->m_pid << " ts: "
-                                                << mt->m_clone_ts
+      SF_DEBUG(m_logger, "Found parent - PID: " << mt->m_pid
+                                                << " ts: " << mt->m_clone_ts
                                                 << " Exepath: " << mt->m_exepath
                                                 << " Exe: " << mt->m_exe)
       if (proc2->second->written) {
@@ -279,21 +279,21 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     } else {
       reupContainer(mt, parent);
     }
-    
+
     parent->children.insert(processes.back()->proc.oid);
     processes.push_back(parent);
     ct = mt;
     mt = mt->get_parent_thread();
   }
-  
+
   if (mt == nullptr && ct->m_ptid != -1) {
-    SF_DEBUG(m_logger,
-             "Ancestral chain not found through standard way. Searching based on pid.")
+    SF_DEBUG(m_logger, "Ancestral chain not found through standard way. "
+                       "Searching based on pid.")
     ProcessObj *prt = getProcess(ct->m_ptid);
     OID o;
     o.hpid = ct->m_pid;
     o.createTS = ct->m_clone_ts;
-    
+
     while (prt != nullptr) {
       SF_DEBUG(m_logger, "Found parent with PID: " << prt->proc.oid.hpid
                                                    << " Create TS "
@@ -307,11 +307,11 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
       prt->children.insert(o);
       o.hpid = prt->proc.oid.hpid;
       o.createTS = prt->proc.oid.createTS;
-      
+
       if (prt->proc.poid.is_null()) {
         break;
       }
-      
+
       OID poid = prt->proc.poid.get_OID();
       prt = getProcess(&poid);
     }
@@ -345,16 +345,16 @@ ProcessObj *ProcessContext::exportProcess(OID *oid) {
                                                              << oid->createTS);
     return p;
   }
-  
+
   if (!p->proc.containerId.is_null()) {
     m_containerCxt->exportContainer(p->proc.containerId.get_string());
   }
-  
+
   if (!p->written) {
     m_writer->writeProcess(&(p->proc));
     p->written = true;
   }
-  
+
   return p;
 }
 
@@ -368,7 +368,7 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
                   ? utils::getAbsolutePath(mainthread, mainthread->m_exe)
                   : mainthread->m_exepath;
   proc->exeArgs.clear();
-  
+
   int i = 0;
   for (auto it = mainthread->m_args.begin(); it != mainthread->m_args.end();
        ++it) {
@@ -379,7 +379,7 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
     }
     i++;
   }
-  
+
   proc->uid = mainthread->m_user.uid;
   proc->gid = mainthread->m_group.gid;
   proc->userName = mainthread->m_user.name;
@@ -436,12 +436,12 @@ void ProcessContext::clearProcesses() {
 
 void ProcessContext::printStats() {
   SF_DEBUG(m_logger, "# Containers: " << m_containerCxt->getSize()
-                                     << " # Procs: " << m_procs.size());
+                                      << " # Procs: " << m_procs.size());
   for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
     ProcessObj *proc = it->second;
     SF_DEBUG(m_logger, proc->proc.exe << " " << proc->children.size() << " "
-                                     << proc->netflows.size() << " "
-                                     << proc->fileflows.size());
+                                      << proc->netflows.size() << " "
+                                      << proc->fileflows.size());
   }
 }
 
@@ -477,9 +477,10 @@ void ProcessContext::writeProcessAndAncestors(ProcessObj *proc) {
 void ProcessContext::printNetworkFlow(ProcessObj *proc) {
   for (NetworkFlowTable::iterator it = proc->netflows.begin();
        it != proc->netflows.end(); it++) {
-    SF_DEBUG(m_logger, "Netflow: " << it->first.ip1 << " " << it->first.ip2 << " "
-         << it->first.port1 << " " << it->first.port2 << " " << it->first.tid
-         << " " << it->first.fd)
+    SF_DEBUG(m_logger, "Netflow: " << it->first.ip1 << " " << it->first.ip2
+                                   << " " << it->first.port1 << " "
+                                   << it->first.port2 << " " << it->first.tid
+                                   << " " << it->first.fd)
   }
 }
 
@@ -490,7 +491,7 @@ void ProcessContext::clearAllProcesses() {
         !it->second->written) {
       writeProcessAndAncestors(it->second);
     }
-    
+
     for (NetworkFlowTable::iterator nfi = it->second->netflows.begin();
          nfi != it->second->netflows.end(); nfi++) {
       nfi->second->netflow.opFlags |= OP_TRUNCATE;
@@ -498,7 +499,7 @@ void ProcessContext::clearAllProcesses() {
       m_writer->writeNetFlow(&(nfi->second->netflow), &(it->second->proc));
       delete nfi->second;
     }
-    
+
     for (FileFlowTable::iterator ffi = it->second->fileflows.begin();
          ffi != it->second->fileflows.end(); ffi++) {
       ffi->second->fileflow.opFlags |= OP_TRUNCATE;
@@ -508,7 +509,7 @@ void ProcessContext::clearAllProcesses() {
                               &(file->file));
       delete ffi->second;
     }
-    
+
     if (it->second->pfo != nullptr) {
       it->second->pfo->procflow.opFlags |= OP_TRUNCATE;
       it->second->pfo->procflow.endTs = utils::getSysdigTime(m_cxt);
@@ -546,15 +547,15 @@ void ProcessContext::deleteProcess(ProcessObj **proc) {
       p->second->children.erase((*proc)->proc.oid);
     }
   }
-  
+
   if (!(*proc)->proc.containerId.is_null()) {
     m_containerCxt->derefContainer((*proc)->proc.containerId.get_string());
   }
-  
+
   if ((*proc)->pfo != nullptr) {
     removeProcessFromSet(*proc, false);
   }
-  
+
   m_procs.erase(&((*proc)->proc.oid));
   delete *proc;
   *proc = nullptr;
@@ -573,17 +574,17 @@ int ProcessContext::removeProcessFromSet(ProcessObj *proc, bool checkForErr) {
       break;
     }
   }
-  
+
   if (!found && checkForErr) {
     SF_ERROR(m_logger,
              "Cannot find Procflow Object in proc flow set. Deleting. "
              "This should not happen");
   }
-  
+
   if (proc->pfo != nullptr) {
     delete proc->pfo;
     proc->pfo = nullptr;
   }
-  
+
   return removed;
 }

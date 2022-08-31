@@ -59,7 +59,7 @@ public:
                     sysflow::File *) {
     write(flow);
   }
-  
+
   inline void write(SysFlow *flow) {
     if (m_errTimer == 0) {
       avro::encode(*m_encoder, *flow);

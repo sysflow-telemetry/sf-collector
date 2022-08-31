@@ -27,12 +27,12 @@ CREATE_LOGGER(SysFlowProcessor, "sysflow.sysflowprocessor");
 SysFlowProcessor::SysFlowProcessor(context::SysFlowContext *cxt,
                                    writer::SysFlowWriter *writer)
     : m_exit(false) {
-  
+
   m_cxt = cxt;
   time_t start = 0;
   if (m_cxt->getFileDuration() > 0) {
     start = utils::getCurrentTime(m_cxt);
-  }  
+  }
 
   m_statsTime = 0;
   if (writer == nullptr) {
@@ -91,15 +91,15 @@ SysFlowProcessor::~SysFlowProcessor() {
 void SysFlowProcessor::printStats() {
   if (m_cxt->isStatsEnabled()) {
     SF_INFO(m_logger,
-      "Container Table: "
-          << m_containerCxt->getSize() << " K8s Enabled: "
-          << m_cxt->isK8sEnabled() << " Pods Table: "
-          << (m_cxt->isK8sEnabled() ? m_k8sCxt->getSize() : 0)
-          << " Process Table: " << m_processCxt->getSize()
-          << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
-          << " FileFlow Table: " << m_dfPrcr->getFFSize()
-          << " ProcFlow Table: " << m_ctrlPrcr->getSize()
-          << " Num Records Written: " << m_writer->getNumRecs());
+            "Container Table: "
+                << m_containerCxt->getSize()
+                << " K8s Enabled: " << m_cxt->isK8sEnabled() << " Pods Table: "
+                << (m_cxt->isK8sEnabled() ? m_k8sCxt->getSize() : 0)
+                << " Process Table: " << m_processCxt->getSize()
+                << " NetworkFlow Table: " << m_dfPrcr->getNFSize()
+                << " FileFlow Table: " << m_dfPrcr->getFFSize()
+                << " ProcFlow Table: " << m_ctrlPrcr->getSize()
+                << " Num Records Written: " << m_writer->getNumRecs());
   }
 }
 
@@ -115,14 +115,14 @@ void SysFlowProcessor::clearTables() {
 bool SysFlowProcessor::checkAndRotateFile() {
   bool fileRotated = false;
   time_t curTime = utils::getCurrentTime(m_cxt);
-  
+
   if (m_writer->isExpired(curTime) || m_writer->needsReset()) {
-    printStats();          
+    printStats();
     m_writer->reset(curTime);
     clearTables();
     fileRotated = true;
   }
-  
+
   if (m_statsTime > 0) {
     double duration = difftime(curTime, m_statsTime);
     if (duration >= m_cxt->getStatsInterval()) {
@@ -130,7 +130,7 @@ bool SysFlowProcessor::checkAndRotateFile() {
       m_statsTime = curTime;
     }
   }
-  
+
   return fileRotated;
 }
 
@@ -139,21 +139,21 @@ int SysFlowProcessor::checkForExpiredRecords() {
   if (numExpired) {
     SF_DEBUG(m_logger, "Data Flow Records exported: " << numExpired);
   }
-  
+
   int numProcExpired = m_ctrlPrcr->checkForExpiredRecords();
   if (numProcExpired) {
     SF_DEBUG(m_logger, "Data Flow Records exported: " << numProcExpired);
   }
-  
+
   return numExpired + numProcExpired;
 }
 
-int SysFlowProcessor::run() {  
-  int32_t res = 0;    
+int SysFlowProcessor::run() {
+  int32_t res = 0;
   sinsp_evt *ev = nullptr;
-  
+
   try {
-    m_writer->initialize();  
+    m_writer->initialize();
 
     while (true) {
       res = m_cxt->getInspector()->next(&ev);
@@ -173,16 +173,16 @@ int SysFlowProcessor::run() {
                                << m_cxt->getInspector()->getlasterr());
         throw sinsp_exception(m_cxt->getInspector()->getlasterr().c_str());
       }
-      
+
       m_cxt->timeStamp = ev->get_ts();
       if (m_exit) {
         break;
       }
-      
+
       checkForExpiredRecords();
       m_processCxt->checkForDeletion();
       checkAndRotateFile();
-      
+
       if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
         continue;
       }
@@ -209,16 +209,16 @@ int SysFlowProcessor::run() {
         SF_SETUID_EXIT(ev)
         SF_SHUTDOWN_EXIT(ev)
         SF_MMAP_EXIT(ev)
-      case PPME_K8S_E: {        
+      case PPME_K8S_E: {
         if (m_cxt->isK8sEnabled()) {
           m_k8sPrcr->handleK8sEvent(ev);
         }
         break;
       }
       }
-    }  
+    }
     SF_INFO(m_logger, "Exiting scap loop... shutting down");
-    printStats();    
+    printStats();
   } catch (sinsp_exception &e) {
     SF_ERROR(m_logger, "Sysdig exception " << e.what());
     return 1;

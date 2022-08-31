@@ -70,14 +70,14 @@ private:
   void checkModule();
   void openInspector();
 
-public:  
+public:
   SysFlowContext(SysFlowConfig *config);
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
   string getExporterID();
   string getNodeIP();
   SysFlowCallback getCallback() { return m_callback; }
-  inline void setNodeIP(string nodeIP) { m_nodeIP = nodeIP; }  
+  inline void setNodeIP(string nodeIP) { m_nodeIP = nodeIP; }
   inline bool isOffline() { return m_offline; }
   inline bool hasCallback() { return m_callback != nullptr; }
   inline sinsp *getInspector() { return m_inspector; }

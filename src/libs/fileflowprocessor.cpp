@@ -177,9 +177,9 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
 
       } else {
         fd = utils::getFD(ev);
-        if (!utils::isMapAnonymous(ev) && fd != -1) {          
+        if (!utils::isMapAnonymous(ev) && fd != -1) {
           sinsp_threadinfo *ti = ev->get_thread_info();
-          fdinfo = ti->get_fd(fd);          
+          fdinfo = ti->get_fd(fd);
         }
       }
     }
@@ -209,7 +209,7 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   default:
     return 1;
   }
-  
+
   bool created = false;
   // calling get process is important because it ensures that the process object
   // has been written to the sysflow file. This is important for long running
@@ -257,7 +257,7 @@ void FileFlowProcessor::removeFileFlow(ProcessObj *proc, FileObj *file,
 int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj *proc, int64_t tid) {
   SF_DEBUG(m_logger, "CALLING removeAndWriteFFFromProc");
   int deleted = 0;
-  
+
   for (FileFlowTable::iterator ffi = proc->fileflows.begin();
        ffi != proc->fileflows.end(); ffi++) {
     if (tid == -1 || tid == ffi->second->fileflow.tid) {
@@ -285,11 +285,11 @@ int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj *proc, int64_t tid) {
       }
     }
   }
- 
+
   if (tid == -1) {
     proc->fileflows.clear();
   }
-  
+
   return deleted;
 }
 
@@ -297,7 +297,7 @@ int FileFlowProcessor::removeFileFlowFromSet(FileFlowObj **ffo,
                                              bool deleteFileFlow) {
   bool found = false;
   int removed = 0;
-  
+
   for (auto iter = m_dfSet->find(*ffo); iter != m_dfSet->end(); iter++) {
     if (!((*iter)->isNetworkFlow)) {
       auto *foundObj = static_cast<FileFlowObj *>(*iter);
@@ -314,7 +314,7 @@ int FileFlowProcessor::removeFileFlowFromSet(FileFlowObj **ffo,
       }
     }
   }
-  
+
   if (!found) {
     SF_ERROR(m_logger,
              "Cannot find FileFlow Object "
@@ -349,7 +349,7 @@ int FileFlowProcessor::removeFileFlowFromSet(FileFlowObj **ffo,
       SF_ERROR(m_logger, "Deleted File Flow...");
     }
   }
-  
+
   return removed;
 }
 

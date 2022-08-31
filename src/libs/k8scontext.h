@@ -24,10 +24,10 @@
 #include "json/json.h"
 
 #include "datatypes.h"
+#include "logger.h"
 #include "sysflow.h"
 #include "sysflowcontext.h"
 #include "sysflowwriter.h"
-#include "logger.h"
 #include <k8s.h>
 #include <sinsp.h>
 

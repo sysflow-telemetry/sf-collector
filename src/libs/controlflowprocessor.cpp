@@ -47,7 +47,7 @@ inline void ControlFlowProcessor::processFlow(sinsp_evt *ev, OpFlags flag) {
   bool created = false;
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
   ProcessFlowObj *pfo = proc->pfo;
-  if (pfo == nullptr) {    
+  if (pfo == nullptr) {
     processNewFlow(ev, proc, flag);
   } else {
     updateProcFlow(pfo, flag, ev);
@@ -85,7 +85,7 @@ inline void ControlFlowProcessor::updateProcFlow(ProcessFlowObj *pf,
   pf->lastUpdate = utils::getCurrentTime(m_cxt);
   if (flag == OP_CLONE) {
     int res = utils::getSyscallResult(ev);
-    if (res == 0) {      
+    if (res == 0) {
       pf->procflow.numThreadsCloned++;
     } else if (res == -1) {
       pf->procflow.numCloneErrors++;
@@ -95,7 +95,7 @@ inline void ControlFlowProcessor::updateProcFlow(ProcessFlowObj *pf,
   }
 }
 
-inline void ControlFlowProcessor::removeAndWriteProcessFlow(ProcessObj *proc) {  
+inline void ControlFlowProcessor::removeAndWriteProcessFlow(ProcessObj *proc) {
   m_writer->writeProcessFlow(&((proc->pfo)->procflow), &(proc->proc));
   m_processCxt->removeProcessFromSet(proc, true);
   proc->pfo = nullptr;
@@ -181,15 +181,15 @@ int ControlFlowProcessor::checkForExpiredRecords() {
   m_lastCheck = now;
   int i = 0;
   SF_DEBUG(m_logger, "Checking expired PROC Flows!!!....");
-  for (auto it = m_pfSet->begin(); it != m_pfSet->end();) {    
+  for (auto it = m_pfSet->begin(); it != m_pfSet->end();) {
     if (difftime(now, (*it)->pfo->exportTime) >= m_cxt->getNFExportInterval()) {
       SF_DEBUG(m_logger, "Exporting Proc flow!!! ");
       if (difftime(now, (*it)->pfo->lastUpdate) >=
-          m_cxt->getNFExpireInterval()) {        
+          m_cxt->getNFExpireInterval()) {
         delete (*it)->pfo;
         (*it)->pfo = nullptr;
         it = m_pfSet->erase(it);
-      } else {        
+      } else {
         exportProcessFlow((*it)->pfo);
         ProcessObj *p = (*it);
         it = m_pfSet->erase(it);

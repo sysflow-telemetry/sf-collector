@@ -39,7 +39,7 @@ void modutils::checkProbeExistsPermits(std::string &path) {
       throw sfexception::SysFlowException(
           std::string("Error reading probe file system path '") + path +
               std::string("'."),
-          sfexception::ErrorReadingFileSystem);      
+          sfexception::ErrorReadingFileSystem);
     } else if (errno == ENOENT) {
       throw sfexception::SysFlowException(
           std::string("Probe does not appear to exist '") + path +
@@ -64,7 +64,7 @@ void modutils::checkForFalcoKernMod() {
   char *modname = NULL;
   char *state = NULL;
   bool found = false;
-  if ((fd = fopen("/proc/modules", "r")) != NULL) {    
+  if ((fd = fopen("/proc/modules", "r")) != NULL) {
     while ((bytes = getline(&line, &len, fd)) != -1) {
       modname = strstr(line, FALCO_STR);
       if (modname && modname == line) {

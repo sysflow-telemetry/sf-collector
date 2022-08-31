@@ -116,7 +116,7 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
   bool created = false;
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
   sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
-  
+
   FileObj *file = nullptr;
   if (fdinfo != nullptr) {
     file = m_fileCxt->getFile(ev, fdinfo, SFObjectState::CREATED, created);

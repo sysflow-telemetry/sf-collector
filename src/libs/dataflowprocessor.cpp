@@ -94,16 +94,16 @@ void DataFlowProcessor::printFlowStats() {
 
 int DataFlowProcessor::checkForExpiredRecords() {
   time_t now = utils::getCurrentTime(m_cxt);
-  
+
   if (m_lastCheck == 0) {
     m_lastCheck = now;
     return 0;
   }
-  
+
   if (difftime(now, m_lastCheck) < 1.0) {
     return 0;
   }
-  
+
   m_lastCheck = now;
   int i = 0;
   SF_DEBUG(m_logger, "Checking expired Flows!!!....");

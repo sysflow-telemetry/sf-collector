@@ -47,7 +47,8 @@ bool K8sContext::exportPod(const string &id) {
   auto pod = m_pods.find(id);
   if (pod != m_pods.end()) {
     if (!pod->second->written) {
-      SF_DEBUG(m_logger, "Writing pod marked not written " << pod->second->pod.name)
+      SF_DEBUG(m_logger,
+               "Writing pod marked not written " << pod->second->pod.name)
       m_writer->writePod(&(pod->second->pod));
       pod->second->written = true;
       exprt = true;
@@ -78,16 +79,16 @@ std::shared_ptr<PodObj> K8sContext::createPod(const k8s_pod_t *p,
   for (auto it = labels.begin(); it != labels.end(); it++) {
     pod->pod.labels.insert((*it));
   }
-  
+
   auto selectors = p->get_selectors();
   for (auto it = selectors.begin(); it != selectors.end(); it++) {
     pod->pod.selectors.insert((*it));
   }
-    
+
   const k8s_state_t::pod_service_map &podServices =
       k8sState.get_pod_service_map();
-  
-  auto range = podServices.equal_range(p->get_uid());   
+
+  auto range = podServices.equal_range(p->get_uid());
   for (auto it = range.first; it != range.second; it++) {
     sysflow::Service srv;
     const k8s_service_t *service = it->second;
@@ -95,8 +96,8 @@ std::shared_ptr<PodObj> K8sContext::createPod(const k8s_pod_t *p,
     srv.id = service->get_uid();
     srv.namespace_ = service->get_namespace();
     utils::strToIP(service->get_cluster_ip().c_str(), srv.clusterIP);
-    
-    auto ports = service->get_port_list();    
+
+    auto ports = service->get_port_list();
     for (auto i = ports.begin(); i != ports.end(); i++) {
       sysflow::Port port;
       port.port = (*i).m_port;
@@ -105,9 +106,9 @@ std::shared_ptr<PodObj> K8sContext::createPod(const k8s_pod_t *p,
       port.nodePort = (*i).m_node_port;
       srv.portList.push_back(port);
     }
-  
+
     pod->pod.services.push_back(srv);
-  }  
+  }
   return pod;
 }
 
@@ -123,13 +124,13 @@ std::shared_ptr<PodObj> K8sContext::getPod(sinsp_threadinfo *ti) {
 
   const k8s_pod_t *p = k8sState.get_pod(ti->m_container_id);
   if (p == nullptr) {
-    SF_DEBUG(m_logger, "No pod for container " << ti->m_container_id)              
+    SF_DEBUG(m_logger, "No pod for container " << ti->m_container_id)
     return pod;
   }
-    
+
   auto pitr = m_pods.find(p->get_uid());
   if (pitr != m_pods.end()) {
-    if (pitr->second->written) {      
+    if (pitr->second->written) {
       return pitr->second;
     }
     pod = pitr->second;
@@ -138,30 +139,28 @@ std::shared_ptr<PodObj> K8sContext::getPod(sinsp_threadinfo *ti) {
   if (pod == nullptr) {
     pod = createPod(p, k8sState);
   }
-  
+
   if (pod == nullptr) {
     return nullptr;
   }
-  
-  m_pods[p->get_uid()] = pod;  
-  m_writer->writePod(&(pod->pod));  
+
+  m_pods[p->get_uid()] = pod;
+  m_writer->writePod(&(pod->pod));
   pod->written = true;
   return pod;
 }
 
 void K8sContext::clearPods() {
   for (auto it = m_pods.begin(); it != m_pods.end(); ++it) {
-    if (it->second->refs == 0) {      
+    if (it->second->refs == 0) {
       m_pods.erase(it);
-    } else {      
+    } else {
       it->second->written = false;
     }
   }
 }
 
-void K8sContext::clearAllPods() { 
-  m_pods.clear(); 
-}
+void K8sContext::clearAllPods() { m_pods.clear(); }
 
 void K8sContext::updateAndWritePodState(std::string &uid) {
   SF_DEBUG(m_logger, "Update and write pod state for modified pod: " << uid)
@@ -169,28 +168,29 @@ void K8sContext::updateAndWritePodState(std::string &uid) {
       m_cxt->getInspector()->m_k8s_client->get_state();
   const k8s_pod_t *pod =
       k8sState.get_component<k8s_pods, k8s_pod_t>(k8sState.get_pods(), uid);
-  
+
   if (pod != nullptr) {
     std::shared_ptr<PodObj> podO = getPod(uid);
     if (podO == nullptr) {
-      SF_DEBUG(m_logger,
+      SF_DEBUG(
+          m_logger,
           << "Unable to find pod object in cache. Ignoring pod modification: "
           << uid)
       return;
     }
-    
+
     std::shared_ptr<PodObj> podObj = createPod(pod, k8sState);
     if (podObj != nullptr) {
       podObj->refs = podO->refs;
-      m_pods[pod->get_uid()] = podObj;      
+      m_pods[pod->get_uid()] = podObj;
       m_writer->writePod(&(podObj->pod));
       podObj->written = true;
     } else {
       SF_DEBUG(m_logger, "Unable to find pod with uid" << uid)
     }
   } else {
-    SF_DEBUG(m_logger, "Unable to find pod with uid " << uid
-              << " in global k8s state. ")
+    SF_DEBUG(m_logger,
+             "Unable to find pod with uid " << uid << " in global k8s state. ")
   }
 }
 
@@ -210,8 +210,8 @@ void K8sContext::updateCompState(sysflow::K8sAction action,
         break;
       }
       default: {
-        SF_DEBUG(m_logger, "Updates on k8s component type no supported: "
-                  << (int)comp)
+        SF_DEBUG(m_logger,
+                 "Updates on k8s component type no supported: " << (int)comp)
       }
       }
     }
