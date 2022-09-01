@@ -151,12 +151,12 @@ int SysFlowProcessor::checkForExpiredRecords() {
 int SysFlowProcessor::run() {
   int32_t res = 0;
   sinsp_evt *ev = nullptr;
-  
+
   m_writer->initialize();
-  
+
   while (true) {
     res = m_cxt->getInspector()->next(&ev);
-    if (res == SCAP_TIMEOUT) {    
+    if (res == SCAP_TIMEOUT) {
       if (m_exit) {
         break;
       }
@@ -173,21 +173,21 @@ int SysFlowProcessor::run() {
                              << m_cxt->getInspector()->getlasterr());
       throw sinsp_exception(m_cxt->getInspector()->getlasterr().c_str());
     }
-    
+
     m_cxt->timeStamp = ev->get_ts();
-    
+
     if (m_exit) {
       break;
     }
-    
+
     checkForExpiredRecords();
     m_processCxt->checkForDeletion();
     checkAndRotateFile();
-    
+
     if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
       continue;
     }
-    
+
     if (m_cxt->getInspector()->m_k8s_client != nullptr &&
         m_cxt->getInspector()->m_k8s_client->get_capture_events().size() > 0) {
       SF_INFO(m_logger,
@@ -195,7 +195,7 @@ int SysFlowProcessor::run() {
                                       ->m_k8s_client->get_capture_events()
                                       .size());
     }
-    
+
     switch (ev->get_type()) {
       SF_EXECVE_ENTER()
       SF_EXECVE_EXIT(ev)
@@ -226,10 +226,10 @@ int SysFlowProcessor::run() {
     }
     }
   }
-  
+
   SF_INFO(m_logger, "Exiting scap loop... shutting down");
-  printStats();  
-  
+  printStats();
+
   return 0;
 }
 
