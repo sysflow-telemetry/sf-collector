@@ -190,8 +190,8 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   }
 
   if ((fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket())) {
-    SF_WARN(m_logger,
-            "handleFileFlowEvent cannot handle ip sockets, ignoring...");
+    SF_DEBUG(m_logger,
+             "handleFileFlowEvent cannot handle ip sockets, ignoring...");
     return 1;
   }
   char restype = fdinfo->get_typechar();

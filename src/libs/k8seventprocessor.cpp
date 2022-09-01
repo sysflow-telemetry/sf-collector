@@ -56,10 +56,10 @@ sysflow::K8sComponent K8sEventProcessor::getK8sComponent(Json::Value &root) {
     } else if (type == "EventList") {
       comp = sysflow::K8sComponent::K8S_EVENTS;
     } else {
-      SF_WARN(m_logger, "Unknown k8s component type " << type << ". Ignoring")
+      SF_DEBUG(m_logger, "Unknown k8s component type " << type << ". Ignoring")
     }
   } else {
-    SF_WARN(m_logger, "Unknown k8s component type not found in JSON")
+    SF_DEBUG(m_logger, "Unknown k8s component type not found in JSON")
   }
   return comp;
 }

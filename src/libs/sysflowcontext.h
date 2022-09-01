@@ -52,7 +52,6 @@ enum ProbeType { EBPF, KMOD, NO_PROBE };
 
 class SysFlowContext {
 private:
-  // time_t m_start{};
   int m_nfExportInterval;
   int m_nfExpireInterval;
   bool m_offline;
@@ -92,7 +91,6 @@ public:
   inline int getFileDuration() { return m_config->rotateInterval; }
   inline bool isFilterContainers() { return m_config->filterContainers; }
   inline bool isStatsEnabled() { return m_config->enableStats; }
-  /*inline void enableStats() { m_stats = true; }*/
   inline bool isProcessFlowEnabled() { return m_config->enableProcessFlow; }
   inline int getStatsInterval() { return m_statsInterval; }
   inline bool isFileOnly() { return m_config->fileOnly; }

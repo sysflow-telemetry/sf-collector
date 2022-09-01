@@ -82,7 +82,7 @@ public:
         int res = connectSocket();
         if (res == 0) {
           SF_WARN(m_logger,
-                  "Successful reconnected to socket " << m_sockPath.c_str())
+                  "Successfully reconnected to socket " << m_sockPath.c_str())
           m_errTimer = 0;
           m_reconnectInterval = CONNECT_INTERVAL;
           m_reset = true;
@@ -92,7 +92,6 @@ public:
             SF_ERROR(
                 m_logger,
                 "Unable to connect to domain socket within interval. Exiting!");
-            // exit(EXIT_FAILURE);
             pid_t myPid = getpid();
             kill(myPid, SIGINT);
           }

@@ -56,8 +56,8 @@ ContainerObj *ContainerContext::createContainer(sinsp_threadinfo *ti) {
       m_cxt->getInspector()->m_container_manager.get_container(
           ti->m_container_id);
   if (!container) {
-    SF_WARN(m_logger, "Thread has container id, but no container object. ID: "
-                          << ti->m_container_id)
+    SF_DEBUG(m_logger, "Thread has container id, but no container object. ID: "
+                           << ti->m_container_id)
     auto *cont = new ContainerObj();
     cont->cont.name = INCOMPLETE;
     cont->cont.image = INCOMPLETE_IMAGE;

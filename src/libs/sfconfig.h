@@ -85,7 +85,7 @@ struct SysFlowConfig {
   // Callback function, required for when using a custom callback function for
   // SysFlow processing.
   SysFlowCallback callback;
-  // Debug mode turns on debug logging inside the library.
+  // Debug mode turns on debug logging inside libsinsp.
   bool debugMode;
   // K8s API URL used to retrieve K8s state and K8s events (experimental).
   std::string k8sAPIURL;

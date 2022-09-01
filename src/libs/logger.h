@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -32,10 +32,10 @@
 #define CONFIGURE_LOGGER(logConfig) google::InitGoogleLogging(argv[0]);
 #define CATCH_LOGGER_EXCEPTION()
 
+#define SF_TRACE(logger, message) VLOG(2) << message;
 #define SF_DEBUG(logger, message) VLOG(1) << message;
-#define SF_WARN(logger, message) LOG(WARNING) << message;
 #define SF_INFO(logger, message) LOG(INFO) << message;
+#define SF_WARN(logger, message) LOG(WARNING) << message;
 #define SF_ERROR(logger, message) LOG(ERROR) << message;
 
-#define IS_DEBUG_ENABLED(logger) VLOG_IS_ON(1)
 #endif

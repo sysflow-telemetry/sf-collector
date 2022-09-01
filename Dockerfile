@@ -117,8 +117,13 @@ ENV DEBUG=$debug
 ARG gllogtostderr=1
 ENV GLOG_logtostderr=$gllogtostderr
 
+# Verbose logging (GLOG_minloglevel must be 0): 1 (DEBUG), 2 (TRACE)
 ARG glv=
 ENV GLOG_v=$glv
+
+# 0 (INFO), 1 (WARNING), 2 (ERROR)
+ARG glminlevel=0
+ENV GLOG_minloglevel=$glminlevel
 
 ARG INSTALL_PATH=/usr/local/sysflow
 
