@@ -21,6 +21,7 @@
 #define _SF_CONFIG_LIBS_
 
 #include "sysflow.h"
+#include <stdint.h>
 
 using SysFlowCallback = std::function<void(
     sysflow::SFHeader *, sysflow::Container *, sysflow::Process *,
@@ -84,7 +85,7 @@ struct SysFlowConfig {
   // Callback function, required for when using a custom callback function for
   // SysFlow processing.
   SysFlowCallback callback;
-  // Debug mode turns on debug logging inside the library.
+  // Debug mode turns on debug logging inside libsinsp.
   bool debugMode;
   // K8s API URL used to retrieve K8s state and K8s events (experimental).
   std::string k8sAPIURL;
@@ -95,6 +96,13 @@ struct SysFlowConfig {
   // Consumer mode - no reads/writes/sends/recvs/closes are collected for TCP
   // and file sessions (not fully implemented)
   bool enableConsumerMode;
+  // This is the dimension that a single buffer in our drivers will have. (BPF,
+  // kmod, modern BPF) Please note:
+  // - This number is expressed in bytes.
+  // - This number must be a multiple of your system page size, otherwise the
+  // allocation will fail.
+  // - If you leave `0`, every driver will set its internal default dimension.
+  uint64_t singleBufferDimension;
 }; // SysFlowConfig
 
 #endif

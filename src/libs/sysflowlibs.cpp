@@ -52,6 +52,7 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   conf->debugMode = false;
   conf->enableConsumerMode = false;
   conf->moduleChecks = true;
+  conf->singleBufferDimension = 0;
   return conf;
 }
 

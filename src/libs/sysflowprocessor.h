@@ -59,10 +59,11 @@ private:
   dataflow::DataFlowProcessor *m_dfPrcr;
   sfk8s::K8sContext *m_k8sCxt;
   k8sevent::K8sEventProcessor *m_k8sPrcr;
+  time_t m_statsTime;
   void clearTables();
   int checkForExpiredRecords();
   bool checkAndRotateFile();
-  time_t m_statsTime;
+  void printStats();
 };
 } // namespace sysflowprocessor
 

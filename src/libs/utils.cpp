@@ -130,8 +130,8 @@ int64_t utils::getSyscallResult(sinsp_evt *ev) {
       res = *reinterpret_cast<int64_t *>(p->m_val);
       break;
     default:
-      SF_WARN(m_logger, "Syscall result not of type pid!! Type: "
-                            << param->type << " Name: " << param->name);
+      SF_DEBUG(m_logger, "Syscall result not of type pid! Type: "
+                             << param->type << " Name: " << param->name);
       break;
     }
   }
@@ -280,7 +280,7 @@ fs::path utils::getCanonicalPath(const string &fileName) {
   try {
     p = fs::weakly_canonical(p);
   } catch (...) {
-    SF_WARN(m_logger, "Unable to compute canonical path from " << fileName);
+    SF_DEBUG(m_logger, "Unable to compute canonical path from " << fileName);
   }
   return p;
 }

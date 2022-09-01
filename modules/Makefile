@@ -35,7 +35,11 @@ all: init \
 init:
 	git submodule update --init --recursive --force
 	cd falco && git checkout $(FALCO_VERSION)
+ifneq ($(FALCO_LIBS_PR),)
+	cd falco-libs && git fetch origin pull/$(FALCO_LIBS_PR)/head:pull_$(FALCO_LIBS_PR) && git checkout pull_$(FALCO_LIBS_PR)
+else
 	cd falco-libs && git checkout $(FALCO_LIBS_VERSION)
+endif
 	cd avro && git checkout $(AVRO_VERSION)
 	cd elfutils && git checkout $(ELFUTILS_VERSION)
 	cd glog && git checkout $(GLOG_VERSION)
@@ -107,6 +111,7 @@ falcolibs/package:
 	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
 	mkdir -p include/userspace/libsinsp/filter && cp ../userspace/libsinsp/filter/*.h include/userspace/libsinsp/filter/ && \
 	mkdir -p include/userspace/libsinsp/include && cp ../userspace/libsinsp/include/*.h include/userspace/libsinsp/include/ && \
+	mkdir -p include/userspace/plugin && cp ../userspace/plugin/*.h include/userspace/plugin/ && \
 	mkdir -p include/userspace/libscap && cd .. && find userspace/libscap -name '*.h' -exec cp -r --parents '{}' build/include \; && cd build && \
 	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
 	cp -r tbb-prefix/src/tbb/include/serial  include/ && \
@@ -127,8 +132,8 @@ falcolibs/package:
 	sed -i -E "s/@DRIVER_VERSION@/\"$(FALCO_LIBS_VERSION)\"/" bin/falco-driver-loader && \
 	sed -i -E "s/@FALCO_VERSION@/\"$(FALCO_VERSION)\"/" bin/falco-driver-loader && \
 	sed -i -E "s#@DRIVERS_REPO@#\"$(DRIVERS_REPO)\"#" bin/falco-driver-loader && \
+    cp re2-prefix/build/libre2.a lib/ && \
 	cp grpc-prefix/src/grpc/*.a lib/ && \
-	cp grpc-prefix/src/grpc/third_party/re2/libre2.a lib/ && \
 	find grpc-prefix/src/grpc/third_party/abseil-cpp -name '*.a' -exec cp '{}' lib \; && \
 	cp c-ares-prefix/src/c-ares/target/lib/libcares.a lib/ && \
 	cp b64-prefix/src/b64/src/libb64.a lib/ && \

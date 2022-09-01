@@ -212,7 +212,6 @@
 
 #define SF_CHMOD_EXIT(EV)                                                      \
   case PPM_SC_CHMOD: {                                                         \
-    cout << "GOT A CHMOD" << endl;                                             \
     break;                                                                     \
   }
 

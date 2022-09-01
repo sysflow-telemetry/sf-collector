@@ -22,7 +22,6 @@
 #include "sysflowexception.h"
 #include <limits.h>
 #include <stdlib.h>
-//#include <sys/utsname.h>
 #define FALCO_STR "falco "
 #define FALCO_STATE "Live"
 
@@ -41,10 +40,6 @@ void modutils::checkProbeExistsPermits(std::string &path) {
           std::string("Error reading probe file system path '") + path +
               std::string("'."),
           sfexception::ErrorReadingFileSystem);
-      //} else if (errno == ELOOP) {
-      // printf("Too many symbolic links '%s'\n", path);
-      //} else if (errno == ENAMETOOLONG) {
-      // printf("Name path long '%s'\n", path);
     } else if (errno == ENOENT) {
       throw sfexception::SysFlowException(
           std::string("Probe does not appear to exist '") + path +
@@ -70,7 +65,6 @@ void modutils::checkForFalcoKernMod() {
   char *state = NULL;
   bool found = false;
   if ((fd = fopen("/proc/modules", "r")) != NULL) {
-    // nfs      170109  0 -          Live 0x129b0000
     while ((bytes = getline(&line, &len, fd)) != -1) {
       modname = strstr(line, FALCO_STR);
       if (modname && modname == line) {
@@ -95,12 +89,3 @@ void modutils::checkForFalcoKernMod() {
     free(line);
   }
 }
-
-/*std::string modutils::getKernelModuleName() {
-  struct utsname buffer;
-  string kernelModule = "/var/lib/dkms/falco/";
-  //KO_FILE="/var/lib/dkms/${DRIVER_NAME}/${DRIVER_VERSION}/${KERNEL_RELEASE}/${ARCH}/module/${DRIVER_NAME}"
-  if (uname(&buffer) >= 0) {
-
-  }
-}*/

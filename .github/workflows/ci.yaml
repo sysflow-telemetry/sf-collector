@@ -153,13 +153,15 @@ jobs:
         with:
           context: .
           push: true
-          file: Dockerfile.ubi.amd64
+          file: Dockerfile.driver.amd64
           tags: |
             ${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}:${{ env.DRIVER_TAG }}
             ghcr.io/${{ env.GH_ORGANIZATION }}/ubi:${{ env.DRIVER_TAG }}
           target: driver
           build-args: |
             UBI_VER=${{ env.UBI_VERSION }}
+            FALCO_VER=${{ env.FALCO_VERSION }}
+            FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }}
             BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
             VERSION=${{ steps.args.outputs.branch }}
             RELEASE=${{ steps.args.outputs.sha_short }}

@@ -86,6 +86,16 @@ clean:
 	make -C modules clean
 	cd scripts/cpack && ./clean.sh
 
+.PHONY: init
+init: 
+	make -C modules init
+
+.PHONY: build
+build: init docker-base-build docker-mods-build docker-driver-build docker-libs-build docker-collector-build docker-runtime-build
+
+.PHONY: build/musl
+build/musl: init docker-base-build/musl docker-mods-build/musl docker-driver-build docker-libs-build/musl docker-collector-build/musl docker-runtime-build/musl
+
 .PHONY: docker-base-build
 docker-base-build:
 	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg UBI_VER=${UBI_VERSION} --target base -t sysflowtelemetry/ubi:base-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
@@ -104,7 +114,7 @@ docker-mods-build/musl:
 
 .PHONY: docker-driver-build
 docker-driver-build:
-	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg UBI_VER=${UBI_VERSION} --target driver -t sysflowtelemetry/ubi:driver-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.ubi.amd64 . )
+	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target driver -t sysflowtelemetry/ubi:driver-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.driver.amd64 . )
 
 .PHONY: docker-libs-build
 docker-libs-build:
@@ -164,6 +174,9 @@ help:
 	@echo "... package"
 	@echo "... install"
 	@echo "... uninstall"
+	@echo "... init"
+	@echo "... build"
+	@echo "... build/musl"
 	@echo "... docker-base-build"
 	@echo "... docker-base-build/musl"
 	@echo "... docker-mods-build"

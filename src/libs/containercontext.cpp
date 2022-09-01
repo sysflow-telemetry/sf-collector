@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -56,8 +56,8 @@ ContainerObj *ContainerContext::createContainer(sinsp_threadinfo *ti) {
       m_cxt->getInspector()->m_container_manager.get_container(
           ti->m_container_id);
   if (!container) {
-    SF_WARN(m_logger, "Thread has container id, but no container object. ID: "
-                          << ti->m_container_id)
+    SF_DEBUG(m_logger, "Thread has container id, but no container object. ID: "
+                           << ti->m_container_id)
     auto *cont = new ContainerObj();
     cont->cont.name = INCOMPLETE;
     cont->cont.image = INCOMPLETE_IMAGE;
@@ -65,24 +65,27 @@ ContainerObj *ContainerContext::createContainer(sinsp_threadinfo *ti) {
     cont->incomplete = true;
     return cont;
   }
+
   auto *cont = new ContainerObj();
   setContainer(&cont, container);
   if (cont->cont.name.compare(INCOMPLETE) == 0 ||
       cont->cont.image.compare(INCOMPLETE_IMAGE) == 0) {
     cont->incomplete = true;
   }
+
   if (m_cxt->isK8sEnabled()) {
-    std::cout << "Get pod for container" << std::endl;
     std::shared_ptr<PodObj> pod = m_k8sCxt->getPod(ti);
     if (pod != nullptr) {
-      std::cout << "setting pod id to " << pod->pod.id << " for container "
-                << ti->m_container_id << std::endl;
+      SF_DEBUG(m_logger, "Setting pod id to " << pod->pod.id
+                                              << " for container "
+                                              << ti->m_container_id)
       cont->cont.podId.set_string(pod->pod.id);
       pod->refs++;
     } else {
       cont->cont.podId.set_null();
     }
   }
+
   return cont;
 }
 
@@ -125,12 +128,14 @@ ContainerObj *ContainerContext::getContainer(sinsp_threadinfo *ti) {
   if (ti->m_container_id.empty()) {
     return nullptr;
   }
+
   ContainerObj *ct = nullptr;
   ContainerTable::iterator cont = m_containers.find(ti->m_container_id);
   if (cont != m_containers.end()) {
     if (cont->second->written && !cont->second->incomplete) {
       return cont->second;
     }
+
     const sinsp_container_info::ptr_t container =
         m_cxt->getInspector()->m_container_manager.get_container(
             ti->m_container_id);
@@ -139,6 +144,7 @@ ContainerObj *ContainerContext::getContainer(sinsp_threadinfo *ti) {
       // delete cont->second;
       return cont->second;
     }
+
     if (cont->second->written && cont->second->incomplete) {
       SF_DEBUG(m_logger,
                "Container is written and includes name: " << container->m_name);
@@ -149,9 +155,11 @@ ContainerObj *ContainerContext::getContainer(sinsp_threadinfo *ti) {
         cont->second->incomplete = false;
       }
     }
+
     ct = cont->second;
     setContainer(&ct, container);
   }
+
   if (ct == nullptr) {
     ct = createContainer(ti);
   } else {
@@ -159,12 +167,15 @@ ContainerObj *ContainerContext::getContainer(sinsp_threadinfo *ti) {
       reupPod(ti, ct);
     }
   }
+
   if (ct == nullptr) {
     return nullptr;
   }
+
   m_containers[ct->cont.id] = ct;
   m_writer->writeContainer(&(ct->cont));
   ct->written = true;
+
   return ct;
 }
 
@@ -172,16 +183,19 @@ void ContainerContext::reupPod(sinsp_threadinfo *ti, ContainerObj *cont) {
   if (!m_cxt->isK8sEnabled()) {
     return;
   }
+
   string podId = "";
   if (!cont->cont.podId.is_null()) {
     podId = cont->cont.podId.get_string();
   }
+
   if (!podId.empty()) {
     auto pod1 = m_k8sCxt->getPod(podId);
     if (pod1 != nullptr) {
       pod1->refs--;
     }
   }
+
   auto pod = m_k8sCxt->getPod(ti);
   if (pod != nullptr) {
     cont->cont.podId.set_string(pod->pod.id);

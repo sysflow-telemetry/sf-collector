@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -70,6 +70,7 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt *ev, OpFlags flag) {
       return 1;
     }
   }
+
   if (fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket()) {
     return m_netflowPrcr->handleNetFlowEvent(ev, flag);
   } else if (IS_FILE_EVT(flag)) {
@@ -77,6 +78,7 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt *ev, OpFlags flag) {
   } else {
     return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
   }
+
   return 2;
 }
 
@@ -87,18 +89,21 @@ int DataFlowProcessor::removeAndWriteDFFromProc(ProcessObj *proc, int64_t tid) {
 
 void DataFlowProcessor::printFlowStats() {
   m_procCxt->printStats();
-  SF_INFO(m_logger, "DF Set: " << m_dfSet.size());
+  SF_DEBUG(m_logger, "DF Set: " << m_dfSet.size());
 }
 
 int DataFlowProcessor::checkForExpiredRecords() {
   time_t now = utils::getCurrentTime(m_cxt);
+
   if (m_lastCheck == 0) {
     m_lastCheck = now;
     return 0;
   }
+
   if (difftime(now, m_lastCheck) < 1.0) {
     return 0;
   }
+
   m_lastCheck = now;
   int i = 0;
   SF_DEBUG(m_logger, "Checking expired Flows!!!....");

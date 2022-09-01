@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
 
   try {
     CONFIGURE_LOGGER(logProps);
-    SF_DEBUG(logger, "Starting sysporter...");
+    SF_INFO(logger, "Starting the SysFlow Collector...");
     g_driver = new sysflowlibscpp::SysFlowDriver(g_config);
     int ret = g_driver->run();
     delete g_driver;

@@ -54,11 +54,13 @@ MUSL ?= 0
 # Compiler options
 CXX = g++
 LIBS = ../libs/libsysflow.a \
-	   $(FALCOLOCALLIBPREFIX)/libsinsp.a $(FALCOLOCALLIBPREFIX)/libscap.a $(FALCOLOCALLIBPREFIX)/libscap_engine_bpf.a $(FALCOLOCALLIBPREFIX)/libscap_engine_kmod.a \
+	   $(FALCOLOCALLIBPREFIX)/libsinsp.a \
+       $(FALCOLOCALLIBPREFIX)/libscap.a $(FALCOLOCALLIBPREFIX)/libscap_engine_bpf.a $(FALCOLOCALLIBPREFIX)/libscap_engine_kmod.a \
+	   $(FALCOLOCALLIBPREFIX)/libscap_engine_savefile.a $(FALCOLOCALLIBPREFIX)/libdriver_event_schema.a \
 	   $(FALCOLOCALLIBPREFIX)/libscap_engine_noop.a $(FALCOLOCALLIBPREFIX)/libscap_engine_source_plugin.a $(FALCOLOCALLIBPREFIX)/libscap_engine_gvisor.a \
 	   $(FALCOLOCALLIBPREFIX)/libscap_engine_nodriver.a $(FALCOLOCALLIBPREFIX)/libscap_engine_udig.a $(FALCOLOCALLIBPREFIX)/libscap_event_schema.a \
        $(FALCOLOCALLIBPREFIX)/libscap_engine_util.a $(FALCOLOCALLIBPREFIX)/libjq.a $(FALCOLOCALLIBPREFIX)/libonig.a \
-       $(FALCOLOCALLIBPREFIX)/libb64.a $(FALCOLOCALLIBPREFIX)/libcurl.a $(FALCOLOCALLIBPREFIX)/libtbb.a $(FALCOLOCALLIBPREFIX)/libgrpc++.a \
+	   $(FALCOLOCALLIBPREFIX)/libb64.a $(FALCOLOCALLIBPREFIX)/libcurl.a $(FALCOLOCALLIBPREFIX)/libtbb.a $(FALCOLOCALLIBPREFIX)/libgrpc++.a \
        $(FALCOLOCALLIBPREFIX)/libgrpc++_alts.a $(FALCOLOCALLIBPREFIX)/libgrpc++_reflection.a  $(FALCOLOCALLIBPREFIX)/libgrpc++_error_details.a \
        $(FALCOLOCALLIBPREFIX)/libgrpc++_unsecure.a  $(FALCOLOCALLIBPREFIX)/libgrpc_plugin_support.a $(FALCOLOCALLIBPREFIX)/libgrpcpp_channelz.a \
        $(FALCOLOCALLIBPREFIX)/libgrpc.a $(FALCOLOCALLIBPREFIX)/libgpr.a $(FALCOLOCALLIBPREFIX)/libabsl_synchronization.a \

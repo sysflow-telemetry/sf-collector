@@ -1,4 +1,4 @@
-/** Copyright (C) 2019 IBM Corporation.
+/** Copyright (C) 2022 IBM Corporation.
  *
  * Authors:
  * Frederico Araujo <frederico.araujo@ibm.com>
@@ -44,16 +44,14 @@
 #define SF_K8S_API_CERT "SF_K8S_API_CERT"
 #define SF_PROBE_BPF_FILEPATH ".falco/falco-bpf.o"
 #define SF_BPF_ENV_VARIABLE "FALCO_BPF_PROBE"
+#define DRIVER_HOME "HOME"
 
-// typedef void (*SysFlowCallback)(sysflow::SFHeader*, sysflow::Container*,
-// sysflow::Process*, sysflow::File*, sysflow::File*, sysflow::SysFlow*);
 namespace context {
 
 enum ProbeType { EBPF, KMOD, NO_PROBE };
 
 class SysFlowContext {
 private:
-  // time_t m_start{};
   int m_nfExportInterval;
   int m_nfExpireInterval;
   bool m_offline;
@@ -69,11 +67,9 @@ private:
   DEFINE_LOGGER();
   void detectProbeType();
   void checkModule();
+  void openInspector();
 
 public:
-  /*SysFlowContext(bool fCont, int fDur, string oFile, string socketFile,
-                 const string &sFile, uint32_t samplingRatio, string exporterID,
-                 string filter, string criPath, int criTO);*/
   SysFlowContext(SysFlowConfig *config);
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
@@ -81,15 +77,6 @@ public:
   string getNodeIP();
   SysFlowCallback getCallback() { return m_callback; }
   inline void setNodeIP(string nodeIP) { m_nodeIP = nodeIP; }
-  /*inline void setReadFileMode(int readFile) { m_fileRead = readFile; }
-  inline void enableFileOnly() { m_fileOnly = true; }
-  inline void enableProcessFlow() { m_processFlow = true; }
-  inline void enableDropMode() {
-  m_inspector->start_dropping_mode(m_samplingRatio); } inline void
-  enableDebugMode() { m_inspector->set_log_stderr();
-    m_inspector->set_min_log_severity(sinsp_logger::severity::SEV_DEBUG);
-  }
-  inline void setCallback(SysFlowCallback callback) { m_callback = callback; }*/
   inline bool isOffline() { return m_offline; }
   inline bool hasCallback() { return m_callback != nullptr; }
   inline sinsp *getInspector() { return m_inspector; }
@@ -104,7 +91,6 @@ public:
   inline int getFileDuration() { return m_config->rotateInterval; }
   inline bool isFilterContainers() { return m_config->filterContainers; }
   inline bool isStatsEnabled() { return m_config->enableStats; }
-  /*inline void enableStats() { m_stats = true; }*/
   inline bool isProcessFlowEnabled() { return m_config->enableProcessFlow; }
   inline int getStatsInterval() { return m_statsInterval; }
   inline bool isFileOnly() { return m_config->fileOnly; }
