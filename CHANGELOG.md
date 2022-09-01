@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Add example consumer of libsysflow
 - Add support for k8s pod and event objects
 - Add build pipeline and static libraries based on musl
+- Add better exception handling with error codes
 
 ### Changed
 
