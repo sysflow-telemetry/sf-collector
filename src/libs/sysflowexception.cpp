@@ -18,8 +18,59 @@
  **/
 
 #include "sysflowexception.h"
+#include "scap.h"
 
-sfexception::SysFlowException::SysFlowException(std::string message) {
+sfexception::SysFlowException::SysFlowException(std::string message)
+    : std::runtime_error(message) {
   setErrorCode(message);
 }
-void sfexception::SysFlowException::setErrorCode(std::string message) {}
+
+void sfexception::SysFlowException::setErrorCode(std::string message) {
+  m_code = LibsError;
+  std::size_t found = message.find("Driver supports API version");
+  if (found != std::string::npos) {
+    m_code = DriverLibsMismatch;
+    return;
+  }
+
+  found = message.find("missing api_version section");
+  if (found != std::string::npos) {
+    m_code = DriverLibsMismatch;
+    return;
+  }
+
+  found = message.find("Make sure you have root credentials and that the falco "
+                       "module is loaded.");
+  if (found != std::string::npos) {
+    m_code = ProbeAccessDenied;
+    return;
+  }
+}
+
+sfexception::SysFlowError sfexception::getErrorCodeFromScap(int32_t ec) {
+  SysFlowError err = LibsError;
+  switch (ec) {
+  case SCAP_SUCCESS:
+  case SCAP_FAILURE:
+  case SCAP_TIMEOUT:
+  case SCAP_EOF:
+    break;
+  case SCAP_ILLEGAL_INPUT:
+  case SCAP_INPUT_TOO_SMALL:
+  case SCAP_UNEXPECTED_BLOCK:
+    err = EventParsingError;
+    break;
+  case SCAP_NOTFOUND:
+    err = ProcResourceNotFound;
+    break;
+  case SCAP_VERSION_MISMATCH:
+    err = DriverLibsMismatch;
+    break;
+  case SCAP_NOT_SUPPORTED:
+    err = OperationNotSupported;
+    break;
+  default:
+    break;
+  }
+  return err;
+}

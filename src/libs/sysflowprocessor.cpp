@@ -152,29 +152,11 @@ int SysFlowProcessor::run() {
   int32_t res = 0;
   sinsp_evt *ev = nullptr;
 
-  try {
-    m_writer->initialize();
+  m_writer->initialize();
 
-    while (true) {
-      res = m_cxt->getInspector()->next(&ev);
-      if (res == SCAP_TIMEOUT) {
-        if (m_exit) {
-          break;
-        }
-        checkForExpiredRecords();
-        m_processCxt->checkForDeletion();
-        checkAndRotateFile();
-        continue;
-      } else if (res == SCAP_EOF) {
-        break;
-      } else if (res != SCAP_SUCCESS) {
-        SF_ERROR(m_logger, "Scap processor failed with res = "
-                               << res << " and error: "
-                               << m_cxt->getInspector()->getlasterr());
-        throw sinsp_exception(m_cxt->getInspector()->getlasterr().c_str());
-      }
-
-      m_cxt->timeStamp = ev->get_ts();
+  while (true) {
+    res = m_cxt->getInspector()->next(&ev);
+    if (res == SCAP_TIMEOUT) {
       if (m_exit) {
         break;
       }
@@ -182,50 +164,72 @@ int SysFlowProcessor::run() {
       checkForExpiredRecords();
       m_processCxt->checkForDeletion();
       checkAndRotateFile();
-
-      if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
-        continue;
-      }
-
-      switch (ev->get_type()) {
-        SF_EXECVE_ENTER()
-        SF_EXECVE_EXIT(ev)
-        SF_CLONE_EXIT(ev)
-        SF_PROCEXIT_E_X(ev)
-        SF_OPEN_EXIT(ev)
-        SF_ACCEPT_EXIT(ev)
-        SF_CONNECT_EXIT(ev)
-        SF_SEND_EXIT(ev)
-        SF_RECV_EXIT(ev)
-        SF_CLOSE_EXIT(ev)
-        SF_SETNS_EXIT(ev)
-        SF_MKDIR_EXIT(ev)
-        SF_RMDIR_EXIT(ev)
-        SF_LINK_EXIT(ev)
-        SF_UNLINK_EXIT(ev)
-        SF_SYMLINK_EXIT(ev)
-        SF_RENAME_EXIT(ev)
-        SF_SETUID_ENTER(ev)
-        SF_SETUID_EXIT(ev)
-        SF_SHUTDOWN_EXIT(ev)
-        SF_MMAP_EXIT(ev)
-      case PPME_K8S_E: {
-        if (m_cxt->isK8sEnabled()) {
-          m_k8sPrcr->handleK8sEvent(ev);
-        }
-        break;
-      }
-      }
+      continue;
+    } else if (res == SCAP_EOF) {
+      break;
+    } else if (res != SCAP_SUCCESS) {
+      SF_ERROR(m_logger, "SCAP processor failed with res = "
+                             << res << " and error: "
+                             << m_cxt->getInspector()->getlasterr());
+      throw sinsp_exception(m_cxt->getInspector()->getlasterr().c_str());
     }
-    SF_INFO(m_logger, "Exiting scap loop... shutting down");
-    printStats();
-  } catch (sinsp_exception &e) {
-    SF_ERROR(m_logger, "Sysdig exception " << e.what());
-    return 1;
-  } catch (avro::Exception &ex) {
-    SF_ERROR(m_logger, "Avro Exception! Error: " << ex.what());
-    return 1;
+
+    m_cxt->timeStamp = ev->get_ts();
+
+    if (m_exit) {
+      break;
+    }
+
+    checkForExpiredRecords();
+    m_processCxt->checkForDeletion();
+    checkAndRotateFile();
+
+    if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
+      continue;
+    }
+
+    if (m_cxt->getInspector()->m_k8s_client != nullptr &&
+        m_cxt->getInspector()->m_k8s_client->get_capture_events().size() > 0) {
+      SF_INFO(m_logger,
+              "Events Count: " << m_cxt->getInspector()
+                                      ->m_k8s_client->get_capture_events()
+                                      .size());
+    }
+
+    switch (ev->get_type()) {
+      SF_EXECVE_ENTER()
+      SF_EXECVE_EXIT(ev)
+      SF_CLONE_EXIT(ev)
+      SF_PROCEXIT_E_X(ev)
+      SF_OPEN_EXIT(ev)
+      SF_ACCEPT_EXIT(ev)
+      SF_CONNECT_EXIT(ev)
+      SF_SEND_EXIT(ev)
+      SF_RECV_EXIT(ev)
+      SF_CLOSE_EXIT(ev)
+      SF_SETNS_EXIT(ev)
+      SF_MKDIR_EXIT(ev)
+      SF_RMDIR_EXIT(ev)
+      SF_LINK_EXIT(ev)
+      SF_UNLINK_EXIT(ev)
+      SF_SYMLINK_EXIT(ev)
+      SF_RENAME_EXIT(ev)
+      SF_SETUID_ENTER(ev)
+      SF_SETUID_EXIT(ev)
+      SF_SHUTDOWN_EXIT(ev)
+      SF_MMAP_EXIT(ev)
+    case PPME_K8S_E: {
+      if (m_cxt->isK8sEnabled()) {
+        m_k8sPrcr->handleK8sEvent(ev);
+      }
+      break;
+    }
+    }
   }
+
+  SF_INFO(m_logger, "Exiting scap loop... shutting down");
+  printStats();
+
   return 0;
 }
 

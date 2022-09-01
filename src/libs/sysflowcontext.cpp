@@ -31,6 +31,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
       m_statsInterval(30), m_nodeIP(), m_k8sEnabled(false),
       m_probeType(NO_PROBE) {
 
+  m_config = config;
   m_offline = !config->scapInputPath.empty();
   if (!m_offline) {
     detectProbeType();
@@ -187,6 +188,9 @@ string SysFlowContext::getExporterID() {
 string SysFlowContext::getNodeIP() { return m_nodeIP; }
 
 void SysFlowContext::checkModule() {
+  if (!m_config->moduleChecks) {
+    return;
+  }
   switch (m_probeType) {
   case KMOD: {
     modutils::checkForFalcoKernMod();

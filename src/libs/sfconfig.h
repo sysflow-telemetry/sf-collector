@@ -91,8 +91,10 @@ struct SysFlowConfig {
   std::string k8sAPIURL;
   // Path to K8s API Certificate (experimental).
   std::string k8sAPICert;
+  // Run added module checks for better error checking.
+  bool moduleChecks;
   // Consumer mode - no reads/writes/sends/recvs/closes are collected for TCP
-  // and file sessions
+  // and file sessions (not fully implemented)
   bool enableConsumerMode;
   // This is the dimension that a single buffer in our drivers will have. (BPF,
   // kmod, modern BPF) Please note:
