@@ -29,7 +29,7 @@ FROM debian:buster AS builder
 # sysflow release
 ARG SYSFLOW_VERSION
 
-# setup build build requirements
+# setup build requirements
 RUN apt-get update && apt-get install -y \
 	make \
 	wget \
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # install libsysflow
-COPY libsysflow-${SYSFLOW_VERSION}-x86_64.deb .  
+COPY libsysflow-${SYSFLOW_VERSION}-x86_64.deb .
 RUN dpkg -i libsysflow-${SYSFLOW_VERSION}-x86_64.deb
 
 # build the example program
