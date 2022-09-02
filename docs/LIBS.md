@@ -119,3 +119,63 @@ After installation, you should have the following directory structure installed 
 The `include` and `lib` directories contain the header files and static libraries that should be used to build a SysFlow consumer. `docker-entrypoint.sh` is provided for container-based deployments of the consumer, and the `falco-driver-loader` is the script used to load the kmod/bpf drivers. `dkms` sources are provided as a convenience and not required for compilation, and can be used to install dkms in case it's not available in the target environment. Similarly, we package the Falco driver sources in `/usr/src/falco-$FALCO_LIBS_VERSION` to enable local compilation of the drivers when these are not available or accessible in the remote driver repository.
 
 The [Makefile](https://github.com/sysflow-telemetry/sf-collector/blob/dev/examples/Makefile) in the example application shows the `LDFLAGS` and `CFLAGS` needed to build a libSysFlow consumer, and provides an example of how to enable glibc and muslc (static) builds.
+
+## Advanced Usage
+
+### Configuration
+
+The library configuration parameters are assigned defaults that should work well in most scenarios. They can be customized using the `SysFlowConfig` object.
+
+| **Field** | **Type** | **Description** | **Default** |
+|---|---|---|---|
+| filterContainers | bool | Filter out all events related to containers | false |
+| rotateInterval | int | Set rotation interval in secs which dictates how often a SysFlow header is emitted. Used for file rotations and also to clean caches to prevent leakages | 300 |
+| exporterID | string | ID for the host | |
+| nodeIP | string | IP for the host/node | |
+| filePath | string | SysFlow output file path.  If path ends with a '/', this will be treated as a directory. If treated as directory, the name of the sysflow file will be a timestamp, and will be rotated every N seconds depending on the rotateInterval. If no '/' at end, and rotateInterval is set, path is treated as a file prefix, and  timestamp is concatenated. Set NULL if not using file output. | |
+| socketPath | string | SysFlow unix socket file path.  Typically used in conjunction with the SysFlow processor to stream SysFlow over a socket. Set NULL if not using socket streaming | |
+| scapInputPath | string | Scap input file path.  Used in offline mode to read from raw scap rather than tapping the kernel. Set NULL if using live kernel collection | |
+| falcoFilter | string | String to set Falco-style filter on events being passed from the falco libs, to the SysFlow library | |
+| samplingRatio | string | Sampling ratio used to determine which system calls to drop in the probe | 1 |
+| criPath | string | CRI-O runtime socket path, needed for monitoring cri-o/containered container runtimes such as k8s and OCP | |
+| criTO | int | CRI-O timeout.  Timeout in secs set when querying CRI-O socket for container metadata | 30 |
+| enableStats | bool | Enable Process Flow collection.  Output Process Flow rather than individual thread clones | false |
+| enableProcessFlow | bool | Only output File Flows and Events related to file objects.  Ignoring pipes, for example. | true |
+| fileOnly | bool | Only output File Flows and Events related to file objects.  Ignoring pipes, for example. | true |
+| fileReadMode | int | Set the file mode to determine which types of file related read flows are ignored to reduce event output. sets mode for reads: "0" enables recording all file reads as flows.  "1" disables all file reads. "2" disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/", "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/" | 2 |
+| dropMode | bool | Drop mode removes syscalls inside the kernel before they are passed up to the collector results in much better performance, less drops, but does remove mmaps from output. | true |
+| callback | SysFlowCallback | Callback function, required for when using a custom callback function for SysFlow processing | |
+| debugMode | bool | Debug mode turns on debug logging inside libsinsp  | false |
+| k8sAPIURL | string | K8s API URL used to retrieve K8s state and K8s events (experimental) | |
+| k8sAPICert | string | Path to K8s API Certificate (experimental) | |
+| moduleChecks | bool | Run added module checks for better error checking | true |
+| enableConsumerMode | bool | Consumer mode no reads/writes/sends/recvs/closes are collected for TCP and file sessions (not fully implemented) | false |
+| singleBufferDimension | int | This is the dimension that a single buffer in our drivers will have (BPF, kmod, modern BPF) Please note:  This number is expressed in bytes. This number must be a multiple of your system page size, otherwise the allocation will fail. If you leave `0`, every driver will set its internal default dimension. | 0 |
+
+### Exception Handling
+
+The library exposes an exception class that contains error code that can be used by SysFlow consumers for logging and troubleshooting.
+
+```cpp
+SysFlowException(std::string message);
+SysFlowException(std::string message, SysFlowError code)
+      : std::runtime_error(message), m_code(code) {}
+SysFlowError getErrorCode() { return m_code; }
+```
+The error codes are defined in an enum, as follows.
+
+```cpp
+enum SysFlowError {
+  LibsError,
+  ProbeAccessDenied,
+  ProbeNotExist,
+  ErrorReadingFileSystem,
+  NameTooLong,
+  ProbeCheckError,
+  ProbeNotLoaded,
+  DriverLibsMismatch,
+  EventParsingError,
+  ProcResourceNotFound,
+  OperationNotSupported
+};
+```

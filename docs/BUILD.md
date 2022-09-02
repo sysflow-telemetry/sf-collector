@@ -36,7 +36,7 @@ make MAKE_JOBS=8 build
 
 During the initial build, a number of base images are created. These are only needed once per dependency version set. Pre-built versions of these images are also available in [Docker Hub](https://hub.docker.com/u/sysflowtelemetry) and [GHCR](https://github.com/orgs/sysflow-telemetry/packages?repo_name=sf-collector).
 
-| **Image** | **Tag** | **Description** | **Dockerfile**
+| **Image** | **Tag** | **Description** | **Dockerfile** |
 |---|---|---|---|
 | ghcr.io/sysflow-telemetry/ubi | base-<FALCO_LIBS_VERSION>-<FALCO_VERSION>-<UBI_VERSION> | A UBI base image containing the build dependencies for Falco and libSysFlow | [Dockerfile.ubi.amd64](https://github.com/sysflow-telemetry/sf-collector/Dockerfile.ubi.amd64)
 |  | mods-<FALCO_LIBS_VERSION>-<FALCO_VERSION>-<UBI_VERSION> | A UBI base image containing the pre-installed Falco Libs and tools for building libSysFlow | [Dockerfile.ubi.amd64](https://github.com/sysflow-telemetry/sf-collector/Dockerfile.ubi.amd64)
@@ -47,7 +47,7 @@ During the initial build, a number of base images are created. These are only ne
 
 If building using musl, the following images are created instead.
 
-| **Image** | **Tag** | **Description** | **Dockerfile**
+| **Image** | **Tag** | **Description** | **Dockerfile** |
 |---|---|---|---|
 | ghcr.io/sysflow-telemetry/alpine | base-<FALCO_LIBS_VERSION>-<FALCO_VERSION>-<ALPINE_VERSION> | An Alpine base image containing the musl build dependencies for Falco and libSysFlow | [Dockerfile.alpine.amd64](https://github.com/sysflow-telemetry/sf-collector/Dockerfile.alpine.amd64)
 |  | mods-<FALCO_LIBS_VERSION>-<FALCO_VERSION>-<ALPINE_VERSION> | An Alpine base image containing the pre-installed Falco Libs and tools for building a musl-based libSysFlow | [Dockerfile.alpine.amd64](https://github.com/sysflow-telemetry/sf-collector/Dockerfile.alpine.amd64)
