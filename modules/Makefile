@@ -21,6 +21,7 @@ include ../makefile.manifest.inc
 include ../makefile.env.inc
 
 MAKE_JOBS ?= 1
+BUNDLE_FALCO_LIBS ?= 1
 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
@@ -142,6 +143,17 @@ falcolibs/package:
 	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
 	cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
 	cp zlib-prefix/src/zlib/libz.a lib/libz.a
+ifeq ($(BUNDLE_FALCO_LIBS), 1)	
+	cp -r falco-libs/build/lib falco-libs/build/bundle
+	cp falco-libs.mri falco-libs/build/bundle 
+	cd falco-libs/build/bundle && \
+	mv libgrpc++.a libgrpcpp.a && \
+	mv libgrpc++_alts.a libgrpcpp_alts.a && \
+	mv libgrpc++_error_details.a libgrpcpp_error_details.a && \
+	mv libgrpc++_reflection.a libgrpcpp_reflection.a && \
+	mv libgrpc++_unsecure.a libgrpcpp_unsecure.a && \
+	ar -M <falco-libs.mri && cp libs.a ../lib/
+endif
 
 .PHONY: falcolibs/install
 falcolibs/install:

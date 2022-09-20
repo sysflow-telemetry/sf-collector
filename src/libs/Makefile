@@ -25,6 +25,7 @@ include ../../makefile.env.inc
 # Target configuration
 TARGET = libsysflow.a 
 SYSFLOW_BUILD_NUMBER ?= 0
+BUNDLE_DEPS ?= 1
 
 # Lint options
 LINT = clang-tidy-9
@@ -39,9 +40,7 @@ LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration
 LIBLOCALPREFIX ?= ../../modules
-FALCOLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/lib
 FALCOLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/include
-AVRLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
 AVRLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
 SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
 FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
@@ -54,12 +53,18 @@ MUSL ?= 0
 CXX = g++
 AR = ar
 MUSLFLAGS = -static -Os 
-CFLAGS = -std=c++11 -Wall -I.. -I$(SFLOCALINCPREFIX)/ -I$(FSLOCALINCPREFIX)/ \
+CFLAGS = -std=c++11 -Wall -I.. -I/usr/local/include/ -I/usr/include/ \
 		 -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
-	 	 -I$(FALCOLOCALINCPREFIX)/ -I$(FALCOLOCALINCPREFIX)/curl/ -I$(FALCOLOCALINCPREFIX)/json2/ \
-		 -I$(FALCOLOCALINCPREFIX)/openssl/ -I$(FALCOLOCALINCPREFIX)/driver/ \
-		 -I$(FALCOLOCALINCPREFIX)/userspace/libsinsp/ -I$(FALCOLOCALINCPREFIX)/userspace/libscap/ \
-		 -I$(AVRLOCALINCPREFIX)/ -I/usr/local/include/ -I/usr/include/ 
+		 -I$(SFLOCALINCPREFIX)/ \
+		 -I$(FSLOCALINCPREFIX)/ \
+	 	 -I$(FALCOLOCALINCPREFIX)/ \
+		 -I$(FALCOLOCALINCPREFIX)/curl/ \
+		 -I$(FALCOLOCALINCPREFIX)/json2/ \
+		 -I$(FALCOLOCALINCPREFIX)/openssl/ \
+		 -I$(FALCOLOCALINCPREFIX)/driver/ \
+		 -I$(FALCOLOCALINCPREFIX)/userspace/libsinsp/ \
+		 -I$(FALCOLOCALINCPREFIX)/userspace/libscap/ \
+		 -I$(AVRLOCALINCPREFIX)/ 
 
 OBJS = .sysflowlibs.o .sysflowlibs.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o .k8scontext.o .k8seventprocessor.o .modutils.o .sysflowexception.o
 
@@ -87,6 +92,14 @@ all: version $(TARGET)
 install: all
 	mkdir -p $(INSTALL_PATH)/lib && cp libsysflow.a $(INSTALL_PATH)/lib
 	mkdir -p $(INSTALL_PATH)/include/sysflow/ && cp *.h $(INSTALL_PATH)/include/sysflow/ && cp *.hpp $(INSTALL_PATH)/include/sysflow/
+ifeq ($(BUNDLE_DEPS), 1)
+ifeq ($(MUSL), 0)
+	$(AR) -M <libsysflow.mri
+else
+	$(AR) -M <libsysflow-musl.mri
+endif
+	cp libsysflow_with_deps.a $(INSTALL_PATH)/lib
+endif
 
 .PHONY: uninstall
 uninstall:

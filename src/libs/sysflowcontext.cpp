@@ -43,6 +43,9 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
   m_inspector->set_buffer_format(sinsp_evt::PF_NORMAL);
   m_inspector->set_hostname_and_port_resolution_mode(false);
 
+  m_inspector->enforce_sinsp_state_tracepoints();
+  m_inspector->enforce_simple_ppm_sc_set();
+
   if (!config->falcoFilter.empty()) {
     m_inspector->set_filter(config->falcoFilter);
   }
