@@ -20,6 +20,7 @@
 #include "sysflowcontext.h"
 #include "engine/bpf/bpf_public.h"
 #include "modutils.h"
+#include "sfmodes.h"
 #include <utility>
 
 using context::SysFlowContext;
@@ -42,7 +43,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
   m_inspector = new sinsp();
   m_inspector->set_buffer_format(sinsp_evt::PF_NORMAL);
   m_inspector->set_hostname_and_port_resolution_mode(false);
- 
+
   if (!config->falcoFilter.empty()) {
     m_inspector->set_filter(config->falcoFilter);
   }
@@ -76,7 +77,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
 
   std::unordered_set<uint32_t> tp_set = m_inspector->enforce_sinsp_state_tp();
   std::unordered_set<uint32_t> ppm_sc = getSyscallSet();
-  
+
   openInspector(tp_set, ppm_sc);
 
   const char *drop = std::getenv(ENABLE_DROP_MODE);
@@ -212,16 +213,27 @@ void SysFlowContext::checkModule() {
   }
 }
 
-void SysFlowContext::openInspector(std::unordered_set<uint32_t> tp_set, std::unordered_set<uint32_t> ppm_sc) {  
+void SysFlowContext::openInspector(std::unordered_set<uint32_t> tp_set,
+                                   std::unordered_set<uint32_t> ppm_sc) {
+  std::string collectionMode =
+      (m_config->collectionMode == SFFlowMode) ? "flow mode" : "consumer mode";
   switch (m_probeType) {
   case KMOD:
+    SF_INFO(m_logger, "Opening kmod probe in "
+                          << collectionMode << " monitoring " << ppm_sc.size()
+                          << " system calls.")
     m_inspector->open_kmod(m_config->singleBufferDimension, ppm_sc, tp_set);
     break;
   case EBPF:
-    m_inspector->open_bpf(m_ebpfProbe, m_config->singleBufferDimension, ppm_sc, tp_set);
+    SF_INFO(m_logger, "Opening ebpf probe in "
+                          << collectionMode << " monitoring " << ppm_sc.size()
+                          << " system calls.")
+    m_inspector->open_bpf(m_ebpfProbe, m_config->singleBufferDimension, ppm_sc,
+                          tp_set);
     break;
   case NO_PROBE:
     m_inspector->open_savefile(m_config->scapInputPath, 0);
+    break;
   default:
     SF_WARN(m_logger, "Unsupported driver " << m_probeType)
     break;
@@ -247,62 +259,13 @@ void SysFlowContext::detectProbeType() {
   }
 }
 
-std::unordered_set<uint32_t> SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppm_sc_set) {
-	auto simple_set = m_inspector->enforce_sinsp_state_ppm_sc(std::unordered_set<uint32_t>{
-		PPM_SC_ACCEPT,
-		PPM_SC_ACCEPT4,
-		PPM_SC_BIND,
-		PPM_SC_CHMOD,
-		PPM_SC_CLONE,
-		PPM_SC_CLONE3,
-		PPM_SC_CLOSE,
-		PPM_SC_CONNECT,
-		PPM_SC_CREAT,
-		PPM_SC_EXECVE,
-		PPM_SC_EXECVEAT,
-		PPM_SC_FORK,
-		PPM_SC_LINK,
-		PPM_SC_LINKAT,
-		PPM_SC_LISTEN,
-		PPM_SC_MMAP,
-		PPM_SC_MMAP2,
-		PPM_SC_MKDIR,
-		PPM_SC_MKDIRAT,
-		PPM_SC_OPEN,
-		PPM_SC_OPENAT,
-		PPM_SC_OPENAT2,
-		PPM_SC_PREAD64,
-		PPM_SC_PREADV,
-		PPM_SC_PWRITEV,
-		PPM_SC_PWRITE64,
-		PPM_SC_READ,
-		PPM_SC_READV,
-		PPM_SC_RECVFROM,
-		PPM_SC_RECVMMSG,
-		PPM_SC_RECVMSG,
-		PPM_SC_RENAME,
-		PPM_SC_RENAMEAT,
-		PPM_SC_RENAMEAT2,
-		PPM_SC_RMDIR,
-		PPM_SC_SENDMMSG,
-		PPM_SC_SENDMSG,
-		PPM_SC_SENDTO,
-		PPM_SC_SETNS,
-		PPM_SC_SETRESUID,
-		PPM_SC_SETRESUID32,
-		PPM_SC_SETUID,
-		PPM_SC_SETUID32,
-		PPM_SC_SHUTDOWN,
-		PPM_SC_SOCKETPAIR,
-		PPM_SC_SYMLINK,
-		PPM_SC_SYMLINKAT,
-		PPM_SC_UNLINK,
-		PPM_SC_UNLINKAT,
-		PPM_SC_VFORK,
-		PPM_SC_WRITE,
-		PPM_SC_WRITEV,
-	});
-	ppm_sc_set.insert(simple_set.begin(), simple_set.end());
-	return ppm_sc_set;
+std::unordered_set<uint32_t>
+SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppmScSet) {
+  auto scMode = SF_FLOW_SC_SET;
+  if (m_config->collectionMode == SFSysCallMode::SFConsumerMode) {
+    scMode = SF_CONSUMER_SC_SET;
+  }
+  auto simpleSet = m_inspector->enforce_sinsp_state_ppm_sc(scMode);
+  ppmScSet.insert(simpleSet.begin(), simpleSet.end());
+  return ppmScSet;
 }
-

@@ -231,9 +231,9 @@ int main(int argc, char **argv) {
   }
 
   try {
-    CONFIGURE_LOGGER(logProps);
-    SF_INFO(logger, "Starting the SysFlow Collector...");
+    g_config->appName = std::string(argv[0]);
     g_driver = new sysflowlibscpp::SysFlowDriver(g_config);
+    SF_INFO(logger, "Starting the SysFlow Collector...");
     int ret = g_driver->run();
     delete g_driver;
     delete g_config;
