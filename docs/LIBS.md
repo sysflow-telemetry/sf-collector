@@ -2,9 +2,9 @@
 
 LibSysFlow is a library for creating SysFlow consumers. It defines a concise API and export first-class SysFlow data types for consumers to transparently process SysFlow records and manage access to the underlying Falco libs and driver.
 
-The main interface accepts a config object where a callback function can be set to process SysFlow records. The config option sets optimal defaults that can be customized by the consumer. The library is packaged as a static (.a) library and distributed as an rpm/deb/tgz artifact with sf-collector releases (both glibc and musl-c flavors are available).
+The main interface accepts a config object in which a callback function can be set to process SysFlow records. The config option sets optimal defaults that can be customized by the consumer. The library is packaged as a static (.a) library and distributed as an rpm/deb/tgz artifact with sf-collector releases (both glibc and musl flavors are available).
 
-Additionally, libsysflow performs the checks to verify that the Falco driver is loaded, and output an exception otherwise. Consumers load the Falco libs driver prior to running their main entrypoint, following the typical entrypoint recipe/script used by Falco and the SysFlow Collector.
+Additionally, libsysflow performs the checks to verify that the Falco driver is loaded and outputs an exception otherwise. Consumers load the Falco libs driver prior to running their main entrypoint, following the typical entrypoint recipe/script used by Falco and the SysFlow Collector.
 
 ## Basic Usage
 
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
 ## Installation
 
-Binary packages (deb, rpm, tgz) for glibc- and muslc-based build pipelines are available in the collector's [release assets](https://github.com/sysflow-telemetry/sf-collector/releases) (since release `$VERSION` >=0.5.0). This is going to install libSysFlow headers and the static libraries (.a) needed to link your application.
+Binary packages (deb, rpm, tgz) for glibc- and musl-based build pipelines are available in the collector's [release assets](https://github.com/sysflow-telemetry/sf-collector/releases) (since release `$VERSION` >=0.5.0). This is going to install libSysFlow headers and the static libraries (.a) needed to link your application.
 
 ### Debian
 
@@ -118,7 +118,7 @@ After installation, you should have the following directory structure installed 
 
 The `include` and `lib` directories contain the header files and static libraries that should be used to build a SysFlow consumer. `docker-entrypoint.sh` is provided for container-based deployments of the consumer, and the `falco-driver-loader` is the script used to load the kmod/bpf drivers. `dkms` sources are provided as a convenience and not required for compilation, and can be used to install dkms in case it's not available in the target environment. Similarly, we package the Falco driver sources in `/usr/src/falco-$FALCO_LIBS_VERSION` to enable local compilation of the drivers when these are not available or accessible in the remote driver repository.
 
-The [Makefile](https://github.com/sysflow-telemetry/sf-collector/blob/dev/examples/Makefile) in the example application shows the `LDFLAGS` and `CFLAGS` needed to build a libSysFlow consumer, and provides an example of how to enable glibc and muslc (static) builds.
+The [Makefile](https://github.com/sysflow-telemetry/sf-collector/blob/dev/examples/Makefile) in the example application shows the `LDFLAGS` and `CFLAGS` needed to build a libSysFlow consumer, and provides an example of how to enable glibc and musl (static) builds.
 
 ## Advanced Usage
 
@@ -179,3 +179,33 @@ enum SysFlowError {
   OperationNotSupported
 };
 ```
+
+### Logging
+
+LibSysFlow uses [Glog](https://github.com/google/glog) for logging.
+
+You can specify one of the following severity levels (in increasing order of severity): INFO, WARNING, ERROR.
+
+You can also add verbose logging when you are chasing difficult bugs. LibSysFlow has two levels of verbose logging: 1 (DEBUG) and 2 (TRACE).
+
+To control logging behavior, you can set flags via environment variables, prefixing the flag name with "GLOG_", e.g.
+
+```bash
+   GLOG_logtostderr=1 ./your_application
+```
+
+The following flags are most commonly used:
+
+- logtostderr (bool, default=false): Log messages to stderr instead of logfiles.
+- stderrthreshold (int, default=2, which is ERROR): Copy log messages at or above this level to stderr in addition to logfiles. The numbers of severity levels INFO, WARNING, ERROR, and FATAL are 0, 1, 2, and 3, respectively.
+- minloglevel (int, default=0, which is INFO): Log messages at or above this level. Again, the numbers of severity levels INFO, WARNING, ERROR, and FATAL are 0, 1, 2, and 3, respectively.
+- log_dir (string, default=""): If specified, logfiles are written into this directory instead of the default logging directory.
+- v (int, default=0): Show all VLOG(m) messages for m less or equal the value of this flag. Overridable by --vmodule. See the section about verbose logging for more detail.
+- vmodule (string, default=""): Per-module verbose level. The argument has to contain a comma-separated list of <module name>=<log level>. <module name> is a glob pattern (e.g., gfs* for all modules whose name starts with "gfs"), matched against the filename base (that is, name ignoring .cc/.h./-inl.h). <log level> overrides any value given by --v.
+
+
+>---
+> **Note** You can set binary flags to true by specifying 1, true, or yes (case insensitive). Also, you can set binary flags to false by specifying 0, false, or no (again, case insensitive).
+>
+>---
+
