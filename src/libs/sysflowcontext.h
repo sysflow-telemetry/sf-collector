@@ -69,7 +69,7 @@ private:
   void detectProbeType();
   void checkModule();
   void openInspector(std::unordered_set<uint32_t> tp_set, std::unordered_set<uint32_t> ppm_sc);
-  std::unordered_set<uint32_t> enforce_sc_set(std::unordered_set<uint32_t> ppm_sc_set = {});
+  std::unordered_set<uint32_t> getSyscallSet(std::unordered_set<uint32_t> ppm_sc_set = {});
 
 public:
   SysFlowContext(SysFlowConfig *config);

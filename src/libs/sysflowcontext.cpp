@@ -75,7 +75,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
   }
 
   std::unordered_set<uint32_t> tp_set = m_inspector->enforce_sinsp_state_tp();
-  std::unordered_set<uint32_t> ppm_sc = enforce_sc_set();
+  std::unordered_set<uint32_t> ppm_sc = getSyscallSet();
   
   openInspector(tp_set, ppm_sc);
 
@@ -247,7 +247,7 @@ void SysFlowContext::detectProbeType() {
   }
 }
 
-std::unordered_set<uint32_t> SysFlowContext::enforce_sc_set(std::unordered_set<uint32_t> ppm_sc_set) {
+std::unordered_set<uint32_t> SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppm_sc_set) {
 	auto simple_set = m_inspector->enforce_sinsp_state_ppm_sc(std::unordered_set<uint32_t>{
 		PPM_SC_ACCEPT,
 		PPM_SC_ACCEPT4,
