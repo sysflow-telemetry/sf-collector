@@ -18,6 +18,7 @@
  **/
 
 #include "sysflowlibs.hpp"
+#include "scap.h"
 #include "scap_open_exception.h"
 #include "sinsp_exception.h"
 #include "sysflowcontext.h"
@@ -52,7 +53,7 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   conf->debugMode = false;
   conf->enableConsumerMode = false;
   conf->moduleChecks = true;
-  conf->singleBufferDimension = 0;
+  conf->singleBufferDimension = DEFAULT_DRIVER_BUFFER_BYTES_DIM;
   return conf;
 }
 
