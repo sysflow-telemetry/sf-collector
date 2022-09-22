@@ -79,3 +79,11 @@ int SysFlowDriver::run() {
   }
   return 0;
 }
+
+sysflow::Container* SysFlowDriver::getContainer(const std::string &containerId) {
+  return m_processor->getContainer(containerId);
+}
+
+sysflow::Process* SysFlowDriver::getProcess(sysflow::OID &oid) {
+  return m_processor->getProcess(oid);
+}
