@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.5.0] - 2022-08-31
+## [0.5.0] - 2022-10-19
 
 ### Added
 
@@ -24,6 +24,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Add support for k8s pod and event objects
 - Add build pipeline and static libraries based on musl
 - Add better exception handling with error codes
+- Added support for bundled builds of libs and libsysflow
+- Added libs system call specialization support
+- Fixed logging error from google init
+- Added collection modes
 
 ### Changed
 
@@ -227,8 +231,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0-rc2...HEAD
-[0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0-rc2
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0-rc3...HEAD
+[0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0-rc3
 [0.4.4]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1...0.4.2
