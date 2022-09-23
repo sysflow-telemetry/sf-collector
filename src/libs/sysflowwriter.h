@@ -40,6 +40,7 @@ class SysFlowWriter {
 protected:
   context::SysFlowContext *m_cxt;
   SysFlow m_flow;
+  sysflow::SFHeader m_header;
   int m_numRecs{};
   void writeHeader();
   time_t m_start;
