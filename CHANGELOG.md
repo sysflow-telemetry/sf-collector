@@ -24,22 +24,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Add support for k8s pod and event objects
 - Add build pipeline and static libraries based on musl
 - Add better exception handling with error codes
-- Added support for bundled builds of libs and libsysflow
-- Added libs system call specialization support
-- Fixed logging error from google init
-- Added collection modes
+- Add support for bundled builds of libs and libsysflow
+- Add libs system call specialization support
+- Add collection modes
+- Add documentation for libsysflow
 
 ### Changed
 
 - Refactor the src directory to separate the collector and libsysflow
-- Build pipeline using sysflow-telemetry/libs-base-images
 - Package static linked binary (based on musl build) into binary packages
-- Bumped Falco libs to 57e4fe5
+- Bumped Falco libs to 0242f97
 
 ### Fixed
 
 - Fix stop condition for traversing process tree
 - Fix exepath in execveat events
+- Fix logging error from google init
 
 ## [0.4.4] - 2022-07-26
 
