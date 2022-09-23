@@ -18,6 +18,7 @@
  **/
 
 #include "sysflowlibs.hpp"
+#include "scap.h"
 #include "scap_open_exception.h"
 #include "sinsp_exception.h"
 #include "sysflowcontext.h"
@@ -27,6 +28,7 @@ using sysflowlibscpp::SysFlowDriver;
 
 SysFlowDriver::SysFlowDriver(SysFlowConfig *conf) {
   try {
+    CONFIGURE_LOGGER(conf->appName.c_str())
     m_cxt = new context::SysFlowContext(conf);
     m_processor = new sysflowprocessor::SysFlowProcessor(m_cxt, nullptr);
   } catch (const sinsp_exception &ex) {
@@ -50,9 +52,10 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   conf->dropMode = true;
   conf->callback = nullptr;
   conf->debugMode = false;
-  conf->enableConsumerMode = false;
   conf->moduleChecks = true;
-  conf->singleBufferDimension = 0;
+  conf->singleBufferDimension = DEFAULT_DRIVER_BUFFER_BYTES_DIM;
+  conf->appName = "sysflowlibs";
+  conf->collectionMode = SFSysCallMode::SFFlowMode;
   return conf;
 }
 

@@ -30,6 +30,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <ppm_events_public.h>
 #include <sinsp.h>
 #include <unistd.h>
 
@@ -67,7 +68,10 @@ private:
   DEFINE_LOGGER();
   void detectProbeType();
   void checkModule();
-  void openInspector();
+  void openInspector(std::unordered_set<uint32_t> tp_set,
+                     std::unordered_set<uint32_t> ppm_sc);
+  std::unordered_set<uint32_t>
+  getSyscallSet(std::unordered_set<uint32_t> ppmScSet = {});
 
 public:
   SysFlowContext(SysFlowConfig *config);

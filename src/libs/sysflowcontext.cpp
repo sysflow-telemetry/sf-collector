@@ -20,6 +20,7 @@
 #include "sysflowcontext.h"
 #include "engine/bpf/bpf_public.h"
 #include "modutils.h"
+#include "sfmodes.h"
 #include <utility>
 
 using context::SysFlowContext;
@@ -74,7 +75,10 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     m_nodeIP = config->nodeIP;
   }
 
-  openInspector();
+  std::unordered_set<uint32_t> tp_set = m_inspector->enforce_sinsp_state_tp();
+  std::unordered_set<uint32_t> ppm_sc = getSyscallSet();
+
+  openInspector(tp_set, ppm_sc);
 
   const char *drop = std::getenv(ENABLE_DROP_MODE);
   if (config->scapInputPath.empty() &&
@@ -209,16 +213,27 @@ void SysFlowContext::checkModule() {
   }
 }
 
-void SysFlowContext::openInspector() {
+void SysFlowContext::openInspector(std::unordered_set<uint32_t> tp_set,
+                                   std::unordered_set<uint32_t> ppm_sc) {
+  std::string collectionMode =
+      (m_config->collectionMode == SFFlowMode) ? "flow mode" : "consumer mode";
   switch (m_probeType) {
   case KMOD:
-    m_inspector->open_kmod(m_config->singleBufferDimension);
+    SF_INFO(m_logger, "Opening kmod probe in "
+                          << collectionMode << " monitoring " << ppm_sc.size()
+                          << " system calls.")
+    m_inspector->open_kmod(m_config->singleBufferDimension, ppm_sc, tp_set);
     break;
   case EBPF:
-    m_inspector->open_bpf(m_config->singleBufferDimension, m_ebpfProbe.c_str());
+    SF_INFO(m_logger, "Opening ebpf probe in "
+                          << collectionMode << " monitoring " << ppm_sc.size()
+                          << " system calls.")
+    m_inspector->open_bpf(m_ebpfProbe, m_config->singleBufferDimension, ppm_sc,
+                          tp_set);
     break;
   case NO_PROBE:
-    m_inspector->open_savefile(m_config->scapInputPath.c_str(), 0);
+    m_inspector->open_savefile(m_config->scapInputPath, 0);
+    break;
   default:
     SF_WARN(m_logger, "Unsupported driver " << m_probeType)
     break;
@@ -242,4 +257,15 @@ void SysFlowContext::detectProbeType() {
                     std::string(SF_PROBE_BPF_FILEPATH);
     }
   }
+}
+
+std::unordered_set<uint32_t>
+SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppmScSet) {
+  auto scMode = SF_FLOW_SC_SET;
+  if (m_config->collectionMode == SFSysCallMode::SFConsumerMode) {
+    scMode = SF_CONSUMER_SC_SET;
+  }
+  auto simpleSet = m_inspector->enforce_sinsp_state_ppm_sc(scMode);
+  ppmScSet.insert(simpleSet.begin(), simpleSet.end());
+  return ppmScSet;
 }

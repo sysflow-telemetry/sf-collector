@@ -23,6 +23,8 @@
 #include "sysflow.h"
 #include <stdint.h>
 
+enum SFSysCallMode { SFFlowMode, SFConsumerMode };
+
 using SysFlowCallback = std::function<void(
     sysflow::SFHeader *, sysflow::Container *, sysflow::Process *,
     sysflow::File *, sysflow::File *, sysflow::SysFlow *)>;
@@ -93,9 +95,6 @@ struct SysFlowConfig {
   std::string k8sAPICert;
   // Run added module checks for better error checking.
   bool moduleChecks;
-  // Consumer mode - no reads/writes/sends/recvs/closes are collected for TCP
-  // and file sessions (not fully implemented)
-  bool enableConsumerMode;
   // This is the dimension that a single buffer in our drivers will have. (BPF,
   // kmod, modern BPF) Please note:
   // - This number is expressed in bytes.
@@ -103,6 +102,13 @@ struct SysFlowConfig {
   // allocation will fail.
   // - If you leave `0`, every driver will set its internal default dimension.
   uint64_t singleBufferDimension;
+  // The app name used in glog logging.
+  std::string appName;
+  // Sets the current collection mode of the libs. There are currently two
+  // modes: SFFlowMode: default mode supports full file and network flows.
+  // SFConsumerMode: Lighterweight mode that doesn't collect
+  // read/write/send/recv data (experimental, wip)
+  SFSysCallMode collectionMode;
 }; // SysFlowConfig
 
 #endif
