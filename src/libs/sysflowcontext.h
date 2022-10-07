@@ -100,6 +100,9 @@ public:
   inline bool isFileOnly() { return m_config->fileOnly; }
   inline int getFileRead() { return m_config->fileReadMode; }
   inline bool isK8sEnabled() { return m_k8sEnabled; }
+  inline bool isConsumerMode() {
+    return m_config->collectionMode == SFSysCallMode::SFConsumerMode;
+  }
 };
 } // namespace context
 

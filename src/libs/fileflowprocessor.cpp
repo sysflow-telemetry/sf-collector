@@ -58,8 +58,10 @@ inline void FileFlowProcessor::populateFileFlow(FileFlowObj *ff, OpFlags flag,
   ff->fileflow.tid = ti->m_tid;
   ff->fileflow.fd = fd;
   ff->fileflow.fileOID = file->file.oid;
-  ff->filekey = file->key;
-  ff->flowkey = std::move(flowkey);
+  if (!m_cxt->isConsumerMode()) {
+    ff->filekey = file->key;
+    ff->flowkey = std::move(flowkey);
+  }
   ff->fileflow.numRRecvOps = 0;
   ff->fileflow.numWSendOps = 0;
   ff->fileflow.numRRecvBytes = 0;
@@ -141,6 +143,29 @@ inline void FileFlowProcessor::processNewFlow(sinsp_evt *ev, ProcessObj *proc,
   }
 }
 
+inline int FileFlowProcessor::createConsumerRecord(sinsp_evt *ev,
+                                                   ProcessObj *proc,
+                                                   FileObj *file, OpFlags flag,
+                                                   sinsp_fdinfo_t *fdinfo,
+                                                   int64_t fd) {
+  if (flag == OP_CLOSE || flag == OP_SHUTDOWN) {
+    return 1;
+  }
+
+  if (flag != OP_OPEN) {
+    SF_WARN(m_logger, "Received a file flow flag other than open or close in "
+                      "consumer mode. Flag: "
+                          << flag)
+    return 1;
+  }
+  FileFlowObj ffobj;
+  static std::string fk;
+  populateFileFlow(&ffobj, flag, ev, proc, file, fk, fdinfo, fd);
+  ffobj.fileflow.endTs = ev->get_ts();
+  SHOULD_WRITE((&ffobj), &(proc->proc), &(file->file))
+  return 1;
+}
+
 inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj *proc,
                                                       FileObj *file,
                                                       FileFlowObj **ff,
@@ -215,8 +240,12 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   // has been written to the sysflow file. This is important for long running
   // NetworkFlows that may span across files.
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
-  FileFlowObj *ff = nullptr;
+  FileObj *file = m_fileCxt->getFile(ev, fdinfo, SFObjectState::REUP, created);
   sinsp_threadinfo *ti = ev->get_thread_info();
+  if (m_cxt->isConsumerMode()) {
+    return createConsumerRecord(ev, proc, file, flag, fdinfo, fd);
+  }
+  FileFlowObj *ff = nullptr;
   string flowkey;
   flowkey.reserve(ti->m_container_id.length() + fdinfo->m_name.length() + 32);
   flowkey += fdinfo->m_name;
@@ -224,7 +253,6 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
   flowkey.append(utils::itoa(ti->m_tid, 10));
   flowkey.append(utils::itoa(fd, 10));
 
-  FileObj *file = m_fileCxt->getFile(ev, fdinfo, SFObjectState::REUP, created);
   FileFlowTable::iterator ffi = proc->fileflows.find(flowkey);
   if (ffi != proc->fileflows.end()) {
     ff = ffi->second;

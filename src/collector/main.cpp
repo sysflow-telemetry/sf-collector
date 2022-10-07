@@ -123,8 +123,11 @@ int main(int argc, char **argv) {
   g_config = sysflowlibscpp::InitializeSysFlowConfig();
 
   while ((c = static_cast<char>(
-              getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:"))) != -1) {
+              getopt(argc, argv, "Chcr:w:G:s:e:l:vf:p:t:du:"))) != -1) {
     switch (c) {
+    case 'C':
+      g_config->collectionMode = SFSysCallMode::SFConsumerMode;
+      break;
     case 'd':
       g_config->enableStats = true;
       break;

@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+sysflowlibscpp::SysFlowDriver *g_driver;
+
 namespace {
 std::function<void()> shutdown_handler;
 void signal_handler(int /*i*/) { shutdown_handler(); }
@@ -17,6 +19,19 @@ void printFile(sysflow::File *file) {
 void process_sysflow(sysflow::SFHeader *header, sysflow::Container *cont,
                      sysflow::Process *proc, sysflow::File *f1,
                      sysflow::File *f2, sysflow::SysFlow *flow) {
+
+  sysflow::Process::poid_t poid = proc->poid;
+
+  while(!poid.is_null()) {
+    sysflow::OID oid = poid.get_OID();
+    sysflow::Process *pp = g_driver->getProcess(oid);
+    if (pp == nullptr) {
+      break;
+    }
+    printf("Parent %s, %s\n", pp->exe.c_str(), pp->exeArgs.c_str());
+    poid = pp->poid;
+  }
+
   printf("****************************************************************\n");
   printf("Header: Exporter %s, IP %s, File name %s\n", header->exporter.c_str(),
          header->ip.c_str(), header->filename.c_str());
@@ -87,18 +102,18 @@ int main(int argc, char **argv) {
   // configure event collection (using defaults)
   SysFlowConfig *config = sysflowlibscpp::InitializeSysFlowConfig();
   config->callback = process_sysflow;
-  sysflowlibscpp::SysFlowDriver *driver =
+  g_driver =
       new sysflowlibscpp::SysFlowDriver(config);
 
   // register signal handlers to stop event collection
-  shutdown_handler = [&]() -> void { driver->exit(); };
+  shutdown_handler = [&]() -> void { g_driver->exit(); };
   std::signal(SIGINT, signal_handler);
   std::signal(SIGTERM, signal_handler);
 
   // start event collection
-  driver->run();
+  g_driver->run();
 
   // clean up resources
-  delete driver;
+  delete g_driver;
   delete config;
 }
