@@ -1,23 +1,3 @@
-# SysFlow Specification
-
-The SysFlow format lifts raw system event information into an abstraction that describes process behaviors, and their relationships with containers, files, and network. This object-relational format is highly compact, yet it provides broad visibility into container clouds. The framework includes several APIs that allow users to process SysFlow with their favorite toolkits.
-
-* [Overview](#overview)
-* [Entities](#entities)
-    * [Header](#header)
-    * [Container](#container)
-    * [Process](#process)
-    * [File](#file)
-* [Events](#events)
-    * [Operation Flags](#operation-flags)
-    * [Process Event](#process-event)
-    * [File Event](#file-event)
-    * [Network Event](#network-event)
-* [Flows](#flows)
-    * [Process Flow](#process-flow)
-    * [File Flow](#file-flow)
-    * [Network Flow](#network-flow)
-
 ## Overview
 
 Figure 1 shows a diagram of the SysFlow format.
@@ -37,21 +17,21 @@ Entities are the components on a system that we are interested in monitoring. Th
 
 #### Object ID
 
-Object IDs allow events and flows to reference entities without having duplicate information stored in each record.  Object IDs are not required to be globally unique across space and time.  In fact, the only requirement for uniqueness is that no two objects managed by a SysFlow exporter can have the same ID simultaneously.  Entities are always written to the binary output file before any events, and flows associated with them are exported. Since entities are exported first, each event, and flow is matched with the entity (with the same id) that is closest to it in the file. Furthermore, every binary output file must be self-contained, meaning that all entities referenced by flows/events must be present in every SysFlow file generated.  
+Object IDs allow events and flows to reference entities without having duplicate information stored in each record.  Object IDs are not required to be globally unique across space and time.  In fact, the only requirement for uniqueness is that no two objects managed by a SysFlow exporter can have the same ID simultaneously.  Entities are always written to the binary output file before any events, and flows associated with them are exported. Since entities are exported first, each event, and flow is matched with the entity (with the same id) that is closest to it in the file. Furthermore, every binary output file must be self-contained, meaning that all entities referenced by flows/events must be present in every SysFlow file generated.
 
 #### State
 
 The state is an enumeration that indicates why an entity was written to disk. The state can currently be one of three values:
 
-| State     | Description  | 
-| ------------- |:-------------:| 
+| State     | Description  |
+| ------------- |:-------------:|
 | CREATED |  Indicates that the entity was recently created on the host/VM. For example, a process clone. |
 | MODIFIED | Indicates that some attributes of the entity were modified since the last time it was exported. |
 | REUP | Indicates that the entity already existed, but is being exported again, so that output files can be self-contained. |
 
-Each entity is defined below with recommendations on what to use for object identifiers, based on what is used in the current implementation of the SysFlow exporter.    
+Each entity is defined below with recommendations on what to use for object identifiers, based on what is used in the current implementation of the SysFlow exporter.
 
-#### Header 
+#### Header
 
 The Header entity is an object which appears at the beginning of each binary SysFlow file. It contains the current version of SysFlow as supported in the file, and the exporter ID.
 
@@ -76,7 +56,7 @@ The Container entity represents a system or application container such as docker
 | type | enum |  Can be one of: CT_DOCKER, CT_LXC, CT_LIBVIRT_LXC, CT_MESOS, CT_RKT, CT_CUSTOM | 1 |
 | privileged | boolean |  If true, the container is running with root privileges | 1 |
 
-#### Process 
+#### Process
 
 The process entity represents a running process on the system. It contains important information about the process including its host pid, creation time, oid id, as well as references to its parent id. When a process entity is exported to a SysFlow file, all its parent processes should be exported before the process, as well as the process's Container entity.   Processes are only exported to a SysFlow file if an event or flow associated with that process or any of its threads are exported.  Threads are not explicitly exported in the process object but are represented in events and flows through a thread id field. Finally, a Process entity only needs to be exported to a file once, unless it's been modified by an event or flow.
 
@@ -100,7 +80,7 @@ The process entity represents a running process on the system. It contains impor
 | tty |  boolean |  If true, the process is tied to a shell | 1 |
 | containerId | string |  Unique string representing the Container Object to which the process resides. It can be NULL if process isn't in a container. | 1 |
 | entry | boolean |  If true, the process is a container or system entrypoint (i.e., virtual pid = 1). | 2 |
- 
+
 #### File
 
 The File entity represents file-based resources on a system including files, directories, unix sockets, and pipes.
@@ -119,9 +99,9 @@ The File entity represents file-based resources on a system including files, dir
 | path |   string | Full path of the file/directory, or unique identifier for pipe, unix socket | 1 |
 | containerId | string |  Unique string representing the Container Object to which the file resides.  Can be NULL if file isn't in a container. | 1 |
 
-### Events 
+### Events
 
-Events represent important individual behaviors of an entity that are broken out on their own due to their importance, their rarity, or because maintaining operation order is important.  In order to manage events and their differing attributes, we divide them into three different categories:  Process, File, and Network events.  These are described more in detail later on.  
+Events represent important individual behaviors of an entity that are broken out on their own due to their importance, their rarity, or because maintaining operation order is important.  In order to manage events and their differing attributes, we divide them into three different categories:  Process, File, and Network events.  These are described more in detail later on.
 
 Each event and flow contains a process object id, a timestamp, a thread id, and a set of operation flags.  The process object id represents the Process Entity on which the event occurred, while the thread id indicates which process thread was associated with the event.
 
@@ -153,13 +133,13 @@ The operation flags describe the actual behavior associated with the event (or f
 | OP_UNLINK     | (1 << 18)| Process deletes file | unlink(), unlinkat() | FileEvent| 1 |
 | OP_SYMLINK    | (1 << 19)| Process creates sym link to existing file | symlink(), symlinkat() | FileEvent| 1 |
 | OP_RENAME     | (1 << 20)| File renamed | rename(), renameat() | FileEvent| 1 |
-   
-#### Process Event 
+
+#### Process Event
 
 A Process Event is an event that creates or modifies a process in some way. Currently, we support four Process Events (referred to as operations), and their behavior in SysFlow is described below.
 
 | Operation     | Behavior  |
-| ------------- | -----------| 
+| ------------- | -----------|
 | OP_CLONE      | Exported when a new process or thread is cloned.  A new Process Entity should be exported prior to exporting the clone operation of a new process. |
 | OP_EXEC       | Exported when a process calls an exec syscall.  This event will modify an existing process, and should be accompanied by a modified Process Entity. |
 | OP_EXIT       | Exported on a process or thread exit. |
@@ -172,16 +152,16 @@ The list of attributes for the Process Event are as follows:
 | **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the event occurred. | 1 |
 | timestamp (ts)|  int64 | The timestamp when the event occurred (nanoseconds). | 1 |
 | tid |  int64 | The id of the thread associated with the ProcessEvent.  If the running process is single threaded tid == pid | 1 |
-| opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | 1 | 
-| args |  string[] | An array of arguments encoded as string for the syscall. |  Sparingly implemented. Only really used with setuid for now. | 
-| ret | int64 | Syscall return value. | 1 | 
+| opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | 1 |
+| args |  string[] | An array of arguments encoded as string for the syscall. |  Sparingly implemented. Only really used with setuid for now. |
+| ret | int64 | Syscall return value. | 1 |
 
-#### File Event 
+#### File Event
 
 A File Event is an event that creates, deletes or modifies a File Entity.   Currently, we support six File Events (referred to as operations), and their behavior in SysFlow is described below.
 
 | Operation     | Behavior  |
-| ------------- | -----------| 
+| ------------- | -----------|
 | OP_MKDIR      | Exported when a new directory is created.  Should be accompanied by a new File Entity representing the directory |
 | OP_RMDIR      | Exported when a directory is deleted.|
 | OP_LINK       | Exported when a process creates a hard link to an existing file.  Should be accompanied by a new File Entity representing the new link. |
@@ -198,20 +178,20 @@ The list of attributes for the File Event are as follows:
 | **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the event occurred. | 1 |
 | timestamp (ts)|  int64 | The timestamp when the event occurred (nanoseconds). | 1 |
 | tid |  int64 | The id of the thread associated with the FileEvent.  If the running process is single threaded tid == pid | 1 |
-| opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | 1 | 
-| ret | int64 | Syscall return value. | 1 | 
+| opFlags | int64 | The id of the syscall associated with the event.  See list of Operation Flags for details. | 1 |
+| ret | int64 | Syscall return value. | 1 |
 | **FOID:** |  string (128bit) | The id of the file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. | 1 |
 | **NewFOID:** |  string (128bit) | Some syscalls (link, symlink, etc.) convert one file into another requiring two files. This id is the id of the file secondary or new file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. Can be NULL. | 1 |
 
-#### Network Event 
+#### Network Event
 
 Currently, not implemented.
 
-### Flows 
+### Flows
 
 A Flow represents an aggregation of multiple events that naturally fit together to describe a particular behavior.   They are designed to reduce data and collect statistics.   Examples of flows include an application reading or writing to a file, or sending and receiving data from another process or host.    Flows represent a number of events occurring over a period of time, and as such each flow has a set of operations (encoded in a bitmap), a start and an end time.   One can determine the operations in the flow by decoding the operation flags.
 
-A flow can be started by any supported operation and are exported in one of two ways.   First, they are exported on an exit, or close event signifying the end of a connection, file interaction, or process.  Second, a long running flow is exported after a preconfigured time period. After a long running flow is exported, its counters and flags are reset. However, if there is no activity on the flow over a preconfigured period of time, that flow is no longer exported.    
+A flow can be started by any supported operation and are exported in one of two ways.   First, they are exported on an exit, or close event signifying the end of a connection, file interaction, or process.  Second, a long running flow is exported after a preconfigured time period. After a long running flow is exported, its counters and flags are reset. However, if there is no activity on the flow over a preconfigured period of time, that flow is no longer exported.
 
 In this section, we describe three categories of Flows:  Process, File and Network Flows.
 
@@ -220,7 +200,7 @@ In this section, we describe three categories of Flows:  Process, File and Netwo
 A Process Flow represents a summarization of the number of threads created and destroyed over a time period. Process Flows are partially implemented in the collector and will be fully implemented in a future release. Since schema version 2. Currently we support the following operations:
 
 | Operation     | Behavior  |
-| ------------- | -----------| 
+| ------------- | -----------|
 | OP_CLONE      | Recorded when a new thread is cloned. |
 | OP_EXIT       | Recorded on a thread exit. |
 
@@ -231,17 +211,17 @@ The list of attributes for the Process Flow are as follows:
 | **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | 2 |
 | timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | 2 |
 | numThreadsCloned |  int64 | The number of threads cloned during the duration of the flow. | 2 |
-| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the ProcessFlow.  See list of Operation Flags for details. | 2 | 
-| endTs |  int64 | The timestamp when the process flow is exported (nanoseconds). | 2 | 
+| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the ProcessFlow.  See list of Operation Flags for details. | 2 |
+| endTs |  int64 | The timestamp when the process flow is exported (nanoseconds). | 2 |
 | numThreadsExited | int64 | Number of threads exited during the duration of the flow. | 2 |
 | numCloneErrors | int64 | Number of clone errors occuring during the duration of the flow. | 2 |
 
-#### File Flow 
+#### File Flow
 
 A File Flow represents a collection of operations on a file. Currently we support the following operations:
 
 | Operation     | Behavior  |
-| ------------- | -----------| 
+| ------------- | -----------|
 | OP_SETNS      | Process entering namespace entry in mounted file related to reference File Entity |
 | OP_OPEN       | Process opening a file/resource. |
 | OP_READ_RECV  | Process reading from file/resource.|
@@ -258,22 +238,22 @@ The list of attributes for the File Flow are as follows:
 | **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | 1 |
 | timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | 1 |
 | tid |  int64 | The id of the thread associated with the flow.  If the running process is single threaded tid == pid | 1 |
-| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the FileFlow.  See list of Operation Flags for details. | 1 | 
+| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the FileFlow.  See list of Operation Flags for details. | 1 |
 | openFlags | int64 | Flags associated with an open syscall if present. | 1 |
-| endTs |  int64 | The timestamp when the file flow is exported (nanoseconds). | 1 | 
+| endTs |  int64 | The timestamp when the file flow is exported (nanoseconds). | 1 |
 | **FOID:** |  string (128bit) | The id of the file on which the system call was called. File Identifier, is a SHA1 hash of the concatenation of the path + container ID. | 1 |
 | fd |  int32 | The file descriptor associated with the flow. | 1 |
 | numRRecvOps | int64 | Number of read operations performed during the duration of the flow. | 1 |
 | numWSendOps | int64 | Number of write operations performed during the duration of the flow. | 1 |
 | numRRecvBytes | int64 | Number of bytes read during the duration of the flow. | 1 |
-| numWSendBytes | int64 | Number of bytes written during the duration of the flow. | 1 | 
+| numWSendBytes | int64 | Number of bytes written during the duration of the flow. | 1 |
 
-#### Network Flow 
+#### Network Flow
 
 A Network Flow represents a collection of operations on a network connection. Currently we support the following operations:
 
 | Operation     | Behavior  |
-| ------------- | -----------| 
+| ------------- | -----------|
 | OP_ACCEPT     | Process accepted a new network connection. |
 | OP_CONNECT    | Process connected to a remote host or process.  |
 | OP_READ_RECV  | Process receiving data from a remote host or process.|
@@ -290,8 +270,8 @@ The list of attributes for the Network Flow are as follows:
 | **OID:**<br> *host pid*<br>*create ts*| **struct** <br> *int64*<br>*int64*| The OID of the process for which the flow occurred. | 1 |
 | timestamp (ts)|  int64 | The timestamp when the flow starts (nanoseconds). | 1 |
 | tid |  int64 | The id of the thread associated with the flow.  If the running process is single threaded tid == pid | 1 |
-| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the flow.  See list of Operation Flags for details. | 1 | 
-| endTs |  int64 | The timestamp when the flow is exported (nanoseconds). | 1 | 
+| opFlags | int64 (bitmap) | The id of one or more syscalls associated with the flow.  See list of Operation Flags for details. | 1 |
+| endTs |  int64 | The timestamp when the flow is exported (nanoseconds). | 1 |
 | sip |  int32 | The source IP address. | 1 |
 | sport |  int16 | The source port. | 1 |
 | dip |  int32 | The destination IP address. | 1 |
@@ -300,7 +280,7 @@ The list of attributes for the Network Flow are as follows:
 | numRRecvOps | int64 | Number of receive operations performed during the duration of the flow. | 1 |
 | numWSendOps | int64 | Number of send operations performed during the duration of the flow. | 1 |
 | numRRecvBytes | int64 | Number of bytes received during the duration of the flow. | 1 |
-| numWSendBytes | int64 | Number of bytes sent during the duration of the flow. | 1 | 
+| numWSendBytes | int64 | Number of bytes sent during the duration of the flow. | 1 |
 
 >---
 > **NOTE**  The current implementation of NetworkFlow only supports ipv4.

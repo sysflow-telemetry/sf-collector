@@ -29,7 +29,7 @@ FROM debian:buster AS builder
 # sysflow release
 ARG SYSFLOW_VERSION
 
-# setup build build requirements
+# setup build requirements
 RUN apt-get update && apt-get install -y \
 	make \
 	wget \
