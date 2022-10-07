@@ -20,6 +20,16 @@ void process_sysflow(sysflow::SFHeader *header, sysflow::Container *cont,
                      sysflow::Process *proc, sysflow::File *f1,
                      sysflow::File *f2, sysflow::SysFlow *flow) {
 
+  printf("****************************************************************\n");
+  printf("Header: Exporter %s, IP %s, File name %s\n", header->exporter.c_str(),
+         header->ip.c_str(), header->filename.c_str());
+
+  if (cont != nullptr) {
+    printf("Container: Id %s, Name %s, Image %s, ImageId %s, Type, %d\n",
+           cont->id.c_str(), cont->name.c_str(), cont->image.c_str(),
+           cont->imageid.c_str(), (int)cont->type);
+  }
+
   sysflow::Process::poid_t poid = proc->poid;
 
   while(!poid.is_null()) {
@@ -32,15 +42,6 @@ void process_sysflow(sysflow::SFHeader *header, sysflow::Container *cont,
     poid = pp->poid;
   }
 
-  printf("****************************************************************\n");
-  printf("Header: Exporter %s, IP %s, File name %s\n", header->exporter.c_str(),
-         header->ip.c_str(), header->filename.c_str());
-
-  if (cont != nullptr) {
-    printf("Container: Id %s, Name %s, Image %s, ImageId %s, Type, %d\n",
-           cont->id.c_str(), cont->name.c_str(), cont->image.c_str(),
-           cont->imageid.c_str(), (int)cont->type);
-  }
 
   printf("Process: PID %lu Creation Time, %lu, Exe %s, Exe Args %s, User Name "
          "%s, Group Name %s, TTY %d\n",
