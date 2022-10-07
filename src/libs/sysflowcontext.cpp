@@ -76,7 +76,16 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
   }
 
   std::unordered_set<uint32_t> tp_set = m_inspector->enforce_sinsp_state_tp();
+  /*The schedule switch tracepoint is very noise and doesn't provide much
+   * information*/
+  tp_set.erase(SCHED_SWITCH);
   std::unordered_set<uint32_t> ppm_sc = getSyscallSet();
+  auto syscalls = m_inspector->get_syscalls_names(ppm_sc);
+
+  SF_DEBUG(m_logger, "List of Syscalls after enforcement:")
+  for (auto it : syscalls) {
+    SF_DEBUG(m_logger, it);
+  }
 
   openInspector(tp_set, ppm_sc);
 
@@ -263,7 +272,13 @@ std::unordered_set<uint32_t>
 SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppmScSet) {
   auto scMode = SF_FLOW_SC_SET;
   if (m_config->collectionMode == SFSysCallMode::SFConsumerMode) {
+    SF_INFO(m_logger, "SysFlow configured for consumer mode.")
     scMode = SF_CONSUMER_SC_SET;
+  }
+  auto syscalls = m_inspector->get_syscalls_names(scMode);
+  SF_DEBUG(m_logger, "Syscall List before enforcement:")
+  for (auto it : syscalls) {
+    SF_DEBUG(m_logger, it)
   }
   auto simpleSet = m_inspector->enforce_sinsp_state_ppm_sc(scMode);
   ppmScSet.insert(simpleSet.begin(), simpleSet.end());
