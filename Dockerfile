@@ -114,9 +114,6 @@ ENV CRI_TIMEOUT=$critimeout
 ARG debug=
 ENV DEBUG=$debug
 
-ARG consumer=
-ENV CONSUMER=$consumer
-
 ARG gllogtostderr=1
 ENV GLOG_logtostderr=$gllogtostderr
 
