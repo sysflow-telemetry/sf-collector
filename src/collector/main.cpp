@@ -123,10 +123,22 @@ int main(int argc, char **argv) {
   g_config = sysflowlibscpp::InitializeSysFlowConfig();
 
   while ((c = static_cast<char>(
-              getopt(argc, argv, "Chcr:w:G:s:e:l:vf:p:t:du:"))) != -1) {
+              getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:m:"))) != -1) {
     switch (c) {
-    case 'C':
-      g_config->collectionMode = SFSysCallMode::SFConsumerMode;
+    case 'm':
+      if (strcmp(optarg, "consume") == 0) {
+        g_config->collectionMode = SFSysCallMode::SFConsumerMode;
+        cout << "Collector configured for consumer mode!" << endl;
+      } else if (strcmp(optarg, "nofiles") == 0) {
+        g_config->collectionMode = SFSysCallMode::SFNoFilesMode;
+        cout << "Collector configured for consumer mode!" << endl;
+      } else if (strcmp(optarg, "flow") == 0) {
+        g_config->collectionMode = SFSysCallMode::SFFlowMode;
+        cout << "Collector configured for flow mode!" << endl;
+      } else {
+        cout << "Collection mode not recognized: " << optarg << " exiting." << endl;
+        exit(1);
+      }
       break;
     case 'd':
       g_config->enableStats = true;

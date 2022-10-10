@@ -105,7 +105,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     config->fileOnly = false;
   }
 
-  if (config->fileOnly) {
+  if (config->fileOnly && !isNoFilesMode()) {
     SF_INFO(m_logger, "Enabled file only mode")
   }
 
@@ -120,25 +120,27 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     SF_INFO(m_logger, "Enabled process flow mode")
   }
 
-  const char *fileRead = std::getenv(FILE_READ_MODE);
-  if (fileRead != nullptr && strcmp(fileRead, "0") == 0) {
-    SF_INFO(m_logger, "Enabled all file reads")
-    config->fileReadMode = FILE_READS_ENABLED;
-  } else if (fileRead != nullptr && strcmp(fileRead, "1") == 0) {
-    SF_INFO(m_logger, "Disabled all file reads")
-    config->fileReadMode = FILE_READS_DISABLED;
-  } else if (fileRead != nullptr && strcmp(fileRead, "2") == 0) {
-    SF_INFO(m_logger,
-            "Disabled file reads to dirs: /proc/, /usr/lib/, /usr/lib64/, "
-            "/lib64/, /lib/, /dev/, /sys/, //sys/")
-    config->fileReadMode = FILE_READS_SELECT;
-  } else {
-    SF_INFO(m_logger,
-            "File Read Mode was set to: "
-                << config->fileReadMode
-                << " Modes are:  0 = enable all file reads, 1 = disable "
-                << "all file reads, or 2 = disable file reads to certain "
-                   "directories")
+  if (!isNoFilesMode()) {
+    const char *fileRead = std::getenv(FILE_READ_MODE);
+    if (fileRead != nullptr && strcmp(fileRead, "0") == 0) {
+      SF_INFO(m_logger, "Enabled all file reads")
+      config->fileReadMode = FILE_READS_ENABLED;
+    } else if (fileRead != nullptr && strcmp(fileRead, "1") == 0) {
+      SF_INFO(m_logger, "Disabled all file reads")
+      config->fileReadMode = FILE_READS_DISABLED;
+    } else if (fileRead != nullptr && strcmp(fileRead, "2") == 0) {
+      SF_INFO(m_logger,
+              "Disabled file reads to dirs: /proc/, /usr/lib/, /usr/lib64/, "
+              "/lib64/, /lib/, /dev/, /sys/, //sys/")
+      config->fileReadMode = FILE_READS_SELECT;
+    } else {
+      SF_INFO(m_logger,
+              "File Read Mode was set to: "
+                  << config->fileReadMode
+                  << " Modes are:  0 = enable all file reads, 1 = disable "
+                  << "all file reads, or 2 = disable file reads to certain "
+                     "directories")
+    }
   }
 
   char *k8sAPIURL = getenv(SF_K8S_API_URL);
@@ -224,8 +226,14 @@ void SysFlowContext::checkModule() {
 
 void SysFlowContext::openInspector(std::unordered_set<uint32_t> tp_set,
                                    std::unordered_set<uint32_t> ppm_sc) {
-  std::string collectionMode =
-      (m_config->collectionMode == SFFlowMode) ? "flow mode" : "consumer mode";
+  std::string collectionMode;
+  if (m_config->collectionMode == SFFlowMode) {
+    collectionMode = "flow mode";
+  } else if (m_config->collectionMode == SFConsumerMode) {
+    collectionMode = "consumer mode";
+  } else {
+    collectionMode = "no files mode";
+  }
   switch (m_probeType) {
   case KMOD:
     SF_INFO(m_logger, "Opening kmod probe in "
@@ -274,6 +282,9 @@ SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppmScSet) {
   if (m_config->collectionMode == SFSysCallMode::SFConsumerMode) {
     SF_INFO(m_logger, "SysFlow configured for consumer mode.")
     scMode = SF_CONSUMER_SC_SET;
+  } else if (m_config->collectionMode == SFSysCallMode::SFNoFilesMode) {
+    SF_INFO(m_logger, "SysFlow configured for no files mode.")
+    scMode = SF_NO_FILES_SC_SET;
   }
   auto syscalls = m_inspector->get_syscalls_names(scMode);
   SF_DEBUG(m_logger, "Syscall List before enforcement:")

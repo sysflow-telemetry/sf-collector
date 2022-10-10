@@ -186,7 +186,8 @@ CMD /usr/local/sysflow/bin/sysporter \
      ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
      ${SOCK_FILE:+-u} ${SOCK_FILE} \
      ${SAMPLING_RATE:+-s} ${SAMPLING_RATE} \
-     ${DEBUG:+-d} ${CONSUMER:+-C}
+     ${DEBUG:+-d} \ 
+     ${MODE:+-m} ${MODE}
 
 #-----------------------
 # Stage: Testing
