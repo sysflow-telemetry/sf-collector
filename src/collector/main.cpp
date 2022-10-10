@@ -136,7 +136,8 @@ int main(int argc, char **argv) {
         g_config->collectionMode = SFSysCallMode::SFFlowMode;
         cout << "Collector configured for flow mode!" << endl;
       } else {
-        cout << "Collection mode not recognized: " << optarg << " exiting." << endl;
+        cout << "Collection mode not recognized: " << optarg << " exiting."
+             << endl;
         exit(1);
       }
       break;
