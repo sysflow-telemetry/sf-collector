@@ -23,7 +23,7 @@
 #include "sysflow.h"
 #include <stdint.h>
 
-enum SFSysCallMode { SFFlowMode, SFConsumerMode };
+enum SFSysCallMode { SFFlowMode, SFConsumerMode, SFNoFilesMode };
 
 using SysFlowCallback = std::function<void(
     sysflow::SFHeader *, sysflow::Container *, sysflow::Process *,

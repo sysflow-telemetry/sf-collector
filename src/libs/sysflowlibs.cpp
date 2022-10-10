@@ -21,8 +21,10 @@
 #include "scap.h"
 #include "scap_open_exception.h"
 #include "sinsp_exception.h"
+#include "sysflow_config.h"
 #include "sysflowcontext.h"
 #include "sysflowprocessor.h"
+#include <sstream>
 
 using sysflowlibscpp::SysFlowDriver;
 
@@ -78,4 +80,10 @@ int SysFlowDriver::run() {
     throw sfexception::SysFlowException(aex.what());
   }
   return 0;
+}
+
+std::string SysFlowDriver::getVersion() {
+  std::stringstream str;
+  str << SF_VERSION << "+" << SF_BUILD;
+  return str.str();
 }

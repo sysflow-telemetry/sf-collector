@@ -48,6 +48,7 @@ public:
   virtual ~SysFlowDriver();
   void exit();
   int run();
+  std::string getVersion();
 };
 
 } // namespace sysflowlibscpp

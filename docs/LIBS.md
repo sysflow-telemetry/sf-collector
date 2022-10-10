@@ -25,6 +25,32 @@ int main(int argc, char **argv) {
 }
 ```
 
+## APIs
+
+The public interface for the SysFlow libs offers two objects: `SysFlowConfig` and `SysFlowDriver`.
+
+### SysFlowConfig
+
+The `SysFlowConfig` object is a struct, which contains all settings for the libs and must be passed into the `SysFlowDriver` constructor.  A more detailed description of the configuration settings for `SysFlowConfig` are in [Advanced Usage](#advanced-usage).
+
+#### API
+
+`SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig()` - initializes the configuration object with a set of default values.
+
+
+### SysFlowDriver
+
+The `SysFlowDriver` object is the main object for collecting and exporting SysFlow data.  It currently supports 3 export options: 1.)  to avro encoded file, 2.) over unix domain socket, 3.) call to user defined callback function (see example above).  Export options are configured using the `SysFlowConfig` option.   Beyond exporting, the driver also supports system call ingestion from the following: 1.) SCAP file, 2.) kernel module, and  3.) ebpf probe.  Configurations for file ingestion are currently set by the `SysFlowConfig` object. For live capture, the kernel module is loaded by default; however, one can use the ebpf probe by currently exporting the `FALCO_BPF_PROBE` environment variable (e.g., `export FALCO_BPF_PROBE=""`) before launching the binary.  Note that probes are launched by running the `falco-driver-loader` script described below.  Finally, the driver offers a new collection mode option, which determines what system calls are collected.  See the `collectionMode` attribute in the [Configuration](#configuration) section below for more details.
+
+#### API
+
+`sysflowlibscpp::SysFlowDriver`
+* `SysFlowDriver(sysflowlibscpp::SysFlowConfig *config)` - Driver constructor configures the driver based on the settings in the `SysFlowConfig` object. Note: the constructor can throw a `SysFlowException`
+* `virtual ~SysFlowDriver()` - Driver destructor.
+* `void exit()` - Stops the driver data collection and export.  Typically called within a signal handler.
+* `int run()` - blocking function that runs the main collection loop. Note: can throw a `SysFlowException`. Returns `0` on successful completion.
+* `std::string getVersion()` - returns a string representing the version number of the libraries.
+
 ## Installation
 
 Binary packages (deb, rpm, tgz) for glibc- and musl-based build pipelines are available in the collector's [release assets](https://github.com/sysflow-telemetry/sf-collector/releases) (since release `$VERSION` >=0.5.0). This is going to install libSysFlow headers and the static libraries (.a) needed to link your application.
@@ -149,7 +175,8 @@ The library configuration parameters are assigned defaults that should work well
 | k8sAPIURL | string | K8s API URL used to retrieve K8s state and K8s events (experimental) | |
 | k8sAPICert | string | Path to K8s API Certificate (experimental) | |
 | moduleChecks | bool | Run added module checks for better error checking | true |
-| enableConsumerMode | bool | Consumer mode no reads/writes/sends/recvs/closes are collected for TCP and file sessions (not fully implemented) | false |
+| collectionMode | enum | Has three possible values: 1.) `SFFlowMode` for SysFlow mode which does full SysFlow collection as described in the spec. 2.) `SFConsumerMode` removes collection of `read`, `write` and `close` operations for FileFlows. 3.) `SFNoFiles` drops file flows and file events. The latter two options are a lighterweight collection mode for systems where CPU or drop issues may occur | `SFFlowMode` |
+| appName | string | Sets the calling application name for logging purposes. | `sysflowlibs` |
 | singleBufferDimension | int | This is the dimension that a single buffer in our drivers will have (BPF, kmod, modern BPF) Please note:  This number is expressed in bytes. This number must be a multiple of your system page size, otherwise the allocation will fail. If you leave `0`, every driver will set its internal default dimension. | 0 |
 
 ### Exception Handling

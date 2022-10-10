@@ -58,6 +58,8 @@ private:
   int removeFileFlowFromSet(FileFlowObj **ffo, bool deleteFileFlow);
   void removeAndWriteRelatedFlows(ProcessObj *proc, FileFlowObj *ffo,
                                   uint64_t endTs);
+  int createConsumerRecord(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
+                           OpFlags flag, sinsp_fdinfo_t *fdinfo, int64_t fd);
   DEFINE_LOGGER();
 
 public:

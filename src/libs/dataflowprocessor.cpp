@@ -60,9 +60,9 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt *ev, OpFlags flag) {
         "Event: " << ev->get_name()
                   << " doesn't have an fdinfo associated with it! ErrorCode: "
                   << utils::getSyscallResult(ev));
-    if (IS_FILE_EVT(flag)) {
+    if (IS_FILE_EVT(flag) && !m_cxt->isNoFilesMode()) {
       return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
-    } else if (flag == OP_MMAP) {
+    } else if (flag == OP_MMAP && !m_cxt->isNoFilesMode()) {
       return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
     }
     if (fdinfo == nullptr) {
@@ -73,9 +73,9 @@ int DataFlowProcessor::handleDataEvent(sinsp_evt *ev, OpFlags flag) {
 
   if (fdinfo->is_ipv4_socket() || fdinfo->is_ipv6_socket()) {
     return m_netflowPrcr->handleNetFlowEvent(ev, flag);
-  } else if (IS_FILE_EVT(flag)) {
+  } else if (IS_FILE_EVT(flag) && !m_cxt->isNoFilesMode()) {
     return m_fileevtPrcr->handleFileFlowEvent(ev, flag);
-  } else {
+  } else if (!m_cxt->isNoFilesMode()) {
     return m_fileflowPrcr->handleFileFlowEvent(ev, flag);
   }
 
