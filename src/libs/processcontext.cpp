@@ -92,11 +92,8 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
       }
     }
   }
-<<<<<<< HEAD
   // this is a fallback to retrieve the process name when exepath is <NA>, which
   // can happen when a page fault occurs during an execve system call.
-=======
->>>>>>> 0ad6fbc (fix(processcontext): partial fix for <NA> issue for processes)
   p->proc.exe = (mainthread->m_exepath.empty() ||
                  mainthread->m_exepath.compare("<NA>") == 0)
                     ? mainthread->m_exe
@@ -371,11 +368,8 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
   sinsp_threadinfo *mainthread = ti->get_main_thread();
   proc->state = state;
   proc->ts = ev->get_ts();
-<<<<<<< HEAD
   // this is a fallback to retrieve the process name when exepath is <NA>, which
   // can happen when a page fault occurs during an execve system call.
-=======
->>>>>>> 0ad6fbc (fix(processcontext): partial fix for <NA> issue for processes)
   proc->exe = (mainthread->m_exepath.empty() ||
                mainthread->m_exepath.compare("<NA>") == 0)
                   ? mainthread->m_exe
