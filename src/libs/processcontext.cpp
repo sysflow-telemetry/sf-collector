@@ -59,6 +59,7 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
   p->proc.oid.hpid = mainthread->m_pid;
   p->proc.oid.createTS = mainthread->m_clone_ts;
   p->proc.entry = (mainthread->m_vpid == 1);
+  p->proc.poid.set_null();
 
   p->proc.tty = mainthread->m_tty;
   sinsp_threadinfo *parent = mainthread->get_parent_thread();
@@ -91,8 +92,11 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
       }
     }
   }
-  p->proc.exe = (mainthread->m_exepath.empty())
-                    ? utils::getAbsolutePath(mainthread, mainthread->m_exe)
+  // this is a fallback to retrieve the process name when exepath is <NA>, which
+  // can happen when a page fault occurs during an execve system call.
+  p->proc.exe = (mainthread->m_exepath.empty() ||
+                 mainthread->m_exepath.compare("<NA>") == 0)
+                    ? mainthread->m_exe
                     : mainthread->m_exepath;
   SF_DEBUG(m_logger, "createProcess: The exepath is "
                          << p->proc.exe
@@ -364,8 +368,11 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
   sinsp_threadinfo *mainthread = ti->get_main_thread();
   proc->state = state;
   proc->ts = ev->get_ts();
-  proc->exe = (mainthread->m_exepath.empty())
-                  ? utils::getAbsolutePath(mainthread, mainthread->m_exe)
+  // this is a fallback to retrieve the process name when exepath is <NA>, which
+  // can happen when a page fault occurs during an execve system call.
+  proc->exe = (mainthread->m_exepath.empty() ||
+               mainthread->m_exepath.compare("<NA>") == 0)
+                  ? mainthread->m_exe
                   : mainthread->m_exepath;
   proc->exeArgs.clear();
 
