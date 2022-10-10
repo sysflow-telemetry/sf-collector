@@ -90,8 +90,7 @@ int main(int argc, char **argv) {
   // configure event collection (using defaults)
   SysFlowConfig *config = sysflowlibscpp::InitializeSysFlowConfig();
   config->callback = process_sysflow;
-  g_driver =
-      new sysflowlibscpp::SysFlowDriver(config);
+  g_driver = new sysflowlibscpp::SysFlowDriver(config);
 
   // register signal handlers to stop event collection
   shutdown_handler = [&]() -> void { g_driver->exit(); };
