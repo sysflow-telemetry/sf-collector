@@ -48,8 +48,6 @@ public:
   virtual ~SysFlowDriver();
   void exit();
   int run();
-  sysflow::Container *getContainer(const std::string &containerId);
-  sysflow::Process *getProcess(sysflow::OID &oid);
   std::string getVersion();
 };
 

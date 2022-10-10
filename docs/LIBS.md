@@ -49,7 +49,6 @@ The `SysFlowDriver` object is the main object for collecting and exporting SysFl
 * `virtual ~SysFlowDriver()` - Driver destructor.
 * `void exit()` - Stops the driver data collection and export.  Typically called within a signal handler.
 * `int run()` - blocking function that runs the main collection loop. Note: can throw a `SysFlowException`. Returns `0` on successful completion.
-*  `sysflow::Process *getProcess(sysflow::OID &oid)` - accessor to libs `Process` objects, given a process object id. This API can be used for accessing parent process objects. If the process doesn't exist, this function returns a null pointer. Note: Currently, the libs "own" the process object.  If calling application wants to store the process object, it should clone the object for safety.
 * `std::string getVersion()` - returns a string representing the version number of the libraries.
 
 ## Installation

@@ -30,19 +30,6 @@ void process_sysflow(sysflow::SFHeader *header, sysflow::Container *cont,
            cont->imageid.c_str(), (int)cont->type);
   }
 
-  sysflow::Process::poid_t poid = proc->poid;
-
-  while(!poid.is_null()) {
-    sysflow::OID oid = poid.get_OID();
-    sysflow::Process *pp = g_driver->getProcess(oid);
-    if (pp == nullptr) {
-      break;
-    }
-    printf("Parent %s, %s\n", pp->exe.c_str(), pp->exeArgs.c_str());
-    poid = pp->poid;
-  }
-
-
   printf("Process: PID %lu Creation Time, %lu, Exe %s, Exe Args %s, User Name "
          "%s, Group Name %s, TTY %d\n",
          proc->oid.hpid, proc->oid.createTS, proc->exe.c_str(),
