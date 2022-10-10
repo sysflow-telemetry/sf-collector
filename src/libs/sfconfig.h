@@ -54,8 +54,8 @@ struct SysFlowConfig {
   // Scap input file path.  Used in offline mode to read from raw scap rather
   // than tapping the kernel. Set null if using online kernel collection.
   std::string scapInputPath;
-  // String to set BPF style filter on events being passed from the falco libs,
-  // to the SysFlow library.
+  // String to set Falco-style filter on events being passed from the falco
+  // libs, to the SysFlow library
   std::string falcoFilter;
   // Sampling ratio used to determine which system calls to drop in the probe.
   int samplingRatio;
