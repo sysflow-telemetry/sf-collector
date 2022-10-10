@@ -103,6 +103,9 @@ public:
   inline bool isConsumerMode() {
     return m_config->collectionMode == SFSysCallMode::SFConsumerMode;
   }
+  inline bool isNoFilesMode() {
+    return m_config->collectionMode == SFSysCallMode::SFNoFilesMode;
+  }
 };
 } // namespace context
 
