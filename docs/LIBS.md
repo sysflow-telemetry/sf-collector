@@ -175,7 +175,7 @@ The library configuration parameters are assigned defaults that should work well
 | k8sAPIURL | string | K8s API URL used to retrieve K8s state and K8s events (experimental) | |
 | k8sAPICert | string | Path to K8s API Certificate (experimental) | |
 | moduleChecks | bool | Run added module checks for better error checking | true |
-| collectionMode | enum | Can either be `SFFlowMode` for SysFlow mode which does full SysFlow collection as described in the spec. `SFConsumerMode` removes collection of `read`, `write` and `close` operations for FileFlows. This is a lighterweight collection mode for systems where CPU or drop issues may occur | `SFFlowMode` |
+| collectionMode | enum | Has three possible values: 1.) `SFFlowMode` for SysFlow mode which does full SysFlow collection as described in the spec. 2.) `SFConsumerMode` removes collection of `read`, `write` and `close` operations for FileFlows. 3.) `SFNoFiles` drops file flows and file events. The latter two options are a lighterweight collection mode for systems where CPU or drop issues may occur | `SFFlowMode` |
 | appName | string | Sets the calling application name for logging purposes. | `sysflowlibs` |
 | singleBufferDimension | int | This is the dimension that a single buffer in our drivers will have (BPF, kmod, modern BPF) Please note:  This number is expressed in bytes. This number must be a multiple of your system page size, otherwise the allocation will fail. If you leave `0`, every driver will set its internal default dimension. | 0 |
 
