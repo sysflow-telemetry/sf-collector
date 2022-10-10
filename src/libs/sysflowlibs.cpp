@@ -82,15 +82,6 @@ int SysFlowDriver::run() {
   return 0;
 }
 
-sysflow::Container *
-SysFlowDriver::getContainer(const std::string &containerId) {
-  return m_processor->getContainer(containerId);
-}
-
-sysflow::Process *SysFlowDriver::getProcess(sysflow::OID &oid) {
-  return m_processor->getProcess(oid);
-}
-
 std::string SysFlowDriver::getVersion() {
   std::stringstream str;
   str << SF_VERSION << "+" << SF_BUILD;
