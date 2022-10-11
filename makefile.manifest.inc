@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SYSFLOW_VERSION?=0.5.0-rc3
+SYSFLOW_VERSION?=0.5.0-rc4
 SYSFLOW_BUILD_NUMBER?=1
 FALCO_VERSION=0.32.2
 FALCO_LIBS_VERSION=0242f97c937388a16feab050286c2d2e5864e47c
