@@ -34,7 +34,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - Refactor the src directory to separate the collector and libsysflow
 - Package static linked binary (based on musl build) into binary packages
-- Bumped Falco libs to 0242f97
+- Bumped Falco libs to 8cca3ab
+- Bumped UBI to 8.6-943
 
 ### Fixed
 
