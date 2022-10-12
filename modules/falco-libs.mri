@@ -65,10 +65,7 @@ addlib libabsl_synchronization.a
 addlib libabsl_throw_delegate.a
 addlib libabsl_time.a
 addlib libabsl_time_zone.a
-addlib libaddress_sorting.a
 addlib libb64.a
-addlib libcares.a
-addlib libcrypto.a
 addlib libcurl.a
 addlib libdriver_event_schema.a
 addlib libgpr.a
@@ -83,9 +80,6 @@ addlib libgrpc_unsecure.a
 addlib libgrpcpp_channelz.a
 addlib libjq.a
 addlib libonig.a
-addlib libprotobuf.a
-addlib libprotoc.a
-addlib libre2.a
 addlib libscap.a
 addlib libscap_engine_bpf.a
 addlib libscap_engine_gvisor.a
@@ -98,10 +92,7 @@ addlib libscap_engine_udig.a
 addlib libscap_engine_util.a
 addlib libscap_event_schema.a
 addlib libsinsp.a
-addlib libssl.a
 addlib libtbb.a
 addlib libtbbmalloc.a
-addlib libupb.a
-addlib libz.a
 save
 end
