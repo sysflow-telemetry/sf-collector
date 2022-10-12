@@ -43,6 +43,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fix exepath in execveat events
 - Fix logging error from google init
 - Fix (partial) missing values in process exec paths
+- Shutdow glog during driver destruction
 
 ## [0.4.4] - 2022-07-26
 
@@ -234,8 +235,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0-rc4...HEAD
-[0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0-rc4
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0-rc5...HEAD
+[0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0-rc5
 [0.4.4]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1...0.4.2
