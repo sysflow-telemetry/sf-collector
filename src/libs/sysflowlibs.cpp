@@ -39,7 +39,10 @@ SysFlowDriver::SysFlowDriver(SysFlowConfig *conf) {
   }
 }
 
-SysFlowDriver::~SysFlowDriver() { delete m_processor; }
+SysFlowDriver::~SysFlowDriver() {
+  delete m_processor;
+  SHUTDOWN_LOGGER()
+}
 
 SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   SysFlowConfig *conf = new SysFlowConfig();
