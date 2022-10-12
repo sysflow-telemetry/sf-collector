@@ -30,6 +30,7 @@
 #define m_logger
 
 #define CONFIGURE_LOGGER(logConfig) google::InitGoogleLogging(logConfig);
+#define SHUTDOWN_LOGGER() google::ShutdownGoogleLogging();
 #define CATCH_LOGGER_EXCEPTION()
 
 #define SF_TRACE(logger, message) VLOG(2) << message;
