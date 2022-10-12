@@ -10,5 +10,6 @@ docker run \
     -v /lib/modules:/host/lib/modules:ro \
     -v /usr:/host/usr:ro \
     -v /etc/:/host/etc:ro \
+    -v /var/lib:/var/lib \
     -e FALCO_BPF_PROBE="" \
     --rm callback:${SYSFLOW_VERSION}
