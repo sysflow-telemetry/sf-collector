@@ -25,31 +25,30 @@ int main(int argc, char **argv) {
 }
 ```
 
-## APIs
+## Public API
 
 The public interface for the SysFlow libs offers two objects: `SysFlowConfig` and `SysFlowDriver`.
 
 ### SysFlowConfig
 
-The `SysFlowConfig` object is a struct, which contains all settings for the libs and must be passed into the `SysFlowDriver` constructor.  A more detailed description of the configuration settings for `SysFlowConfig` are in [Advanced Usage](#advanced-usage).
+The `SysFlowConfig` object is a struct, which contains all settings for the libs and must be passed into the `SysFlowDriver` constructor.  A more detailed description of the configuration settings for `SysFlowConfig` can be found in [Advanced Usage](#advanced-usage).
 
-#### API
-
-`SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig()` - initializes the configuration object with a set of default values.
+| **Method** | **Description** |
+|---|---|
+`SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig()` | Initializes the configuration object with a set of [default](#advanced-usage) values |
 
 
 ### SysFlowDriver
 
-The `SysFlowDriver` object is the main object for collecting and exporting SysFlow data.  It currently supports 3 export options: 1.)  to avro encoded file, 2.) over unix domain socket, 3.) call to user defined callback function (see example above).  Export options are configured using the `SysFlowConfig` option.   Beyond exporting, the driver also supports system call ingestion from the following: 1.) SCAP file, 2.) kernel module, and  3.) ebpf probe.  Configurations for file ingestion are currently set by the `SysFlowConfig` object. For live capture, the kernel module is loaded by default; however, one can use the ebpf probe by currently exporting the `FALCO_BPF_PROBE` environment variable (e.g., `export FALCO_BPF_PROBE=""`) before launching the binary.  Note that probes are launched by running the `falco-driver-loader` script described below.  Finally, the driver offers a new collection mode option, which determines what system calls are collected.  See the `collectionMode` attribute in the [Configuration](#configuration) section below for more details.
+The `SysFlowDriver` object is the main object for collecting and exporting SysFlow data.  The driver also supports system call ingestion from the following sources: SCAP file, kernel module (live), and ebpf probe (live). Configurations for file ingestion are currently set by the `SysFlowConfig` object. For live capture, the kernel module is loaded by default; however, one can use the ebpf probe by currently exporting the `FALCO_BPF_PROBE` environment variable (e.g., `export FALCO_BPF_PROBE=""`) before launching the binary.  Note that probes are launched by running the `falco-driver-loader` script described below.  Finally, the driver offers a collection mode option, which determines which system calls are collected.  See the `collectionMode` attribute in the [Configuration](#configuration) section below for more details. The driver currently supports three export options: to avro encoded file, over unix domain socket, and call to user-defined callback function (see example above). Export options are configured using the `SysFlowConfig` option.
 
-#### API
-
-`sysflowlibscpp::SysFlowDriver`
-* `SysFlowDriver(sysflowlibscpp::SysFlowConfig *config)` - Driver constructor configures the driver based on the settings in the `SysFlowConfig` object. Note: the constructor can throw a `SysFlowException`
-* `virtual ~SysFlowDriver()` - Driver destructor.
-* `void exit()` - Stops the driver data collection and export.  Typically called within a signal handler.
-* `int run()` - blocking function that runs the main collection loop. Note: can throw a `SysFlowException`. Returns `0` on successful completion.
-* `std::string getVersion()` - returns a string representing the version number of the libraries.
+| **Method** | **Description** |
+|---|---|
+`SysFlowDriver(sysflowlibscpp::SysFlowConfig *config)` | Driver constructor configures the driver based on the settings in the `SysFlowConfig` object.<br>Note: the constructor can throw a `SysFlowException` |
+`virtual ~SysFlowDriver()` | Driver destructor |
+`void exit()` | Stops the driver data collection and export.  Typically called within a signal handler |
+`int run()` | Blocking function that runs the main collection loop. <br>Note: can throw a `SysFlowException`. Returns `0` on successful completion. |
+`std::string getVersion()` | returns a string representing the version number of the libraries |
 
 ## Installation
 
