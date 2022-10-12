@@ -146,6 +146,7 @@ docker run -d --privileged --name sf-collector \
 			-v /lib/modules:/host/lib/modules:ro \
             -v /usr:/host/usr:ro \
 			-v /etc/:/host/etc:ro \
+			-v /var/lib/:/host/var/lib:ro \
 			-v /mnt/data:/mnt/data \
             -e INTERVAL=60 \
             -e EXPORTER_ID=${HOSTNAME} \
