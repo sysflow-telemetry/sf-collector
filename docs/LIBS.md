@@ -35,7 +35,7 @@ The `SysFlowConfig` object is a struct, which contains all settings for the libs
 
 | **Method** | **Description** |
 |---|---|
-`SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig()` | Initializes the configuration object with a set of [default](#advanced-usage) values |
+SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() | Initializes the configuration object with a set of [default](#advanced-usage) values |
 
 
 ### SysFlowDriver
@@ -44,11 +44,11 @@ The `SysFlowDriver` object is the main object for collecting and exporting SysFl
 
 | **Method** | **Description** |
 |---|---|
-`SysFlowDriver(sysflowlibscpp::SysFlowConfig *config)` | Driver constructor configures the driver based on the settings in the `SysFlowConfig` object.<br>Note: the constructor can throw a `SysFlowException` |
-`virtual ~SysFlowDriver()` | Driver destructor |
-`void exit()` | Stops the driver data collection and export.  Typically called within a signal handler |
-`int run()` | Blocking function that runs the main collection loop. <br>Note: can throw a `SysFlowException`. Returns `0` on successful completion. |
-`std::string getVersion()` | returns a string representing the version number of the libraries |
+SysFlowDriver(sysflowlibscpp::SysFlowConfig *config | Driver constructor configures the driver based on the settings in the [SysFlowConfig](#sysflowconfig) object.<br>Note: the constructor can throw a [SysFlowException](#exception-handling). |
+virtual ~SysFlowDriver() | Driver destructor |
+void exit() | Stops the driver data collection and export.  Typically called within a signal handler |
+int run() | Blocking function that runs the main collection loop. <br>Note: can throw a [SysFlowException](#exception-handling). Returns 0 on successful completion. |
+std::string getVersion() | returns a string representing the version number of the libraries |
 
 ## Installation
 
