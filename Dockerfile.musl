@@ -37,6 +37,9 @@ ARG BUILD_NUMBER=0
 ARG DEBUG=0
 ARG ASAN=0
 
+# manifest (need to be copied here to refresh sysflow version)
+COPY ./makefile.manifest.inc /build/
+
 # build libsysflow
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
 COPY ./modules/sysflow/c\+\+/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/sysflow.hh

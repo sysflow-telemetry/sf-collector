@@ -36,6 +36,9 @@ ARG BUILD_NUMBER=0
 ARG DEBUG=0
 ARG ASAN=0
 
+# manifest (need to be copied here to refresh sysflow version)
+COPY ./makefile.manifest.inc /build/
+
 # build libsysflow
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
 COPY ./modules/sysflow/c\+\+/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/sysflow.hh
@@ -183,7 +186,7 @@ CMD /usr/local/sysflow/bin/sysporter \
      ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
      ${SOCK_FILE:+-u} ${SOCK_FILE} \
      ${SAMPLING_RATE:+-s} ${SAMPLING_RATE} \
-     ${STATS:+-d} \ 
+     ${STATS:+-d} \
      ${MODE:+-m} ${MODE}
 
 #-----------------------
