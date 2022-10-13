@@ -35,6 +35,7 @@ SysFlowDriver::SysFlowDriver(SysFlowConfig *conf) {
     m_processor = new sysflowprocessor::SysFlowProcessor(m_cxt, nullptr);
   } catch (const sinsp_exception &ex) {
     SF_ERROR(logger, "Runtime exception on module load: " << ex.what());
+    SHUTDOWN_LOGGER()
     throw sfexception::SysFlowException(ex.what());
   }
 }
