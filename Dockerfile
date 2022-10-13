@@ -111,8 +111,8 @@ ENV CRI_PATH=$cripath
 ARG critimeout=
 ENV CRI_TIMEOUT=$critimeout
 
-ARG debug=
-ENV DEBUG=$debug
+ARG stats=
+ENV STATS=$stats
 
 ARG gllogtostderr=1
 ENV GLOG_logtostderr=$gllogtostderr
@@ -183,7 +183,7 @@ CMD /usr/local/sysflow/bin/sysporter \
      ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
      ${SOCK_FILE:+-u} ${SOCK_FILE} \
      ${SAMPLING_RATE:+-s} ${SAMPLING_RATE} \
-     ${DEBUG:+-d} \ 
+     ${STATS:+-d} \ 
      ${MODE:+-m} ${MODE}
 
 #-----------------------

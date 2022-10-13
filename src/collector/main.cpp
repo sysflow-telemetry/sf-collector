@@ -110,7 +110,6 @@ int main(int argc, char **argv) {
   int criTO = 0;
   std::string criPath = "";
   char *criTimeout;
-  std::string filter = "";
   bool help = false;
   bool domainSocket = false;
   bool writeFile = false;
@@ -131,7 +130,7 @@ int main(int argc, char **argv) {
         cout << "Collector configured for consumer mode!" << endl;
       } else if (strcmp(optarg, "nofiles") == 0) {
         g_config->collectionMode = SFSysCallMode::SFNoFilesMode;
-        cout << "Collector configured for consumer mode!" << endl;
+        cout << "Collector configured for nofiles mode!" << endl;
       } else if (strcmp(optarg, "flow") == 0) {
         g_config->collectionMode = SFSysCallMode::SFFlowMode;
         cout << "Collector configured for flow mode!" << endl;
@@ -184,7 +183,7 @@ int main(int argc, char **argv) {
       break;
     case 'f':
       g_config->falcoFilter = optarg;
-      cout << "Configured filter: " << filter << endl;
+      cout << "Configured filter: " << g_config->falcoFilter << endl;
       break;
     case 'l':
       logProps = optarg;
