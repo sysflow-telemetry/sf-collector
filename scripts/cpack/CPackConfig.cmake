@@ -61,8 +61,9 @@ set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
 set(CPACK_RPM_PACKAGE_RELOCATABLE "OFF")
 # Since we package make to enable dkms install
 set(CPACK_RPM_SPEC_MORE_DEFINE "%define _build_id_links none")
+set(CPACK_RPM_PACKAGE_AUTOREQ "OFF")
 
 # Contents
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_PROCESSOR})
-set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build/conf" "/etc/sysflow/conf" "${CMAKE_CURRENT_LIST_DIR}/build/driver" "/etc/sysflow/driver" "${CMAKE_CURRENT_LIST_DIR}/build/driver/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build/service" "/usr/lib/systemd/system" "${CMAKE_CURRENT_LIST_DIR}/build/modules" "/etc/sysflow/modules")
+set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build/conf" "/etc/sysflow/conf" "${CMAKE_CURRENT_LIST_DIR}/build/driver" "/etc/sysflow/driver" "${CMAKE_CURRENT_LIST_DIR}/build/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build/service" "/usr/lib/systemd/system" "${CMAKE_CURRENT_LIST_DIR}/build/modules" "/etc/sysflow/modules")
 

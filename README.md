@@ -6,7 +6,7 @@
 
 # Supported tags and respective `Dockerfile` links
 
--	[`0.4.4`, `latest`](https://github.com/sysflow-telemetry/sf-collector/blob/0.4.4/Dockerfile), [`edge`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile), [`dev`](https://github.com/sysflow-telemetry/sf-collector/blob/dev/Dockerfile)
+-	[`0.5.0-rc6`, `latest`](https://github.com/sysflow-telemetry/sf-collector/blob/0.5.0-rc6/Dockerfile), [`edge`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile), [`dev`](https://github.com/sysflow-telemetry/sf-collector/blob/dev/Dockerfile)
 
 # Quick reference
 
@@ -26,7 +26,7 @@
 	[docker hub](https://hub.docker.com/u/sysflowtelemetry) | [GHCR](https://github.com/orgs/sysflow-telemetry/packages)
 
 -	**Binary packages**:
-	[deb](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.4/sfcollector-0.4.4-x86_64.deb) | [rpm](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.4/sfcollector-0.4.4-x86_64.rpm) | [tgz](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.4.4/sfcollector-0.4.4-x86_64.tar.gz)
+	[deb](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.5.0-rc6/sfcollector-0.5.0-rc6-x86_64.deb) | [rpm](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.5.0-rc6/sfcollector-0.5.0-rc6-x86_64.rpm) | [tgz](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.5.0-rc6/sfcollector-0.5.0-rc6-x86_64.tar.gz)
 
 # What is SysFlow?
 
@@ -61,6 +61,7 @@ docker run -d --privileged --name sf-collector \
 			-v /lib/modules:/host/lib/modules:ro \
             -v /usr:/host/usr:ro \
 			-v /etc/:/host/etc:ro \
+			-v /var/lib:/host/var/lib:ro \
 			-v /mnt/data:/mnt/data \
             -e INTERVAL=60 \
             -e EXPORTER_ID=${HOSTNAME} \

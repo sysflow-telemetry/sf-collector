@@ -15,6 +15,37 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2022-10-19
+
+### Added
+
+- Add libsysflow
+- Add example consumer of libsysflow
+- Add support for k8s pod and event objects
+- Add build pipeline and static libraries based on musl
+- Add better exception handling with error codes
+- Add support for bundled builds of libs and libsysflow
+- Add libs system call specialization support
+- Add collection modes
+- Add documentation for libsysflow
+- Add collection modes for libsysflow
+
+### Changed
+
+- Refactor the src directory to separate the collector and libsysflow
+- Package static linked binary (based on musl build) into binary packages
+- Bumped Falco libs to 8cca3ab
+- Bumped UBI to 8.6-943
+
+### Fixed
+
+- Fix stop condition for traversing process tree
+- Fix exepath in execveat events
+- Fix logging error from google init
+- Fix (partial) missing values in process exec paths
+- Shutdow glog during driver destruction
+- Added logging cleanup on constructor exception
+
 ## [0.4.4] - 2022-07-26
 
 ### Changed
@@ -205,7 +236,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...HEAD
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0-rc6...HEAD
+[0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0-rc6
 [0.4.4]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.1...0.4.2

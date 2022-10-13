@@ -90,10 +90,47 @@ if [ "${MODE}" == "base" ] ; then
         boost-static \
         sparsehash-devel \
         bc \
+        libasan \
+        libubsan \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
 
-# Install llvm 9
-DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
+    # Install llvm 9
+    DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
+
+elif [ "${MODE}" == "driver" ] ; then
+    # packages for driver image
+
+    subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms" && \
+    dnf -y update && \
+    dnf -y install \
+        gcc \
+        gcc-c++ \
+        make \
+        cmake \
+        pkgconfig \
+        autoconf \
+        wget \
+        automake \
+        libtool \
+        patch \
+        binutils \
+        bzip2 \
+        perl \
+        glibc-static \
+        diffutils \
+        kmod \
+        xz \
+        openssl-devel \
+        flex \
+        bison \
+        libstdc++-static \
+        bc \
+        libasan \
+        libubsan \
+    && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
+
+    # Install llvm 9
+    DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
 
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing
