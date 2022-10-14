@@ -25,3 +25,6 @@
 [submodule "modules/dkms"]
 	path = modules/dkms
 	url = https://github.com/dell/dkms.git
+[submodule "modules/falco-driver"]
+	path = modules/falco-driver
+	url = https://github.com/falcosecurity/libs.git

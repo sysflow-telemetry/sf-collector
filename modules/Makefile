@@ -41,6 +41,7 @@ ifneq ($(FALCO_LIBS_PR),)
 else
 	cd falco-libs && git checkout $(FALCO_LIBS_VERSION)
 endif
+	cd falco-driver && git checkout $(FALCO_LIBS_DRIVER_VERSION)
 	cd avro && git checkout $(AVRO_VERSION)
 	cd elfutils && git checkout $(ELFUTILS_VERSION)
 	cd glog && git checkout $(GLOG_VERSION)
@@ -52,6 +53,7 @@ endif
 modules: elfutils/package \
 		elfutils/install \
 		falcolibs/package \
+		falcodriver/package \
 		avro/package \
 		glog/package \
 		snappy/package
@@ -59,6 +61,7 @@ modules: elfutils/package \
 .PHONY: install
 install: modules \
 	falcolibs/install \
+	falcodriver/install \
 	avro/install \
 	sysflow/install \
 	fs/install \
@@ -68,6 +71,7 @@ install: modules \
 
 .PHONY: modules/no-elfutils
 modules/no-elfutils: falcolibs/package \
+		falcodriver/package \
 		avro/package \
 		glog/package \
 		snappy/package
@@ -75,6 +79,7 @@ modules/no-elfutils: falcolibs/package \
 .PHONY: install/no-elfutils
 install/no-elfutils: modules/no-elfutils \
 	falcolibs/install \
+	falcodriver/install \
 	avro/install \
 	sysflow/install \
 	fs/install \
@@ -127,10 +132,9 @@ falcolibs/package:
 	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
 	cp libsinsp/libsinsp.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
-	cp -r ../driver/bpf driver/src/ && \
 	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
 	cp ../../falco/scripts/falco-driver-loader bin/ && \
-	sed -i -E "s/@DRIVER_VERSION@/\"$(FALCO_LIBS_VERSION)\"/" bin/falco-driver-loader && \
+	sed -i -E "s/@DRIVER_VERSION@/\"$(FALCO_LIBS_DRIVER_VERSION)\"/" bin/falco-driver-loader && \
 	sed -i -E "s/@FALCO_VERSION@/\"$(FALCO_VERSION)\"/" bin/falco-driver-loader && \
 	sed -i -E "s#@DRIVERS_REPO@#\"$(DRIVERS_REPO)\"#" bin/falco-driver-loader && \
     cp re2-prefix/build/libre2.a lib/ && \
@@ -157,8 +161,26 @@ endif
 
 .PHONY: falcolibs/install
 falcolibs/install:
-	mkdir -p $(FALCOINCPREFIX) && mkdir -p $(FALCOLIBPREFIX) && mkdir -p $(BINPREFIX) && mkdir -p "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)" && \
-	cd falco-libs/build && cp -r include/* $(FALCOINCPREFIX)/ && cp -a lib/* $(FALCOLIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/ && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_VERSION)"
+	mkdir -p $(FALCOINCPREFIX) && mkdir -p $(FALCOLIBPREFIX) && mkdir -p $(BINPREFIX) && \
+	cd falco-libs/build && cp -r include/* $(FALCOINCPREFIX)/ && cp -a lib/* $(FALCOLIBPREFIX)/ && cp -a bin/* $(BINPREFIX)/
+
+.PHONY: falcodriver/package
+falcodriver/package:
+	cd falco-driver && \
+	mkdir -p build && cd build && \
+        cmake \
+			-DDRIVER_PACKAGE_NAME=falco \
+			-DDRIVER_NAME=falco \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DUSE_BUNDLED_DEPS=ON \
+			-DBUILD_LIBSCAP_GVISOR=Off \
+			-DBUILD_BPF=True .. && \
+	cp -r ../driver/bpf driver/src/
+
+.PHONY: falcodriver/install
+falcodriver/install:
+	mkdir -p "$(DRIVERPREFIX)$(FALCO_LIBS_DRIVER_VERSION)" && \
+	cd falco-driver/build && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_DRIVER_VERSION)"
 
 .PHONY: avro/package
 avro/package:
@@ -220,9 +242,9 @@ dkms-rh/install:
 .PHONY: uninstall
 uninstall:
 	rm -rf $(LIBPREFIX) $(INCPREFIX) $(CONFPREFIX) && \
-	rm -rf $(DRIVERPREFIX)$(FALCO_LIBS_VERSION) && \
+	rm -rf $(DRIVERPREFIX)$(FALCO_LIBS_DRIVER_VERSION) && \
 	find $(BINPREFIX) ! -name "sysporter" -type f -exec rm -f {} +
 
 .PHONY: clean
 clean:
-	rm -rf avro/lang/c++/build falco-libs/build glog/build snappy/build
+	rm -rf avro/lang/c++/build falco-libs/build falco-driver/build glog/build snappy/build
