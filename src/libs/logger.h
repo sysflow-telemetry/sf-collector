@@ -29,7 +29,11 @@
 #define DEFINE_LOGGER()
 #define m_logger
 
-#define CONFIGURE_LOGGER(logConfig) google::InitGoogleLogging(logConfig);
+#define CONFIGURE_LOGGER(logConfig)                                            \
+  if (!google::IsGoogleLoggingInitialized()) {                                 \
+    google::InitGoogleLogging(logConfig);                                      \
+  }
+
 #define SHUTDOWN_LOGGER() google::ShutdownGoogleLogging();
 #define CATCH_LOGGER_EXCEPTION()
 
