@@ -16,10 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SYSFLOW_VERSION?=0.5.0-rc7
+SYSFLOW_VERSION?=0.5.0
 SYSFLOW_BUILD_NUMBER?=1
 FALCO_VERSION=0.32.2
-FALCO_LIBS_VERSION=74eec76d2c1dbba66a37db227d25a6b41987c1a6
+FALCO_LIBS_VERSION=0.9.0
 FALCO_LIBS_DRIVER_VERSION=3.0.1+driver
 AVRO_VERSION=release-1.11.0
 ELFUTILS_VERSION=elfutils-0.179
