@@ -60,8 +60,8 @@ trap cleanup EXIT
 
 if [ "${MODE}" == "base" ] ; then
     # packages for base image
-
-    subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms" && \
+    echo "Installing base packages"
+    subscription-manager release --set=8.6 && subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-eus-rpms" && \
     dnf -y update && \
     dnf -y install \
         gcc \
@@ -92,15 +92,16 @@ if [ "${MODE}" == "base" ] ; then
         bc \
         libasan \
         libubsan \
+	llvm-toolset \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
 
     # Install llvm 9
-    DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
+    #DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
 
 elif [ "${MODE}" == "driver" ] ; then
     # packages for driver image
 
-    subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms" && \
+    subscription-manager release --set=8.6 && subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-eus-rpms" && \
     dnf -y update && \
     dnf -y install \
         gcc \
@@ -127,10 +128,11 @@ elif [ "${MODE}" == "driver" ] ; then
         bc \
         libasan \
         libubsan \
+	llvm-toolset \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
 
     # Install llvm 9
-    DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
+    #DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
 
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing

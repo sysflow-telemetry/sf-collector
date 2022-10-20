@@ -105,6 +105,7 @@ falcolibs/package:
 			-DUSE_BUNDLED_GTEST=ON \
 			-DUSE_BUNDLED_DEPS=ON \
 			-DCREATE_TEST_TARGETS=OFF \
+			-DBUILD_LIBSINSP_EXAMPLES=OFF \
 			-DCMD_MAKE="make -j${MAKE_JOBS}" \
 			${MUSL_FLAG} ../. && make -j${MAKE_JOBS} && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \

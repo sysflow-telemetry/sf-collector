@@ -10,8 +10,8 @@ mkdir -p $DIR/$BUILD_DIR/include && cp -a /usr/local/sysflow/modules/include/fal
 mkdir -p $DIR/$BUILD_DIR/lib && cp -a /usr/local/sysflow/lib $DIR/$BUILD_DIR/lib/sysflow && \
     cp -a /usr/local/sysflow/modules/lib/*.a $DIR/$BUILD_DIR/lib/sysflow/. && \
     cp -a /usr/lib/libelf.a $DIR/$BUILD_DIR/lib/sysflow/. && \
-    cp -a /usr/local/lib64/libsnappy.a $DIR/$BUILD_DIR/lib/sysflow/. && \
-    cp -a /usr/local/lib64/libglog.a $DIR/$BUILD_DIR/lib/sysflow/.
+    cp -a /usr/local/lib/libsnappy.a $DIR/$BUILD_DIR/lib/sysflow/. && \
+    cp -a /usr/local/lib/libglog.a $DIR/$BUILD_DIR/lib/sysflow/.
 mkdir -p $DIR/$BUILD_DIR/include && cp -a /usr/local/sysflow/include/sysflow $DIR/$BUILD_DIR/include/. && \
     cp -a /usr/local/sysflow/modules/include/sysflow/c++/sysflow/* $DIR/$BUILD_DIR/include/sysflow/. && \
     cp -a /usr/local/sysflow/modules/include/avro $DIR/$BUILD_DIR/include/sysflow/. && \

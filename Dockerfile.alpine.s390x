@@ -1,0 +1,78 @@
+#
+# Copyright (C) 2022 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+ARG ALPINE_VER=3.12.0
+
+#-----------------------
+# Stage: base
+#-----------------------
+FROM s390x/alpine:${ALPINE_VER} AS base
+
+# install dependencies
+RUN apk add \
+    g++ \
+    gcc \
+    cmake \
+    make \
+    git \
+    bash \
+    perl \
+    linux-headers \
+    autoconf \
+    automake \
+    m4 \
+    libtool \
+    elfutils-dev \
+    libelf-static \
+    patch \
+    binutils \
+    libelf-static \       
+    boost-dev \
+    boost-static \
+    flex \
+    bison \
+    gawk \
+    sparsehash 
+   
+#-----------------------
+# Stage: mods
+#-----------------------
+FROM base AS mods
+
+# environment and args
+ARG INSTALL_PATH=/usr/local/sysflow
+
+ENV PATH="$PATH:"${INSTALL_PATH}"/modules/bin"
+
+ENV HOST_ROOT=/host
+
+ENV HOME=/root
+
+ARG MAKE_JOBS=1
+
+#  build modules
+RUN echo "1"
+COPY ./modules /build/modules
+COPY ./makefile.* /build/
+COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
+RUN  cmake --version
+RUN  cd /build/modules && \
+     make INSTALL_PATH=${INSTALL_PATH} MUSL=1 MAKE_JOBS=${MAKE_JOBS} install/no-elfutils #&& \
+     #make clean && rm -rf /build/modules
+
