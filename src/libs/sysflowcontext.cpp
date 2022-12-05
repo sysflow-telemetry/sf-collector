@@ -177,6 +177,10 @@ SysFlowContext::~SysFlowContext() {
     m_inspector->close();
     delete m_inspector;
   }
+  if (m_config != nullptr) {
+    delete *m_config;
+    *m_config = nullptr;
+  }
 }
 
 string SysFlowContext::getExporterID() {
