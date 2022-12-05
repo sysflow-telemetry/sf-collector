@@ -184,7 +184,8 @@
 
 #define SF_RENAME_EXIT(EV)                                                     \
   case PPME_SYSCALL_RENAME_X:                                                  \
-  case PPME_SYSCALL_RENAMEAT_X: {                                              \
+  case PPME_SYSCALL_RENAMEAT_X:                                                \
+  case PPME_SYSCALL_RENAMEAT2_X: {                                             \
     m_dfPrcr->handleDataEvent(EV, OP_RENAME);                                  \
     break;                                                                     \
   }

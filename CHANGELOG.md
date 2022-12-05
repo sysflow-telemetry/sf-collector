@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [0.5.1] - 2022-12-20
 
+### Added
+
+- Add support for renameat2 system call
+
 ### Changed
 
 - Add configuration object cleanup in sysflow context object destructor
