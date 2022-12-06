@@ -178,8 +178,8 @@ SysFlowContext::~SysFlowContext() {
     delete m_inspector;
   }
   if (m_config != nullptr) {
-    delete *m_config;
-    *m_config = nullptr;
+    delete m_config;
+    m_config = nullptr;
   }
 }
 
