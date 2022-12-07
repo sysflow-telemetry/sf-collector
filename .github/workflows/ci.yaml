@@ -74,27 +74,27 @@ jobs:
         id: checks
         shell: bash
         run: |
-          echo "##[set-output name=base_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.BASE_TAG }}/ > /dev/null && echo 1 || echo 0)"
-          echo "##[set-output name=mods_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.MODS_TAG }}/ > /dev/null && echo 1 || echo 0)"
-          echo "##[set-output name=driver_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.DRIVER_TAG }}/ > /dev/null && echo 1 || echo 0)"
+          echo "BASE_EXISTS=$(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.BASE_TAG }}/ > /dev/null && echo 1 || echo 0)" >> $GITHUB_ENV
+          echo "MODS_EXISTS=$(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.MODS_TAG }}/ > /dev/null && echo 1 || echo 0)" >> $GITHUB_ENV
+          echo "DRIVER_EXISTS=$(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.UBI_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.DRIVER_TAG }}/ > /dev/null && echo 1 || echo 0)" >> $GITHUB_ENV
       - name: Init modules
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         run: make -C modules init
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
       - name: Login to DockerHub
         uses: docker/login-action@v1
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -102,14 +102,14 @@ jobs:
       - name: Set build args
         id: args
         shell: bash
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         run: |
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
-          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "BRANCH=$(echo ${GITHUB_REF#refs/*/})" >> $GITHUB_ENV
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Build and push base
         id: base_docker_build
         uses: docker/build-push-action@v2
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         with:
           context: .
           push: true
@@ -120,16 +120,16 @@ jobs:
           target: base
           build-args: |
             UBI_VER=${{ env.UBI_VERSION }}
-            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
-            VERSION=${{ steps.args.outputs.branch }}
-            RELEASE=${{ steps.args.outputs.sha_short }}
+            BUILD_NUMBER=${{ env.SHA_SHORT }}
+            VERSION=${{ env.BRANCH }}
+            RELEASE=${{ env.SHA_SHORT }}
           secrets: |
             rhuser=${{ secrets.RH_USERNAME }}
             rhpassword=${{ secrets.RH_PASSWORD }}
       - name: Build and push mods
         id: mods_docker_build
         uses: docker/build-push-action@v2
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         with:
           context: .
           push: true
@@ -140,16 +140,16 @@ jobs:
           target: mods
           build-args: |
             UBI_VER=${{ env.UBI_VERSION }}
-            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
-            VERSION=${{ steps.args.outputs.branch }}
-            RELEASE=${{ steps.args.outputs.sha_short }}
+            BUILD_NUMBER=${{ env.SHA_SHORT }}
+            VERSION=${{ env.BRANCH }}
+            RELEASE=${{ env.SHA_SHORT }}
           secrets: |
             rhuser=${{ secrets.RH_USERNAME }}
             rhpassword=${{ secrets.RH_PASSWORD }}
       - name: Build and push driver
         id: driver_docker_build
         uses: docker/build-push-action@v2
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         with:
           context: .
           push: true
@@ -162,14 +162,14 @@ jobs:
             UBI_VER=${{ env.UBI_VERSION }}
             FALCO_VER=${{ env.FALCO_VERSION }}
             FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }}
-            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
-            VERSION=${{ steps.args.outputs.branch }}
-            RELEASE=${{ steps.args.outputs.sha_short }}
+            BUILD_NUMBER=${{ env.SHA_SHORT }}
+            VERSION=${{ env.BRANCH }}
+            RELEASE=${{ env.SHA_SHORT }}
           secrets: |
             rhuser=${{ secrets.RH_USERNAME }}
             rhpassword=${{ secrets.RH_PASSWORD }}
       - name: Image digest
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 || steps.checks.outputs.driver_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         run: |
           echo ${{ steps.base_docker_build.outputs.digest }}
           echo ${{ steps.mods_docker_build.outputs.digest }}
@@ -200,26 +200,26 @@ jobs:
         id: checks
         shell: bash
         run: |
-          echo "##[set-output name=base_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.BASE_TAG }}/ > /dev/null && echo 1 || echo 0)"
-          echo "##[set-output name=mods_exists;] $(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.MODS_TAG }}/ > /dev/null && echo 1 || echo 0)"
+          echo "BASE_EXISTS=$(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.BASE_TAG }}/ > /dev/null && echo 1 || echo 0)" >> $GITHUB_ENV
+          echo "MODS_EXISTS=$(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.MODS_TAG }}/ > /dev/null && echo 1 || echo 0)" >> $GITHUB_ENV
       - name: Init modules
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
         run: make -C modules init
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
       - name: Login to DockerHub
         uses: docker/login-action@v1
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -227,14 +227,14 @@ jobs:
       - name: Set build args
         id: args
         shell: bash
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
         run: |
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
-          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "BRANCH=$(echo ${GITHUB_REF#refs/*/})" >> $GITHUB_ENV
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Build and push base
         id: base_docker_build
         uses: docker/build-push-action@v2
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
         with:
           context: .
           push: true
@@ -245,13 +245,13 @@ jobs:
           target: base
           build-args: |
             ALPINE_VER=${{ env.ALPINE_VERSION }}
-            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
-            VERSION=${{ steps.args.outputs.branch }}
-            RELEASE=${{ steps.args.outputs.sha_short }}
+            BUILD_NUMBER=${{ env.SHA_SHORT }}
+            VERSION=${{ env.BRANCH }}
+            RELEASE=${{ env.SHA_SHORT }}
       - name: Build and push mods
         id: mods_docker_build
         uses: docker/build-push-action@v2
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
         with:
           context: .
           push: true
@@ -262,11 +262,11 @@ jobs:
           target: mods
           build-args: |
             ALPINE_VER=${{ env.ALPINE_VERSION }}
-            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
-            VERSION=${{ steps.args.outputs.branch }}
-            RELEASE=${{ steps.args.outputs.sha_short }}
+            BUILD_NUMBER=${{ env.SHA_SHORT }}
+            VERSION=${{ env.BRANCH }}
+            RELEASE=${{ env.SHA_SHORT }}
       - name: Image digest
-        if: ${{ steps.checks.outputs.base_exists == 0 || steps.checks.outputs.mods_exists == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
         run: |
           echo ${{ steps.base_docker_build.outputs.digest }}
           echo ${{ steps.mods_docker_build.outputs.digest }}
@@ -348,8 +348,8 @@ jobs:
         id: args
         shell: bash
         run: |
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/*/})"
-          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "BRANCH=$(echo ${GITHUB_REF#refs/*/})" >> $GITHUB_ENV
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
@@ -364,9 +364,9 @@ jobs:
             FALCO_VER=${{ env.FALCO_VERSION }}
             FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }}
             FALCO_LIBS_DRIVER_VER=${{ env.FALCO_LIBS_DRIVER_VERSION }}
-            BUILD_NUMBER=${{ steps.args.outputs.sha_short }}
-            VERSION=${{ steps.args.outputs.branch }}
-            RELEASE=${{ steps.args.outputs.sha_short }}
+            BUILD_NUMBER=${{ env.SHA_SHORT }}
+            VERSION=${{ env.BRANCH }}
+            RELEASE=${{ env.SHA_SHORT }}
       - name: Push README to Dockerhub
         uses: christian-korneck/update-container-description-action@v1
         if: ${{ github.ref == 'refs/heads/master' && github.event_name != 'pull_request' }}
@@ -398,8 +398,8 @@ jobs:
         id: tag_name
         shell: bash
         run: |
-          GHREF=${GITHUB_REF#refs/tags/}; echo ::set-output name=current_version::${GHREF%%-*}
-          echo ::set-output name=current_tag::${GITHUB_REF#refs/tags/}
+          GHREF=${GITHUB_REF#refs/tags/}; echo "CURRENT_VERSION=${GHREF%%-*}" >> $GITHUB_ENV
+          echo "CURRENT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
       - name: Init modules
         run: make -C modules init
       - name: Build Release Assets
@@ -414,36 +414,36 @@ jobs:
           make package-libs
           make package-libs/musl
           export $(sed 's/\?//g' makefile.manifest.inc | grep -v '^#' | xargs)
-          echo "##[set-output name=bindeb;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.deb)"
-          echo "##[set-output name=libdeb;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.deb)"
-          echo "##[set-output name=libmusldeb;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.deb)"
-          echo "##[set-output name=binrpm;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.rpm)"
-          echo "##[set-output name=librpm;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.rpm)"
-          echo "##[set-output name=libmuslrpm;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.rpm)"
-          echo "##[set-output name=bintgz;] $(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.tar.gz)"
-          echo "##[set-output name=libtgz;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.tar.gz)"
-          echo "##[set-output name=libmusltgz;] $(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.tar.gz)"
+          echo "BIN_DEB=$(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.deb)" >> $GITHUB_ENV
+          echo "LIB_DEB=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.deb)" >> $GITHUB_ENV
+          echo "LIBMUSL_DEB=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.deb)" >> $GITHUB_ENV
+          echo "BIN_RPM=$(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.rpm)" >> $GITHUB_ENV
+          echo "LIB_RPM=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.rpm)" >> $GITHUB_ENV
+          echo "LIBMUSL_RPM=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.rpm)" >> $GITHUB_ENV
+          echo "BIN_TGZ=$(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.tar.gz)" >> $GITHUB_ENV
+          echo "LIB_TGZ=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.tar.gz)" >> $GITHUB_ENV
+          echo "LIBMUSL_TGZ=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.tar.gz)" >> $GITHUB_ENV
       - name: Get Changelog Entry
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2
         with:
-          version: ${{ steps.tag_name.outputs.current_version }}
+          version: ${{ env.CURRENT_VERSION }}
           path: ./CHANGELOG.md
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           body: ${{ steps.changelog_reader.outputs.changes }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: ( contains(steps.tag_name.outputs.current_version, '-rc') || contains(steps.tag_name.outputs.current_version, '-alpha') || contains(steps.tag_name.outputs.current_version, '-beta') )
+          prerelease: ( contains(env.CURRENT_VERSION, '-rc') || contains(env.CURRENT_VERSION, '-alpha') || contains(env.CURRENT_VERSION, '-beta') )
           draft: true
           files: |
-            ${{ steps.build_release_assets.outputs.bindeb }}
-            ${{ steps.build_release_assets.outputs.libdeb }}
-            ${{ steps.build_release_assets.outputs.libmusldeb }}
-            ${{ steps.build_release_assets.outputs.binrpm }}
-            ${{ steps.build_release_assets.outputs.librpm }}
-            ${{ steps.build_release_assets.outputs.libmuslrpm }}
-            ${{ steps.build_release_assets.outputs.bintgz }}
-            ${{ steps.build_release_assets.outputs.libtgz }}
-            ${{ steps.build_release_assets.outputs.libmusltgz }}
+            ${{ env.BIN_DEB }}
+            ${{ env.LIB_DEB }}
+            ${{ env.LIBMUSL_DEB }}
+            ${{ env.BIN_RPM }}
+            ${{ env.LIB_RPM }}
+            ${{ env.LIBMUSL_RPM }}
+            ${{ env.BIN_TGZ }}
+            ${{ env.LIB_TGZ }}
+            ${{ env.LIBMUSL_TGZ }}
 
