@@ -127,6 +127,7 @@ elif [ "${MODE}" == "driver" ] ; then
         bc \
         libasan \
         libubsan \
+        elfutils-libelf-devel \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
 
     # Install llvm 9
