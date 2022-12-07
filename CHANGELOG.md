@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Add configuration object cleanup in sysflow context object destructor
+- Bump UBI to to 8.7-1026
 
 ### Fixed
 
