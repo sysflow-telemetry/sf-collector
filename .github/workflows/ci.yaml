@@ -310,7 +310,7 @@ jobs:
         run: make -C modules init
       - name: Build image metadata
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: |
             ${{ env.DOCKER_REGISTRY_REPOSITORY }}
