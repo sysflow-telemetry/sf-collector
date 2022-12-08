@@ -231,9 +231,9 @@
 
 #define IS_AT_SC(TYPE)                                                         \
   ((TYPE) == PPME_SYSCALL_SYMLINKAT_X || (TYPE) == PPME_SYSCALL_RENAMEAT_X ||  \
-   (TYPE) == PPME_SYSCALL_UNLINKAT_X || (TYPE) == PPME_SYSCALL_UNLINKAT_2_X || \
-   (TYPE) == PPME_SYSCALL_LINKAT_X || (TYPE) == PPME_SYSCALL_LINKAT_2_X ||     \
-   (TYPE) == PPME_SYSCALL_MKDIRAT_X)
+   (TYPE) == PPME_SYSCALL_RENAMEAT2_X || (TYPE) == PPME_SYSCALL_UNLINKAT_X ||   \
+   (TYPE) == PPME_SYSCALL_UNLINKAT_2_X || (TYPE) == PPME_SYSCALL_LINKAT_X ||   \
+   (TYPE) == PPME_SYSCALL_LINKAT_2_X || (TYPE) == PPME_SYSCALL_MKDIRAT_X)
 
 #define IS_UNLINKAT(TYPE)                                                      \
   ((TYPE) == PPME_SYSCALL_UNLINKAT_X || (TYPE) == PPME_SYSCALL_UNLINKAT_2_X)
