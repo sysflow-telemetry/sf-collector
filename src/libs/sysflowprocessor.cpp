@@ -154,6 +154,8 @@ int SysFlowProcessor::run() {
 
   m_writer->initialize();
 
+  m_cxt->getInspector()->start_capture();
+
   while (true) {
     res = m_cxt->getInspector()->next(&ev);
     if (res == SCAP_TIMEOUT) {
@@ -165,10 +167,12 @@ int SysFlowProcessor::run() {
       m_processCxt->checkForDeletion();
       checkAndRotateFile();
       continue;
+    } else if (res == SCAP_FILTERED_EVENT) {
+      continue;
     } else if (res == SCAP_EOF) {
       break;
     } else if (res != SCAP_SUCCESS) {
-      SF_ERROR(m_logger, "SCAP processor failed with res = "
+      SF_ERROR(m_logger, "Scap processor failed with res = "
                              << res << " and error: "
                              << m_cxt->getInspector()->getlasterr());
       throw sinsp_exception(m_cxt->getInspector()->getlasterr().c_str());
@@ -227,7 +231,8 @@ int SysFlowProcessor::run() {
     }
   }
 
-  SF_INFO(m_logger, "Exiting scap loop... shutting down");
+  SF_INFO(m_logger, "Exiting event capture loop. Shutting down.");
+  m_cxt->getInspector()->stop_capture();
   printStats();
 
   return 0;

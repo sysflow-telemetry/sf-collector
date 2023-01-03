@@ -35,18 +35,18 @@ all: init \
 .PHONY: init
 init:
 	git submodule update --init --recursive --force
-	cd falco && git checkout $(FALCO_VERSION)
+	cd falco && git fetch origin && git checkout $(FALCO_VERSION)
 ifneq ($(FALCO_LIBS_PR),)
 	cd falco-libs && git fetch origin pull/$(FALCO_LIBS_PR)/head:pull_$(FALCO_LIBS_PR) && git checkout pull_$(FALCO_LIBS_PR)
 else
-	cd falco-libs && git checkout $(FALCO_LIBS_VERSION)
+	cd falco-libs && git fetch origin && git checkout $(FALCO_LIBS_VERSION)
 endif
-	cd falco-driver && git checkout $(FALCO_LIBS_DRIVER_VERSION)
-	cd avro && git checkout $(AVRO_VERSION)
-	cd elfutils && git checkout $(ELFUTILS_VERSION)
-	cd glog && git checkout $(GLOG_VERSION)
-	cd snappy && git checkout $(SNAPPY_VERSION)
-	cd dkms && git checkout $(DKMS_VERSION)
+	cd falco-driver && git fetch origin && git checkout $(FALCO_LIBS_DRIVER_VERSION)
+	cd avro && git fetch origin && git checkout $(AVRO_VERSION)
+	cd elfutils && git fetch origin && git checkout $(ELFUTILS_VERSION)
+	cd glog && git fetch origin && git checkout $(GLOG_VERSION)
+	cd snappy && git fetch origin && git checkout $(SNAPPY_VERSION)
+	cd dkms && git fetch origin && git checkout $(DKMS_VERSION)
 
 # elfutils is a pre-requisite for libs.
 .PHONY: modules
@@ -112,7 +112,7 @@ falcolibs/package:
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
 	mkdir -p include/json && cp ../userspace/libsinsp/third-party/jsoncpp/jsoncpp.cpp include/json && \
 	mkdir -p include/json && cp ../userspace/libsinsp/third-party/jsoncpp/json/*.h include/json && \
-	mkdir -p include/userspace/common && cp ../userspace/common/*.h include/userspace/common && \
+	mkdir -p include/userspace/common && cp ../userspace/common/*.h include/userspace/common && cp ../build/common/*.h include/userspace/common &&\
 	mkdir -p include/userspace/libsinsp && cp ../userspace/libsinsp/*.h include/userspace/libsinsp && \
 	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
 	mkdir -p include/userspace/libsinsp/filter && cp ../userspace/libsinsp/filter/*.h include/userspace/libsinsp/filter/ && \
