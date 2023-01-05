@@ -72,6 +72,7 @@ if [ "${MODE}" == "base" ] ; then
         cmake \
         pkgconfig \
         autoconf \
+        gettext-devel \
         wget \
         automake \
         libtool \
