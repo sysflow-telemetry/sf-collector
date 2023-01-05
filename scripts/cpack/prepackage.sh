@@ -18,5 +18,7 @@ cp $DIR/../service/driver/start $DIR/$BUILD_DIR/driver/.
 cp $DIR/../service/driver/cleanup $DIR/$BUILD_DIR/driver/.
 cp $DIR/../../LICENSE.md $DIR/$BUILD_DIR/.
 cp $DIR/../../README.md $DIR/$BUILD_DIR/.
-cd $DIR
+
+# strip binaries
+find "$BUILD_DIR" -type f -name "sysporter" -exec strip -g '{}' \;
 
