@@ -104,7 +104,10 @@ falcolibs/package:
 			-DBUILD_DRIVER=OFF \
 			-DUSE_BUNDLED_GTEST=ON \
 			-DUSE_BUNDLED_DEPS=ON \
+			-DUSE_BUNDLED_LIBELF=OFF \
 			-DCREATE_TEST_TARGETS=OFF \
+			-DBUILD_LIBSCAP_EXAMPLES=OFF \
+			-DBUILD_LIBSINSP_EXAMPLES=OFF \
 			-DCMD_MAKE="make -j${MAKE_JOBS}" \
 			${MUSL_FLAG} ../. && make -j${MAKE_JOBS} && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
@@ -206,7 +209,7 @@ fs/install:
 .PHONY: elfutils/package
 elfutils/package:
 	cd elfutils && autoreconf -i -f && \
-	./configure --prefix=/usr --enable-maintainer-mode --disable-debuginfod && \
+	./configure --prefix=/usr --enable-maintainer-mode --disable-debuginfod --enable-deterministic-archives --disable-libdebuginfod && \
 	make -j${MAKE_JOBS} && make install
 
 .PHONY: elfutils/install
