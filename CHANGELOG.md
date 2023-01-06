@@ -15,6 +15,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.5.1] - 2022-12-20
+
+### Added
+
+- Add support for renameat2 system call
+- Strip binaries and static libraries before packaging (to reduce package sizes)
+
+### Changed
+
+- Add configuration object cleanup in sysflow context object destructor
+- Bump Falco libs to 0.10.0, driver to 4.0.0
+- Bump UBI to to 8.7-1037
+- Bump GHC Filesystem version to v1.5.12
+- Bump elfutils to 0.187
+
+### Fixed
+
+- Remove duplicate config variable assignment in sysflow context constructor
+- Fixed getPath and getAbsolutePath functions in utils (caused paths for AT syscalls to resolve to an empty string)
+
 ## [0.5.0] - 2022-10-17
 
 ### Added
@@ -236,7 +256,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.1...HEAD
+[0.5.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0
 [0.4.4]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.2...0.4.3

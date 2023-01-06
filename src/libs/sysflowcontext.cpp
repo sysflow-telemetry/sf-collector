@@ -39,7 +39,6 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     checkModule();
   }
 
-  m_config = config;
   m_inspector = new sinsp();
   m_inspector->set_buffer_format(sinsp_evt::PF_NORMAL);
   m_inspector->set_hostname_and_port_resolution_mode(false);
@@ -177,6 +176,10 @@ SysFlowContext::~SysFlowContext() {
   if (m_inspector != nullptr) {
     m_inspector->close();
     delete m_inspector;
+  }
+  if (m_config != nullptr) {
+    delete m_config;
+    m_config = nullptr;
   }
 }
 

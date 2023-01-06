@@ -90,7 +90,9 @@ addlib libscap_engine_savefile.a
 addlib libscap_engine_source_plugin.a
 addlib libscap_engine_udig.a
 addlib libscap_engine_util.a
+addlib libscap_error.a
 addlib libscap_event_schema.a
+addlib libscap_platform.a
 addlib libsinsp.a
 addlib libtbb.a
 addlib libtbbmalloc.a

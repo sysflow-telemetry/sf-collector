@@ -102,5 +102,4 @@ int main(int argc, char **argv) {
 
   // clean up resources
   delete g_driver;
-  delete config;
 }

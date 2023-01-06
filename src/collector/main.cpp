@@ -251,7 +251,6 @@ int main(int argc, char **argv) {
     SF_INFO(logger, "Starting the SysFlow Collector...");
     int ret = g_driver->run();
     delete g_driver;
-    delete g_config;
     return ret;
   } catch (sfexception::SysFlowException &ex) {
     SF_ERROR(logger, "Runtime exception caught in main loop: "

@@ -80,12 +80,12 @@ build/dev:
 
 .PHONY: build/musl
 build/musl:
-	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg ALPINE_VER=${ALPINE_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: build/musldev
 build/musldev:
-	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl.dev . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg ALPINE_VER=${ALPINE_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl.dev . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: format

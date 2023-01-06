@@ -65,11 +65,6 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   return conf;
 }
 
-void DeleteSysFlowConfig(SysFlowConfig **conf) {
-  delete *conf;
-  *conf = nullptr;
-}
-
 void SysFlowDriver::exit() { m_processor->exit(); }
 
 int SysFlowDriver::run() {

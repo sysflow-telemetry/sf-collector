@@ -54,6 +54,8 @@ trap cleanup EXIT
         echo 'Assume build on RHEL machines or install packages only in UBI repositories.'
     else
         echo "Login RHEL..."
+        # See https://access.redhat.com/discussions/5889431?tour=8
+        sed -i 's/\(def in_container():\)/\1\n    return False/g' /usr/lib64/python*/*-packages/rhsm/config.py
         subscription-manager register --username "$REGISTER_USER" --password "$REGISTER_PASSWORD" --auto-attach
     fi
 )
@@ -70,6 +72,7 @@ if [ "${MODE}" == "base" ] ; then
         cmake \
         pkgconfig \
         autoconf \
+        gettext-devel \
         wget \
         automake \
         libtool \
@@ -127,6 +130,7 @@ elif [ "${MODE}" == "driver" ] ; then
         bc \
         libasan \
         libubsan \
+        elfutils-libelf-devel \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
 
     # Install llvm 9
