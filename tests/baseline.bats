@@ -143,3 +143,19 @@ exporter=tests
   run $sfcomp ${tdir}/${tfile}.sf ${tdir}/${tfile}.sf
   [ ${status} -eq 0 ]
 }
+
+@test "Trace comparison on rename operations" {
+  tdir=${TDIR}/rename
+  tfile=rename
+  run $sysporter -r ${tdir}/${tfile}.scap -w ${tdir}/${tfile}.sf -e $exporter > /tmp/${tfile}.log
+  run $sfcomp ${tdir}/${tfile}.sf ${tdir}/${tfile}.sf
+  [ ${status} -eq 0 ]
+}
+
+@test "Trace comparison on rename2_at operations" {
+  tdir=${TDIR}/rename
+  tfile=rename2at
+  run $sysporter -r ${tdir}/${tfile}.scap -w ${tdir}/${tfile}.sf -e $exporter > /tmp/${tfile}.log
+  run $sfcomp ${tdir}/${tfile}.sf ${tdir}/${tfile}.sf
+  [ ${status} -eq 0 ]
+}
