@@ -246,9 +246,11 @@ string utils::getPath(sinsp_evt *ev, const string &paraName) {
     if (paraName.compare(name) != 0) {
       continue;
     }
-    SF_DEBUG(m_logger, "getPath: Found '" << name << "' of type " << param->type);
+    SF_DEBUG(m_logger,
+             "getPath: Found '" << name << "' of type " << param->type);
     const sinsp_evt_param *p = ev->get_param(i);
-    if (param->type == PT_FSPATH || param->type == PT_CHARBUF || param->type == PT_FSRELPATH) {
+    if (param->type == PT_FSPATH || param->type == PT_CHARBUF ||
+        param->type == PT_FSRELPATH) {
       path = string(p->m_val, p->m_len);
       SF_DEBUG(m_logger, "getPath: Param '" << name << "'s value is " << path);
       sanitize_string(path);
