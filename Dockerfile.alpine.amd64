@@ -17,7 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG ALPINE_VER=3.12.0
+ARG ALPINE_VER=latest
 
 #-----------------------
 # Stage: base
@@ -67,7 +67,6 @@ ENV HOME=/root
 ARG MAKE_JOBS=1
 
 #  build modules
-RUN echo "1"
 COPY ./modules /build/modules
 COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/

@@ -20,11 +20,12 @@
 ARG FALCO_LIBS_VER
 ARG FALCO_VER
 ARG UBI_VER
+ARG ALPINE_VER
 
 #-----------------------
 # Stage: Builder
 #-----------------------
-FROM alpine:3.12.0 AS builder
+FROM alpine:${ALPINE_VER} AS builder
 
 # sysflow release
 ARG SYSFLOW_VERSION

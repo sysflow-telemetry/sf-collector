@@ -3,8 +3,8 @@ addlib /usr/local/sysflow/lib/libsysflow.a
 addlib /usr/local/sysflow/modules/lib/falcosecurity/libs.a
 addlib /usr/local/sysflow/modules/lib/libavrocpp_s.a
 addlib /usr/lib/libboost_iostreams.a
-addlib /usr/local/lib64/libsnappy.a
-addlib /usr/local/lib64/libglog.a
+addlib /usr/local/lib/libsnappy.a
+addlib /usr/local/lib/libglog.a
 addlib /usr/lib/libelf.a
 save
 end

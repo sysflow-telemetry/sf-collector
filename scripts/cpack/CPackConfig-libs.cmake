@@ -40,6 +40,7 @@ if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
 endif()
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/sysflow-telemetry/sf-collector")
+set(CPACK_DEBIAN_COMPRESSION_TYPE "gzip")
 
 # RPM
 set(CPACK_RPM_PACKAGE_LICENSE "Apache v2.0")

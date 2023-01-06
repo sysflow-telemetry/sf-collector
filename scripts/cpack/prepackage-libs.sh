@@ -19,5 +19,7 @@ mkdir -p $DIR/$BUILD_DIR/include && cp -a /usr/local/sysflow/include/sysflow $DI
     cp -a /usr/local/include $DIR/$BUILD_DIR/include/sysflow/mods
 cp $DIR/../../LICENSE.md $DIR/$BUILD_DIR/.
 cp $DIR/../../README.md $DIR/$BUILD_DIR/.
-cd $DIR
+
+# strip static libraries
+find "$BUILD_DIR" -type f -name "*.a" -exec strip -g '{}' \;
 
