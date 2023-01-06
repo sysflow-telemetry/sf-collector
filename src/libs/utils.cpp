@@ -246,9 +246,11 @@ string utils::getPath(sinsp_evt *ev, const string &paraName) {
     if (paraName.compare(name) != 0) {
       continue;
     }
+    SF_DEBUG(m_logger, "getPath: Found '" << name << "' of type " << param->type);
     const sinsp_evt_param *p = ev->get_param(i);
-    if (param->type == PT_FSPATH || param->type == PT_CHARBUF) {
+    if (param->type == PT_FSPATH || param->type == PT_CHARBUF || param->type == PT_FSRELPATH) {
       path = string(p->m_val, p->m_len);
+      SF_DEBUG(m_logger, "getPath: Param '" << name << "'s value is " << path);
       sanitize_string(path);
     }
     break;
@@ -308,7 +310,7 @@ string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
       SF_DEBUG(m_logger,
                "getAbsolutePath: Retrieve fdinfo for fd. Path:  " << tmp);
     }
-    tmp /= fileName;
+    tmp /= p;
     SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
     p = utils::getCanonicalPath(tmp);
     SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);
@@ -329,7 +331,7 @@ string utils::getAbsolutePath(sinsp_threadinfo *ti, const string &fileName) {
     string cwd = ti->get_cwd();
     if (!cwd.empty()) {
       tmp = cwd;
-      tmp /= fileName;
+      tmp /= p;
       SF_DEBUG(m_logger, "getAbsolutePath: Before canonicalization: " << tmp);
       p = utils::getCanonicalPath(tmp);
       SF_DEBUG(m_logger, "getAbsolutePath: The canonicalized file is " << p);
