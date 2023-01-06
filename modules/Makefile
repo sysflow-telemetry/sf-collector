@@ -47,6 +47,7 @@ endif
 	cd glog && git fetch origin && git checkout $(GLOG_VERSION)
 	cd snappy && git fetch origin && git checkout $(SNAPPY_VERSION)
 	cd dkms && git fetch origin && git checkout $(DKMS_VERSION)
+	cd filesystem && git fetch origin && git checkout $(GHCFS_VERSION)
 
 # elfutils is a pre-requisite for libs.
 .PHONY: modules
