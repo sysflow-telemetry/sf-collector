@@ -42,7 +42,7 @@ COPY ./makefile.manifest.inc /build/
 # build libsysflow
 COPY ./modules/sysflow/avro/avsc  /build/modules/sysflow/avro/avsc
 COPY ./modules/sysflow/c\+\+/sysflow/sysflow.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/sysflow.hh
-COPY ./modules/sysflow/c\+\+/sysflow/avsc_sysflow4.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/avsc_sysflow4.hh
+COPY ./modules/sysflow/c\+\+/sysflow/avsc_sysflow5.hh ${MODPREFIX}/include/sysflow/c\+\+/sysflow/avsc_sysflow5.hh
 COPY ./src/libs /build/src/libs
 RUN make -C /build/src/libs \
          SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \

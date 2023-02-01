@@ -60,7 +60,8 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
   p->proc.oid.createTS = mainthread->m_clone_ts;
   p->proc.entry = (mainthread->m_vpid == 1);
   p->proc.poid.set_null();
-
+  p->proc.cwd = mainthread->get_cwd();
+  p->proc.env = mainthread->get_env();
   p->proc.tty = mainthread->m_tty;
   sinsp_threadinfo *parent = mainthread->get_parent_thread();
 
