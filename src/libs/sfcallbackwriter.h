@@ -54,7 +54,7 @@ public:
     }
     default: {
       sysflow::Container *cont = nullptr;
-      if (!proc->containerId.is_null()) {
+      if (proc != nullptr && !proc->containerId.is_null()) {
         cont = m_sysflowProc->getContainer(proc->containerId.get_string());
       }
       m_callback(&m_header, cont, proc, file1, file2, flow);

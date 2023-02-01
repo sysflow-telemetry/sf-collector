@@ -56,7 +56,8 @@ modules: elfutils/package \
 		falcodriver/package \
 		avro/package \
 		glog/package \
-		snappy/package
+		snappy/package \
+		xxhash/package
 
 .PHONY: install
 install: modules \
@@ -67,14 +68,16 @@ install: modules \
 	fs/install \
 	glog/install \
 	snappy/install \
-	dkms-rh/install
+	dkms-rh/install \
+	xxhash/install
 
 .PHONY: modules/no-elfutils
 modules/no-elfutils: falcolibs/package \
 		falcodriver/package \
 		avro/package \
 		glog/package \
-		snappy/package
+		snappy/package \
+		xxhash/package
 
 .PHONY: install/no-elfutils
 install/no-elfutils: modules/no-elfutils \
@@ -85,7 +88,8 @@ install/no-elfutils: modules/no-elfutils \
 	fs/install \
 	glog/install \
 	snappy/install \
-	dkms-rh/install
+	dkms-rh/install \
+	xxhash/install
 
 .PHONY: falcolibs/package
 falcolibs/package:
@@ -227,6 +231,14 @@ glog/install:
 snappy/package:
 	cd snappy && cmake -S . -B build -G "Unix Makefiles" -DSNAPPY_BUILD_BENCHMARKS=OFF -DSNAPPY_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=OFF && \
 	cmake --build build -- -j${MAKE_JOBS}
+
+.PHONY: xxhash/package
+xxhash/package:
+	cd xxHash && make all
+
+.PHONY: xxhash/install
+xxhash/install:
+	cd xxHash && cp libxxhash.a $(LIBPREFIX) && cp libxxhash.so* $(LIBPREFIX) && cp *.h $(MODPREFIX)/include/
 
 .PHONY: snappy/install
 snappy/install:
