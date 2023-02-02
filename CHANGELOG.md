@@ -27,7 +27,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Add configuration object cleanup in sysflow context object destructor
-- Bump Falco libs to 0.10.2, driver to 4.0.0
+- Bump Falco libs to 0.10.3, driver to 4.0.0
+- Bump Falco to b4ec7c6 (rc for 0.34)
 - Bump UBI to to 8.7-1054
 - Bump GHC Filesystem version to v1.5.12
 - Bump elfutils to 0.187
