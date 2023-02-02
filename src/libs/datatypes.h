@@ -19,9 +19,9 @@
 
 #ifndef __HASHER__
 #define __HASHER__
-#include "xxhash.h"
 #include "sysflow.h"
 #include "utils.h"
+#include "xxhash.h"
 #include <google/dense_hash_map>
 #include <google/dense_hash_set>
 #include <set>
@@ -202,19 +202,15 @@ public:
 };
 
 typedef google::dense_hash_map<int, string> ParameterMapping;
-typedef google::dense_hash_map<string, ContainerObj *, XXHasher<string>,
-                               eqstr>
+typedef google::dense_hash_map<string, ContainerObj *, XXHasher<string>, eqstr>
     ContainerTable;
-typedef google::dense_hash_map<NFKey, NetFlowObj *, XXHasher<NFKey>,
-                               eqnfkey>
+typedef google::dense_hash_map<NFKey, NetFlowObj *, XXHasher<NFKey>, eqnfkey>
     NetworkFlowTable;
-typedef google::dense_hash_map<string, FileFlowObj *, XXHasher<string>,
-                               eqstr>
+typedef google::dense_hash_map<string, FileFlowObj *, XXHasher<string>, eqstr>
     FileFlowTable;
 typedef google::dense_hash_map<string, FileObj *, XXHasher<string>, eqstr>
     FileTable;
-typedef google::dense_hash_map<OID, NetworkFlowTable *, XXHasher<OID>,
-                               eqoid>
+typedef google::dense_hash_map<OID, NetworkFlowTable *, XXHasher<OID>, eqoid>
     OIDNetworkTable;
 typedef google::dense_hash_set<OID, XXHasher<OID>, eqoid> ProcessSet;
 typedef multiset<DataFlowObj *, eqdfobj> DataFlowSet;
@@ -255,8 +251,7 @@ struct eqpfobj {
   }
 };
 typedef multiset<ProcessObj *, eqpfobj> ProcessFlowSet;
-typedef google::dense_hash_map<OID *, ProcessObj *, XXHasher<OID *>,
-                               eqoidptr>
+typedef google::dense_hash_map<OID *, ProcessObj *, XXHasher<OID *>, eqoidptr>
     ProcessTable;
 
 class PodObj {
