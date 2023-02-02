@@ -19,7 +19,6 @@
 
 #ifndef __HASHER__
 #define __HASHER__
-//#include "MurmurHash3.h"
 #include "xxhash.h"
 #include "sysflow.h"
 #include "utils.h"
