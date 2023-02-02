@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Bump UBI to to 8.7-1054
 - Bump GHC Filesystem version to v1.5.12
 - Bump elfutils to 0.187
+- Replaced mumurhash with xxhash
 
 ### Fixed
 
