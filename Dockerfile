@@ -192,10 +192,10 @@ CMD /usr/local/sysflow/bin/sysporter \
 #-----------------------
 # Stage: Testing
 #-----------------------
-FROM python:3.9-buster AS testing
+FROM python:3.11-buster AS testing
 
 # environment and build args
-ARG BATS_VERSION=1.1.0
+ARG BATS_VERSION=1.8.2
 
 ARG wdir=/usr/local/sysflow
 ENV WDIR=$wdir
