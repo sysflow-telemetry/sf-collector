@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - Add support for renameat2 system call
 - Strip binaries and static libraries before packaging (to reduce package sizes)
+- Add cwd (current working directory) attribute to process object
+- Add env (environment variables vector) attribute to process object
 
 ### Changed
 
