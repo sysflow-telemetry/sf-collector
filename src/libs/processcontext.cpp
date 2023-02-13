@@ -503,7 +503,7 @@ void ProcessContext::clearAllProcesses() {
     for (NetworkFlowTable::iterator nfi = it->second->netflows.begin();
          nfi != it->second->netflows.end(); nfi++) {
       nfi->second->netflow.opFlags |= OP_TRUNCATE;
-      nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
+      nfi->second->netflow.endTs = utils::getSinspTime(m_cxt);
       m_writer->writeNetFlow(&(nfi->second->netflow), &(it->second->proc));
       delete nfi->second;
     }
@@ -511,7 +511,7 @@ void ProcessContext::clearAllProcesses() {
     for (FileFlowTable::iterator ffi = it->second->fileflows.begin();
          ffi != it->second->fileflows.end(); ffi++) {
       ffi->second->fileflow.opFlags |= OP_TRUNCATE;
-      ffi->second->fileflow.endTs = utils::getSysdigTime(m_cxt);
+      ffi->second->fileflow.endTs = utils::getSinspTime(m_cxt);
       FileObj *file = m_fileCxt->exportFile(ffi->second->filekey);
       m_writer->writeFileFlow(&(ffi->second->fileflow), &(it->second->proc),
                               &(file->file));
@@ -520,7 +520,7 @@ void ProcessContext::clearAllProcesses() {
 
     if (it->second->pfo != nullptr) {
       it->second->pfo->procflow.opFlags |= OP_TRUNCATE;
-      it->second->pfo->procflow.endTs = utils::getSysdigTime(m_cxt);
+      it->second->pfo->procflow.endTs = utils::getSinspTime(m_cxt);
       SF_DEBUG(m_logger, "Writing processflow")
       m_writer->writeProcessFlow(&(it->second->pfo->procflow),
                                  &(it->second->proc));

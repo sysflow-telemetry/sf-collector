@@ -79,7 +79,8 @@ inline time_t getCurrentTime(context::SysFlowContext *cxt) {
   }
   return time(nullptr);
 }
-inline uint64_t getSysdigTime(context::SysFlowContext *cxt) {
+
+inline uint64_t getSinspTime(context::SysFlowContext *cxt) {
   if (cxt->isOffline()) {
     return cxt->timeStamp;
   }

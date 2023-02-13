@@ -290,7 +290,7 @@ int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj *proc, int64_t tid) {
        ffi != proc->fileflows.end(); ffi++) {
     if (tid == -1 || tid == ffi->second->fileflow.tid) {
       FileObj *file = m_fileCxt->getFile(ffi->second->filekey);
-      ffi->second->fileflow.endTs = utils::getSysdigTime(m_cxt);
+      ffi->second->fileflow.endTs = utils::getSinspTime(m_cxt);
       if (tid != -1) {
         removeAndWriteRelatedFlows(proc, ffi->second,
                                    ffi->second->fileflow.endTs);
@@ -384,7 +384,7 @@ int FileFlowProcessor::removeFileFlowFromSet(FileFlowObj **ffo,
 void FileFlowProcessor::removeFileFlow(DataFlowObj *dfo) {
   auto *ffo = static_cast<FileFlowObj *>(dfo);
   // do we want to write out a fileflow that hasn't had any action in an
-  // interval? nfo->fileflow.endTs = utils::getSysdigTime(m_cxt);
+  // interval? nfo->fileflow.endTs = utils::getSinspTime(m_cxt);
   // m_writer->writeNetFlow(&(nfo->fileflow));
   SF_DEBUG(m_logger, "Erasing flow");
   ProcessObj *proc = m_processCxt->getProcess(&(ffo->fileflow.procOID));
@@ -405,14 +405,14 @@ void FileFlowProcessor::removeFileFlow(DataFlowObj *dfo) {
 
 void FileFlowProcessor::exportFileFlow(DataFlowObj *dfo, time_t /*now*/) {
   auto *ffo = static_cast<FileFlowObj *>(dfo);
-  ffo->fileflow.endTs = utils::getSysdigTime(m_cxt);
+  ffo->fileflow.endTs = utils::getSinspTime(m_cxt);
   ProcessObj *proc = m_processCxt->exportProcess(&(ffo->fileflow.procOID));
   FileObj *file = m_fileCxt->exportFile(ffo->filekey);
   SHOULD_WRITE(ffo, ((proc != nullptr) ? &(proc->proc) : nullptr),
                ((file != nullptr) ? &(file->file) : nullptr))
   // m_writer->writeFileFlow(&(ffo->fileflow));
   SF_DEBUG(m_logger, "Reupping flow");
-  ffo->fileflow.ts = utils::getSysdigTime(m_cxt);
+  ffo->fileflow.ts = utils::getSinspTime(m_cxt);
   ffo->fileflow.endTs = 0;
   ffo->fileflow.opFlags = 0;
   ffo->fileflow.numRRecvOps = 0;
