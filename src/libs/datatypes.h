@@ -19,9 +19,9 @@
 
 #ifndef __HASHER__
 #define __HASHER__
-#include "MurmurHash3.h"
 #include "sysflow.h"
 #include "utils.h"
+#include "xxhash.h"
 #include <google/dense_hash_map>
 #include <google/dense_hash_set>
 #include <set>
@@ -118,25 +118,22 @@ public:
 };
 
 // simple hash adapter for types without pointers
-template <typename T> struct MurmurHasher {
+template <typename T> struct XXHasher {
   size_t operator()(const T &t) const {
-    size_t hash;
-    MurmurHash3_x86_32(&t, sizeof(t), 0, &hash);
+    XXH64_hash_t hash = XXH3_64bits(&t, sizeof(t));
     return hash;
   }
 };
 
-template <> struct MurmurHasher<OID *> {
+template <> struct XXHasher<OID *> {
   size_t operator()(const OID *t) const {
-    size_t hash;
-    MurmurHash3_x86_32((void *)t, sizeof(OID), 0, &hash);
+    XXH64_hash_t hash = XXH3_64bits((void *)t, sizeof(OID));
     return hash;
   }
 };
-template <> struct MurmurHasher<NFKey *> {
+template <> struct XXHasher<NFKey *> {
   size_t operator()(const NFKey *t) const {
-    size_t hash;
-    MurmurHash3_x86_32((void *)t, sizeof(NFKey), 0, &hash);
+    XXH64_hash_t hash = XXH3_64bits((void *)t, sizeof(NFKey));
     return hash;
   }
 };
@@ -153,10 +150,9 @@ struct eqoid {
 };
 
 // specialization for strings
-template <> struct MurmurHasher<string> {
+template <> struct XXHasher<string> {
   size_t operator()(const string &t) const {
-    size_t hash;
-    MurmurHash3_x86_32(t.c_str(), t.size(), 0, &hash);
+    XXH64_hash_t hash = XXH3_64bits(t.c_str(), t.size());
     return hash;
   }
 };
@@ -167,10 +163,9 @@ struct eqstr {
   }
 };
 
-template <> struct MurmurHasher<NFKey> {
+template <> struct XXHasher<NFKey> {
   size_t operator()(const NFKey &t) const {
-    size_t hash = 0;
-    MurmurHash3_x86_32((void *)&t, sizeof(NFKey), 0, &hash);
+    XXH64_hash_t hash = XXH3_64bits((void *)&t, sizeof(NFKey));
     return hash;
   }
 };
@@ -207,21 +202,17 @@ public:
 };
 
 typedef google::dense_hash_map<int, string> ParameterMapping;
-typedef google::dense_hash_map<string, ContainerObj *, MurmurHasher<string>,
-                               eqstr>
+typedef google::dense_hash_map<string, ContainerObj *, XXHasher<string>, eqstr>
     ContainerTable;
-typedef google::dense_hash_map<NFKey, NetFlowObj *, MurmurHasher<NFKey>,
-                               eqnfkey>
+typedef google::dense_hash_map<NFKey, NetFlowObj *, XXHasher<NFKey>, eqnfkey>
     NetworkFlowTable;
-typedef google::dense_hash_map<string, FileFlowObj *, MurmurHasher<string>,
-                               eqstr>
+typedef google::dense_hash_map<string, FileFlowObj *, XXHasher<string>, eqstr>
     FileFlowTable;
-typedef google::dense_hash_map<string, FileObj *, MurmurHasher<string>, eqstr>
+typedef google::dense_hash_map<string, FileObj *, XXHasher<string>, eqstr>
     FileTable;
-typedef google::dense_hash_map<OID, NetworkFlowTable *, MurmurHasher<OID>,
-                               eqoid>
+typedef google::dense_hash_map<OID, NetworkFlowTable *, XXHasher<OID>, eqoid>
     OIDNetworkTable;
-typedef google::dense_hash_set<OID, MurmurHasher<OID>, eqoid> ProcessSet;
+typedef google::dense_hash_set<OID, XXHasher<OID>, eqoid> ProcessSet;
 typedef multiset<DataFlowObj *, eqdfobj> DataFlowSet;
 typedef std::list<OIDObj *> OIDQueue;
 class ProcessObj {
@@ -260,8 +251,7 @@ struct eqpfobj {
   }
 };
 typedef multiset<ProcessObj *, eqpfobj> ProcessFlowSet;
-typedef google::dense_hash_map<OID *, ProcessObj *, MurmurHasher<OID *>,
-                               eqoidptr>
+typedef google::dense_hash_map<OID *, ProcessObj *, XXHasher<OID *>, eqoidptr>
     ProcessTable;
 
 class PodObj {
@@ -284,7 +274,7 @@ public:
 };
 
 typedef google::dense_hash_map<std::string, std::shared_ptr<PodObj>,
-                               MurmurHasher<std::string>, eqstr>
+                               XXHasher<std::string>, eqstr>
     PodTable;
 
 #endif
