@@ -169,7 +169,7 @@ bool ProcessContext::isAncestor(OID *oid, Process *proc) {
 }
 
 void ProcessContext::reupContainer(sinsp_threadinfo *ti, ProcessObj *proc) {
-  string containerId = "";
+  std::string containerId = "";
   if (!proc->proc.containerId.is_null()) {
     containerId = proc->proc.containerId.get_string();
   }

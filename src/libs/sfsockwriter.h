@@ -41,7 +41,7 @@ namespace writer {
 class SFSocketWriter : public writer::SysFlowWriter {
 private:
   int m_sock;
-  string m_sockPath;
+  std::string m_sockPath;
   avro::EncoderPtr m_encoder;
   std::ostringstream m_stringStream;
   std::unique_ptr<avro::OutputStream> m_outStream;

@@ -32,8 +32,8 @@ FileContext::FileContext(container::ContainerContext *containerCxt,
 
 FileContext::~FileContext() { clearAllFiles(); }
 
-FileObj *FileContext::createFile(sinsp_evt *ev, string path, char typechar,
-                                 SFObjectState state, string key) {
+FileObj *FileContext::createFile(sinsp_evt *ev, std::string path, char typechar,
+                                 SFObjectState state, std::string key) {
   auto *f = new FileObj();
   f->key = std::move(key);
   f->file.state = state;
@@ -55,11 +55,12 @@ FileObj *FileContext::getFile(sinsp_evt *ev, sinsp_fdinfo_t *fdinfo,
                               SFObjectState state, bool &created) {
   return getFile(ev, fdinfo->m_name, fdinfo->get_typechar(), state, created);
 }
-FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,
-                              SFObjectState state, bool &created) {
+FileObj *FileContext::getFile(sinsp_evt *ev, const std::string &path,
+                              char typechar, SFObjectState state,
+                              bool &created) {
   sinsp_threadinfo *ti = ev->get_thread_info();
   created = true;
-  string key;
+  std::string key;
   key.reserve(ti->m_container_id.length() + path.length());
   key += ti->m_container_id;
   key += path;
@@ -82,7 +83,7 @@ FileObj *FileContext::getFile(sinsp_evt *ev, const string &path, char typechar,
   return file;
 }
 
-FileObj *FileContext::getFile(const string &key) {
+FileObj *FileContext::getFile(const std::string &key) {
   FileTable::iterator f = m_files.find(key);
   if (f != m_files.end()) {
     if (!f->second->written) {
@@ -95,7 +96,7 @@ FileObj *FileContext::getFile(const string &key) {
   return nullptr;
 }
 
-FileObj *FileContext::exportFile(const string &key) {
+FileObj *FileContext::exportFile(const std::string &key) {
   FileTable::iterator f = m_files.find(key);
   if (f != m_files.end()) {
     if (!f->second->written) {

@@ -37,7 +37,7 @@ class SFFileWriter : public writer::SysFlowWriter {
 private:
   avro::ValidSchema m_sysfSchema;
   avro::DataFileWriter<SysFlow> *m_dfw;
-  string getFileName(time_t curTime);
+  std::string getFileName(time_t curTime);
 
 public:
   SFFileWriter(context::SysFlowContext *cxt, time_t start);

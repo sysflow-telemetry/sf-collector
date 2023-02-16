@@ -54,8 +54,8 @@ int FileEventProcessor::writeLinkEvent(sinsp_evt *ev, OpFlags flag) {
   FileObj *file1 = nullptr;
   FileObj *file2 = nullptr;
 
-  string path1;
-  string path2;
+  std::string path1;
+  std::string path2;
   if (flag == OP_LINK || flag == OP_RENAME) {
     path1 = utils::getPath(ev, "oldpath");
     path2 = utils::getPath(ev, "newpath");
@@ -121,9 +121,9 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
   if (fdinfo != nullptr) {
     file = m_fileCxt->getFile(ev, fdinfo, SFObjectState::CREATED, created);
   } else {
-    string fileName = (IS_UNLINKAT(ev->get_type()))
-                          ? utils::getPath(ev, "name")
-                          : utils::getPath(ev, "path");
+    std::string fileName = (IS_UNLINKAT(ev->get_type()))
+                               ? utils::getPath(ev, "name")
+                               : utils::getPath(ev, "path");
     if (IS_AT_SC(ev->get_type())) {
       sinsp_evt_param *pinfo;
       pinfo = ev->get_param(1);

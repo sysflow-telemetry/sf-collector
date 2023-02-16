@@ -86,8 +86,8 @@ public:
 class FileFlowObj : public DataFlowObj {
 public:
   FileFlow fileflow;
-  string filekey;
-  string flowkey;
+  std::string filekey;
+  std::string flowkey;
   bool operator==(const FileFlowObj &ffo) {
     if (exportTime != ffo.exportTime) {
       return false;
@@ -150,15 +150,15 @@ struct eqoid {
 };
 
 // specialization for strings
-template <> struct XXHasher<string> {
-  size_t operator()(const string &t) const {
+template <> struct XXHasher<std::string> {
+  size_t operator()(const std::string &t) const {
     XXH64_hash_t hash = XXH3_64bits(t.c_str(), t.size());
     return hash;
   }
 };
 
 struct eqstr {
-  bool operator()(const string &s1, const string &s2) const {
+  bool operator()(const std::string &s1, const std::string &s2) const {
     return (s1.compare(s2) == 0);
   }
 };
@@ -187,7 +187,7 @@ class FileObj {
 public:
   bool written{false};
   uint32_t refs{0};
-  string key;
+  std::string key;
   sysflow::File file;
   FileObj() {}
 };
@@ -201,19 +201,22 @@ public:
   ContainerObj() {}
 };
 
-typedef google::dense_hash_map<int, string> ParameterMapping;
-typedef google::dense_hash_map<string, ContainerObj *, XXHasher<string>, eqstr>
+typedef google::dense_hash_map<int, std::string> ParameterMapping;
+typedef google::dense_hash_map<std::string, ContainerObj *,
+                               XXHasher<std::string>, eqstr>
     ContainerTable;
 typedef google::dense_hash_map<NFKey, NetFlowObj *, XXHasher<NFKey>, eqnfkey>
     NetworkFlowTable;
-typedef google::dense_hash_map<string, FileFlowObj *, XXHasher<string>, eqstr>
+typedef google::dense_hash_map<std::string, FileFlowObj *,
+                               XXHasher<std::string>, eqstr>
     FileFlowTable;
-typedef google::dense_hash_map<string, FileObj *, XXHasher<string>, eqstr>
+typedef google::dense_hash_map<std::string, FileObj *, XXHasher<std::string>,
+                               eqstr>
     FileTable;
 typedef google::dense_hash_map<OID, NetworkFlowTable *, XXHasher<OID>, eqoid>
     OIDNetworkTable;
 typedef google::dense_hash_set<OID, XXHasher<OID>, eqoid> ProcessSet;
-typedef multiset<DataFlowObj *, eqdfobj> DataFlowSet;
+typedef std::multiset<DataFlowObj *, eqdfobj> DataFlowSet;
 typedef std::list<OIDObj *> OIDQueue;
 class ProcessObj {
 public:
@@ -250,7 +253,7 @@ struct eqpfobj {
     return (p1->pfo->exportTime < p2->pfo->exportTime);
   }
 };
-typedef multiset<ProcessObj *, eqpfobj> ProcessFlowSet;
+typedef std::multiset<ProcessObj *, eqpfobj> ProcessFlowSet;
 typedef google::dense_hash_map<OID *, ProcessObj *, XXHasher<OID *>, eqoidptr>
     ProcessTable;
 

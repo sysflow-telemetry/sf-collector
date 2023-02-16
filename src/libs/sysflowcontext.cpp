@@ -74,12 +74,12 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     m_nodeIP = config->nodeIP;
   }
 
-  std::unordered_set<uint32_t> tp_set = m_inspector->enforce_sinsp_state_tp();
+  auto tp_set = libsinsp::events::enforce_simple_tp_set();
   /*The schedule switch tracepoint is very noise and doesn't provide much
    * information*/
-  tp_set.erase(SCHED_SWITCH);
-  std::unordered_set<uint32_t> ppm_sc = getSyscallSet();
-  auto syscalls = m_inspector->get_syscalls_names(ppm_sc);
+  tp_set.remove(SCHED_SWITCH);
+  auto ppm_sc = getSyscallSet();
+  auto syscalls = libsinsp::events::sc_set_to_names(ppm_sc);
 
   SF_DEBUG(m_logger, "List of Syscalls after enforcement:")
   for (auto it : syscalls) {
@@ -144,12 +144,12 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
 
   char *k8sAPIURL = getenv(SF_K8S_API_URL);
   char *k8sAPICert = getenv(SF_K8S_API_CERT);
-  string *k8sURL = nullptr;
-  string *k8sCert = nullptr;
+  std::string *k8sURL = nullptr;
+  std::string *k8sCert = nullptr;
   if (k8sAPIURL != nullptr) {
-    k8sURL = new string(k8sAPIURL);
+    k8sURL = new std::string(k8sAPIURL);
     if (k8sAPICert != nullptr) {
-      k8sCert = new string(k8sAPICert);
+      k8sCert = new std::string(k8sAPICert);
     }
   } else if (!config->k8sAPIURL.empty()) {
     k8sURL = &(config->k8sAPIURL);
@@ -183,7 +183,7 @@ SysFlowContext::~SysFlowContext() {
   }
 }
 
-string SysFlowContext::getExporterID() {
+std::string SysFlowContext::getExporterID() {
   if (m_config->exporterID.empty()) {
     const scap_machine_info *mi = m_inspector->get_machine_info();
     if (mi != nullptr) {
@@ -203,7 +203,7 @@ string SysFlowContext::getExporterID() {
   return m_config->exporterID;
 }
 
-string SysFlowContext::getNodeIP() { return m_nodeIP; }
+std::string SysFlowContext::getNodeIP() { return m_nodeIP; }
 
 void SysFlowContext::checkModule() {
   if (!m_config->moduleChecks) {
@@ -227,8 +227,8 @@ void SysFlowContext::checkModule() {
   }
 }
 
-void SysFlowContext::openInspector(std::unordered_set<uint32_t> tp_set,
-                                   std::unordered_set<uint32_t> ppm_sc) {
+void SysFlowContext::openInspector(libsinsp::events::set<ppm_tp_code> tp_set,
+                                   libsinsp::events::set<ppm_sc_code> ppm_sc) {
   std::string collectionMode;
   if (m_config->collectionMode == SFFlowMode) {
     collectionMode = "flow mode";
@@ -279,8 +279,8 @@ void SysFlowContext::detectProbeType() {
   }
 }
 
-std::unordered_set<uint32_t>
-SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppmScSet) {
+libsinsp::events::set<ppm_sc_code>
+SysFlowContext::getSyscallSet(libsinsp::events::set<ppm_sc_code> ppmScSet) {
   auto scMode = SF_FLOW_SC_SET;
   if (m_config->collectionMode == SFSysCallMode::SFConsumerMode) {
     SF_INFO(m_logger, "SysFlow configured for consumer mode.")
@@ -289,12 +289,15 @@ SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppmScSet) {
     SF_INFO(m_logger, "SysFlow configured for no files mode.")
     scMode = SF_NO_FILES_SC_SET;
   }
-  auto syscalls = m_inspector->get_syscalls_names(scMode);
+  
+  auto scModeSet = libsinsp::events::set<ppm_sc_code>::from_unordered_set(scMode);
+  auto syscalls = libsinsp::events::sc_set_to_names(scModeSet);
   SF_DEBUG(m_logger, "Syscall List before enforcement:")
   for (auto it : syscalls) {
     SF_DEBUG(m_logger, it)
   }
-  auto simpleSet = m_inspector->enforce_sinsp_state_ppm_sc(scMode);
-  ppmScSet.insert(simpleSet.begin(), simpleSet.end());
-  return ppmScSet;
+
+  static auto sinspStatePpmSc = libsinsp::events::sinsp_state_sc_set();
+  static auto finalSet = scModeSet.merge(sinspStatePpmSc);
+  return ppmScSet.merge(finalSet);
 }
