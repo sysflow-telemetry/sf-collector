@@ -47,7 +47,7 @@ void initKeys() {
   s_keysinit = true;
 }
 
-void utils::generateFOID(const string &key, FOID *foid) {
+void utils::generateFOID(const std::string &key, FOID *foid) {
   SHA1(reinterpret_cast<const unsigned char *>(key.c_str()), key.size(),
        foid->begin());
 }
@@ -149,13 +149,13 @@ bool utils::isMapAnonymous(sinsp_evt *ev) {
   return flags & PPM_MAP_ANONYMOUS;
 }
 
-int64_t utils::getIntParam(sinsp_evt *ev, string pname) {
+int64_t utils::getIntParam(sinsp_evt *ev, std::string pname) {
   uint32_t n = ev->get_num_params();
   if (n == 0) {
     return -1;
   }
   for (uint32_t i = n - 1; i >= 0; i--) {
-    string name = ev->get_param_name(i);
+    std::string name = ev->get_param_name(i);
     if (name.compare(pname) == 0) {
       const ppm_param_info *param = ev->get_param_info(i);
       switch (param->type) {
@@ -237,12 +237,12 @@ int64_t utils::getSchemaVersion() {
   return -1;
 }
 
-string utils::getPath(sinsp_evt *ev, const string &paraName) {
+std::string utils::getPath(sinsp_evt *ev, const std::string &paraName) {
   int numParams = ev->get_num_params();
-  string path;
+  std::string path;
   for (int i = 0; i < numParams; i++) {
     const ppm_param_info *param = ev->get_param_info(i);
-    string name = ev->get_param_name(i);
+    std::string name = ev->get_param_name(i);
     if (paraName.compare(name) != 0) {
       continue;
     }
@@ -251,7 +251,7 @@ string utils::getPath(sinsp_evt *ev, const string &paraName) {
     const sinsp_evt_param *p = ev->get_param(i);
     if (param->type == PT_FSPATH || param->type == PT_CHARBUF ||
         param->type == PT_FSRELPATH) {
-      path = string(p->m_val, p->m_len);
+      path = std::string(p->m_val, p->m_len);
       SF_DEBUG(m_logger, "getPath: Param '" << name << "'s value is " << path);
       sanitize_string(path);
     }
@@ -260,12 +260,12 @@ string utils::getPath(sinsp_evt *ev, const string &paraName) {
   return path;
 }
 
-int64_t utils::getFD(sinsp_evt *ev, const string &paraName) {
+int64_t utils::getFD(sinsp_evt *ev, const std::string &paraName) {
   int numParams = ev->get_num_params();
   int64_t fd = -1;
   for (int i = 0; i < numParams; i++) {
     const ppm_param_info *param = ev->get_param_info(i);
-    string name = ev->get_param_name(i);
+    std::string name = ev->get_param_name(i);
     if (paraName.compare(name) != 0) {
       continue;
     }
@@ -279,7 +279,7 @@ int64_t utils::getFD(sinsp_evt *ev, const string &paraName) {
   return fd;
 }
 
-fs::path utils::getCanonicalPath(const string &fileName) {
+fs::path utils::getCanonicalPath(const std::string &fileName) {
   fs::path p(fileName);
   try {
     p = fs::weakly_canonical(p);
@@ -289,15 +289,15 @@ fs::path utils::getCanonicalPath(const string &fileName) {
   return p;
 }
 
-string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
-                              const string &fileName) {
+std::string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
+                                   const std::string &fileName) {
   fs::path p(fileName);
   SF_DEBUG(m_logger, "getAbsolutePath: The path is "
                          << p << " File name " << fileName << " is relative? "
                          << p.is_relative());
   if (fileName.empty() || p.is_relative()) {
     fs::path tmp;
-    string cwd = ti->get_cwd();
+    std::string cwd = ti->get_cwd();
     if (dirfd == PPM_AT_FDCWD) {
       if (cwd.empty()) {
         return p.string();
@@ -323,14 +323,15 @@ string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
   return p.string();
 }
 
-string utils::getAbsolutePath(sinsp_threadinfo *ti, const string &fileName) {
+std::string utils::getAbsolutePath(sinsp_threadinfo *ti,
+                                   const std::string &fileName) {
   fs::path p(fileName);
   SF_DEBUG(m_logger, "getAbsolutePath: The path is "
                          << p << " File name " << fileName << " is relative? "
                          << p.is_relative());
   if (fileName.empty() || p.is_relative()) {
     fs::path tmp;
-    string cwd = ti->get_cwd();
+    std::string cwd = ti->get_cwd();
     if (!cwd.empty()) {
       tmp = cwd;
       tmp /= p;

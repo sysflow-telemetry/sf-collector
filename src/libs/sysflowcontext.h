@@ -57,7 +57,7 @@ private:
   int m_nfExpireInterval;
   bool m_offline;
   int m_statsInterval;
-  string m_nodeIP;
+  std::string m_nodeIP;
   bool m_k8sEnabled;
   SysFlowCallback m_callback;
   SysFlowConfig *m_config;
@@ -68,29 +68,29 @@ private:
   DEFINE_LOGGER();
   void detectProbeType();
   void checkModule();
-  void openInspector(std::unordered_set<uint32_t> tp_set,
-                     std::unordered_set<uint32_t> ppm_sc);
-  std::unordered_set<uint32_t>
-  getSyscallSet(std::unordered_set<uint32_t> ppmScSet = {});
+  void openInspector(libsinsp::events::set<ppm_tp_code> tp_set,
+                     libsinsp::events::set<ppm_sc_code> ppm_sc);
+  libsinsp::events::set<ppm_sc_code>
+  getSyscallSet(libsinsp::events::set<ppm_sc_code> ppmScSet = {});
 
 public:
   SysFlowContext(SysFlowConfig *config);
   virtual ~SysFlowContext();
   uint64_t timeStamp{};
-  string getExporterID();
-  string getNodeIP();
+  std::string getExporterID();
+  std::string getNodeIP();
   SysFlowCallback getCallback() { return m_callback; }
-  inline void setNodeIP(string nodeIP) { m_nodeIP = nodeIP; }
+  inline void setNodeIP(std::string nodeIP) { m_nodeIP = nodeIP; }
   inline bool isOffline() { return m_offline; }
   inline bool hasCallback() { return m_callback != nullptr; }
   inline sinsp *getInspector() { return m_inspector; }
   inline int getNFExportInterval() { return m_nfExportInterval; }
   inline int getNFExpireInterval() { return m_nfExpireInterval; }
-  inline string getOutputFile() { return m_config->filePath; }
-  inline string getSocketFile() { return m_config->socketPath; }
+  inline std::string getOutputFile() { return m_config->filePath; }
+  inline std::string getSocketFile() { return m_config->socketPath; }
   inline bool isDomainSocket() { return !m_config->socketPath.empty(); }
   inline bool isOutputFile() { return !m_config->filePath.empty(); }
-  inline string getScapFile() { return m_config->scapInputPath; }
+  inline std::string getScapFile() { return m_config->scapInputPath; }
   inline bool hasPrefix() { return m_hasPrefix; }
   inline int getFileDuration() { return m_config->rotateInterval; }
   inline bool isFilterContainers() { return m_config->filterContainers; }

@@ -22,7 +22,7 @@
 #include <ppm_events_public.h>
 #include <unordered_set>
 
-static const std::unordered_set<uint32_t> SF_FLOW_SC_SET{
+static const std::unordered_set<ppm_sc_code> SF_FLOW_SC_SET{
     PPM_SC_ACCEPT,      PPM_SC_ACCEPT4,   PPM_SC_BIND,      PPM_SC_CHMOD,
     PPM_SC_CLONE,       PPM_SC_CLONE3,    PPM_SC_CLOSE,     PPM_SC_CONNECT,
     PPM_SC_CREAT,       PPM_SC_EXECVE,    PPM_SC_EXECVEAT,  PPM_SC_FORK,
@@ -38,7 +38,7 @@ static const std::unordered_set<uint32_t> SF_FLOW_SC_SET{
     PPM_SC_UNLINKAT,    PPM_SC_VFORK,     PPM_SC_WRITE,     PPM_SC_WRITEV,
 };
 
-static const std::unordered_set<uint32_t> SF_CONSUMER_SC_SET{
+static const std::unordered_set<ppm_sc_code> SF_CONSUMER_SC_SET{
     PPM_SC_ACCEPT,     PPM_SC_ACCEPT4,     PPM_SC_CHMOD,     PPM_SC_CLONE,
     PPM_SC_CLONE3,     PPM_SC_CLOSE,       PPM_SC_CONNECT,   PPM_SC_CREAT,
     PPM_SC_EXECVE,     PPM_SC_EXECVEAT,    PPM_SC_FORK,      PPM_SC_LINK,
@@ -51,7 +51,7 @@ static const std::unordered_set<uint32_t> SF_CONSUMER_SC_SET{
     PPM_SC_UNLINKAT,   PPM_SC_VFORK,
 };
 
-static const std::unordered_set<uint32_t> SF_NO_FILES_SC_SET{
+static const std::unordered_set<ppm_sc_code> SF_NO_FILES_SC_SET{
     PPM_SC_ACCEPT,      PPM_SC_ACCEPT4,  PPM_SC_CLONE,    PPM_SC_CLONE3,
     PPM_SC_CLOSE,       PPM_SC_CONNECT,  PPM_SC_CREAT,    PPM_SC_EXECVE,
     PPM_SC_EXECVEAT,    PPM_SC_FORK,     PPM_SC_OPEN,     PPM_SC_OPENAT,
