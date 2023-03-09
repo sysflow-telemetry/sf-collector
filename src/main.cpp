@@ -28,7 +28,6 @@
 #include <csignal>
 #include <cstdio>
 #include <iostream>
-#include <sinsp.h>
 #include <string>
 #include <unistd.h>
 #include <exception>

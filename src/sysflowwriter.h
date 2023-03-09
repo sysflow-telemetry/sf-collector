@@ -20,6 +20,7 @@
 #ifndef __SF_WRITER_
 #define __SF_WRITER_
 #include "sysflow.h"
+#include "op_flags.h"
 #include "sysflowcontext.h"
 #include "utils.h"
 
@@ -63,7 +64,7 @@ public:
     write(&m_flow);
   }
   inline void writeNetFlow(NetworkFlow *nf) {
-    if (nf->opFlags == 0) {
+    if (nf->opFlags == 0 || nf->opFlags == OP_TRUNCATE) {
       return;
     }
     m_flow.rec.set_NetworkFlow(*nf);
@@ -71,7 +72,7 @@ public:
     write(&m_flow);
   }
   inline void writeProcessFlow(ProcessFlow *pf) {
-    if (pf->opFlags == 0) {
+    if (pf->opFlags == 0 || pf->opFlags == OP_TRUNCATE) {
       return;
     }
     m_flow.rec.set_ProcessFlow(*pf);
@@ -79,7 +80,7 @@ public:
     write(&m_flow);
   }
   inline void writeFileFlow(FileFlow *ff) {
-    if (ff->opFlags == 0) {
+    if (ff->opFlags == 0 || ff->opFlags == OP_TRUNCATE) {
       return;
     }
     m_flow.rec.set_FileFlow(*ff);

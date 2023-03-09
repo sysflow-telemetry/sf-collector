@@ -18,7 +18,12 @@
  **/
 
 #include "sysflowcontext.h"
+#ifdef SYSDIG
 #include "sysdig/sdinspector.h"
+#endif
+#ifdef CDM
+#include "cdm/cdminspector.h"
+#endif 
 #include "containercontext.h"
 #include "filecontext.h"
 #include "processcontext.h"
@@ -51,6 +56,11 @@ SysFlowContext::~SysFlowContext() {
 void SysFlowContext::init(process::ProcessContext *procCxt,
                           file::FileContext *fileCxt,
                           container::ContainerContext *contCxt) {
+#ifdef SYSDIG
   m_inspector = new sysdig::SDInspector(this, procCxt, fileCxt, contCxt);
+#endif
+#ifdef CDM 
+  m_inspector = new cdm::CDMInspector(this, procCxt, fileCxt, contCxt);
+#endif
   m_inspector->init();
 }
