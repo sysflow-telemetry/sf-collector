@@ -290,7 +290,7 @@ SysFlowContext::getSyscallSet(libsinsp::events::set<ppm_sc_code> ppmScSet) {
     scMode = SF_NO_FILES_SC_SET;
   }
   
-  auto scModeSet = libsinsp::events::set<ppm_sc_code>::from_unordered_set(scMode);
+  auto scModeSet = libsinsp::events::set<ppm_sc_code>::from(scMode);
   auto syscalls = libsinsp::events::sc_set_to_names(scModeSet);
   SF_DEBUG(m_logger, "Syscall List before enforcement:")
   for (auto it : syscalls) {
