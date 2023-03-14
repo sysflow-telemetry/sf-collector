@@ -95,6 +95,5 @@ addlib libscap_event_schema.a
 addlib libscap_platform.a
 addlib libsinsp.a
 addlib libtbb.a
-addlib libtbbmalloc.a
 save
 end
