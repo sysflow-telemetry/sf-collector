@@ -129,13 +129,12 @@ falcolibs/package:
 	mkdir -p include/userspace/plugin && cp ../userspace/plugin/*.h include/userspace/plugin/ && \
 	mkdir -p include/userspace/libscap && cd .. && find userspace/libscap -name '*.h' -exec cp -r --parents '{}' build/include \; && cd build && \
 	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
-	cp -r tbb-prefix/src/tbb/include/serial  include/ && \
 	cp -r tbb-prefix/src/tbb/include/tbb include/ && \
+	cp -r tbb-prefix/src/tbb/include/oneapi include/ && \
 	cp -r protobuf-prefix/src/protobuf/target/include/google include/ && \
 	cp protobuf-prefix/src/protobuf/target/lib/libprotobuf.a lib && \
 	cp protobuf-prefix/src/protobuf/target/lib/libprotoc.a lib && \
-	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
-	cp tbb-prefix/src/tbb/build/lib_release/libtbbmalloc.a lib/ && \
+	cp tbb-prefix/src/tbb/lib_release/libtbb.a lib/ && \
 	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
 	cp -r b64-prefix/src/b64/include/b64 include/ && \
 	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
@@ -153,7 +152,6 @@ falcolibs/package:
 	cp b64-prefix/src/b64/src/libb64.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
 	cp jq-prefix/src/jq/target/lib/*.a lib/ && \
-	cp tbb-prefix/src/tbb/build/lib_release/libtbb.a lib/ && \
 	cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
 	cp zlib-prefix/src/zlib/libz.a lib/libz.a
 ifeq ($(BUNDLE_FALCO_LIBS), 1)	
