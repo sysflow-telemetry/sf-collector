@@ -64,7 +64,7 @@ NFKey *getNFDelKey();
 NFKey *getNFEmptyKey();
 OID *getOIDDelKey();
 OID *getOIDEmptyKey();
-void generateFOID(const string &key, FOID *foid);
+void generateFOID(const std::string &key, FOID *foid);
 std::string getPath(sinsp_evt *ev, const std::string &paraName);
 fs::path getCanonicalPath(const std::string &fileName);
 std::string getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,

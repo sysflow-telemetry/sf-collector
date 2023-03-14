@@ -238,7 +238,7 @@ int SysFlowProcessor::run() {
   return 0;
 }
 
-sysflow::Container *SysFlowProcessor::getContainer(const string &id) {
+sysflow::Container *SysFlowProcessor::getContainer(const std::string &id) {
   ContainerObj *cont = m_containerCxt->getContainer(id);
   if (cont != nullptr) {
     return &(cont->cont);

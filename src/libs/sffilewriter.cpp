@@ -35,7 +35,7 @@ SFFileWriter::~SFFileWriter() {
 
 int SFFileWriter::initialize() {
   time_t curTime = time(nullptr);
-  string ofile = getFileName(curTime);
+  std::string ofile = getFileName(curTime);
   m_dfw = new avro::DataFileWriter<SysFlow>(ofile.c_str(), m_sysfSchema,
                                             COMPRESS_BLOCK_SIZE,
                                             avro::Codec::DEFLATE_CODEC);
@@ -44,8 +44,8 @@ int SFFileWriter::initialize() {
   return 0;
 }
 
-string SFFileWriter::getFileName(time_t curTime) {
-  string ofile;
+std::string SFFileWriter::getFileName(time_t curTime) {
+  std::string ofile;
   if (m_start > 0) {
     if (m_cxt->hasPrefix()) {
       ofile = m_cxt->getOutputFile() + "." + std::to_string(curTime);
@@ -63,7 +63,7 @@ string SFFileWriter::getFileName(time_t curTime) {
 }
 
 void SFFileWriter::reset(time_t curTime) {
-  string ofile = getFileName(curTime);
+  std::string ofile = getFileName(curTime);
   setHeaderFile(ofile);
   m_numRecs = 0;
   m_dfw->close();

@@ -89,7 +89,7 @@ ContainerObj *ContainerContext::createContainer(sinsp_threadinfo *ti) {
   return cont;
 }
 
-ContainerObj *ContainerContext::getContainer(const string &id) {
+ContainerObj *ContainerContext::getContainer(const std::string &id) {
   ContainerTable::iterator cont = m_containers.find(id);
   if (cont != m_containers.end()) {
     return cont->second;
@@ -97,7 +97,7 @@ ContainerObj *ContainerContext::getContainer(const string &id) {
   return nullptr;
 }
 
-bool ContainerContext::exportContainer(const string &id) {
+bool ContainerContext::exportContainer(const std::string &id) {
   bool exprt = false;
   ContainerTable::iterator cont = m_containers.find(id);
   if (cont != m_containers.end()) {
@@ -113,7 +113,7 @@ bool ContainerContext::exportContainer(const string &id) {
   return exprt;
 }
 
-int ContainerContext::derefContainer(const string &id) {
+int ContainerContext::derefContainer(const std::string &id) {
   int result = 0;
   ContainerTable::iterator cont = m_containers.find(id);
   if (cont != m_containers.end()) {
@@ -184,7 +184,7 @@ void ContainerContext::reupPod(sinsp_threadinfo *ti, ContainerObj *cont) {
     return;
   }
 
-  string podId = "";
+  std::string podId = "";
   if (!cont->cont.podId.is_null()) {
     podId = cont->cont.podId.get_string();
   }

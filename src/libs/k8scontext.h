@@ -46,9 +46,9 @@ public:
   K8sContext(context::SysFlowContext *cxt, writer::SysFlowWriter *writer);
   virtual ~K8sContext();
   std::shared_ptr<PodObj> getPod(sinsp_threadinfo *ti);
-  std::shared_ptr<PodObj> getPod(const string &id);
-  bool exportPod(const string &id);
-  int derefPod(const string &id);
+  std::shared_ptr<PodObj> getPod(const std::string &id);
+  bool exportPod(const std::string &id);
+  int derefPod(const std::string &id);
   void clearAllPods();
   void clearPods();
   inline int getSize() { return m_pods.size(); }

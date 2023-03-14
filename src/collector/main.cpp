@@ -127,16 +127,16 @@ int main(int argc, char **argv) {
     case 'm':
       if (strcmp(optarg, "consume") == 0) {
         g_config->collectionMode = SFSysCallMode::SFConsumerMode;
-        cout << "Collector configured for consumer mode!" << endl;
+        std::cout << "Collector configured for consumer mode!" << std::endl;
       } else if (strcmp(optarg, "nofiles") == 0) {
         g_config->collectionMode = SFSysCallMode::SFNoFilesMode;
-        cout << "Collector configured for nofiles mode!" << endl;
+        std::cout << "Collector configured for nofiles mode!" << std::endl;
       } else if (strcmp(optarg, "flow") == 0) {
         g_config->collectionMode = SFSysCallMode::SFFlowMode;
-        cout << "Collector configured for flow mode!" << endl;
+        std::cout << "Collector configured for flow mode!" << std::endl;
       } else {
-        cout << "Collection mode not recognized: " << optarg << " exiting."
-             << endl;
+        std::cout << "Collection mode not recognized: " << optarg << " exiting."
+             << std::endl;
         exit(1);
       }
       break;
@@ -160,11 +160,11 @@ int main(int argc, char **argv) {
     case 'G':
       duration = optarg;
       if (str2int(fileDuration, duration, 10)) {
-        cout << "Unable to parse file duration " << duration << endl;
+        std::cout << "Unable to parse file duration " << duration << std::endl;
         exit(1);
       }
       if (fileDuration < 1) {
-        cout << "File duration must be higher than 0" << endl;
+        std::cout << "File duration must be higher than 0" << std::endl;
         exit(1);
       }
       g_config->rotateInterval = fileDuration;
@@ -176,14 +176,14 @@ int main(int argc, char **argv) {
       char *sr;
       sr = optarg;
       if (str2int(samplingRatio, sr, 10)) {
-        cout << "Unable to parse sampling ratio " << samplingRatio << endl;
+        std::cout << "Unable to parse sampling ratio " << samplingRatio << std::endl;
         exit(1);
       }
       g_config->samplingRatio = samplingRatio;
       break;
     case 'f':
       g_config->falcoFilter = optarg;
-      cout << "Configured filter: " << g_config->falcoFilter << endl;
+      std::cout << "Configured filter: " << g_config->falcoFilter << std::endl;
       break;
     case 'l':
       logProps = optarg;
@@ -197,11 +197,11 @@ int main(int argc, char **argv) {
     case 't':
       criTimeout = optarg;
       if (str2int(criTO, criTimeout, 10)) {
-        cout << "Unable to parse " << criTimeout << endl;
+        std::cout << "Unable to parse " << criTimeout << std::endl;
         exit(1);
       }
       if (criTO < 1) {
-        cout << "CRI timeout must be higher than 0" << endl;
+        std::cout << "CRI timeout must be higher than 0" << std::endl;
         exit(1);
       }
       g_config->criTO = criTO;
@@ -209,7 +209,7 @@ int main(int argc, char **argv) {
     case 'v':
       std::cerr << " Version: " << SF_VERSION << "+" << SF_BUILD
                 << " Avro Schema Version: " << utils::getSchemaVersion()
-                << endl;
+                << std::endl;
       exit(0);
     case '?':
       if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' ||

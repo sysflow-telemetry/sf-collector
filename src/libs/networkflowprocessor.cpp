@@ -241,7 +241,7 @@ void NetworkFlowProcessor::removeNetworkFlow(ProcessObj *proc, NetFlowObj **nf,
 void NetworkFlowProcessor::removeAndWriteRelatedFlows(ProcessObj *proc,
                                                       NFKey *key,
                                                       uint64_t endTs) {
-  vector<NetFlowObj *> nfobjs;
+  std::vector<NetFlowObj *> nfobjs;
   for (NetworkFlowTable::iterator nfi = proc->netflows.begin();
        nfi != proc->netflows.end(); nfi++) {
     if (nfi->first.tid != key->tid && nfi->first.ip1 == key->ip1 &&

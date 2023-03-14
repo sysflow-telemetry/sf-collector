@@ -40,12 +40,12 @@ public:
   virtual ~FileContext();
   FileObj *getFile(sinsp_evt *ev, sinsp_fdinfo_t *fdinfo, SFObjectState state,
                    bool &created);
-  FileObj *getFile(sinsp_evt *ev, const string &path, char typechar,
+  FileObj *getFile(sinsp_evt *ev, const std::string &path, char typechar,
                    SFObjectState state, bool &created);
-  FileObj *getFile(const string &key);
-  FileObj *createFile(sinsp_evt *ev, string path, char typechar,
-                      SFObjectState state, string key);
-  FileObj *exportFile(const string &key);
+  FileObj *getFile(const std::string &key);
+  FileObj *createFile(sinsp_evt *ev, std::string path, char typechar,
+                      SFObjectState state, std::string key);
+  FileObj *exportFile(const std::string &key);
   void clearFiles();
   inline int getSize() { return m_files.size(); }
 };

@@ -41,20 +41,20 @@ private:
   DataFlowSet *m_dfSet;
   file::FileContext *m_fileCxt;
   void populateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev,
-                        ProcessObj *proc, FileObj *file, string flowkey,
+                        ProcessObj *proc, FileObj *file, std::string flowkey,
                         sinsp_fdinfo_t *fdinfo, int64_t fd);
   void updateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev,
                       sinsp_fdinfo_t *fdinfo);
   void processExistingFlow(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
-                           OpFlags flag, string flowkey, FileFlowObj *ff,
+                           OpFlags flag, std::string flowkey, FileFlowObj *ff,
                            sinsp_fdinfo_t *fdinfo);
   void processNewFlow(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
-                      OpFlags flag, const string &flowkey,
+                      OpFlags flag, const std::string &flowkey,
                       sinsp_fdinfo_t *fdinfo, int64_t fd);
   void removeAndWriteFileFlow(ProcessObj *proc, FileObj *file, FileFlowObj **nf,
-                              string flowkey);
+                              std::string flowkey);
   void removeFileFlow(ProcessObj *proc, FileObj *file, FileFlowObj **ff,
-                      const string &flowkey);
+                      const std::string &flowkey);
   int removeFileFlowFromSet(FileFlowObj **ffo, bool deleteFileFlow);
   void removeAndWriteRelatedFlows(ProcessObj *proc, FileFlowObj *ffo,
                                   uint64_t endTs);
