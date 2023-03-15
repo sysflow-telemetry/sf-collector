@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.5.1] - 2023-02-28
+## [0.5.1] - 2023-03-31
 
 ### Added
 
@@ -27,17 +27,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Add configuration object cleanup in sysflow context object destructor
-- Bump Falco libs to 0.10.3, driver to 4.0.0
-- Bump Falco to 0.34.0
-- Bump UBI to to 8.7-1054
+- Bump Falco libs to PR981 (fix to path sanitization), driver to 2649577
+- Bump Falco to 0.34.1
+- Bump UBI to to 8.7-1090
 - Bump GHC Filesystem version to v1.5.12
 - Bump elfutils to 0.187
 - Replaced mumurhash with xxhash
+- Updated libSysFlow to new libsinsp events API
+- Updated build for libtbb v2021.8.0 (updated in Falco libs)
 
 ### Fixed
 
 - Remove duplicate config variable assignment in sysflow context constructor
 - Fixed getPath and getAbsolutePath functions in utils (caused paths for AT syscalls to resolve to an empty string)
+- Fix path sanitization (libsinsp PR981)
 
 ## [0.5.0] - 2022-10-17
 
