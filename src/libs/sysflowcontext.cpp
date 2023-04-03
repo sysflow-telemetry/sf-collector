@@ -74,10 +74,6 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     m_nodeIP = config->nodeIP;
   }
 
-  auto tp_set = libsinsp::events::enforce_simple_tp_set();
-  /*The schedule switch tracepoint is very noise and doesn't provide much
-   * information*/
-  tp_set.remove(SCHED_SWITCH);
   auto ppm_sc = getSyscallSet();
   auto syscalls = libsinsp::events::sc_set_to_names(ppm_sc);
 
@@ -86,7 +82,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     SF_DEBUG(m_logger, it);
   }
 
-  openInspector(tp_set, ppm_sc);
+  openInspector(ppm_sc);
 
   const char *drop = std::getenv(ENABLE_DROP_MODE);
   if (config->scapInputPath.empty() &&
@@ -227,8 +223,7 @@ void SysFlowContext::checkModule() {
   }
 }
 
-void SysFlowContext::openInspector(libsinsp::events::set<ppm_tp_code> tp_set,
-                                   libsinsp::events::set<ppm_sc_code> ppm_sc) {
+void SysFlowContext::openInspector(libsinsp::events::set<ppm_sc_code> ppm_sc) {
   std::string collectionMode;
   if (m_config->collectionMode == SFFlowMode) {
     collectionMode = "flow mode";
@@ -242,14 +237,13 @@ void SysFlowContext::openInspector(libsinsp::events::set<ppm_tp_code> tp_set,
     SF_INFO(m_logger, "Opening kmod probe in "
                           << collectionMode << " monitoring " << ppm_sc.size()
                           << " system calls.")
-    m_inspector->open_kmod(m_config->singleBufferDimension, ppm_sc, tp_set);
+    m_inspector->open_kmod(m_config->singleBufferDimension, ppm_sc);
     break;
   case EBPF:
     SF_INFO(m_logger, "Opening ebpf probe in "
                           << collectionMode << " monitoring " << ppm_sc.size()
                           << " system calls.")
-    m_inspector->open_bpf(m_ebpfProbe, m_config->singleBufferDimension, ppm_sc,
-                          tp_set);
+    m_inspector->open_bpf(m_ebpfProbe, m_config->singleBufferDimension, ppm_sc);
     break;
   case NO_PROBE:
     m_inspector->open_savefile(m_config->scapInputPath, 0);
@@ -289,7 +283,7 @@ SysFlowContext::getSyscallSet(libsinsp::events::set<ppm_sc_code> ppmScSet) {
     SF_INFO(m_logger, "SysFlow configured for no files mode.")
     scMode = SF_NO_FILES_SC_SET;
   }
-  
+
   auto scModeSet = libsinsp::events::set<ppm_sc_code>::from(scMode);
   auto syscalls = libsinsp::events::sc_set_to_names(scModeSet);
   SF_DEBUG(m_logger, "Syscall List before enforcement:")
