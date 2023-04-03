@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
         std::cout << "Collector configured for flow mode!" << std::endl;
       } else {
         std::cout << "Collection mode not recognized: " << optarg << " exiting."
-             << std::endl;
+                  << std::endl;
         exit(1);
       }
       break;
@@ -176,7 +176,8 @@ int main(int argc, char **argv) {
       char *sr;
       sr = optarg;
       if (str2int(samplingRatio, sr, 10)) {
-        std::cout << "Unable to parse sampling ratio " << samplingRatio << std::endl;
+        std::cout << "Unable to parse sampling ratio " << samplingRatio
+                  << std::endl;
         exit(1);
       }
       g_config->samplingRatio = samplingRatio;
