@@ -68,8 +68,7 @@ private:
   DEFINE_LOGGER();
   void detectProbeType();
   void checkModule();
-  void openInspector(libsinsp::events::set<ppm_tp_code> tp_set,
-                     libsinsp::events::set<ppm_sc_code> ppm_sc);
+  void openInspector(libsinsp::events::set<ppm_sc_code> ppm_sc);
   libsinsp::events::set<ppm_sc_code>
   getSyscallSet(libsinsp::events::set<ppm_sc_code> ppmScSet = {});
 
