@@ -52,6 +52,7 @@ src/sysflow_config.h
 *.egg-info
 /logs/
 docker-run*
+scaptests 
 
 # secrets
 scripts/build/rhpassword
