@@ -59,6 +59,7 @@ scripts/build/rhpassword
 scripts/build/rhuser
 
 # examples
+examples/manifest
 examples/callback
 examples/libsysflow-*
 

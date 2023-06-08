@@ -1,6 +1,6 @@
 #!/bin/bash
 DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-export $(grep -v '^#' $DIR/manifest | xargs)
+export $(grep -v '^#' $DIR/manifest | xargs | sed 's/?//g')
 docker run \
     --privileged \
     -v /var/run/docker.sock:/host/var/run/docker.sock \
