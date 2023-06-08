@@ -20,6 +20,7 @@
 
 
 # Target configuration
+MANIFEST:=$(shell cp ../makefile.manifest.inc manifest)
 include manifest
 TARGET = callback
 INSTALL_PATH ?= /usr/local/example
@@ -101,7 +102,7 @@ callback.o: callback.cpp
 
 .PHONY: clean
 clean:
-	rm -f .[!.]*.o *.o *.so *.a $(TARGET)
+	rm -f .[!.]*.o *.o *.so *.a $(TARGET) manifest
 
 .PHONY : help
 help:
