@@ -75,7 +75,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
   }
 
   auto ppm_sc = getSyscallSet();
-  auto syscalls = libsinsp::events::sc_set_to_names(ppm_sc);
+  auto syscalls = libsinsp::events::sc_set_to_sc_names(ppm_sc);
 
   SF_DEBUG(m_logger, "List of Syscalls after enforcement:")
   for (auto it : syscalls) {
@@ -285,7 +285,7 @@ SysFlowContext::getSyscallSet(libsinsp::events::set<ppm_sc_code> ppmScSet) {
   }
 
   auto scModeSet = libsinsp::events::set<ppm_sc_code>::from(scMode);
-  auto syscalls = libsinsp::events::sc_set_to_names(scModeSet);
+  auto syscalls = libsinsp::events::sc_set_to_sc_names(scModeSet);
   SF_DEBUG(m_logger, "Syscall List before enforcement:")
   for (auto it : syscalls) {
     SF_DEBUG(m_logger, it)

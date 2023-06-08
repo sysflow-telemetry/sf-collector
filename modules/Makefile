@@ -126,6 +126,7 @@ falcolibs/package:
 	mkdir -p include/userspace/libsinsp/filter && cp ../userspace/libsinsp/filter/*.h include/userspace/libsinsp/filter/ && \
 	mkdir -p include/userspace/libsinsp/events && cp ../userspace/libsinsp/events/*.h include/userspace/libsinsp/events/ && \
 	mkdir -p include/userspace/libsinsp/include && cp ../userspace/libsinsp/include/*.h include/userspace/libsinsp/include/ && \
+	mkdir -p include/userspace/libsinsp/state && cp ../userspace/libsinsp/state/*.h include/userspace/libsinsp/state/ && \
 	mkdir -p include/userspace/plugin && cp ../userspace/plugin/*.h include/userspace/plugin/ && \
 	mkdir -p include/userspace/libscap && cd .. && find userspace/libscap -name '*.h' -exec cp -r --parents '{}' build/include \; && cd build && \
 	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
