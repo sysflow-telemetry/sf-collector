@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.5.1] - 2023-03-31
+## [0.5.1] - 2023-06-07
 
 ### Added
 
@@ -27,9 +27,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Add configuration object cleanup in sysflow context object destructor
-- Bump Falco libs to PR981 (fix to path sanitization), driver to 2649577
+- Bump Falco libs to 0.11.2, driver to 5.0.1
 - Bump Falco to 0.34.1
-- Bump UBI to to 8.7-1090
+- Bump UBI to to 8.8-854
 - Bump GHC Filesystem version to v1.5.12
 - Bump elfutils to 0.187
 - Replaced mumurhash with xxhash
