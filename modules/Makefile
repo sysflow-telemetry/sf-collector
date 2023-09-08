@@ -139,7 +139,7 @@ falcolibs/package:
 	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
 	cp -r b64-prefix/src/b64/include/b64 include/ && \
 	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
-	cp libsinsp/libsinsp.a lib/ && \
+	cp libsinsp/*.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
 	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
 	cp ../../falco/scripts/falco-driver-loader bin/ && \
