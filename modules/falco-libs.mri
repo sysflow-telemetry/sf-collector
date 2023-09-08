@@ -93,7 +93,10 @@ addlib libscap_engine_util.a
 addlib libscap_error.a
 addlib libscap_event_schema.a
 addlib libscap_platform.a
+addlib libscap_platform_util.a
 addlib libsinsp.a
+addlib libcri_v1alpha2.a
+addlib libcri_v1.a
 addlib libtbb.a
 save
 end
