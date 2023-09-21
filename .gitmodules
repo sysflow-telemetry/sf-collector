@@ -31,3 +31,6 @@
 [submodule "modules/xxHash"]
 	path = modules/xxHash
 	url = https://github.com/Cyan4973/xxHash.git
+[submodule "modules/sparsehash"]
+	path = modules/sparsehash
+	url = https://github.com/sparsehash/sparsehash.git
