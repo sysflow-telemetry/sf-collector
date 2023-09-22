@@ -49,8 +49,6 @@
 
 namespace context {
 
-enum ProbeType { EBPF, KMOD, NO_PROBE };
-
 class SysFlowContext {
 private:
   int m_nfExportInterval;
@@ -62,11 +60,10 @@ private:
   SysFlowCallback m_callback;
   SysFlowConfig *m_config;
   bool m_hasPrefix;
-  ProbeType m_probeType;
   std::string m_ebpfProbe;
   sinsp *m_inspector;
   DEFINE_LOGGER();
-  void detectProbeType();
+  void loadDriverInfo();
   void checkModule();
   void openInspector(libsinsp::events::set<ppm_sc_code> ppm_sc);
   libsinsp::events::set<ppm_sc_code>

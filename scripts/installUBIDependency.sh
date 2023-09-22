@@ -63,7 +63,7 @@ trap cleanup EXIT
 if [ "${MODE}" == "base" ] ; then
     # packages for base image
 
-    subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms" && \
+    subscription-manager repos --enable="codeready-builder-for-rhel-9-$(/bin/arch)-rpms" && \
     dnf -y update && \
     dnf -y install \
         gcc \
@@ -83,6 +83,7 @@ if [ "${MODE}" == "base" ] ; then
         glibc-static \
         diffutils \
         kmod \
+        zlib-devel \
         xz \
         apr-devel \
         apr-util-devel \
@@ -91,23 +92,23 @@ if [ "${MODE}" == "base" ] ; then
         bison \
         libstdc++-static \
         boost-static \
-        sparsehash-devel \
         bc \
         libasan \
         libubsan \
+        llvm-toolset \
+        bpftool \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
 
-    # Install llvm 9
-    DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
 
 elif [ "${MODE}" == "driver" ] ; then
     # packages for driver image
 
-    subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms" && \
+    subscription-manager repos --enable="codeready-builder-for-rhel-9-$(/bin/arch)-rpms" && \
     dnf -y update && \
     dnf -y install \
         gcc \
         gcc-c++ \
+        gcc-toolset-12-gcc \
         make \
         cmake \
         pkgconfig \
@@ -130,11 +131,9 @@ elif [ "${MODE}" == "driver" ] ; then
         bc \
         libasan \
         libubsan \
+        llvm-toolset \
         elfutils-libelf-devel \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
-
-    # Install llvm 9
-    DIR=$(pwd) && cd /build/rpms/llvm && ./install.sh && cd $DIR
 
 elif [ "${MODE}" == "test-extra" ] ; then
     # additional packages for testing

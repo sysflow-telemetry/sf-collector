@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 enum SFSysCallMode { SFFlowMode, SFConsumerMode, SFNoFilesMode };
+enum DriverType { EBPF, CORE_EBPF, KMOD, NO_DRIVER };
 
 using SysFlowCallback = std::function<void(
     sysflow::SFHeader *, sysflow::Container *, sysflow::Process *,
@@ -57,7 +58,7 @@ struct SysFlowConfig {
   // String to set Falco-style filter on events being passed from the falco
   // libs, to the SysFlow library
   std::string falcoFilter;
-  // Sampling ratio used to determine which system calls to drop in the probe.
+  // Sampling ratio used to determine which system calls to drop in the driver.
   int samplingRatio;
   // CRI-O runtime socket path, needed for monitoring cri-o/containered
   // container runtimes such as k8s and OCP.
@@ -109,6 +110,15 @@ struct SysFlowConfig {
   // SFConsumerMode: Lighterweight mode that doesn't collect
   // read/write/send/recv data (experimental, wip)
   SFSysCallMode collectionMode;
+  // Sets the number of CPU ring buffers to set up to collect system calls.
+  // Traditional eBPF automatically uses one per online CPU. This setting is
+  // only relevant for the CORE eBPF, and cannot be higher than the number of
+  // online CPUs available.  Setting the value to 0 causes it to choose the
+  // number of online CPUs.
+  ssize_t cpuBuffers;
+  // Set the driver type to EBPF (traditional ebpf driver), KMOD (kernel
+  // module), CORE_EBPF (CORE ebpf driver), NO_DRIVER (reading from a file)
+  DriverType driverType;
 }; // SysFlowConfig
 
 #endif

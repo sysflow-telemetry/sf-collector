@@ -40,7 +40,9 @@ ARG UBI_VER
 #-----------------------
 # Stage: base
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
+FROM registry.access.redhat.com/ubi9/ubi:${UBI_VER} AS base
+
+ENV SMDEV_CONTAINER_OFF=1
 
 # Install Packages
 # Copy in llvm 9.0 rpms. Falco's ebpf probe fails unless compiled with llvm 7 to 12 for now.

@@ -86,6 +86,7 @@ addlib libscap_engine_gvisor.a
 addlib libscap_engine_kmod.a
 addlib libscap_engine_nodriver.a
 addlib libscap_engine_noop.a
+addlib libscap_engine_modern_bpf.a
 addlib libscap_engine_savefile.a
 addlib libscap_engine_source_plugin.a
 addlib libscap_engine_udig.a
@@ -98,5 +99,7 @@ addlib libsinsp.a
 addlib libcri_v1alpha2.a
 addlib libcri_v1.a
 addlib libtbb.a
+addlib libpman.a
+addlib libbpf.a
 save
 end
