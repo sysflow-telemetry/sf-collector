@@ -29,13 +29,11 @@ CREATE_LOGGER(SysFlowContext, "sysflow.sysflowcontext");
 
 SysFlowContext::SysFlowContext(SysFlowConfig *config)
     : m_nfExportInterval(30), m_nfExpireInterval(60), m_offline(false),
-      m_statsInterval(30), m_nodeIP(), m_k8sEnabled(false),
-      m_probeType(NO_PROBE) {
-
+      m_statsInterval(30), m_nodeIP(), m_k8sEnabled(false) {
   m_config = config;
   m_offline = !config->scapInputPath.empty();
   if (!m_offline) {
-    detectProbeType();
+    loadDriverInfo();
     checkModule();
   }
 
@@ -205,7 +203,7 @@ void SysFlowContext::checkModule() {
   if (!m_config->moduleChecks) {
     return;
   }
-  switch (m_probeType) {
+  switch (m_config->driverType) {
   case KMOD: {
     modutils::checkForFalcoKernMod();
     break;
@@ -214,9 +212,13 @@ void SysFlowContext::checkModule() {
     modutils::checkProbeExistsPermits(m_ebpfProbe);
     break;
   }
+  case CORE_EBPF: {
+    // TODO verify the CORE probe exists
+    break;
+  }
   default: {
     SF_WARN(m_logger, "Probe type currently "
-                          << m_probeType
+                          << m_config->driverType
                           << " not handled by check module operation")
     break;
   }
@@ -232,7 +234,8 @@ void SysFlowContext::openInspector(libsinsp::events::set<ppm_sc_code> ppm_sc) {
   } else {
     collectionMode = "no files mode";
   }
-  switch (m_probeType) {
+  ssize_t onlineCPUs = 0;
+  switch (m_config->driverType) {
   case KMOD:
     SF_INFO(m_logger, "Opening kmod probe in "
                           << collectionMode << " monitoring " << ppm_sc.size()
@@ -245,23 +248,49 @@ void SysFlowContext::openInspector(libsinsp::events::set<ppm_sc_code> ppm_sc) {
                           << " system calls.")
     m_inspector->open_bpf(m_ebpfProbe, m_config->singleBufferDimension, ppm_sc);
     break;
-  case NO_PROBE:
+  case CORE_EBPF:
+    SF_INFO(m_logger, "Opening CORE ebpf probe in "
+                          << collectionMode << " monitoring " << ppm_sc.size()
+                          << " system calls.")
+    onlineCPUs = sysconf(_SC_NPROCESSORS_ONLN);
+    if (m_config->cpuBuffers > onlineCPUs || m_config->cpuBuffers == 0) {
+      if (m_config->cpuBuffers > onlineCPUs) {
+        SF_INFO(
+            m_logger,
+            "Configured number CPU buffers exceeds maximum available online: "
+                << m_config->cpuBuffers)
+      }
+      SF_INFO(m_logger, "Configuring number of CPU buffers to max available: "
+                            << onlineCPUs)
+      m_config->cpuBuffers = onlineCPUs;
+    } else {
+      SF_INFO(m_logger,
+              "Configuring number of CPU buffers to: " << m_config->cpuBuffers)
+    }
+    m_inspector->open_modern_bpf(m_config->singleBufferDimension,
+                                 m_config->cpuBuffers, true, ppm_sc);
+    break;
+  case NO_DRIVER:
     m_inspector->open_savefile(m_config->scapInputPath, 0);
     break;
   default:
-    SF_WARN(m_logger, "Unsupported driver " << m_probeType)
+    SF_WARN(m_logger, "Unsupported driver " << m_config->driverType)
     break;
   }
 }
 
-void SysFlowContext::detectProbeType() {
-  const char *probe = std::getenv(SF_BPF_ENV_VARIABLE);
-  if (probe == nullptr) {
-    m_probeType = KMOD;
-  } else {
-    m_probeType = EBPF;
-    if (strlen(probe) != 0) {
-      m_ebpfProbe = std::string(probe);
+void SysFlowContext::loadDriverInfo() {
+  const char *driver = std::getenv(SF_BPF_ENV_VARIABLE);
+  if (m_config->driverType == NO_DRIVER) {
+    if (driver == nullptr) {
+      m_config->driverType = KMOD;
+    } else {
+      m_config->driverType = EBPF;
+    }
+  }
+  if (m_config->driverType == EBPF) {
+    if (strlen(driver) != 0) {
+      m_ebpfProbe = std::string(driver);
     } else {
       const char *home = getenv(DRIVER_HOME);
       if (!home) {

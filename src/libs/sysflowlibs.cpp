@@ -62,6 +62,8 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   conf->singleBufferDimension = DEFAULT_DRIVER_BUFFER_BYTES_DIM;
   conf->appName = "sysflowlibs";
   conf->collectionMode = SFSysCallMode::SFFlowMode;
+  conf->cpuBuffers = 0;
+  conf->driverType = EBPF;
   return conf;
 }
 
