@@ -124,8 +124,6 @@ falcolibs/package:
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
-	mkdir -p include/json && cp ../userspace/libsinsp/third-party/jsoncpp/jsoncpp.cpp include/json && \
-	mkdir -p include/json && cp ../userspace/libsinsp/third-party/jsoncpp/json/*.h include/json && \
 	mkdir -p include/userspace/common && cp ../userspace/common/*.h include/userspace/common && cp ../build/common/*.h include/userspace/common &&\
 	mkdir -p include/userspace/libsinsp && cp ../userspace/libsinsp/*.h include/userspace/libsinsp && \
 	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
@@ -144,8 +142,10 @@ falcolibs/package:
 	cp protobuf-prefix/src/protobuf/target/lib/libprotoc.a lib && \
 	cp tbb-prefix/src/tbb/lib_release/libtbb.a lib/ && \
 	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
-	cp -r b64-prefix/src/b64/include/b64 include/ && \
 	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
+	cp b64/base64.h include/ && \
+	mkdir -p include/json && cp jsoncpp-prefix/src/include/json/*.h  include/json/ && \
+	cp jsoncpp-prefix/src/lib/libjsoncpp.a lib/ && \
 	cp libpman/*.a lib/ && \
 	cp libsinsp/*.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
@@ -158,7 +158,6 @@ falcolibs/package:
 	cp grpc-prefix/src/grpc/*.a lib/ && \
 	find grpc-prefix/src/grpc/third_party/abseil-cpp -name '*.a' -exec cp '{}' lib \; && \
 	cp c-ares-prefix/src/c-ares/target/lib/libcares.a lib/ && \
-	cp b64-prefix/src/b64/src/libb64.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
 	cp jq-prefix/src/jq/target/lib/*.a lib/ && \
 	cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \

@@ -65,7 +65,6 @@ addlib libabsl_synchronization.a
 addlib libabsl_throw_delegate.a
 addlib libabsl_time.a
 addlib libabsl_time_zone.a
-addlib libb64.a
 addlib libcurl.a
 addlib libdriver_event_schema.a
 addlib libgpr.a
@@ -101,5 +100,6 @@ addlib libcri_v1.a
 addlib libtbb.a
 addlib libpman.a
 addlib libbpf.a
+addlib libjsoncpp.a
 save
 end
