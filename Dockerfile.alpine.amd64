@@ -49,7 +49,8 @@ RUN apk add \
     bison \
     gawk \
     sparsehash \
-    clang
+    clang \
+    bpftool
    
 #-----------------------
 # Stage: mods
