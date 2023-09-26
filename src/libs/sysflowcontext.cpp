@@ -280,6 +280,9 @@ void SysFlowContext::openInspector(libsinsp::events::set<ppm_sc_code> ppm_sc) {
 }
 
 void SysFlowContext::loadDriverInfo() {
+  if (m_config->driverType == KMOD || m_config->driverType == CORE_EBPF) {
+    return
+  }
   const char *driver = std::getenv(SF_BPF_ENV_VARIABLE);
   if (driver != nullptr) {
     m_config->driverType = EBPF;
@@ -293,6 +296,11 @@ void SysFlowContext::loadDriverInfo() {
       m_ebpfProbe = std::string(home) + std::string("/") +
                     std::string(SF_PROBE_BPF_FILEPATH);
     }
+  } else {
+    m_config->driverType = KMOD;
+    SF_WARN(m_logger, "Driver set to kernel module. "
+                          << "Environment varibale '" << SF_BPF_ENV_VARIABLE
+                          << "' must be set to enable the eBPF driver.")
   }
 }
 
