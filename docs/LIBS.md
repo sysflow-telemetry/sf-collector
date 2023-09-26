@@ -39,7 +39,7 @@ The `SysFlowConfig` object is a struct, which contains all settings for the libs
 
 ### SysFlowDriver
 
-The `SysFlowDriver` object is the main object for collecting and exporting SysFlow data.  The driver also supports system call ingestion from the following sources: SCAP file, kernel module (live), and ebpf probe (live). Configurations for file ingestion are currently set by the `SysFlowConfig` object. For live capture, the kernel module is loaded by default; however, one can use the ebpf probe by currently exporting the `FALCO_BPF_PROBE` environment variable (e.g., `export FALCO_BPF_PROBE=""`) before launching the binary.  Note that probes are launched by running the `falco-driver-loader` script described below.  Finally, the driver offers a collection mode option, which determines which system calls are collected.  See the `collectionMode` attribute in the [Configuration](#configuration) section below for more details. The driver currently supports three export options: to avro encoded file, over unix domain socket, and call to user-defined callback function (see example above). Export options are configured using the `SysFlowConfig` option.
+The `SysFlowDriver` object is the main object for collecting and exporting SysFlow data.  The driver also supports system call ingestion from the following sources: SCAP file, kernel module (live), and ebpf drivers (live). Configurations for file ingestion are currently set by the `SysFlowConfig` object. For live capture, the kernel module is loaded by default; however, one can use the ebpf driver by currently exporting the `FALCO_BPF_PROBE` environment variable (e.g., `export FALCO_BPF_PROBE=""`) before launching the binary. Alternatively, the CO-RE ebpf driver can be used by setting the `driverType` variable (which is set using the `-k` in the collector). Note that the kmod and ebpf drivers are launched by running the `falco-driver-loader` script described below; the CO-RE ebpf driver is embedded in libSysFlow and does not use the `falco-driver-loader` script. Finally, the driver offers a collection mode option, which determines which system calls are collected.  See the `collectionMode` attribute in the [Configuration](#configuration) section below for more details. The driver currently supports three export options: to avro encoded file, over unix domain socket, and call to user-defined callback function (see example above). Export options are configured using the `SysFlowConfig` option.
 
 | **Method** | **Description** |
 |---|---|
@@ -160,7 +160,7 @@ The library configuration parameters are assigned defaults that should work well
 | socketPath | string | SysFlow unix socket file path.  Typically used in conjunction with the SysFlow processor to stream SysFlow over a socket. Set NULL if not using socket streaming | |
 | scapInputPath | string | Scap input file path.  Used in offline mode to read from raw scap rather than tapping the kernel. Set NULL if using live kernel collection | |
 | falcoFilter | string | String to set Falco-style filter on events being passed from the falco libs, to the SysFlow library | |
-| samplingRatio | string | Sampling ratio used to determine which system calls to drop in the probe | 1 |
+| samplingRatio | string | Sampling ratio used to determine which system calls to drop in the driver | 1 |
 | criPath | string | CRI-O runtime socket path, needed for monitoring cri-o/containered container runtimes such as k8s and OCP | |
 | criTO | int | CRI-O timeout.  Timeout in secs set when querying CRI-O socket for container metadata | 30 |
 | enableStats | bool | Enable Process Flow collection.  Output Process Flow rather than individual thread clones | false |
@@ -176,6 +176,8 @@ The library configuration parameters are assigned defaults that should work well
 | collectionMode | enum | Has three possible values: 1.) `SFFlowMode` for SysFlow mode which does full SysFlow collection as described in the spec. 2.) `SFConsumerMode` removes collection of `read`, `write` and `close` operations for FileFlows. 3.) `SFNoFiles` drops file flows and file events. The latter two options are a lighterweight collection mode for systems where CPU or drop issues may occur | `SFFlowMode` |
 | appName | string | Sets the calling application name for logging purposes. | `sysflowlibs` |
 | singleBufferDimension | int | This is the dimension that a single buffer in our drivers will have (BPF, kmod, modern BPF) Please note:  This number is expressed in bytes. This number must be a multiple of your system page size, otherwise the allocation will fail. If you leave `0`, every driver will set its internal default dimension. | 0 |
+| cpuBuffers | int | Sets the number of CPU ring buffers to set up to collect system calls. Traditional eBPF automatically uses one per online CPU. This setting is only relevant for the CORE eBPF driver, and cannot be higher than the number of online CPUs available. Setting the value to `0` causes it to choose the number of online CPUs. | 0 |
+| driverType | enum | Sets the driver type to `EBPF` (traditional ebpf driver), `KMOD` (kernel module), `CORE_EBPF` (CORE ebpf driver), `NO_DRIVER` (reading from a file). | `KMOD` |
 
 ### Exception Handling
 
