@@ -213,11 +213,11 @@ void SysFlowContext::checkModule() {
     break;
   }
   case CORE_EBPF: {
-    // TODO verify the CORE probe exists
+    // TODO verify the CORE driver exists
     break;
   }
   default: {
-    SF_WARN(m_logger, "Probe type currently "
+    SF_WARN(m_logger, "Driver type currently "
                           << m_config->driverType
                           << " not handled by check module operation")
     break;
@@ -237,19 +237,19 @@ void SysFlowContext::openInspector(libsinsp::events::set<ppm_sc_code> ppm_sc) {
   ssize_t onlineCPUs = 0;
   switch (m_config->driverType) {
   case KMOD:
-    SF_INFO(m_logger, "Opening kmod probe in "
+    SF_INFO(m_logger, "Opening kmod driver in "
                           << collectionMode << " monitoring " << ppm_sc.size()
                           << " system calls.")
     m_inspector->open_kmod(m_config->singleBufferDimension, ppm_sc);
     break;
   case EBPF:
-    SF_INFO(m_logger, "Opening ebpf probe in "
+    SF_INFO(m_logger, "Opening ebpf driver in "
                           << collectionMode << " monitoring " << ppm_sc.size()
                           << " system calls.")
     m_inspector->open_bpf(m_ebpfProbe, m_config->singleBufferDimension, ppm_sc);
     break;
   case CORE_EBPF:
-    SF_INFO(m_logger, "Opening CORE ebpf probe in "
+    SF_INFO(m_logger, "Opening CORE ebpf driver in "
                           << collectionMode << " monitoring " << ppm_sc.size()
                           << " system calls.")
     onlineCPUs = sysconf(_SC_NPROCESSORS_ONLN);
