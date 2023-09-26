@@ -281,7 +281,7 @@ void SysFlowContext::openInspector(libsinsp::events::set<ppm_sc_code> ppm_sc) {
 
 void SysFlowContext::loadDriverInfo() {
   if (m_config->driverType == KMOD || m_config->driverType == CORE_EBPF) {
-    return
+    return;
   }
   const char *driver = std::getenv(SF_BPF_ENV_VARIABLE);
   if (driver != nullptr) {
