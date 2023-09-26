@@ -63,7 +63,7 @@ SysFlowConfig *sysflowlibscpp::InitializeSysFlowConfig() {
   conf->appName = "sysflowlibs";
   conf->collectionMode = SFSysCallMode::SFFlowMode;
   conf->cpuBuffers = 0;
-  conf->driverType = KMOD;
+  conf->driverType = NO_DRIVER;
   return conf;
 }
 
