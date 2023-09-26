@@ -19,7 +19,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Make eBPF driver default in libSysFlow
 - Update c++ compatibility to c++17
 - Bump Falco libs to 0.12.0, driver to 5.1.0
 - Bump Falco to 0.35.1
