@@ -42,6 +42,8 @@ ARG UBI_VER
 #-----------------------
 FROM registry.access.redhat.com/ubi9/ubi:${UBI_VER} AS base
 
+# To enable subscription manager on ubi9
+# https://access.redhat.com/discussions/5889431
 ENV SMDEV_CONTAINER_OFF=1
 
 # Install Packages

@@ -56,6 +56,9 @@ ENV DRIVER_NAME=falco
 ENV DRIVERS_REPO="https://download.falco.org/driver"
 ENV HOST_ROOT=/host
 ENV HOME=/root
+
+# To enable subscription manager on ubi9
+# https://access.redhat.com/discussions/5889431
 ENV SMDEV_CONTAINER_OFF=1
 
 # Install Packages
