@@ -186,13 +186,14 @@ CMD /usr/local/sysflow/bin/sysporter \
      ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
      ${SOCK_FILE:+-u} ${SOCK_FILE} \
      ${SAMPLING_RATE:+-s} ${SAMPLING_RATE} \
+     ${DRIVER_TYPE:+-k} "${DRIVER_TYPE}" \
      ${STATS:+-d} \
      ${MODE:+-m} ${MODE}
 
 #-----------------------
 # Stage: Testing
 #-----------------------
-FROM python:3.11-buster AS testing
+FROM debian:bookworm AS testing
 
 # environment and build args
 ARG BATS_VERSION=1.8.2
@@ -207,7 +208,8 @@ ENV ENABLE_PROC_FLOW=0
 ENV FILE_ONLY=0
 ENV FILE_READ_MODE=0
 
-# Install extra packages for tests
+# install extra packages for tests
+RUN apt update && apt install -yq python3 python3-pip python-is-python3 wget
 RUN mkdir /tmp/bats && cd /tmp/bats && \
     wget https://github.com/bats-core/bats-core/archive/v${BATS_VERSION}.tar.gz && \
     tar -xzf v${BATS_VERSION}.tar.gz && rm -rf v${BATS_VERSION}.tar.gz && \
@@ -217,7 +219,7 @@ RUN mkdir /tmp/bats && cd /tmp/bats && \
 COPY modules/sysflow/py3 ${INSTALL_PATH}/utils
 
 RUN cd /usr/local/sysflow/utils && \
-    python3 -m pip install .
+    python3 -m pip install --break-system-packages .
 
 # copy the collector binary
 COPY --from=collector ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/

@@ -48,6 +48,7 @@ endif
 	cd snappy && git fetch origin && git checkout $(SNAPPY_VERSION)
 	cd dkms && git fetch origin && git checkout $(DKMS_VERSION)
 	cd filesystem && git fetch origin && git checkout $(GHCFS_VERSION)
+	cd sparsehash && git fetch origin && git checkout $(SPARSE_VERSION)
 
 # elfutils is a pre-requisite for libs.
 .PHONY: modules
@@ -58,7 +59,8 @@ modules: elfutils/package \
 		avro/package \
 		glog/package \
 		snappy/package \
-		xxhash/package
+		xxhash/package \
+		sparsehash/package
 
 .PHONY: install
 install: modules \
@@ -70,7 +72,8 @@ install: modules \
 	glog/install \
 	snappy/install \
 	dkms-rh/install \
-	xxhash/install
+	xxhash/install \
+	sparsehash/install
 
 .PHONY: modules/no-elfutils
 modules/no-elfutils: falcolibs/package \
@@ -78,7 +81,8 @@ modules/no-elfutils: falcolibs/package \
 		avro/package \
 		glog/package \
 		snappy/package \
-		xxhash/package
+		xxhash/package \
+		sparsehash/package
 
 .PHONY: install/no-elfutils
 install/no-elfutils: modules/no-elfutils \
@@ -90,7 +94,8 @@ install/no-elfutils: modules/no-elfutils \
 	glog/install \
 	snappy/install \
 	dkms-rh/install \
-	xxhash/install
+	xxhash/install \
+	sparsehash/install
 
 .PHONY: falcolibs/package
 falcolibs/package:
@@ -107,6 +112,7 @@ falcolibs/package:
 			-DDRIVER_NAME=falco \
 			-DBUILD_BPF=OFF \
 			-DBUILD_DRIVER=OFF \
+			-DBUILD_LIBSCAP_MODERN_BPF=ON \
 			-DUSE_BUNDLED_GTEST=ON \
 			-DUSE_BUNDLED_DEPS=ON \
 			-DUSE_BUNDLED_LIBELF=OFF \
@@ -133,13 +139,15 @@ falcolibs/package:
 	cp -r tbb-prefix/src/tbb/include/tbb include/ && \
 	cp -r tbb-prefix/src/tbb/include/oneapi include/ && \
 	cp -r protobuf-prefix/src/protobuf/target/include/google include/ && \
+	cp libbpf-prefix/src/libbpf-build/build/*.a lib/ && \
 	cp protobuf-prefix/src/protobuf/target/lib/libprotobuf.a lib && \
 	cp protobuf-prefix/src/protobuf/target/lib/libprotoc.a lib && \
 	cp tbb-prefix/src/tbb/lib_release/libtbb.a lib/ && \
 	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
 	cp -r b64-prefix/src/b64/include/b64 include/ && \
 	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
-	cp libsinsp/libsinsp.a lib/ && \
+	cp libpman/*.a lib/ && \
+	cp libsinsp/*.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
 	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
 	cp ../../falco/scripts/falco-driver-loader bin/ && \
@@ -239,9 +247,17 @@ snappy/package:
 xxhash/package:
 	cd xxHash && make all
 
+.PHONY: sparsehash/package
+sparsehash/package:
+	cd sparsehash && ./configure && make
+
 .PHONY: xxhash/install
 xxhash/install:
 	cd xxHash && cp libxxhash.a $(LIBPREFIX) && cp libxxhash.so* $(LIBPREFIX) && cp *.h $(MODPREFIX)/include/
+
+.PHONY: sparsehash/install
+sparsehash/install:
+	cd sparsehash && make install
 
 .PHONY: snappy/install
 snappy/install:

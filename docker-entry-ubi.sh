@@ -36,4 +36,14 @@ else
     fi
 fi
 
+if [ "${DRIVER_TYPE}" == "ebpf-core" ]; then
+	echo "Exporting SKIP_DRIVER_LOADER"
+	export SKIP_DRIVER_LOADER=1
+fi
+
+if [ "${DRIVER_TYPE}" == "ebpf" ] && [ -z "${FALCO_BPF_PROBE}" ]; then
+	echo "Exporting FALCO_BPF_PROBE"
+	export FALCO_BPF_PROBE=""
+fi
+
 exec /usr/local/sysflow/modules/bin/docker-entrypoint.sh "$@"    

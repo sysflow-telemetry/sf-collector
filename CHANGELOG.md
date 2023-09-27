@@ -15,6 +15,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### [0.6.0] - 2023-09-30
+
+### Changed
+
+- Update c++ compatibility to c++17
+- Bump Falco libs to 0.12.0, driver to 5.1.0
+- Bump Falco to 0.35.1
+
 ## [0.5.1] - 2023-06-07
 
 ### Added
@@ -263,7 +271,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0
 [0.4.4]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...0.4.4
