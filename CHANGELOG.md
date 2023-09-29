@@ -17,9 +17,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### [0.6.0] - 2023-09-30
 
+### Added
+
+- CO-RE eBPF driver support
+
 ### Changed
 
 - Update c++ compatibility to c++17
+- Add sparsehash as part of compiled dependencies
 - Bump Falco libs to 0.12.0, driver to 5.1.0
 - Bump Falco to 0.35.1
 

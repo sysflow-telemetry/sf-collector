@@ -49,7 +49,6 @@ RUN apk add \
     flex \
     bison \
     gawk \
-    sparsehash \
     clang \
     bpftool
    
