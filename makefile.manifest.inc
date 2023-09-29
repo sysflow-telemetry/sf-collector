@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SYSFLOW_VERSION?=0.5.2
+SYSFLOW_VERSION?=0.6.0-rc1
 SYSFLOW_BUILD_NUMBER?=1
 FALCO_VERSION=0.35.1
 FALCO_LIBS_VERSION=0.12.0
@@ -30,3 +30,4 @@ GHCFS_VERSION=v1.5.14
 XXHASH_VERSION=v0.8.1
 ALPINE_VERSION=3.18.3
 UBI_VERSION=9.2-755
+SPARSE_VERSION=sparsehash-2.0.4

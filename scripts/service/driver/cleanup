@@ -1,8 +1,7 @@
 #!/bin/bash
 set -e
 DRIVER_SRC_PATH=$(find /usr/src -name "falco-*")
-[ ${DRIVER_TYPE} == "module" ] && /etc/sysflow/driver/falco-driver-loader --clean
+[ ${DRIVER_TYPE} == "kmod" ] && /etc/sysflow/driver/falco-driver-loader --clean
 [ -f "${DRIVER_SRC_PATH}/bpf/Makefile" ] && make -C ${DRIVER_SRC_PATH}/bpf clean
 [ -d "${DRIVER_SRC_PATH}/bpf" ] && cd ${DRIVER_SRC_PATH}/bpf && rm -rf .cache* .tmp* *.tmp *.ll *.symvers
 rm -rf /run/sysflow
- 
