@@ -10,6 +10,14 @@ then
     fi
 fi
 
-export HOME=/run/sysflow && \
-    /etc/sysflow/driver/falco-driver-loader ${DRIVER_TYPE:-bpf} ${DRIVER_OPTS} && \
-    /usr/bin/sysporter -e ${NODE_ID:-${HOSTNAME}} -u ${SOCKET:-/sock/sysflow.sock} ${FILTER:+-f "$FILTER"}
+export HOME=/run/sysflow
+if [ "${DRIVER_TYPE}" == "ebpf" ] || [ -z "${DRIVER_TYPE}" ]; then
+    export DRIVER_TYPE="ebpf"
+    if [ -z "${FALCO_BPF_PROBE}" ]; then
+       export FALCO_BPF_PROBE=""
+    fi
+    /etc/sysflow/driver/falco-driver-loader bpf ${DRIVER_OPTS}
+elif [ "${DRIVER_TYPE}" == "kmod" ]; then
+    /etc/sysflow/driver/falco-driver-loader module ${DRIVER_OPTS}
+fi
+/usr/bin/sysporter -e ${NODE_ID:-${HOSTNAME}} -u ${SOCKET:-/sock/sysflow.sock} ${DRIVER_TYPE:+-k} "${DRIVER_TYPE}"  ${FILTER:+-f "$FILTER"}
