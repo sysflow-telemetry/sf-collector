@@ -29,13 +29,11 @@ CREATE_LOGGER(SysFlowContext, "sysflow.sysflowcontext");
 
 SysFlowContext::SysFlowContext(SysFlowConfig *config)
     : m_nfExportInterval(30), m_nfExpireInterval(60), m_offline(false),
-      m_statsInterval(30), m_nodeIP(), m_k8sEnabled(false),
-      m_probeType(NO_PROBE) {
-
+      m_statsInterval(30), m_nodeIP(), m_k8sEnabled(false) {
   m_config = config;
   m_offline = !config->scapInputPath.empty();
   if (!m_offline) {
-    detectProbeType();
+    loadDriverInfo();
     checkModule();
   }
 
@@ -74,19 +72,15 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     m_nodeIP = config->nodeIP;
   }
 
-  std::unordered_set<uint32_t> tp_set = m_inspector->enforce_sinsp_state_tp();
-  /*The schedule switch tracepoint is very noise and doesn't provide much
-   * information*/
-  tp_set.erase(SCHED_SWITCH);
-  std::unordered_set<uint32_t> ppm_sc = getSyscallSet();
-  auto syscalls = m_inspector->get_syscalls_names(ppm_sc);
+  auto ppm_sc = getSyscallSet();
+  auto syscalls = libsinsp::events::sc_set_to_sc_names(ppm_sc);
 
   SF_DEBUG(m_logger, "List of Syscalls after enforcement:")
   for (auto it : syscalls) {
     SF_DEBUG(m_logger, it);
   }
 
-  openInspector(tp_set, ppm_sc);
+  openInspector(ppm_sc);
 
   const char *drop = std::getenv(ENABLE_DROP_MODE);
   if (config->scapInputPath.empty() &&
@@ -144,12 +138,12 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
 
   char *k8sAPIURL = getenv(SF_K8S_API_URL);
   char *k8sAPICert = getenv(SF_K8S_API_CERT);
-  string *k8sURL = nullptr;
-  string *k8sCert = nullptr;
+  std::string *k8sURL = nullptr;
+  std::string *k8sCert = nullptr;
   if (k8sAPIURL != nullptr) {
-    k8sURL = new string(k8sAPIURL);
+    k8sURL = new std::string(k8sAPIURL);
     if (k8sAPICert != nullptr) {
-      k8sCert = new string(k8sAPICert);
+      k8sCert = new std::string(k8sAPICert);
     }
   } else if (!config->k8sAPIURL.empty()) {
     k8sURL = &(config->k8sAPIURL);
@@ -183,7 +177,7 @@ SysFlowContext::~SysFlowContext() {
   }
 }
 
-string SysFlowContext::getExporterID() {
+std::string SysFlowContext::getExporterID() {
   if (m_config->exporterID.empty()) {
     const scap_machine_info *mi = m_inspector->get_machine_info();
     if (mi != nullptr) {
@@ -203,13 +197,13 @@ string SysFlowContext::getExporterID() {
   return m_config->exporterID;
 }
 
-string SysFlowContext::getNodeIP() { return m_nodeIP; }
+std::string SysFlowContext::getNodeIP() { return m_nodeIP; }
 
 void SysFlowContext::checkModule() {
   if (!m_config->moduleChecks) {
     return;
   }
-  switch (m_probeType) {
+  switch (m_config->driverType) {
   case KMOD: {
     modutils::checkForFalcoKernMod();
     break;
@@ -218,17 +212,20 @@ void SysFlowContext::checkModule() {
     modutils::checkProbeExistsPermits(m_ebpfProbe);
     break;
   }
+  case CORE_EBPF: {
+    // TODO verify the CORE driver exists
+    break;
+  }
   default: {
-    SF_WARN(m_logger, "Probe type currently "
-                          << m_probeType
+    SF_WARN(m_logger, "Driver type currently "
+                          << m_config->driverType
                           << " not handled by check module operation")
     break;
   }
   }
 }
 
-void SysFlowContext::openInspector(std::unordered_set<uint32_t> tp_set,
-                                   std::unordered_set<uint32_t> ppm_sc) {
+void SysFlowContext::openInspector(libsinsp::events::set<ppm_sc_code> ppm_sc) {
   std::string collectionMode;
   if (m_config->collectionMode == SFFlowMode) {
     collectionMode = "flow mode";
@@ -237,37 +234,60 @@ void SysFlowContext::openInspector(std::unordered_set<uint32_t> tp_set,
   } else {
     collectionMode = "no files mode";
   }
-  switch (m_probeType) {
+  ssize_t onlineCPUs = 0;
+  switch (m_config->driverType) {
   case KMOD:
-    SF_INFO(m_logger, "Opening kmod probe in "
+    SF_INFO(m_logger, "Opening kmod driver in "
                           << collectionMode << " monitoring " << ppm_sc.size()
                           << " system calls.")
-    m_inspector->open_kmod(m_config->singleBufferDimension, ppm_sc, tp_set);
+    m_inspector->open_kmod(m_config->singleBufferDimension, ppm_sc);
     break;
   case EBPF:
-    SF_INFO(m_logger, "Opening ebpf probe in "
+    SF_INFO(m_logger, "Opening ebpf driver in "
                           << collectionMode << " monitoring " << ppm_sc.size()
                           << " system calls.")
-    m_inspector->open_bpf(m_ebpfProbe, m_config->singleBufferDimension, ppm_sc,
-                          tp_set);
+    m_inspector->open_bpf(m_ebpfProbe, m_config->singleBufferDimension, ppm_sc);
     break;
-  case NO_PROBE:
+  case CORE_EBPF:
+    SF_INFO(m_logger, "Opening CORE ebpf driver in "
+                          << collectionMode << " monitoring " << ppm_sc.size()
+                          << " system calls.")
+    onlineCPUs = sysconf(_SC_NPROCESSORS_ONLN);
+    if (m_config->cpuBuffers > onlineCPUs || m_config->cpuBuffers == 0) {
+      if (m_config->cpuBuffers > onlineCPUs) {
+        SF_INFO(
+            m_logger,
+            "Configured number CPU buffers exceeds maximum available online: "
+                << m_config->cpuBuffers)
+      }
+      SF_INFO(m_logger, "Configuring number of CPU buffers to max available: "
+                            << onlineCPUs)
+      m_config->cpuBuffers = onlineCPUs;
+    } else {
+      SF_INFO(m_logger,
+              "Configuring number of CPU buffers to: " << m_config->cpuBuffers)
+    }
+    m_inspector->open_modern_bpf(m_config->singleBufferDimension,
+                                 m_config->cpuBuffers, true, ppm_sc);
+    break;
+  case NO_DRIVER:
     m_inspector->open_savefile(m_config->scapInputPath, 0);
     break;
   default:
-    SF_WARN(m_logger, "Unsupported driver " << m_probeType)
+    SF_WARN(m_logger, "Unsupported driver " << m_config->driverType)
     break;
   }
 }
 
-void SysFlowContext::detectProbeType() {
-  const char *probe = std::getenv(SF_BPF_ENV_VARIABLE);
-  if (probe == nullptr) {
-    m_probeType = KMOD;
-  } else {
-    m_probeType = EBPF;
-    if (strlen(probe) != 0) {
-      m_ebpfProbe = std::string(probe);
+void SysFlowContext::loadDriverInfo() {
+  if (m_config->driverType == KMOD || m_config->driverType == CORE_EBPF) {
+    return;
+  }
+  const char *driver = std::getenv(SF_BPF_ENV_VARIABLE);
+  if (driver != nullptr) {
+    m_config->driverType = EBPF;
+    if (strlen(driver) != 0) {
+      m_ebpfProbe = std::string(driver);
     } else {
       const char *home = getenv(DRIVER_HOME);
       if (!home) {
@@ -276,11 +296,16 @@ void SysFlowContext::detectProbeType() {
       m_ebpfProbe = std::string(home) + std::string("/") +
                     std::string(SF_PROBE_BPF_FILEPATH);
     }
+  } else {
+    m_config->driverType = KMOD;
+    SF_WARN(m_logger, "Driver set to kernel module. "
+                          << "Environment varibale '" << SF_BPF_ENV_VARIABLE
+                          << "' must be set to enable the eBPF driver.")
   }
 }
 
-std::unordered_set<uint32_t>
-SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppmScSet) {
+libsinsp::events::set<ppm_sc_code>
+SysFlowContext::getSyscallSet(libsinsp::events::set<ppm_sc_code> ppmScSet) {
   auto scMode = SF_FLOW_SC_SET;
   if (m_config->collectionMode == SFSysCallMode::SFConsumerMode) {
     SF_INFO(m_logger, "SysFlow configured for consumer mode.")
@@ -289,12 +314,15 @@ SysFlowContext::getSyscallSet(std::unordered_set<uint32_t> ppmScSet) {
     SF_INFO(m_logger, "SysFlow configured for no files mode.")
     scMode = SF_NO_FILES_SC_SET;
   }
-  auto syscalls = m_inspector->get_syscalls_names(scMode);
+
+  auto scModeSet = libsinsp::events::set<ppm_sc_code>::from(scMode);
+  auto syscalls = libsinsp::events::sc_set_to_sc_names(scModeSet);
   SF_DEBUG(m_logger, "Syscall List before enforcement:")
   for (auto it : syscalls) {
     SF_DEBUG(m_logger, it)
   }
-  auto simpleSet = m_inspector->enforce_sinsp_state_ppm_sc(scMode);
-  ppmScSet.insert(simpleSet.begin(), simpleSet.end());
-  return ppmScSet;
+
+  static auto sinspStatePpmSc = libsinsp::events::sinsp_state_sc_set();
+  static auto finalSet = scModeSet.merge(sinspStatePpmSc);
+  return ppmScSet.merge(finalSet);
 }

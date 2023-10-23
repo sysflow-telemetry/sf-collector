@@ -241,7 +241,7 @@ void NetworkFlowProcessor::removeNetworkFlow(ProcessObj *proc, NetFlowObj **nf,
 void NetworkFlowProcessor::removeAndWriteRelatedFlows(ProcessObj *proc,
                                                       NFKey *key,
                                                       uint64_t endTs) {
-  vector<NetFlowObj *> nfobjs;
+  std::vector<NetFlowObj *> nfobjs;
   for (NetworkFlowTable::iterator nfi = proc->netflows.begin();
        nfi != proc->netflows.end(); nfi++) {
     if (nfi->first.tid != key->tid && nfi->first.ip1 == key->ip1 &&
@@ -273,7 +273,7 @@ int NetworkFlowProcessor::removeAndWriteNFFromProc(ProcessObj *proc,
   for (NetworkFlowTable::iterator nfi = proc->netflows.begin();
        nfi != proc->netflows.end(); nfi++) {
     if (tid == -1 || tid == nfi->second->netflow.tid) {
-      nfi->second->netflow.endTs = utils::getSysdigTime(m_cxt);
+      nfi->second->netflow.endTs = utils::getSinspTime(m_cxt);
       if (tid != -1) {
         static NFKey k;
         canonicalizeKey(nfi->second, &k);
@@ -330,7 +330,7 @@ void NetworkFlowProcessor::removeNetworkFlow(DataFlowObj *dfo) {
   NFKey key{};
   auto *nfo = static_cast<NetFlowObj *>(dfo);
   // do we want to write out a netflow that hasn't had any action in an
-  // interval? nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
+  // interval? nfo->netflow.endTs = utils::getSinspTime(m_cxt);
   // m_writer->writeNetFlow(&(nfo->netflow));
   canonicalizeKey(nfo, &key);
   SF_DEBUG(m_logger, "Erasing network flow");
@@ -347,12 +347,12 @@ void NetworkFlowProcessor::removeNetworkFlow(DataFlowObj *dfo) {
 
 void NetworkFlowProcessor::exportNetworkFlow(DataFlowObj *dfo, time_t /*now*/) {
   auto *nfo = static_cast<NetFlowObj *>(dfo);
-  nfo->netflow.endTs = utils::getSysdigTime(m_cxt);
+  nfo->netflow.endTs = utils::getSinspTime(m_cxt);
   ProcessObj *proc = m_processCxt->exportProcess(&(nfo->netflow.procOID));
   m_writer->writeNetFlow(&(nfo->netflow),
                          ((proc != nullptr) ? &(proc->proc) : nullptr));
   SF_DEBUG(m_logger, "Reupping network flow");
-  nfo->netflow.ts = utils::getSysdigTime(m_cxt);
+  nfo->netflow.ts = utils::getSinspTime(m_cxt);
   nfo->netflow.endTs = 0;
   nfo->netflow.opFlags = 0;
   nfo->netflow.numRRecvOps = 0;

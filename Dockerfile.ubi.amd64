@@ -40,7 +40,11 @@ ARG UBI_VER
 #-----------------------
 # Stage: base
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS base
+FROM registry.access.redhat.com/ubi9/ubi:${UBI_VER} AS base
+
+# To enable subscription manager on ubi9
+# https://access.redhat.com/discussions/5889431
+ENV SMDEV_CONTAINER_OFF=1
 
 # Install Packages
 # Copy in llvm 9.0 rpms. Falco's ebpf probe fails unless compiled with llvm 7 to 12 for now.
@@ -74,7 +78,7 @@ COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  dnf -y install git && \
      cd /build/modules && \
-     make INSTALL_PATH=${INSTALL_PATH} MAKE_JOBS=${MAKE_JOBS} install #&& \
-     #make clean && rm -rf /build/modules && \
-     #dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
+     make INSTALL_PATH=${INSTALL_PATH} MAKE_JOBS=${MAKE_JOBS} install && \
+     make clean && rm -rf /build/modules && \
+     dnf -y remove git && dnf -y clean all && rm -rf /var/cache/dnf
 

@@ -20,6 +20,7 @@
 
 
 # Target configuration
+MANIFEST:=$(shell cp ../makefile.manifest.inc manifest)
 include manifest
 TARGET = callback
 INSTALL_PATH ?= /usr/local/example
@@ -35,10 +36,10 @@ DEBUG ?= 0
 MUSL ?= 0
 CLANG_FORMAT = clang-format-12
 CXX = g++
-LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf
+LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs
 MUSLFLAGS = -static -Os
 LDFLAGS = $(LIBS) -L$(FALCO_LIBS_LIB_PREFIX) -L$(SYSFLOW_LIB_PREFIX)
-CFLAGS = -std=c++11 -Wall -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I$(SYSFLOW_INCLUDE_PREFIX)
+CFLAGS = -std=c++17 -Wall -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I$(SYSFLOW_INCLUDE_PREFIX)
 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
@@ -101,7 +102,7 @@ callback.o: callback.cpp
 
 .PHONY: clean
 clean:
-	rm -f .[!.]*.o *.o *.so *.a $(TARGET)
+	rm -f .[!.]*.o *.o *.so *.a $(TARGET) manifest
 
 .PHONY : help
 help:

@@ -52,12 +52,14 @@ src/sysflow_config.h
 *.egg-info
 /logs/
 docker-run*
+scaptests 
 
 # secrets
 scripts/build/rhpassword
 scripts/build/rhuser
 
 # examples
+examples/manifest
 examples/callback
 examples/libsysflow-*
 

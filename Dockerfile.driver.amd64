@@ -47,7 +47,7 @@ FROM sysflowtelemetry/ubi:mods-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS mods
 #-----------------------
 # Stage: driver
 #-----------------------
-FROM registry.access.redhat.com/ubi8/ubi:${UBI_VER} AS driver 
+FROM registry.access.redhat.com/ubi9/ubi:${UBI_VER} AS driver 
 
 # environment and args
 ARG INSTALL_PATH=/usr/local/sysflow
@@ -57,11 +57,14 @@ ENV DRIVERS_REPO="https://download.falco.org/driver"
 ENV HOST_ROOT=/host
 ENV HOME=/root
 
+# To enable subscription manager on ubi9
+# https://access.redhat.com/discussions/5889431
+ENV SMDEV_CONTAINER_OFF=1
 
 # Install Packages
 # Copy in llvm 9.0 rpms. Falco's ebpf probe fails unless compiled with llvm 7 to 12 for now.
 # https://github.com/falcosecurity/libs/issues/4
-COPY ./scripts/dev/rpms /build/rpms
+#COPY ./scripts/dev/rpms /build/rpms
 COPY ./scripts/installUBIDependency.sh /build/install.sh
 
 RUN --mount=type=secret,id=rhuser,dst=/secret/rhuser --mount=type=secret,id=rhpassword,dst=/secret/rhpassword \
@@ -69,7 +72,7 @@ RUN --mount=type=secret,id=rhuser,dst=/secret/rhuser --mount=type=secret,id=rhpa
  rm -rf /build
 
 # copy resources
-COPY --from=mods ${INSTALL_PATH}/modules/bin/docker-entry-ubi.sh /docker-entrypoint.sh
+COPY docker-entry-ubi.sh /docker-entrypoint.sh
 COPY --from=mods ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh
 COPY --from=mods ${INSTALL_PATH}/modules/bin/falco-driver-loader /usr/bin/falco-driver-loader
 COPY --from=mods /usr/src/falco-* /usr/src/

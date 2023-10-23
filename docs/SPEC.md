@@ -8,7 +8,7 @@ Entity behaviors are modeled as events or flows. Events represent important indi
 
 SysFlow enables users to configure the granularity of system-level data desired based on resource limitations and data analytics requirements. In this way, behaviors can be broken out into individual events or combined into smaller aggregated volumetric flows. The current specification describes events and flows in three key behavioral areas: Files, Networks, and Processes.
 
-![SF_Object_View.png](https://sysflow.readthedocs.io/en/latest/_static/SF_Object_View_v2.png)
+![SF_Object_View.png](https://sysflow.readthedocs.io/en/latest/_static/SF_Object_View_v5.png)
 *Figure 1:  SysFlow Object Relational View*
 
 ### Entities
@@ -98,6 +98,8 @@ The process entity represents a running process on the system. It contains impor
 | tty |  boolean |  If true, the process is tied to a shell | 1 |
 | containerId | string |  Unique string representing the Container Object to which the process resides. It can be NULL if process isn't in a container. | 1 |
 | entry | boolean |  If true, the process is a container or system entrypoint (i.e., virtual pid = 1). | 2 |
+| cwd |  string |  Current working directory of the process. | 5 |
+| env |  string[] |  Environment variables array exported to the process. | 5 |
 
 #### File
 

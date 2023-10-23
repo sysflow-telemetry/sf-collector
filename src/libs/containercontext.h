@@ -47,9 +47,9 @@ public:
                    sfk8s::K8sContext *k8sCxt);
   virtual ~ContainerContext();
   ContainerObj *getContainer(sinsp_threadinfo *ti);
-  ContainerObj *getContainer(const string &id);
-  bool exportContainer(const string &id);
-  int derefContainer(const string &id);
+  ContainerObj *getContainer(const std::string &id);
+  bool exportContainer(const std::string &id);
+  int derefContainer(const std::string &id);
   void clearAllContainers();
   void clearContainers();
   inline int getSize() { return m_containers.size(); }

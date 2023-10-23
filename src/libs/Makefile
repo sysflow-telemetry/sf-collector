@@ -53,7 +53,7 @@ MUSL ?= 0
 CXX = g++
 AR = ar
 MUSLFLAGS = -static -Os 
-CFLAGS = -std=c++11 -Wall -I.. -I/usr/local/include/ -I/usr/include/ \
+CFLAGS = -std=c++17 -Wall -I.. -I/usr/local/include/ -I/usr/include/ \
 		 -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 		 -I$(SFLOCALINCPREFIX)/ \
 		 -I$(FSLOCALINCPREFIX)/ \

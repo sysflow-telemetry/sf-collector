@@ -15,25 +15,45 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.5.1] - 2022-12-20
+## [0.6.0] - 2023-09-30
+
+### Added
+
+- CO-RE eBPF driver support
+
+### Changed
+
+- Update c++ compatibility to c++17
+- Add sparsehash as part of compiled dependencies
+- Bump Falco libs to 0.12.0, driver to 5.1.0
+- Bump Falco to 0.35.1
+
+## [0.5.1] - 2023-06-07
 
 ### Added
 
 - Add support for renameat2 system call
 - Strip binaries and static libraries before packaging (to reduce package sizes)
+- Add cwd (current working directory) attribute to process object
+- Add env (environment variables vector) attribute to process object
 
 ### Changed
 
 - Add configuration object cleanup in sysflow context object destructor
-- Bump Falco libs to 0.10.0, driver to 4.0.0
-- Bump UBI to to 8.7-1037
+- Bump Falco libs to 0.11.2, driver to 5.0.1
+- Bump Falco to 0.34.1
+- Bump UBI to to 8.8-854
 - Bump GHC Filesystem version to v1.5.12
 - Bump elfutils to 0.187
+- Replaced mumurhash with xxhash
+- Updated libSysFlow to new libsinsp events API
+- Updated build for libtbb v2021.8.0 (updated in Falco libs)
 
 ### Fixed
 
 - Remove duplicate config variable assignment in sysflow context constructor
 - Fixed getPath and getAbsolutePath functions in utils (caused paths for AT syscalls to resolve to an empty string)
+- Fix path sanitization (libsinsp PR981)
 
 ## [0.5.0] - 2022-10-17
 
@@ -256,7 +276,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0
 [0.4.4]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.3...0.4.4

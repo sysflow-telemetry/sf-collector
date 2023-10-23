@@ -40,11 +40,9 @@ FileFlowProcessor::FileFlowProcessor(context::SysFlowContext *cxt,
 
 FileFlowProcessor::~FileFlowProcessor() = default;
 
-inline void FileFlowProcessor::populateFileFlow(FileFlowObj *ff, OpFlags flag,
-                                                sinsp_evt *ev, ProcessObj *proc,
-                                                FileObj *file, string flowkey,
-                                                sinsp_fdinfo_t *fdinfo,
-                                                int64_t fd) {
+inline void FileFlowProcessor::populateFileFlow(
+    FileFlowObj *ff, OpFlags flag, sinsp_evt *ev, ProcessObj *proc,
+    FileObj *file, std::string flowkey, sinsp_fdinfo_t *fdinfo, int64_t fd) {
   sinsp_threadinfo *ti = ev->get_thread_info();
   ff->fileflow.opFlags = flag;
   ff->fileflow.ts = ev->get_ts();
@@ -71,7 +69,7 @@ inline void FileFlowProcessor::populateFileFlow(FileFlowObj *ff, OpFlags flag,
 void FileFlowProcessor::removeAndWriteRelatedFlows(ProcessObj *proc,
                                                    FileFlowObj *ffo,
                                                    uint64_t endTs) {
-  vector<FileFlowObj *> ffobjs;
+  std::vector<FileFlowObj *> ffobjs;
   for (FileFlowTable::iterator ffi = proc->fileflows.begin();
        ffi != proc->fileflows.end(); ffi++) {
     if (ffi->second->fileflow.tid != ffo->fileflow.tid &&
@@ -122,7 +120,7 @@ inline void FileFlowProcessor::updateFileFlow(FileFlowObj *ff, OpFlags flag,
 
 inline void FileFlowProcessor::processNewFlow(sinsp_evt *ev, ProcessObj *proc,
                                               FileObj *file, OpFlags flag,
-                                              const string &flowkey,
+                                              const std::string &flowkey,
                                               sinsp_fdinfo_t *fdinfo,
                                               int64_t fd) {
   auto *ff = new FileFlowObj();
@@ -169,7 +167,7 @@ inline int FileFlowProcessor::createConsumerRecord(sinsp_evt *ev,
 inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj *proc,
                                                       FileObj *file,
                                                       FileFlowObj **ff,
-                                                      string flowkey) {
+                                                      std::string flowkey) {
   // m_writer->writeFileFlow(&((*ff)->fileflow));
   SHOULD_WRITE((*ff), &(proc->proc), &(file->file))
   removeFileFlowFromSet(ff, false);
@@ -178,7 +176,7 @@ inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj *proc,
 
 inline void FileFlowProcessor::processExistingFlow(
     sinsp_evt *ev, ProcessObj *proc, FileObj *file, OpFlags flag,
-    string flowkey, FileFlowObj *ff, sinsp_fdinfo_t *fdinfo) {
+    std::string flowkey, FileFlowObj *ff, sinsp_fdinfo_t *fdinfo) {
   updateFileFlow(ff, flag, ev, fdinfo);
   if (flag == OP_CLOSE) {
     removeAndWriteRelatedFlows(proc, ff, ev->get_ts());
@@ -246,7 +244,7 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
     return createConsumerRecord(ev, proc, file, flag, fdinfo, fd);
   }
   FileFlowObj *ff = nullptr;
-  string flowkey;
+  std::string flowkey;
   flowkey.reserve(ti->m_container_id.length() + fdinfo->m_name.length() + 32);
   flowkey += fdinfo->m_name;
   flowkey += ti->m_container_id;
@@ -273,7 +271,7 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
 
 void FileFlowProcessor::removeFileFlow(ProcessObj *proc, FileObj *file,
                                        FileFlowObj **ff,
-                                       const string &flowkey) {
+                                       const std::string &flowkey) {
   proc->fileflows.erase(flowkey);
   delete *ff;
   ff = nullptr;
@@ -290,7 +288,7 @@ int FileFlowProcessor::removeAndWriteFFFromProc(ProcessObj *proc, int64_t tid) {
        ffi != proc->fileflows.end(); ffi++) {
     if (tid == -1 || tid == ffi->second->fileflow.tid) {
       FileObj *file = m_fileCxt->getFile(ffi->second->filekey);
-      ffi->second->fileflow.endTs = utils::getSysdigTime(m_cxt);
+      ffi->second->fileflow.endTs = utils::getSinspTime(m_cxt);
       if (tid != -1) {
         removeAndWriteRelatedFlows(proc, ffi->second,
                                    ffi->second->fileflow.endTs);
@@ -384,7 +382,7 @@ int FileFlowProcessor::removeFileFlowFromSet(FileFlowObj **ffo,
 void FileFlowProcessor::removeFileFlow(DataFlowObj *dfo) {
   auto *ffo = static_cast<FileFlowObj *>(dfo);
   // do we want to write out a fileflow that hasn't had any action in an
-  // interval? nfo->fileflow.endTs = utils::getSysdigTime(m_cxt);
+  // interval? nfo->fileflow.endTs = utils::getSinspTime(m_cxt);
   // m_writer->writeNetFlow(&(nfo->fileflow));
   SF_DEBUG(m_logger, "Erasing flow");
   ProcessObj *proc = m_processCxt->getProcess(&(ffo->fileflow.procOID));
@@ -405,14 +403,14 @@ void FileFlowProcessor::removeFileFlow(DataFlowObj *dfo) {
 
 void FileFlowProcessor::exportFileFlow(DataFlowObj *dfo, time_t /*now*/) {
   auto *ffo = static_cast<FileFlowObj *>(dfo);
-  ffo->fileflow.endTs = utils::getSysdigTime(m_cxt);
+  ffo->fileflow.endTs = utils::getSinspTime(m_cxt);
   ProcessObj *proc = m_processCxt->exportProcess(&(ffo->fileflow.procOID));
   FileObj *file = m_fileCxt->exportFile(ffo->filekey);
   SHOULD_WRITE(ffo, ((proc != nullptr) ? &(proc->proc) : nullptr),
                ((file != nullptr) ? &(file->file) : nullptr))
   // m_writer->writeFileFlow(&(ffo->fileflow));
   SF_DEBUG(m_logger, "Reupping flow");
-  ffo->fileflow.ts = utils::getSysdigTime(m_cxt);
+  ffo->fileflow.ts = utils::getSinspTime(m_cxt);
   ffo->fileflow.endTs = 0;
   ffo->fileflow.opFlags = 0;
   ffo->fileflow.numRRecvOps = 0;

@@ -88,6 +88,8 @@ static void usage(const std::string &name) {
       << "\t-t cri timeout\t\tThe amount of time in ms to wait for cri socket "
          "to "
          " respond\n"
+      << "\t-k driver type\t\tThe driver type to load. Can be ebpf, ebpf-core, "
+         "or kmod\n"
       << "\t-d\t\t\tPrint debug stats (not debug logging) of all caches\n"
       << "\t-v\t\t\tPrint the version of " << name << " and exit.\n"
       << std::endl;
@@ -114,29 +116,29 @@ int main(int argc, char **argv) {
   bool domainSocket = false;
   bool writeFile = false;
   bool breakout = false;
+  DriverType driver = NO_DRIVER;
   std::string logProps;
 
   sigaction(SIGINT, &sigHandler, nullptr);
   sigaction(SIGTERM, &sigHandler, nullptr);
 
   g_config = sysflowlibscpp::InitializeSysFlowConfig();
-
   while ((c = static_cast<char>(
-              getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:m:"))) != -1) {
+              getopt(argc, argv, "hcr:w:G:s:e:l:vf:p:t:du:m:k:"))) != -1) {
     switch (c) {
     case 'm':
       if (strcmp(optarg, "consume") == 0) {
         g_config->collectionMode = SFSysCallMode::SFConsumerMode;
-        cout << "Collector configured for consumer mode!" << endl;
+        std::cout << "Collector configured for consumer mode!" << std::endl;
       } else if (strcmp(optarg, "nofiles") == 0) {
         g_config->collectionMode = SFSysCallMode::SFNoFilesMode;
-        cout << "Collector configured for nofiles mode!" << endl;
+        std::cout << "Collector configured for nofiles mode!" << std::endl;
       } else if (strcmp(optarg, "flow") == 0) {
         g_config->collectionMode = SFSysCallMode::SFFlowMode;
-        cout << "Collector configured for flow mode!" << endl;
+        std::cout << "Collector configured for flow mode!" << std::endl;
       } else {
-        cout << "Collection mode not recognized: " << optarg << " exiting."
-             << endl;
+        std::cout << "Collection mode not recognized: " << optarg << " exiting."
+                  << std::endl;
         exit(1);
       }
       break;
@@ -152,6 +154,7 @@ int main(int argc, char **argv) {
       break;
     case 'r':
       g_config->scapInputPath = optarg;
+      driver = NO_DRIVER;
       break;
     case 'w':
       writeFile = true;
@@ -160,11 +163,11 @@ int main(int argc, char **argv) {
     case 'G':
       duration = optarg;
       if (str2int(fileDuration, duration, 10)) {
-        cout << "Unable to parse file duration " << duration << endl;
+        std::cout << "Unable to parse file duration " << duration << std::endl;
         exit(1);
       }
       if (fileDuration < 1) {
-        cout << "File duration must be higher than 0" << endl;
+        std::cout << "File duration must be higher than 0" << std::endl;
         exit(1);
       }
       g_config->rotateInterval = fileDuration;
@@ -176,14 +179,15 @@ int main(int argc, char **argv) {
       char *sr;
       sr = optarg;
       if (str2int(samplingRatio, sr, 10)) {
-        cout << "Unable to parse sampling ratio " << samplingRatio << endl;
+        std::cout << "Unable to parse sampling ratio " << samplingRatio
+                  << std::endl;
         exit(1);
       }
       g_config->samplingRatio = samplingRatio;
       break;
     case 'f':
       g_config->falcoFilter = optarg;
-      cout << "Configured filter: " << g_config->falcoFilter << endl;
+      std::cout << "Configured filter: " << g_config->falcoFilter << std::endl;
       break;
     case 'l':
       logProps = optarg;
@@ -194,14 +198,27 @@ int main(int argc, char **argv) {
     case 'p':
       g_config->criPath = optarg;
       break;
+    case 'k':
+      if (strcasecmp(optarg, "ebpf") == 0) {
+        driver = EBPF;
+      } else if (strcasecmp(optarg, "ebpf-core") == 0) {
+        driver = CORE_EBPF;
+      } else if (strcasecmp(optarg, "kmod") == 0) {
+        driver = KMOD;
+      } else {
+        std::cout << "-k must be set to one of ebpf, ebpf-core, or kmod"
+                  << std::endl;
+        exit(1);
+      }
+      break;
     case 't':
       criTimeout = optarg;
       if (str2int(criTO, criTimeout, 10)) {
-        cout << "Unable to parse " << criTimeout << endl;
+        std::cout << "Unable to parse " << criTimeout << std::endl;
         exit(1);
       }
       if (criTO < 1) {
-        cout << "CRI timeout must be higher than 0" << endl;
+        std::cout << "CRI timeout must be higher than 0" << std::endl;
         exit(1);
       }
       g_config->criTO = criTO;
@@ -209,12 +226,12 @@ int main(int argc, char **argv) {
     case 'v':
       std::cerr << " Version: " << SF_VERSION << "+" << SF_BUILD
                 << " Avro Schema Version: " << utils::getSchemaVersion()
-                << endl;
+                << std::endl;
       exit(0);
     case '?':
       if (optopt == 'r' || optopt == 's' || optopt == 'f' || optopt == 'w' ||
           optopt == 'u' || optopt == 'G' || optopt == 'l' || optopt == 'p' ||
-          optopt == 't') {
+          optopt == 't' || optopt == 'k') {
         fprintf(stderr, "Option -%c requires an argument.\n", optopt);
       } else if (isprint(optopt)) {
         fprintf(stderr, "Unknown option `-%c'.\n", optopt);
@@ -236,6 +253,14 @@ int main(int argc, char **argv) {
     usage(argv[0]);
     return 0;
   }
+
+  if (!g_config->scapInputPath.empty() && driver != NO_DRIVER) {
+    std::cout << "Cannot set both -r and -k at the same time." << std::endl;
+    return 1;
+  }
+
+  g_config->driverType = driver;
+
   if (g_config->filePath.empty() && writeFile) {
     usage(argv[0]);
     return 1;

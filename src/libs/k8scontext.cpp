@@ -34,7 +34,7 @@ K8sContext::K8sContext(context::SysFlowContext *cxt,
 
 K8sContext::~K8sContext() { clearAllPods(); }
 
-std::shared_ptr<PodObj> K8sContext::getPod(const string &id) {
+std::shared_ptr<PodObj> K8sContext::getPod(const std::string &id) {
   auto pod = m_pods.find(id);
   if (pod != m_pods.end()) {
     return pod->second;
@@ -42,7 +42,7 @@ std::shared_ptr<PodObj> K8sContext::getPod(const string &id) {
   return nullptr;
 }
 
-bool K8sContext::exportPod(const string &id) {
+bool K8sContext::exportPod(const std::string &id) {
   bool exprt = false;
   auto pod = m_pods.find(id);
   if (pod != m_pods.end()) {
@@ -57,7 +57,7 @@ bool K8sContext::exportPod(const string &id) {
   return exprt;
 }
 
-int K8sContext::derefPod(const string &id) {
+int K8sContext::derefPod(const std::string &id) {
   int result = 0;
   auto pod = m_pods.find(id);
   if (pod != m_pods.end()) {
@@ -73,7 +73,7 @@ std::shared_ptr<PodObj> K8sContext::createPod(const k8s_pod_t *p,
   std::shared_ptr<PodObj> pod = std::make_shared<PodObj>(
       p->get_uid(), p->get_name(), p->get_node_name(), p->get_host_ip(),
       p->get_internal_ip(), p->get_namespace(), p->get_restart_count());
-  pod->pod.ts = utils::getSysdigTime(m_cxt);
+  pod->pod.ts = utils::getSinspTime(m_cxt);
 
   auto labels = p->get_labels();
   for (auto it = labels.begin(); it != labels.end(); it++) {

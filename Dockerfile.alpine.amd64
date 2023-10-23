@@ -42,13 +42,15 @@ RUN apk add \
     libelf-static \
     patch \
     binutils \
-    libelf-static \       
+    libelf-static \
+    zstd-static \
     boost-dev \
     boost-static \
     flex \
     bison \
     gawk \
-    sparsehash 
+    clang \
+    bpftool
    
 #-----------------------
 # Stage: mods
