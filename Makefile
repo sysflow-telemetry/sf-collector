@@ -20,7 +20,7 @@
 include makefile.manifest.inc
 include makefile.env.inc
 
-MAKE_JOBS ?= 1
+MAKE_JOBS ?= 1 
 
 .PHONY: all
 all: modules sysporter

@@ -20,7 +20,7 @@
 include ../makefile.manifest.inc
 include ../makefile.env.inc
 
-MAKE_JOBS ?= 1
+MAKE_JOBS ?= 4 
 BUNDLE_FALCO_LIBS ?= 1
 
 $(info    MUSL is $(MUSL))
