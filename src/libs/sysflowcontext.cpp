@@ -299,7 +299,7 @@ void SysFlowContext::loadDriverInfo() {
   } else {
     m_config->driverType = KMOD;
     SF_WARN(m_logger, "Driver set to kernel module. "
-                          << "Environment varibale '" << SF_BPF_ENV_VARIABLE
+                          << "Environment variable '" << SF_BPF_ENV_VARIABLE
                           << "' must be set to enable the eBPF driver.")
   }
 }
