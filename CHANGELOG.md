@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Add sparsehash as part of compiled dependencies
 - Bump Falco libs to 0.12.0, driver to 5.1.0
 - Bump Falco to 0.35.1
+- Bump UBI to 9.3-1361.1699548029
 
 ## [0.5.1] - 2023-06-07
 
