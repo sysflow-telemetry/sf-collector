@@ -24,26 +24,14 @@ ARG UBI_VER
 #-----------------------
 # Stage: Builder
 #-----------------------
-FROM debian:buster AS builder
+FROM sysflowtelemetry/ubi:base-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS builder
 
 # sysflow release
 ARG SYSFLOW_VERSION
 
-# setup build requirements
-RUN apt-get update && apt-get install -y \
-	make \
-	wget \
-	g++ \
-	libboost-iostreams-dev \
-	flex \
-	bison \
-	gawk \
-	libsparsehash-dev && \
-    rm -rf /var/lib/apt/lists/*
-
 # install libsysflow
-RUN wget https://github.com/sysflow-telemetry/sf-collector/releases/download/${SYSFLOW_VERSION}/libsysflow-${SYSFLOW_VERSION}-x86_64.deb && \
-    dpkg -i libsysflow-${SYSFLOW_VERSION}-x86_64.deb
+RUN wget https://github.com/sysflow-telemetry/sf-collector/releases/download/${SYSFLOW_VERSION}/libsysflow-${SYSFLOW_VERSION}-x86_64.tar.gz && \
+    tar xzf libsysflow-${SYSFLOW_VERSION}-x86_64.tar.gz && cp -r libsysflow-${SYSFLOW_VERSION}-x86_64/usr/* /usr/.
 
 # build the example program
 COPY callback.cpp /build/
