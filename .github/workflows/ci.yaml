@@ -290,7 +290,7 @@ jobs:
           make docker-test
   docker:
     runs-on: ubuntu-latest
-    needs: tests
+    needs: [tests, lint, ubi, alpine]
     if: ${{ always() && !failure() && !cancelled() }}
     permissions:
       contents: read
