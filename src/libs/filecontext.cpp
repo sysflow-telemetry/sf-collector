@@ -43,6 +43,9 @@ FileObj *FileContext::createFile(sinsp_evt *ev, std::string path, char typechar,
   f->file.restype = typechar;
   sinsp_threadinfo *ti = ev->get_thread_info();
   sinsp_threadinfo *mt = ti->get_main_thread();
+  if (mt == nullptr) {
+    mt = ti;
+  }
   ContainerObj *cont = m_containerCxt->getContainer(mt);
   if (cont != nullptr) {
     f->file.containerId.set_string(cont->cont.id);

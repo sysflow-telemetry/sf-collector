@@ -52,8 +52,10 @@ ProcessFlowSet *ProcessContext::getPFSet() { return &m_pfSet; }
 ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
                                           SFObjectState state) {
   auto *p = new ProcessObj();
-  sinsp_threadinfo *mainthread =
-      ti->is_main_thread() ? ti : ti->get_main_thread();
+  sinsp_threadinfo *mainthread = ti->get_main_thread();
+  if (mainthread == nullptr) {
+    mainthread = ti;
+  }
   p->proc.state = state;
   p->proc.ts = ev->get_ts();
   p->proc.oid.hpid = mainthread->m_pid;
@@ -205,6 +207,9 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
                                        bool &created) {
   sinsp_threadinfo *ti = ev->get_thread_info();
   sinsp_threadinfo *mt = ti->get_main_thread();
+  if (mt == nullptr) {
+    mt = ti;
+  }
   OID key;
   key.createTS = mt->m_clone_ts;
   key.hpid = mt->m_pid;
@@ -367,6 +372,9 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
                                    SFObjectState state) {
   sinsp_threadinfo *ti = ev->get_thread_info();
   sinsp_threadinfo *mainthread = ti->get_main_thread();
+  if (mainthread == nullptr) {
+    mainthread = ti;
+  }
   proc->state = state;
   proc->ts = ev->get_ts();
   // this is a fallback to retrieve the process name when exepath is <NA>, which
