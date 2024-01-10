@@ -90,6 +90,18 @@ int main(int argc, char **argv) {
   // configure event collection (using defaults)
   SysFlowConfig *config = sysflowlibscpp::InitializeSysFlowConfig();
   config->callback = process_sysflow;
+
+  if (argc > 1 && strcmp(argv[1], "k") == 0) {
+    config->driverType = KMOD;
+  } else if (argc > 1 && strcmp(argv[1], "e") == 0) {
+    config->driverType = EBPF;
+  } else if (argc > 1 && strcmp(argv[1], "c") == 0) {
+    config->driverType = CORE_EBPF;
+  } else {
+    printf("Please specify the driver type: ./callback <drivertype>\n");
+    printf("k = kernel module, e = ebpf module, c = core epbf probe\n");
+    exit(1);
+  }
   g_driver = new sysflowlibscpp::SysFlowDriver(config);
 
   // register signal handlers to stop event collection

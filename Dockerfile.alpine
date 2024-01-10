@@ -18,11 +18,12 @@
 # limitations under the License.
 
 ARG ALPINE_VER=latest
+ARG ALPINE_IMAGE=alpine
 
 #-----------------------
 # Stage: base
 #-----------------------
-FROM alpine:${ALPINE_VER} AS base
+FROM ${ALPINE_IMAGE}:${ALPINE_VER} AS base
 
 # install dependencies
 RUN apk add \

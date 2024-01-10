@@ -22,6 +22,7 @@ ARG FALCO_LIBS_VER
 ARG FALCO_LIBS_DRIVER_VER
 ARG UBI_VER
 ARG ALPINE_VER
+ARG RUNTIME_IMAGE
 
 #-----------------------
 # Stage: Libs
@@ -94,7 +95,7 @@ RUN cd /build/src/collector && \
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
+FROM sysflowtelemetry/${RUNTIME_IMAGE}:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
 
 # environment variables
 ARG interval=30

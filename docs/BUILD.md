@@ -103,6 +103,18 @@ make build/musl
 make package
 ```
 
+To build the libs/collector and packages for s390x:
+
+```bash
+ make MAKE_JOBS=4 docker-base-build/musl
+ make MAKE_JOBS=4 docker-mods-build/musl
+ make MAKE_JOBS=4 docker-libs-build/musl
+ make MAKE_JOBS=4 docker-collector-build/musl
+ make MAKE_JOBS=4 docker-driver-build/musl/s390x
+ make MAKE_JOBS=4 docker-runtime-build/musl
+ make package-libs/musl
+```
+
 ## Running
 
 ### Command line usage

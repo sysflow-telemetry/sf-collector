@@ -36,15 +36,16 @@ DEBUG ?= 0
 MUSL ?= 0
 CLANG_FORMAT = clang-format-12
 CXX = g++
-LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs
+LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs -ljsoncpp
 MUSLFLAGS = -static -Os
 LDFLAGS = $(LIBS) -L$(FALCO_LIBS_LIB_PREFIX) -L$(SYSFLOW_LIB_PREFIX)
-CFLAGS = -std=c++17 -Wno-all -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I$(SYSFLOW_INCLUDE_PREFIX)
+CFLAGS = -std=c++17 -Wall -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I$(SYSFLOW_INCLUDE_PREFIX)
 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
 	CFLAGS += $(MUSLFLAGS) -fPIE -pie -DHAVE_STRLCPY
 	LDFLAGS += $(MUSLFLAGS)
+	LIBS += -lzstd
 else 
 	LIBS += -lrt -lanl
 	LDFLAGS += -fno-PIE -no-pie
@@ -86,7 +87,7 @@ build/musl:
 
 .PHONY: build/musldev
 build/musldev:
-	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg ALPINE_VER=${ALPINE_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl.dev . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg ARCH=${ARCH} --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg ALPINE_VER=${ALPINE_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl.dev . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: format

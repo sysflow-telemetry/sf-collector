@@ -1,0 +1,97 @@
+# syntax = docker/dockerfile:1.0-experimental
+#
+# Copyright (C) 2022 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#-----------------------
+# Usage
+#-----------------------
+#
+# 1. Add scripts/build/rhpassword and scripts/build/rhuser and update them
+#    with user/password for RHEL subscription manager
+# 2. Build with Docker BuildKit:
+#
+#    DOCKER_BUILDKIT=1 docker build --no-cache \
+#                                   --build-arg UBI_VER=8.4-206
+#                                   --secret id=rhuser,src=scripts/build/rhuser \
+#                                   --secret id=rhpassword,src=scripts/build/rhpassword \
+#                                   --target driver \
+#                                   -t ubi:mods-0.0.0 \
+#                                   -f Dockerfile.ubi.amd64 .
+#
+
+ARG FALCO_VER
+ARG FALCO_LIBS_VER
+ARG UBI_VER
+ARG ALPINE_VER
+
+#-----------------------
+# Stage: mods
+# #-----------------------
+FROM sysflowtelemetry/alpine:mods-${FALCO_LIBS_VER}-${FALCO_VER}-${ALPINE_VER} AS mods
+
+#-----------------------
+# Stage: driver
+#-----------------------
+FROM s390x/alpine:${ALPINE_VER}  AS driver 
+
+RUN apk add \
+    g++ \
+    gcc \
+    cmake \
+    make \
+    bash \
+    perl \
+    linux-headers \
+    autoconf \
+    automake \
+    m4 \
+    libtool \
+    elfutils-dev \
+    libelf-static \
+    patch \
+    binutils \
+    libelf-static \       
+    flex \
+    bison \
+    wget \
+    patch \
+    curl \
+    clang \
+    llvm \
+    xz  \
+    bc
+
+# environment and args
+ARG INSTALL_PATH=/usr/local/sysflow
+ARG DRIVER_PACKAGE_NAME=falco
+ENV DRIVER_NAME=falco
+ENV DRIVERS_REPO="https://download.falco.org/driver"
+ENV HOST_ROOT=/host
+ENV HOME=/root
+
+
+# copy resources
+COPY --from=mods ${INSTALL_PATH}/modules/bin/docker-entry-ubi.sh /docker-entrypoint.sh
+COPY --from=mods ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh ${INSTALL_PATH}/modules/bin/docker-entrypoint.sh
+COPY --from=mods ${INSTALL_PATH}/modules/bin/falco-driver-loader /usr/bin/falco-driver-loader
+COPY --from=mods /usr/src/falco-* /usr/src/
+COPY --from=mods /usr/sbin/dkms /usr/sbin/dkms
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+

@@ -141,11 +141,11 @@ falcolibs/package:
 	cp protobuf-prefix/src/protobuf/target/lib/libprotobuf.a lib && \
 	cp protobuf-prefix/src/protobuf/target/lib/libprotoc.a lib && \
 	cp tbb-prefix/src/tbb/lib_release/libtbb.a lib/ && \
-	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
-	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
-	cp b64/base64.h include/ && \
-	mkdir -p include/json && cp jsoncpp-prefix/src/include/json/*.h  include/json/ && \
 	cp jsoncpp-prefix/src/lib/libjsoncpp.a lib/ && \
+	cp -r jsoncpp-prefix/src/include/json  include/ && \
+	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
+	cp b64/base64.h include/ && \
+	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
 	cp libpman/*.a lib/ && \
 	cp libsinsp/*.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
@@ -164,14 +164,14 @@ falcolibs/package:
 	cp zlib-prefix/src/zlib/libz.a lib/libz.a
 ifeq ($(BUNDLE_FALCO_LIBS), 1)	
 	cp -r falco-libs/build/lib falco-libs/build/bundle
-	cp falco-libs.mri falco-libs/build/bundle 
+	cp falco-libs.$(ARCH).mri falco-libs/build/bundle 
 	cd falco-libs/build/bundle && \
 	mv libgrpc++.a libgrpcpp.a && \
 	mv libgrpc++_alts.a libgrpcpp_alts.a && \
 	mv libgrpc++_error_details.a libgrpcpp_error_details.a && \
 	mv libgrpc++_reflection.a libgrpcpp_reflection.a && \
 	mv libgrpc++_unsecure.a libgrpcpp_unsecure.a && \
-	ar -M <falco-libs.mri && cp libs.a ../lib/
+	ar -M <falco-libs.$(ARCH).mri && cp libs.a ../lib/
 endif
 
 .PHONY: falcolibs/install
