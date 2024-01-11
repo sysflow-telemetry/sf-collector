@@ -21,6 +21,8 @@ include makefile.manifest.inc
 include makefile.env.inc
 
 MAKE_JOBS ?= 1
+
+ARCH ?= x86_64
 RUNTIME_IMAGE = "ubi"
 ALPINE_IMAGE= "alpine"
 ifeq ($(ARCH), "s390x")
