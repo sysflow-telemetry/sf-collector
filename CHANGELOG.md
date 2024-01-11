@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.6.1] - 2023-01-30
+
+### Added
+
+- s390x support for libSysFlow
+
 ## [0.6.0] - 2023-11-28
 
 ### Added
@@ -277,7 +283,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.4.4...0.5.0

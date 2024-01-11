@@ -6,7 +6,7 @@
 
 # Supported tags and respective `Dockerfile` links
 
--	[`0.6.0`, `latest`](https://github.com/sysflow-telemetry/sf-collector/blob/0.6.0/Dockerfile), [`edge`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile), [`dev`](https://github.com/sysflow-telemetry/sf-collector/blob/dev/Dockerfile)
+-	[`0.6.1-rc1`, `latest`](https://github.com/sysflow-telemetry/sf-collector/blob/0.6.1-rc1/Dockerfile), [`edge`](https://github.com/sysflow-telemetry/sf-collector/blob/master/Dockerfile), [`dev`](https://github.com/sysflow-telemetry/sf-collector/blob/dev/Dockerfile)
 
 # Quick reference
 
@@ -26,7 +26,7 @@
 	[docker hub](https://hub.docker.com/u/sysflowtelemetry) | [GHCR](https://github.com/orgs/sysflow-telemetry/packages)
 
 -	**Binary packages**:
-	[deb](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.6.0/sfcollector-0.6.0-x86_64.deb) | [rpm](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.6.0/sfcollector-0.6.0-x86_64.rpm) | [tgz](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.6.0/sfcollector-0.6.0-x86_64.tar.gz)
+	[deb](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.6.1-rc1/sfcollector-0.6.1-rc1-x86_64.deb) | [rpm](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.6.1-rc1/sfcollector-0.6.1-rc1-x86_64.rpm) | [tgz](https://github.com/sysflow-telemetry/sf-collector/releases/tag/0.6.1-rc1/sfcollector-0.6.1-rc1-x86_64.tar.gz)
 
 # What is SysFlow?
 
@@ -44,8 +44,7 @@ The SysFlow framework consists of the following sub-projects:
 # About This Image
 
 This image packages SysFlow Collector, which monitors and collects system call and event information from hosts
-and exports them in the SysFlow format using Apache Avro object serialization. The SysFlow Collector depends on [Sysdig](https://github.com/draios/sysdig) probe to passively collect system events and turn them into SysFlow. As a result,
-the collector supports Sysdig's powerful filtering capabilities. Please check the [Installation and Usage](https://sysflow.readthedocs.io/en/latest/build.html) for the complete set of options.
+and exports them in the SysFlow format using Apache Avro object serialization. The SysFlow Collector depends on the [Falco libs](https://github.com/falcosecurity/libs) to passively collect system events and turn them into SysFlow. Please check the [Installation and Usage](https://sysflow.readthedocs.io/en/latest/build.html) for the complete set of options.
 
 # How to use this image
 
