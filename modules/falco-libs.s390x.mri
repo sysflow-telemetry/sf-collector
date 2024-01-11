@@ -99,5 +99,6 @@ addlib libcri_v1.a
 addlib libtbb.a
 addlib libpman.a
 addlib libbpf.a
+addlib libjsoncpp.a
 save
 end

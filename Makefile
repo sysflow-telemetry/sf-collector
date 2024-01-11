@@ -120,7 +120,7 @@ docker-mods-build:
 
 .PHONY: docker-mods-build/musl
 docker-mods-build/musl:
-	( DOCKER_BUILDKIT=1 docker build --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg ALPINE_IMAGE=${ALPINE_IMAGE} --build-arg ALPINE_VER=${ALPINE_VERSION} --target mods -t sysflowtelemetry/alpine:mods-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${ALPINE_VERSION} -f Dockerfile.alpine . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg ARCH=${ARCH} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg ALPINE_IMAGE=${ALPINE_IMAGE} --build-arg ALPINE_VER=${ALPINE_VERSION} --target mods -t sysflowtelemetry/alpine:mods-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${ALPINE_VERSION} -f Dockerfile.alpine . )
 
 .PHONY: docker-driver-build
 docker-driver-build:

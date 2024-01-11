@@ -53,7 +53,7 @@ MUSL ?= 0
 
 # Compiler options
 CXX = g++
-LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs -ljsoncpp
+LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs
 MUSLFLAGS = -static -Os
 LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(FALCOLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/  -L/usr/lib/
 CFLAGS = -std=c++17 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ \

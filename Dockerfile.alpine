@@ -69,11 +69,13 @@ ENV HOME=/root
 
 ARG MAKE_JOBS=1
 
+ARG ARCH=x86_64
+
 #  build modules
 COPY ./modules /build/modules
 COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  cd /build/modules && \
-     make INSTALL_PATH=${INSTALL_PATH} MUSL=1 MAKE_JOBS=${MAKE_JOBS} install/no-elfutils && \
+     make INSTALL_PATH=${INSTALL_PATH} ARCH=${ARCH} MUSL=1 MAKE_JOBS=${MAKE_JOBS} install/no-elfutils && \
      make clean && rm -rf /build/modules
 
