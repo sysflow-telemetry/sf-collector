@@ -238,7 +238,7 @@ jobs:
         with:
           context: .
           push: true
-          file: Dockerfile.alpine.amd64
+          file: Dockerfile.alpine
           tags: |
             ${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}:${{ env.BASE_TAG }}
             ghcr.io/${{ env.GH_ORGANIZATION }}/alpine:${{ env.BASE_TAG }}
@@ -255,7 +255,7 @@ jobs:
         with:
           context: .
           push: true
-          file: Dockerfile.alpine.amd64
+          file: Dockerfile.alpine
           tags: |
             ${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}:${{ env.MODS_TAG }}
             ghcr.io/${{ env.GH_ORGANIZATION }}/alpine:${{ env.MODS_TAG }}

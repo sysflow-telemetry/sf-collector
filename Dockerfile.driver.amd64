@@ -18,30 +18,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#-----------------------
-# Usage
-#-----------------------
-#
-# 1. Add scripts/build/rhpassword and scripts/build/rhuser and update them
-#    with user/password for RHEL subscription manager
-# 2. Build with Docker BuildKit:
-#
-#    DOCKER_BUILDKIT=1 docker build --no-cache \
-#                                   --build-arg UBI_VER=8.4-206
-#                                   --secret id=rhuser,src=scripts/build/rhuser \
-#                                   --secret id=rhpassword,src=scripts/build/rhpassword \
-#                                   --target driver \
-#                                   -t ubi:mods-0.0.0 \
-#                                   -f Dockerfile.ubi.amd64 .
-#
-
 ARG FALCO_VER
 ARG FALCO_LIBS_VER
 ARG UBI_VER
 
 #-----------------------
 # Stage: mods
-# #-----------------------
+#-----------------------
 FROM sysflowtelemetry/ubi:mods-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS mods
 
 #-----------------------
