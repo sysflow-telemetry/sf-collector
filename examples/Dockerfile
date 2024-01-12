@@ -46,5 +46,8 @@ FROM sysflowtelemetry/ubi:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS ru
 
 COPY --from=builder /usr/local/example/bin/callback /usr/local/example/bin/callback
 
-CMD ["/usr/local/example/bin/callback"]
+ARG driver_type="e"
+ENV DRIVER_TYPE=$driver_type
+
+CMD /usr/local/example/bin/callback ${DRIVER_TYPE}
 
