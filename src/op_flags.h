@@ -45,6 +45,8 @@ enum OpFlags {
   OP_RENAME = (1 << 20)
 };
 
+#define OP_LOAD_LIBRARY OpFlags(OP_OPEN | OP_MMAP | OP_CLOSE)
+
 #define IS_FILE_EVT(FLAG)                                                      \
   ((FLAG) == OP_MKDIR || (FLAG) == OP_RMDIR || (FLAG) == OP_LINK ||            \
    (FLAG) == OP_UNLINK || (FLAG) == OP_SYMLINK || (FLAG) == OP_RENAME)

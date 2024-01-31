@@ -39,6 +39,7 @@
   }
 
 #define SF_OPEN_EXIT(EV)                                                       \
+  case OP_LOAD_LIBRARY:                                                        \
   case OP_OPEN: {                                                              \
     m_dfPrcr->handleDataEvent(EV);                                             \
     break;                                                                     \

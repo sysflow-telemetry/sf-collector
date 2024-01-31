@@ -260,7 +260,7 @@ ProcessObj *ProcessContext::getProcess(api::SysFlowEvent *ev,
     ct = std::move(mt);
     mt = inspector->getProcess(parentPID);
   }
-  if (mt == nullptr && ct->getParentPID() != -1) {
+  if (mt == nullptr && ct != nullptr && ct->getParentPID() != -1) {
     SF_DEBUG(m_logger,
              "Ancestral chain not found standard way.. searching based on pid")
     ProcessObj *prt = getProcess(ct->getParentPID());
@@ -450,7 +450,7 @@ void ProcessContext::clearAllProcesses() {
       nfi->second->netflow.opFlags |= OP_TRUNCATE;
       nfi->second->netflow.endTs = utils::getSystemTime(m_cxt);
       m_writer->writeNetFlow(&(nfi->second->netflow));
-      delete nfi->second;
+      //delete nfi->second;
     }
     for (FileFlowTable::iterator ffi = it->second->fileflows.begin();
          ffi != it->second->fileflows.end(); ffi++) {
@@ -458,26 +458,26 @@ void ProcessContext::clearAllProcesses() {
       ffi->second->fileflow.endTs = utils::getSystemTime(m_cxt);
       m_fileCxt->exportFile(ffi->second->filekey);
       m_writer->writeFileFlow(&(ffi->second->fileflow));
-      delete ffi->second;
+      //delete ffi->second;
     }
     if (it->second->pfo != nullptr) {
       it->second->pfo->procflow.opFlags |= OP_TRUNCATE;
       it->second->pfo->procflow.endTs = utils::getSystemTime(m_cxt);
       SF_INFO(m_logger, "Writing processflow!")
       m_writer->writeProcessFlow(&(it->second->pfo->procflow));
-      delete it->second->pfo;
-      it->second->pfo = nullptr;
+      //delete it->second->pfo;
+      //it->second->pfo = nullptr;
     }
   }
 
-  for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
+  /*for (ProcessTable::iterator it = m_procs.begin(); it != m_procs.end(); ++it) {
     delete it->second;
   }
 
   for (auto it = m_delProcQue.begin(); it != m_delProcQue.end(); ++it) {
     delete (*it);
     it = m_delProcQue.erase(it);
-  }
+  }*/
 }
 
 void ProcessContext::markForDeletion(ProcessObj **proc) {

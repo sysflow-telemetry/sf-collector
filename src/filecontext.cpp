@@ -116,7 +116,7 @@ void FileContext::clearFiles() {
 }
 
 void FileContext::clearAllFiles() {
-  for (FileTable::iterator it = m_files.begin(); it != m_files.end(); ++it) {
+ /* for (FileTable::iterator it = m_files.begin(); it != m_files.end(); ++it) {
     delete it->second;
-  }
+  }*/
 }

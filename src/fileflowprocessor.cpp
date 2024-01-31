@@ -122,7 +122,7 @@ inline void FileFlowProcessor::processNewFlow(
   ff->lastUpdate = utils::getCurrentTime(m_cxt);
   populateFileFlow(ff, flag, ev, proc, file, flowkey, fdinfo, fd);
   updateFileFlow(ff, flag, ev, fdinfo);
-  if (flag != OP_CLOSE) {
+  if (flag != OP_CLOSE && flag != OP_LOAD_LIBRARY) {
     proc->fileflows[ff->flowkey] = ff;
     file->refs++;
     m_dfSet->insert(ff);
