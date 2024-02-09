@@ -117,14 +117,13 @@ falcolibs/package:
 			-DUSE_BUNDLED_DEPS=ON \
 			-DUSE_BUNDLED_LIBELF=OFF \
 			-DCREATE_TEST_TARGETS=OFF \
-			-DBUILD_LIBSCAP_EXAMPLES=OFF \
-			-DBUILD_LIBSINSP_EXAMPLES=OFF \
+			-DBUILD_LIBSCAP_EXAMPLES=ON \
+			-DBUILD_LIBSINSP_EXAMPLES=ON \
 			-DCMD_MAKE="make -j${MAKE_JOBS}" \
 			${MUSL_FLAG} ../. && make -j${MAKE_JOBS} && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
-	mkdir -p include/userspace/common && cp ../userspace/common/*.h include/userspace/common && cp ../build/common/*.h include/userspace/common &&\
 	mkdir -p include/userspace/libsinsp && cp ../userspace/libsinsp/*.h include/userspace/libsinsp && \
 	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
 	mkdir -p include/userspace/libsinsp/filter && cp ../userspace/libsinsp/filter/*.h include/userspace/libsinsp/filter/ && \
@@ -144,8 +143,6 @@ falcolibs/package:
 	cp jsoncpp-prefix/src/lib/libjsoncpp.a lib/ && \
 	cp -r jsoncpp-prefix/src/include/json  include/ && \
 	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
-	cp b64/base64.h include/ && \
-	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
 	cp libpman/*.a lib/ && \
 	cp libsinsp/*.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
@@ -159,7 +156,6 @@ falcolibs/package:
 	find grpc-prefix/src/grpc/third_party/abseil-cpp -name '*.a' -exec cp '{}' lib \; && \
 	cp c-ares-prefix/src/c-ares/target/lib/libcares.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
-	cp jq-prefix/src/jq/target/lib/*.a lib/ && \
 	cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
 	cp zlib-prefix/src/zlib/libz.a lib/libz.a
 ifeq ($(BUNDLE_FALCO_LIBS), 1)	
