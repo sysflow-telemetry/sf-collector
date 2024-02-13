@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022 IBM Corporation.
+# Copyright (C) 2024 IBM Corporation.
 #
 # Authors:
 # Frederico Araujo <frederico.araujo@ibm.com>
@@ -39,11 +39,8 @@ RUN apk add \
     automake \
     m4 \
     libtool \
-    elfutils-dev \
-    libelf-static \
     patch \
     binutils \
-    libelf-static \
     zstd-static \
     boost-dev \
     boost-static \
@@ -51,8 +48,9 @@ RUN apk add \
     bison \
     gawk \
     clang \
-    bpftool
-   
+    bpftool \
+    musl-libintl
+
 #-----------------------
 # Stage: mods
 #-----------------------
@@ -75,7 +73,8 @@ ARG ARCH=x86_64
 COPY ./modules /build/modules
 COPY ./makefile.* /build/
 COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
+
 RUN  cd /build/modules && \
-     make INSTALL_PATH=${INSTALL_PATH} ARCH=${ARCH} MUSL=1 MAKE_JOBS=${MAKE_JOBS} install/no-elfutils && \
+     make INSTALL_PATH=${INSTALL_PATH} ARCH=${ARCH} MUSL=1 MAKE_JOBS=${MAKE_JOBS} install && \
      make clean && rm -rf /build/modules
 

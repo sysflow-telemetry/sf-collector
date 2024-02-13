@@ -34,3 +34,6 @@
 [submodule "modules/sparsehash"]
 	path = modules/sparsehash
 	url = https://github.com/sparsehash/sparsehash.git
+[submodule "modules/elf"]
+	path = modules/elf
+	url = https://github.com/arachsys/libelf.git

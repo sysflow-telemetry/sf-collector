@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2019 IBM Corporation.
+# Copyright (C) 2024 IBM Corporation.
 #
 # Authors:
 # Frederico Araujo <frederico.araujo@ibm.com>
@@ -39,12 +39,12 @@ LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
 LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration
-LIBLOCALPREFIX ?= ../../modules
-FALCOLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/include
-AVRLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
-SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
-FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
-SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
+MODPREFIX ?= ../../modules
+FALCOINCPREFIX ?= $(MODPREFIX)/falco-libs/build/include
+AVRINCPREFIX ?= $(MODPREFIX)/avro/lang/c++/build
+SFINCPREFIX ?= $(MODPREFIX)/sysflow/c++
+FSINCPREFIX ?= $(MODPREFIX)/filesystem/include
+SCHPREFIX ?= $(MODPREFIX)/sysflow/avro/avsc
 DEBUG ?= 0
 ASAN ?= 0
 MUSL ?= 0
@@ -55,17 +55,17 @@ AR = ar
 MUSLFLAGS = -static -Os 
 CFLAGS = -std=c++17 -Wall -I.. -I/usr/local/include/ -I/usr/include/ \
 		 -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
-		 -I$(SFLOCALINCPREFIX)/ \
-		 -I$(FSLOCALINCPREFIX)/ \
-	 	 -I$(FALCOLOCALINCPREFIX)/ \
-		 -I$(FALCOLOCALINCPREFIX)/curl/ \
-		 -I$(FALCOLOCALINCPREFIX)/json2/ \
-		 -I$(FALCOLOCALINCPREFIX)/openssl/ \
-		 -I$(FALCOLOCALINCPREFIX)/driver/ \
-		 -I$(FALCOLOCALINCPREFIX)/userspace/libsinsp/ \
-		 -I$(FALCOLOCALINCPREFIX)/userspace/libscap/ \
-		 -I$(FALCOLOCALINCPREFIX)/userspace/common/ \
-		 -I$(AVRLOCALINCPREFIX)/
+		 -I$(SFINCPREFIX)/ \
+		 -I$(FSINCPREFIX)/ \
+	 	 -I$(FALCOINCPREFIX)/ \
+		 -I$(FALCOINCPREFIX)/curl/ \
+		 -I$(FALCOINCPREFIX)/json2/ \
+		 -I$(FALCOINCPREFIX)/openssl/ \
+		 -I$(FALCOINCPREFIX)/driver/ \
+		 -I$(FALCOINCPREFIX)/userspace/libsinsp/ \
+		 -I$(FALCOINCPREFIX)/userspace/libscap/ \
+		 -I$(FALCOINCPREFIX)/userspace/common/ \
+		 -I$(AVRINCPREFIX)/
 
 OBJS = .sysflowlibs.o .sysflowlibs.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o .k8scontext.o .k8seventprocessor.o .modutils.o .sysflowexception.o
 
