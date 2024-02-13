@@ -48,7 +48,7 @@ COPY ./modules/sysflow/c\+\+/sysflow/avsc_sysflow5.hh ${MODPREFIX}/include/sysfl
 COPY ./src/libs /build/src/libs
 RUN make -C /build/src/libs \
          SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
-         LIBPREFIX=${MODPREFIX} \
+         MODPREFIX=${MODPREFIX} \
          FALCOLIBPREFIX=${MODPREFIX}/lib/falcosecurity \
          FALCOINCPREFIX=${MODPREFIX}/include/falcosecurity \
          AVRLIBPREFIX=${MODPREFIX}/lib \
@@ -79,7 +79,7 @@ ARG MODPREFIX=${INSTALL_PATH}/modules
 COPY ./src/collector /build/src/collector
 RUN cd /build/src/collector && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
-         LIBPREFIX=${MODPREFIX} \
+         MODPREFIX=${MODPREFIX} \
          FALCOLIBPREFIX=${MODPREFIX}/lib/falcosecurity \
          FALCOINCPREFIX=${MODPREFIX}/include/falcosecurity \
          AVRLIBPREFIX=${MODPREFIX}/lib \
@@ -128,6 +128,7 @@ ARG glv=
 ENV GLOG_v=$glv
 
 ARG INSTALL_PATH=/usr/local/sysflow
+ARG ELF_RPATH=/usr/lib/sysflow
 
 ARG MODPREFIX=${INSTALL_PATH}/modules
 ENV HOST_ROOT=/host
@@ -173,7 +174,7 @@ LABEL "io.k8s.description"="The SysFlow Collector monitors and collects system c
 COPY ./LICENSE.md /licenses/LICENSE.md
 
 # copy resources
-COPY --from=collector ${INSTALL_PATH}/lib/*.so.* ${INSTALL_PATH}/lib/
+COPY --from=collector ${ELF_RPATH} ${ELF_RPATH}
 COPY --from=collector ${INSTALL_PATH}/bin/sysporter ${INSTALL_PATH}/bin/sysporter
 COPY --from=collector ${INSTALL_PATH}/conf/ ${INSTALL_PATH}/conf/
 

@@ -35,7 +35,7 @@ LINTCHECKS = "bugprone-*"
 	     -llvm-header-guard,misc-*,modernize-*,-modernize-use-trailing-return-type,-modernize-loop-convert,\
 	     -modernize-make-unique,-modernize-pass-by-value, performance-*,-readability-*,\
 	     -readability-convert-member-functions-to-static"
-LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
+LINTSRCS := $(wildcard *.cpp)
 LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration
@@ -45,6 +45,7 @@ AVRINCPREFIX ?= $(MODPREFIX)/avro/lang/c++/build
 SFINCPREFIX ?= $(MODPREFIX)/sysflow/c++
 FSINCPREFIX ?= $(MODPREFIX)/filesystem/include
 SCHPREFIX ?= $(MODPREFIX)/sysflow/avro/avsc
+ELF_RPATH ?= /usr/lib/sysflow
 DEBUG ?= 0
 ASAN ?= 0
 MUSL ?= 0
@@ -98,13 +99,22 @@ ifeq ($(MUSL), 0)
 	$(AR) -M <libsysflow.mri
 else
 	$(AR) -M <libsysflow-musl.mri
+	mkdir -p $(ELF_RPATH) && \
+	cp `readlink -f /lib/ld-musl-x86_64.so.1` $(ELF_RPATH)/ld-musl-x86_64.so.1 && \
+	cp `readlink -f /usr/lib/libstdc++.so.6` $(ELF_RPATH)/libstdc++.so.6 && \
+	cp `readlink -f /usr/lib/libelf.so.1` $(ELF_RPATH)/libelf.so.1 && \
+	cp `readlink -f /usr/lib/libelf.so.1` $(ELF_RPATH)/libelf.so && \
+	cp `readlink -f /usr/lib/libgcc_s.so.1` $(ELF_RPATH)/libgcc_s.so.1 && \
+	cp `readlink -f /lib/libc.musl-x86_64.so.1` $(ELF_RPATH)/libc.musl-x86_64.so.1 && \
+	cp `readlink -f /lib/libz.so.1` $(ELF_RPATH)/libz.so.1 && \
+	cp `readlink -f /usr/lib/libzstd.so.1` $(ELF_RPATH)/libzstd.so.1
 endif
 	cp libsysflow_with_deps.a $(INSTALL_PATH)/lib
 endif
 
 .PHONY: uninstall
 uninstall:
-	rm -rf $(INSTALL_PATH)/lib
+	rm -rf $(INSTALL_PATH)/lib $(ELF_RPATH)
 
 .PHONY: lint
 lint: $(LINTSRCS)

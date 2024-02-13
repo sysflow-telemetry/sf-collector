@@ -38,7 +38,7 @@ RUN apk add \
 	g++ \
 	boost-dev \
 	boost-static \
-        zstd-static \
+    zstd-static \
 	flex \
 	bison \
 	gawk \
@@ -59,6 +59,7 @@ RUN MUSL=1 make -C /build install
 #-----------------------
 FROM sysflowtelemetry/ubi:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
 
+COPY --from=builder /usr/lib/sysflow /usr/lib/sysflow
 COPY --from=builder /usr/local/example/bin/callback /usr/local/example/bin/callback
 
 ARG driver_type="e"

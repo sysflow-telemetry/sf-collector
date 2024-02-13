@@ -38,7 +38,6 @@ LINTSRCS := $(wildcard *.cpp)
 LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration (these are overridden during docker build) 
-LIBPREFIX ?= ../lib
 MODPREFIX ?= ../../modules
 FALCOLIBPREFIX ?= $(MODPREFIX)/falco-libs/build/lib
 FALCOINCPREFIX ?= $(MODPREFIX)/falco-libs/build/include
@@ -48,6 +47,7 @@ SFINCPREFIX ?= $(MODPREFIX)/sysflow/c++
 SFLIBPREFIX ?= $(MODPREFIX)/lib
 FSINCPREFIX ?= $(MODPREFIX)/filesystem/include
 SCHPREFIX ?= $(MODPREFIX)/sysflow/avro/avsc
+ELF_RPATH ?= /usr/lib/sysflow
 DEBUG ?= 0
 ASAN ?= 0
 MUSL ?= 0
@@ -56,7 +56,7 @@ MUSL ?= 0
 CXX = g++
 LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs -lelf
 MUSLFLAGS = -Os
-LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(FALCOLIBPREFIX)/ -L$(AVRLIBPREFIX)/  -L/usr/lib/ 
+LDFLAGS = $(LIBS) -L$(FALCOLIBPREFIX)/ -L$(AVRLIBPREFIX)/  -L/usr/lib/ 
 CFLAGS = -std=c++17 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ \
 		 -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
 		 -I$(SFINCPREFIX)/ \
@@ -73,9 +73,7 @@ CFLAGS = -std=c++17 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
 	CFLAGS += $(MUSLFLAGS) -fPIE -pie -DHAVE_STRLCPY
-	LDFLAGS += $(MUSLFLAGS) \
-		-Wl,-rpath $(INSTALL_PATH)/lib -Xlinker "--dynamic-linker=$(INSTALL_PATH)/lib/ld-musl-x86_64.so.1"
-	#-L$(INSTALL_PATH)/lib
+	LDFLAGS += $(MUSLFLAGS) -L$(ELF_RPATH) -Wl,-rpath $(ELF_RPATH) -Xlinker "--dynamic-linker=$(ELF_RPATH)/ld-musl-x86_64.so.1"
 	LIBS += -lzstd
 else 
 	LIBS += -lrt -lanl
@@ -96,7 +94,7 @@ ifeq ($(ASAN), 1)
 endif
 
 .PHONY: all
-all: $(TARGET) $(LIB_TARGET)
+all: $(TARGET)
 
 .PHONY: install
 install: all

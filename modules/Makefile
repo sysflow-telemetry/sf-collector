@@ -22,7 +22,6 @@ include ../makefile.env.inc
 
 MAKE_JOBS ?= 1
 BUNDLE_FALCO_LIBS ?= 1
-BUNDLE_LIBELF ?= 1
 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
@@ -204,18 +203,6 @@ elf/package:
 .PHONY: elf/install
 elf/install:
 	cd elf && PREFIX=/usr make -j${MAKE_JOBS} install
-ifeq ($(BUNDLE_LIBELF), 1)	
-ifeq ($(MUSL), 1)
-	mkdir -p $(INSTALL_PATH)/lib && \
-	cp `readlink -f /lib/ld-musl-x86_64.so.1` $(INSTALL_PATH)/lib/ld-musl-x86_64.so.1 && \
-	cp `readlink -f /usr/lib/libstdc++.so.6` $(INSTALL_PATH)/lib/libstdc++.so.6 && \
-	cp `readlink -f /usr/lib/libelf.so.1` $(INSTALL_PATH)/lib/libelf.so.1 && \
-	cp `readlink -f /usr/lib/libgcc_s.so.1` $(INSTALL_PATH)/lib/libgcc_s.so.1 && \
-	cp `readlink -f /lib/libc.musl-x86_64.so.1` $(INSTALL_PATH)/lib/libc.musl-x86_64.so.1 && \
-	cp `readlink -f /lib/libz.so.1` $(INSTALL_PATH)/lib/libz.so.1 && \
-	cp `readlink -f /usr/lib/libzstd.so.1` $(INSTALL_PATH)/lib/libzstd.so.1
-endif
-endif
 
 .PHONY: glog/package
 glog/package:
