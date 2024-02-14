@@ -25,7 +25,7 @@ MAKE_JOBS ?= 1
 ARCH ?= x86_64
 RUNTIME_IMAGE = "ubi"
 ALPINE_IMAGE= "alpine"
-ifeq ($(ARCH), "s390x")
+ifeq ($(ARCH),s390x)
 	RUNTIME_IMAGE = "alpine"
 	ALPINE_IMAGE= "s390x/alpine"
 endif

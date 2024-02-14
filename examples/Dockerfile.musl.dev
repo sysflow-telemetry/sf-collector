@@ -21,11 +21,13 @@ ARG FALCO_LIBS_VER
 ARG FALCO_VER
 ARG UBI_VER
 ARG ALPINE_VER
+ARG ALPINE_IMAGE
+ARG RUNTIME_IMAGE
 
 #-----------------------
 # Stage: Builder
 #-----------------------
-FROM alpine:${ALPINE_VER} AS builder
+FROM ${ALPINE_IMAGE}:${ALPINE_VER} AS builder
 
 ARG ARCH="x86_64"
 
@@ -57,7 +59,7 @@ RUN MUSL=1 make -C /build install
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
+FROM sysflowtelemetry/${RUNTIME_IMAGE}:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
 
 COPY --from=builder /usr/lib/sysflow /usr/lib/sysflow
 COPY --from=builder /usr/local/example/bin/callback /usr/local/example/bin/callback

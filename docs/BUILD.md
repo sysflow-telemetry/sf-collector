@@ -34,6 +34,22 @@ If this is your first time building the collector, run the build task in the bac
 make MAKE_JOBS=8 build
 ```
 
+### Build collector and callback for s390x
+
+```bash
+make init
+make ARCH=s390x  docker-base-build/musl
+make ARCH=s390x MAKE_JOBS=4 docker-mods-build/musl > modules.output 2>&1
+make ARCH=s390x MAKE_JOBS=4 docker-libs-build/musl
+make ARCH=s390x MAKE_JOBS=4 docker-collector-build/musl
+make docker-driver-build/musl/s390x
+make ARCH=s390x docker-runtime-build/musl
+make ARCH=s390x package-libs/musl
+cd examples/
+cp ../scripts/cpack/libsysflow-musl-0.6.1-rc1-s390x.tar.gz .
+make ARCH=s390x build/musldev
+```
+
 During the initial build, a number of base images are created. These are only needed once per dependency version set. Pre-built versions of these images are also available in [Docker Hub](https://hub.docker.com/u/sysflowtelemetry) and [GHCR](https://github.com/orgs/sysflow-telemetry/packages?repo_name=sf-collector).
 
 | **Image** | **Tag** | **Description** | **Dockerfile** |
