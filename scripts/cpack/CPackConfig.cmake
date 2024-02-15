@@ -39,6 +39,9 @@ endif()
 if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
 endif()
+if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "s390x")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "s390x")
+endif()
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/sysflow-telemetry/sf-collector")
 
 # RPM

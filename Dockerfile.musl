@@ -32,6 +32,7 @@ FROM sysflowtelemetry/alpine:mods-${FALCO_LIBS_VER}-${FALCO_VER}-${ALPINE_VER} A
 # install path build args
 ARG INSTALL_PATH=/usr/local/sysflow
 ARG MODPREFIX=${INSTALL_PATH}/modules
+ARG ARCH=x86_64
 
 # environment and build args
 ARG BUILD_NUMBER=0
@@ -58,6 +59,7 @@ RUN make -C /build/src/libs \
          SCHPREFIX=${MODPREFIX}/conf \
          DEBUG=${DEBUG} \
          ASAN=${ASAN} \
+         ARCH=${ARCH} \
          MUSL=1 \
          install
 
@@ -89,6 +91,7 @@ RUN cd /build/src/collector && \
          SCHPREFIX=${MODPREFIX}/conf \
          DEBUG=${DEBUG} \
          ASAN=${ASAN} \
+         ARCH=${ARCH} \
          MUSL=1 \
          install
 

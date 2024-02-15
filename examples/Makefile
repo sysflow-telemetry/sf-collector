@@ -52,7 +52,7 @@ endif
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
 	CFLAGS += $(MUSLFLAGS) -fPIE -pie -DHAVE_STRLCPY
-	LDFLAGS += $(MUSLFLAGS) -Wl,-rpath $(SYSFLOW_LIB_PREFIX) -Xlinker "--dynamic-linker=$(SYSFLOW_LIB_PREFIX)/ld-musl-x86_64.so.1"
+	LDFLAGS += $(MUSLFLAGS) -Wl,-rpath $(SYSFLOW_LIB_PREFIX) -Xlinker "--dynamic-linker=$(SYSFLOW_LIB_PREFIX)/ld-musl-$(ARCH).so.1"
 	LIBS += -lzstd
 else 
 	LIBS += -lrt -lanl

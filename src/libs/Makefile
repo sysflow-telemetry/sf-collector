@@ -100,12 +100,12 @@ ifeq ($(MUSL), 0)
 else
 	$(AR) -M <libsysflow-musl.mri
 	mkdir -p $(ELF_RPATH) && \
-	cp `readlink -f /lib/ld-musl-x86_64.so.1` $(ELF_RPATH)/ld-musl-x86_64.so.1 && \
+	cp `readlink -f /lib/ld-musl-$(ARCH).so.1` $(ELF_RPATH)/ld-musl-$(ARCH).so.1 && \
 	cp `readlink -f /usr/lib/libstdc++.so.6` $(ELF_RPATH)/libstdc++.so.6 && \
 	cp `readlink -f /usr/lib/libelf.so.1` $(ELF_RPATH)/libelf.so.1 && \
 	cp `readlink -f /usr/lib/libelf.so.1` $(ELF_RPATH)/libelf.so && \
 	cp `readlink -f /usr/lib/libgcc_s.so.1` $(ELF_RPATH)/libgcc_s.so.1 && \
-	cp `readlink -f /lib/libc.musl-x86_64.so.1` $(ELF_RPATH)/libc.musl-x86_64.so.1 && \
+	cp `readlink -f /lib/libc.musl-$(ARCH).so.1` $(ELF_RPATH)/libc.musl-$(ARCH).so.1 && \
 	cp `readlink -f /lib/libz.so.1` $(ELF_RPATH)/libz.so.1 && \
 	cp `readlink -f /usr/lib/libzstd.so.1` $(ELF_RPATH)/libzstd.so.1
 endif

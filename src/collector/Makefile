@@ -25,6 +25,7 @@ include ../../makefile.env.inc
 # Target configuration
 TARGET = sysporter
 SYSFLOW_BUILD_NUMBER ?= 0
+ARCH ?= x86_64
 
 # Lint options
 LINT = clang-tidy-9
@@ -73,7 +74,7 @@ CFLAGS = -std=c++17 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
 	CFLAGS += $(MUSLFLAGS) -fPIE -pie -DHAVE_STRLCPY
-	LDFLAGS += $(MUSLFLAGS) -L$(ELF_RPATH) -Wl,-rpath $(ELF_RPATH) -Xlinker "--dynamic-linker=$(ELF_RPATH)/ld-musl-x86_64.so.1"
+	LDFLAGS += $(MUSLFLAGS) -L$(ELF_RPATH) -Wl,-rpath $(ELF_RPATH) -Xlinker "--dynamic-linker=$(ELF_RPATH)/ld-musl-$(ARCH).so.1"
 	LIBS += -lzstd
 else 
 	LIBS += -lrt -lanl
