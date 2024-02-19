@@ -21,11 +21,15 @@ ARG FALCO_LIBS_VER
 ARG FALCO_VER
 ARG UBI_VER
 ARG ALPINE_VER
+ARG ALPINE_IMAGE
+ARG RUNTIME_IMAGE
 
 #-----------------------
 # Stage: Builder
 #-----------------------
-FROM alpine:${ALPINE_VER} AS builder
+FROM ${ALPINE_IMAGE}:${ALPINE_VER} AS builder
+
+ARG ARCH="x86_64"
 
 # sysflow release
 ARG SYSFLOW_VERSION
@@ -42,9 +46,7 @@ RUN apk add \
 	sparsehash
 
 # install libsysflow
-RUN wget -qO- https://github.com/sysflow-telemetry/sf-collector/releases/download/${SYSFLOW_VERSION}/libsysflow-musl-${SYSFLOW_VERSION}-x86_64.tar.gz | tar xz --strip-components=2  -C /usr
-#COPY libsysflow-musl-${SYSFLOW_VERSION}-x86_64.tar.gz .
-#RUN tar xzf libsysflow-musl-${SYSFLOW_VERSION}-x86_64.tar.gz && cp -r libsysflow-musl-${SYSFLOW_VERSION}-x86_64/usr/* /usr/.
+RUN wget -qO- https://github.com/sysflow-telemetry/sf-collector/releases/download/${SYSFLOW_VERSION}/libsysflow-musl-${SYSFLOW_VERSION}-${ARCH}.tar.gz | tar xz --strip-components=2  -C /usr
 
 # build the example program
 COPY callback.cpp /build/
@@ -55,8 +57,9 @@ RUN MUSL=1 make -C /build install
 #-----------------------
 # Stage: Runtime
 #-----------------------
-FROM sysflowtelemetry/ubi:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
+FROM sysflowtelemetry/${RUNTIME_IMAGE}:driver-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS runtime
 
+COPY --from=builder /usr/lib/sysflow /usr/lib/sysflow
 COPY --from=builder /usr/local/example/bin/callback /usr/local/example/bin/callback
 
 ARG driver_type="e"

@@ -72,6 +72,7 @@ FROM libs as collector
 ARG BUILD_NUMBER=0
 ARG DEBUG=0
 ARG ASAN=0
+ARG ARCH=x86_64
 
 # install path build args
 ARG INSTALL_PATH=/usr/local/sysflow

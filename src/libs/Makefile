@@ -49,6 +49,7 @@ ELF_RPATH ?= /usr/lib/sysflow
 DEBUG ?= 0
 ASAN ?= 0
 MUSL ?= 0
+ARCH ?= x86_64
 
 # Compiler options
 CXX = g++

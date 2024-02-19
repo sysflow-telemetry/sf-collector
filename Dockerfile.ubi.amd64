@@ -72,6 +72,8 @@ ENV HOME=/root
 
 ARG MAKE_JOBS=1
 
+ARG ARCH=x86_64
+
 #  build modules
 COPY ./modules /build/modules
 COPY ./makefile.* /build/

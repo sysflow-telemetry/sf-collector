@@ -97,6 +97,8 @@ if [ "${MODE}" == "base" ] ; then
         libubsan \
         llvm-toolset \
         bpftool \
+        libzstd-devel \
+        elfutils-libelf-devel \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
 
 

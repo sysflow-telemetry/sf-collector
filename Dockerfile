@@ -30,6 +30,7 @@ FROM sysflowtelemetry/ubi:mods-${FALCO_LIBS_VER}-${FALCO_VER}-${UBI_VER} AS libs
 # install path build args
 ARG INSTALL_PATH=/usr/local/sysflow
 ARG MODPREFIX=${INSTALL_PATH}/modules
+ARG ARCH=x86_64
 
 # environment and build args
 ARG BUILD_NUMBER=0
@@ -46,16 +47,17 @@ COPY ./modules/sysflow/c\+\+/sysflow/avsc_sysflow5.hh ${MODPREFIX}/include/sysfl
 COPY ./src/libs /build/src/libs
 RUN make -C /build/src/libs \
          SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
-         LIBLOCALPREFIX=${MODPREFIX} \
-         FALCOLOCALLIBPREFIX=${MODPREFIX}/lib/falcosecurity \
-         FALCOLOCALINCPREFIX=${MODPREFIX}/include/falcosecurity \
-         AVRLOCALLIBPREFIX=${MODPREFIX}/lib \
-         AVRLOCALINCPREFIX=${MODPREFIX}/include \
-         SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
-         FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
-         SCHLOCALPREFIX=${MODPREFIX}/conf \
+         MODPREFIX=${MODPREFIX} \
+         FALCOLIBPREFIX=${MODPREFIX}/lib/falcosecurity \
+         FALCOINCPREFIX=${MODPREFIX}/include/falcosecurity \
+         AVRLIBPREFIX=${MODPREFIX}/lib \
+         AVRINCPREFIX=${MODPREFIX}/include \
+         SFINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
+         FSINCPREFIX=${MODPREFIX}/include/filesystem \
+         SCHPREFIX=${MODPREFIX}/conf \
          DEBUG=${DEBUG} \
          ASAN=${ASAN} \
+         ARCH=${ARCH} \
          install
 
 #-----------------------
@@ -67,6 +69,7 @@ FROM libs as collector
 ARG BUILD_NUMBER=0
 ARG DEBUG=0
 ARG ASAN=0
+ARG ARCH=x86_64
 
 # install path build args
 ARG INSTALL_PATH=/usr/local/sysflow
@@ -76,16 +79,17 @@ ARG MODPREFIX=${INSTALL_PATH}/modules
 COPY ./src/collector /build/src/collector
 RUN cd /build/src/collector && \
     make SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
-         LIBLOCALPREFIX=${MODPREFIX} \
-         FALCOLOCALLIBPREFIX=${MODPREFIX}/lib/falcosecurity \
-         FALCOLOCALINCPREFIX=${MODPREFIX}/include/falcosecurity \
-         AVRLOCALLIBPREFIX=${MODPREFIX}/lib \
-         AVRLOCALINCPREFIX=${MODPREFIX}/include \
-         SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
-         FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
-         SCHLOCALPREFIX=${MODPREFIX}/conf \
+         MODPREFIX=${MODPREFIX} \
+         FALCOLIBPREFIX=${MODPREFIX}/lib/falcosecurity \
+         FALCOINCPREFIX=${MODPREFIX}/include/falcosecurity \
+         AVRLIBPREFIX=${MODPREFIX}/lib \
+         AVRINCPREFIX=${MODPREFIX}/include \
+         SFINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
+         FSINCPREFIX=${MODPREFIX}/include/filesystem \
+         SCHPREFIX=${MODPREFIX}/conf \
          DEBUG=${DEBUG} \
          ASAN=${ASAN} \
+         ARCH=${ARCH} \
          install
 
 #-----------------------
