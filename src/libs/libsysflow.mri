@@ -6,6 +6,5 @@ addlib /usr/local/sysflow/modules/lib/libxxhash.a
 addlib /usr/lib64/libboost_iostreams.a
 addlib /usr/local/lib64/libsnappy.a
 addlib /usr/local/lib64/libglog.a
-addlib /usr/lib64/libelf.a
 save
 end

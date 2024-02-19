@@ -13,9 +13,6 @@
 [submodule "modules/falco"]
 	path = modules/falco
 	url = https://github.com/falcosecurity/falco.git
-[submodule "modules/elfutils"]
-	path = modules/elfutils
-	url = https://sourceware.org/git/elfutils.git
 [submodule "modules/glog"]
 	path = modules/glog
 	url = https://github.com/google/glog.git
@@ -34,3 +31,6 @@
 [submodule "modules/sparsehash"]
 	path = modules/sparsehash
 	url = https://github.com/sparsehash/sparsehash.git
+[submodule "modules/elf"]
+	path = modules/elf
+	url = https://github.com/arachsys/libelf.git

@@ -25,6 +25,7 @@ include ../../makefile.env.inc
 # Target configuration
 TARGET = sysporter
 SYSFLOW_BUILD_NUMBER ?= 0
+ARCH ?= x86_64
 
 # Lint options
 LINT = clang-tidy-9
@@ -34,45 +35,46 @@ LINTCHECKS = "bugprone-*"
 	     -llvm-header-guard,misc-*,modernize-*,-modernize-use-trailing-return-type,-modernize-loop-convert,\
 	     -modernize-make-unique,-modernize-pass-by-value, performance-*,-readability-*,\
 	     -readability-convert-member-functions-to-static"
-LINTSRCS := $(filter-out MurmurHash3.cpp, $(wildcard *.cpp))
+LINTSRCS := $(wildcard *.cpp)
 LINTHEADERS = "^($(shell pwd)\/)((?!logger).)*"
 
 # Dir structure configuration (these are overridden during docker build) 
-LIBLOCALPREFIX ?= ../../modules
-FALCOLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/lib
-FALCOLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/falco-libs/build/include
-AVRLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
-AVRLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/avro/lang/c++/build
-SFLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/sysflow/c++
-SFLOCALLIBPREFIX ?= $(LIBLOCALPREFIX)/lib
-FSLOCALINCPREFIX ?= $(LIBLOCALPREFIX)/filesystem/include
-SCHLOCALPREFIX ?= $(LIBLOCALPREFIX)/sysflow/avro/avsc
+MODPREFIX ?= ../../modules
+FALCOLIBPREFIX ?= $(MODPREFIX)/falco-libs/build/lib
+FALCOINCPREFIX ?= $(MODPREFIX)/falco-libs/build/include
+AVRLIBPREFIX ?= $(MODPREFIX)/avro/lang/c++/build
+AVRINCPREFIX ?= $(MODPREFIX)/avro/lang/c++/build
+SFINCPREFIX ?= $(MODPREFIX)/sysflow/c++
+SFLIBPREFIX ?= $(MODPREFIX)/lib
+FSINCPREFIX ?= $(MODPREFIX)/filesystem/include
+SCHPREFIX ?= $(MODPREFIX)/sysflow/avro/avsc
+ELF_RPATH ?= /usr/lib/sysflow
 DEBUG ?= 0
 ASAN ?= 0
 MUSL ?= 0
 
 # Compiler options
 CXX = g++
-LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs
-MUSLFLAGS = -static -Os
-LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(FALCOLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/  -L/usr/lib/
+LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs -lelf
+MUSLFLAGS = -Os
+LDFLAGS = $(LIBS) -L$(FALCOLIBPREFIX)/ -L$(AVRLIBPREFIX)/  -L/usr/lib/ 
 CFLAGS = -std=c++17 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ \
 		 -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD \
-		 -I$(SFLOCALINCPREFIX)/ \
-		 -I$(FSLOCALINCPREFIX)/ \
-	 	 -I$(FALCOLOCALINCPREFIX)/ \
-		 -I$(FALCOLOCALINCPREFIX)/curl/ \
-		 -I$(FALCOLOCALINCPREFIX)/json2/ \
-		 -I$(FALCOLOCALINCPREFIX)/openssl/ \
-		 -I$(FALCOLOCALINCPREFIX)/driver/ \
-		 -I$(FALCOLOCALINCPREFIX)/userspace/libsinsp/ \
-		 -I$(FALCOLOCALINCPREFIX)/userspace/libscap/ \
-		 -I$(AVRLOCALINCPREFIX)/ 
+		 -I$(SFINCPREFIX)/ \
+		 -I$(FSINCPREFIX)/ \
+	 	 -I$(FALCOINCPREFIX)/ \
+		 -I$(FALCOINCPREFIX)/curl/ \
+		 -I$(FALCOINCPREFIX)/json2/ \
+		 -I$(FALCOINCPREFIX)/openssl/ \
+		 -I$(FALCOINCPREFIX)/driver/ \
+		 -I$(FALCOINCPREFIX)/userspace/libsinsp/ \
+		 -I$(FALCOINCPREFIX)/userspace/libscap/ \
+		 -I$(AVRINCPREFIX)/ 
 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
 	CFLAGS += $(MUSLFLAGS) -fPIE -pie -DHAVE_STRLCPY
-	LDFLAGS += $(MUSLFLAGS)
+	LDFLAGS += $(MUSLFLAGS) -L$(ELF_RPATH) -Wl,-rpath $(ELF_RPATH) -Xlinker "--dynamic-linker=$(ELF_RPATH)/ld-musl-$(ARCH).so.1"
 	LIBS += -lzstd
 else 
 	LIBS += -lrt -lanl
@@ -93,12 +95,12 @@ ifeq ($(ASAN), 1)
 endif
 
 .PHONY: all
-all: $(TARGET) $(LIB_TARGET)
+all: $(TARGET)
 
 .PHONY: install
 install: all
 	mkdir -p $(INSTALL_PATH)/bin && cp sysporter $(INSTALL_PATH)/bin
-	mkdir -p $(INSTALL_PATH)/conf && cp $(SCHLOCALPREFIX)/SysFlow.avsc $(INSTALL_PATH)/conf
+	mkdir -p $(INSTALL_PATH)/conf && cp $(SCHPREFIX)/SysFlow.avsc $(INSTALL_PATH)/conf
 
 .PHONY: uninstall
 uninstall:

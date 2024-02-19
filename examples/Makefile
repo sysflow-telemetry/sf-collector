@@ -29,16 +29,16 @@ INSTALL_PATH ?= /usr/local/example
 SYSFLOW_LIB_PREFIX = /usr/lib/sysflow
 SYSFLOW_INCLUDE_PREFIX = /usr/include/sysflow
 FALCO_LIBS_LIB_PREFIX = /usr/lib/falcosecurity
-FALCO_LIBS_INCLUDE_PREFIX = /usr/include/falcosecurity
 
 ARCH ?= x86_64
+
 # Compiler options
 DEBUG ?= 0
 MUSL ?= 0
 CLANG_FORMAT = clang-format-12
 CXX = g++
-LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs
-MUSLFLAGS = -static -Os
+LIBS = $(SYSFLOW_LIB_PREFIX)/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs -lelf
+MUSLFLAGS = -Os
 LDFLAGS = $(LIBS) -L$(FALCO_LIBS_LIB_PREFIX) -L$(SYSFLOW_LIB_PREFIX)
 CFLAGS = -std=c++17 -Wall -DHAS_CAPTURE -DPLATFORM_NAME=\"Linux\" -DK8S_DISABLE_THREAD -I$(SYSFLOW_INCLUDE_PREFIX)
 
@@ -52,7 +52,7 @@ endif
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
 	CFLAGS += $(MUSLFLAGS) -fPIE -pie -DHAVE_STRLCPY
-	LDFLAGS += $(MUSLFLAGS)
+	LDFLAGS += $(MUSLFLAGS) -Wl,-rpath $(SYSFLOW_LIB_PREFIX) -Xlinker "--dynamic-linker=$(SYSFLOW_LIB_PREFIX)/ld-musl-$(ARCH).so.1"
 	LIBS += -lzstd
 else 
 	LIBS += -lrt -lanl
@@ -90,7 +90,7 @@ build/dev:
 
 .PHONY: build/musl
 build/musl:
-	( DOCKER_BUILDKIT=1 docker build --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg ALPINE_VER=${ALPINE_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg ARCH=${ARCH} --build-arg RUNTIME_IMAGE=${RUNTIME_IMAGE} --build-arg ALPINE_IMAGE=${ALPINE_IMAGE} --build-arg SYSFLOW_VERSION=${SYSFLOW_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg ALPINE_VER=${ALPINE_VERSION} -t callback:${SYSFLOW_VERSION} -f Dockerfile.musl . )
 	docker run --rm -v $(shell pwd):/mnt --entrypoint=/bin/bash callback:${SYSFLOW_VERSION} -c "cp /usr/local/example/bin/callback /mnt/."
 
 .PHONY: build/musldev

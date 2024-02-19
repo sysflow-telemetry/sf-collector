@@ -43,17 +43,17 @@ else
 endif
 	cd falco-driver && git fetch origin && git checkout $(FALCO_LIBS_DRIVER_VERSION)
 	cd avro && git fetch origin && git checkout $(AVRO_VERSION)
-	cd elfutils && git fetch origin && git checkout $(ELFUTILS_VERSION)
+	cd elf && git fetch origin && git checkout $(ELF_VERSION)
 	cd glog && git fetch origin && git checkout $(GLOG_VERSION)
 	cd snappy && git fetch origin && git checkout $(SNAPPY_VERSION)
 	cd dkms && git fetch origin && git checkout $(DKMS_VERSION)
 	cd filesystem && git fetch origin && git checkout $(GHCFS_VERSION)
 	cd sparsehash && git fetch origin && git checkout $(SPARSE_VERSION)
 
-# elfutils is a pre-requisite for libs.
+# libelf is a pre-requisite for libs build
 .PHONY: modules
-modules: elfutils/package \
-		elfutils/install \
+modules: elf/package \
+	    elf/install \
 		falcolibs/package \
 		falcodriver/package \
 		avro/package \
@@ -64,28 +64,6 @@ modules: elfutils/package \
 
 .PHONY: install
 install: modules \
-	falcolibs/install \
-	falcodriver/install \
-	avro/install \
-	sysflow/install \
-	fs/install \
-	glog/install \
-	snappy/install \
-	dkms-rh/install \
-	xxhash/install \
-	sparsehash/install
-
-.PHONY: modules/no-elfutils
-modules/no-elfutils: falcolibs/package \
-		falcodriver/package \
-		avro/package \
-		glog/package \
-		snappy/package \
-		xxhash/package \
-		sparsehash/package
-
-.PHONY: install/no-elfutils
-install/no-elfutils: modules/no-elfutils \
 	falcolibs/install \
 	falcodriver/install \
 	avro/install \
@@ -218,15 +196,13 @@ sysflow/install:
 fs/install:
 	mkdir -p $(FSINCPREFIX) && cp -r filesystem/include/* $(FSINCPREFIX)/
 
-.PHONY: elfutils/package
-elfutils/package:
-	cd elfutils && autoreconf -i -f && \
-	./configure --prefix=/usr --enable-maintainer-mode --disable-debuginfod --enable-deterministic-archives --disable-libdebuginfod && \
-	make -j${MAKE_JOBS} && make install
+.PHONY: elf/package
+elf/package:
+	cd elf && PREFIX=/usr make -j${MAKE_JOBS}
 
-.PHONY: elfutils/install
-elfutils/install:
-	cd elfutils && make install
+.PHONY: elf/install
+elf/install:
+	cd elf && PREFIX=/usr make -j${MAKE_JOBS} install
 
 .PHONY: glog/package
 glog/package:
@@ -242,25 +218,25 @@ snappy/package:
 	cd snappy && cmake -S . -B build -G "Unix Makefiles" -DSNAPPY_BUILD_BENCHMARKS=OFF -DSNAPPY_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=OFF && \
 	cmake --build build -- -j${MAKE_JOBS}
 
+.PHONY: snappy/install
+snappy/install:
+	cd snappy/build && make install
+
 .PHONY: xxhash/package
 xxhash/package:
 	cd xxHash && make all
-
-.PHONY: sparsehash/package
-sparsehash/package:
-	cd sparsehash && ./configure && make
 
 .PHONY: xxhash/install
 xxhash/install:
 	cd xxHash && cp libxxhash.a $(LIBPREFIX) && cp libxxhash.so* $(LIBPREFIX) && cp *.h $(MODPREFIX)/include/
 
+.PHONY: sparsehash/package
+sparsehash/package:
+	cd sparsehash && ./configure && make
+
 .PHONY: sparsehash/install
 sparsehash/install:
 	cd sparsehash && make install
-
-.PHONY: snappy/install
-snappy/install:
-	cd snappy/build && make install
 
 .PHONY: dkms-deb/install
 dkms-deb/install:

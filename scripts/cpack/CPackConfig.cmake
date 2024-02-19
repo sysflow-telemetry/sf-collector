@@ -39,6 +39,9 @@ endif()
 if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
 endif()
+if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "s390x")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "s390x")
+endif()
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/sysflow-telemetry/sf-collector")
 
 # RPM
@@ -56,6 +59,7 @@ set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     /usr/bin
     /usr/share
     /usr/lib
+    /usr/lib/sysflow
     /usr/lib/systemd
     /usr/lib/systemd/system)
 set(CPACK_RPM_PACKAGE_RELOCATABLE "OFF")
@@ -65,5 +69,5 @@ set(CPACK_RPM_PACKAGE_AUTOREQ "OFF")
 
 # Contents
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_PROCESSOR})
-set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build/conf" "/etc/sysflow/conf" "${CMAKE_CURRENT_LIST_DIR}/build/driver" "/etc/sysflow/driver" "${CMAKE_CURRENT_LIST_DIR}/build/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build/service" "/usr/lib/systemd/system" "${CMAKE_CURRENT_LIST_DIR}/build/modules" "/etc/sysflow/modules")
+set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build/conf" "/etc/sysflow/conf" "${CMAKE_CURRENT_LIST_DIR}/build/driver" "/etc/sysflow/driver" "${CMAKE_CURRENT_LIST_DIR}/build/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build/service" "/usr/lib/systemd/system" "${CMAKE_CURRENT_LIST_DIR}/build/modules" "/etc/sysflow/modules" "${CMAKE_CURRENT_LIST_DIR}/build/lib" "/usr/lib")
 

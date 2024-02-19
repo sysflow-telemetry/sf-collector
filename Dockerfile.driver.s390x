@@ -44,11 +44,8 @@ RUN apk add \
     automake \
     m4 \
     libtool \
-    elfutils-dev \
-    libelf-static \
     patch \
     binutils \
-    libelf-static \       
     flex \
     bison \
     wget \
