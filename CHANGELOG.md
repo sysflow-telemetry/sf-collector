@@ -21,6 +21,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - s390x support for libSysFlow
 
+### Changed
+
+- Update build pipeline to use shared libelf
+- Bump UBI to 9.3-1552
+
 ## [0.6.0] - 2023-11-28
 
 ### Added
