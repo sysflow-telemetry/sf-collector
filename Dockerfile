@@ -213,7 +213,7 @@ ENV FILE_ONLY=0
 ENV FILE_READ_MODE=0
 
 # install extra packages for tests
-RUN apt update && apt install -yq python3 python3-pip python-is-python3 wget
+RUN apt update && apt install -yq python3 python3-pip python-is-python3 wget elfutils
 RUN mkdir /tmp/bats && cd /tmp/bats && \
     wget https://github.com/bats-core/bats-core/archive/v${BATS_VERSION}.tar.gz && \
     tar -xzf v${BATS_VERSION}.tar.gz && rm -rf v${BATS_VERSION}.tar.gz && \
