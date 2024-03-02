@@ -103,6 +103,10 @@ inline void ControlFlowProcessor::removeAndWriteProcessFlow(ProcessObj *proc) {
 
 int ControlFlowProcessor::handleProcEvent(sinsp_evt *ev, OpFlags flag) {
   sinsp_threadinfo *ti = ev->get_thread_info();
+  if (ti == nullptr) {
+    SF_DEBUG(m_logger, "ti is NULL in handleProcEvent for flag " << flag);
+    return -1;
+  }
 
   switch (flag) {
   case OP_EXIT: {
