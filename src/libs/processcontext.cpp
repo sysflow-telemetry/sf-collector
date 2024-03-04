@@ -69,7 +69,14 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
 
   if (parent != nullptr) {
     OID poid;
-    parent = parent->is_main_thread() ? parent : parent->get_main_thread();
+    if (!parent->is_main_thread()) {
+      sinsp_threadinfo *main = parent->get_main_thread();
+      if (main != nullptr) {
+        parent = main;
+      } else {
+        SF_DEBUG(m_logger, "Parent main thread is NULL.");
+      }
+    }
     poid.createTS = parent->m_clone_ts;
     poid.hpid = parent->m_pid;
     p->proc.poid.set_OID(poid);
@@ -252,7 +259,12 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   mt = mt->get_parent_thread();
 
   while (mt != nullptr && mt->m_tid != -1) {
-    mt = mt->is_main_thread() ? mt : mt->get_main_thread();
+    if (mt->is_main_thread()) {
+      sinsp_threadinfo *tmp = mt->get_main_thread();
+      if (tmp != nullptr) {
+        mt = tmp;
+      }
+    }
     if (mt->m_clone_ts == 0 && mt->m_pid == 0) {
       ct = mt;
       mt = mt->get_parent_thread();

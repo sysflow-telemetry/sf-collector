@@ -162,7 +162,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     m_inspector->set_snaplen(0);
   }
   m_offline = !config->scapInputPath.empty();
-  m_hasPrefix = (config->filePath.back() != '/');
+  m_hasPrefix = ((!config->filePath.empty()) && config->filePath.back() != '/');
   m_callback = config->callback;
 }
 
