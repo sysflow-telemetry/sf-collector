@@ -74,7 +74,7 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
       if (main != nullptr) {
         parent = main;
       } else {
-        SF_DEBUG(m_logger, "Parent main thread is NULL!!");
+        SF_DEBUG(m_logger, "Parent main thread is NULL.");
       }
     }
     poid.createTS = parent->m_clone_ts;
