@@ -17,9 +17,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [0.6.2] - 2024-03-04
 
-### Changed
+### Fixed
 
-- Fixed segfaulting issues in k8s/kind
+- Fix segfaulting issues in k8s/kind
 
 ## [0.6.1] - 2024-02-23
 
