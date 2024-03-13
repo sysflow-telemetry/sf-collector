@@ -35,6 +35,7 @@
 #include <ctime>
 #include <stdlib.h>
 #include <string>
+#include <thread>
 
 namespace sysflowprocessor {
 class SysFlowProcessor {

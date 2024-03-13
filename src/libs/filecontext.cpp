@@ -20,6 +20,10 @@
 #include "filecontext.h"
 #include <utility>
 
+extern "C" {
+#include "sidcache_api.h"
+}
+
 using file::FileContext;
 
 FileContext::FileContext(container::ContainerContext *containerCxt,
@@ -49,6 +53,30 @@ FileObj *FileContext::createFile(sinsp_evt *ev, std::string path, char typechar,
   } else {
     f->file.containerId.set_null();
   }
+  if (ev->get_type() == PPME_SYSCALL_OPENAT_2_X ||
+      ev->get_type() == PPME_SYSCALL_OPEN_X ||
+      ev->get_type() == PPME_SYSCALL_OPENAT2_X) {
+    uint32_t n = ev->get_num_params();
+    printf("Openat called %s\n", f->file.path.c_str());
+    int paramid = 0;
+    if (ev->get_type() == PPME_SYSCALL_OPENAT_2_X && n >= 8) {
+      paramid = 7;
+    } else if (ev->get_type() == PPME_SYSCALL_OPEN_X ||
+               ev->get_type() == PPME_SYSCALL_OPENAT2_X && n >= 7) {
+      paramid = 6;
+    }
+    if (paramid != 0) {
+      const sinsp_evt_param *p = ev->get_param(paramid);
+      f->file.sid = *reinterpret_cast<int64_t *>(p->m_val);
+      printf("Openat %s, SID: %d\n", f->file.path.c_str(), f->file.sid);
+      char *label = sc_get_ctx(f->file.sid);
+      if (label != nullptr) {
+        f->file.selabel = std::string(label);
+        printf("Openat %s, SID: %d, Label: %s\n", f->file.path.c_str(),
+               f->file.sid, f->file.selabel.c_str());
+      }
+    }
+  }
   return f;
 }
 FileObj *FileContext::getFile(sinsp_evt *ev, sinsp_fdinfo_t *fdinfo,
@@ -68,6 +96,14 @@ FileObj *FileContext::getFile(sinsp_evt *ev, const std::string &path,
   FileObj *file = nullptr;
   if (f != m_files.end()) {
     created = false;
+    if (f->second->file.selabel.empty()) {
+      char *label = sc_get_ctx(f->second->file.sid);
+      if (label != nullptr && strlen(label) > 0) {
+        f->second->file.selabel = std::string(label);
+        f->second->written = false;
+      }
+    }
+
     if (f->second->written) {
       return f->second;
     }

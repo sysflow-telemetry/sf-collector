@@ -238,3 +238,10 @@
 #define IS_UNLINKAT(TYPE)                                                      \
   ((TYPE) == PPME_SYSCALL_UNLINKAT_X || (TYPE) == PPME_SYSCALL_UNLINKAT_2_X)
 #endif
+
+#define IS_CLONE(TYPE)                                                         \
+  ((TYPE) == PPME_SYSCALL_CLONE_11_X || (TYPE) == PPME_SYSCALL_CLONE_16_X ||   \
+   (TYPE) == PPME_SYSCALL_CLONE_17_X || (TYPE) == PPME_SYSCALL_CLONE_20_X ||   \
+   (TYPE) == PPME_SYSCALL_FORK_X || (TYPE) == PPME_SYSCALL_VFORK_X ||          \
+   (TYPE) == PPME_SYSCALL_FORK_17_X || (TYPE) == PPME_SYSCALL_VFORK_17_X ||    \
+   (TYPE) == PPME_SYSCALL_FORK_20_X || (TYPE) == PPME_SYSCALL_VFORK_20_X)

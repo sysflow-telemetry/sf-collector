@@ -3,6 +3,7 @@ addlib /usr/local/sysflow/lib/libsysflow.a
 addlib /usr/local/sysflow/modules/lib/falcosecurity/libs.a
 addlib /usr/local/sysflow/modules/lib/libavrocpp_s.a
 addlib /usr/local/sysflow/modules/lib/libxxhash.a
+addlib /usr/local/sysflow/modules/lib/libbpf.a
 addlib /usr/lib64/libboost_iostreams.a
 addlib /usr/local/lib64/libsnappy.a
 addlib /usr/local/lib64/libglog.a

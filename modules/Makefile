@@ -20,7 +20,7 @@
 include ../makefile.manifest.inc
 include ../makefile.env.inc
 
-MAKE_JOBS ?= 1
+MAKE_JOBS ?= 8
 BUNDLE_FALCO_LIBS ?= 1
 
 $(info    MUSL is $(MUSL))
@@ -34,13 +34,7 @@ all: init \
 
 .PHONY: init
 init:
-	git submodule update --init --recursive --force
 	cd falco && git fetch origin && git checkout $(FALCO_VERSION)
-ifneq ($(FALCO_LIBS_PR),)
-	cd falco-libs && git fetch origin pull/$(FALCO_LIBS_PR)/head:pull_$(FALCO_LIBS_PR) && git checkout pull_$(FALCO_LIBS_PR)
-else
-	cd falco-libs && git fetch origin && git checkout $(FALCO_LIBS_VERSION)
-endif
 	cd falco-driver && git fetch origin && git checkout $(FALCO_LIBS_DRIVER_VERSION)
 	cd avro && git fetch origin && git checkout $(AVRO_VERSION)
 	cd elfutils && git fetch origin && git checkout $(ELFUTILS_VERSION)
@@ -111,8 +105,6 @@ falcolibs/package:
 			-DUSE_BUNDLED_DEPS=ON \
 			-DUSE_BUNDLED_LIBELF=OFF \
 			-DCREATE_TEST_TARGETS=OFF \
-			-DBUILD_LIBSCAP_EXAMPLES=OFF \
-			-DBUILD_LIBSINSP_EXAMPLES=OFF \
 			-DCMD_MAKE="make -j${MAKE_JOBS}" \
 			${MUSL_FLAG} ../. && make -j${MAKE_JOBS} && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
@@ -135,6 +127,8 @@ falcolibs/package:
 	cp -r protobuf-prefix/src/protobuf/target/include/google include/ && \
 	cp protobuf-prefix/src/protobuf/target/lib/libprotobuf.a lib && \
 	cp protobuf-prefix/src/protobuf/target/lib/libprotoc.a lib && \
+	cp libselinux-prefix/src/libselinux/src/libselinux.a lib && \
+	cp libsepol-prefix/src/libsepol/src/libsepol.a lib && \
 	cp tbb-prefix/src/tbb/lib_release/libtbb.a lib/ && \
 	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
 	cp -r b64-prefix/src/b64/include/b64 include/ && \

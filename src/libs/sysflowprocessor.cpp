@@ -19,6 +19,7 @@
 
 #include "sysflowprocessor.h"
 #include "sfcallbackwriter.h"
+#include "sidcachethread.h"
 
 using sysflowprocessor::SysFlowProcessor;
 
@@ -151,7 +152,8 @@ int SysFlowProcessor::checkForExpiredRecords() {
 int SysFlowProcessor::run() {
   int32_t res = 0;
   sinsp_evt *ev = nullptr;
-
+  sid::SIDCacheThread sidth;
+  std::thread sidThread(&sid::SIDCacheThread::run, &sidth);
   m_writer->initialize();
 
   m_cxt->getInspector()->start_capture();
@@ -234,6 +236,9 @@ int SysFlowProcessor::run() {
   SF_INFO(m_logger, "Exiting event capture loop. Shutting down.");
   m_cxt->getInspector()->stop_capture();
   printStats();
+
+  sidth.stop();
+  sidThread.join();
 
   return 0;
 }

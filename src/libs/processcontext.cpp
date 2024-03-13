@@ -18,6 +18,10 @@
  **/
 
 #include "processcontext.h"
+extern "C" {
+#include "sidcache_api.h"
+}
+#include "syscall_defs.h"
 
 using process::ProcessContext;
 
@@ -63,6 +67,26 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
   p->proc.cwd = mainthread->get_cwd();
   p->proc.env = mainthread->get_env();
   p->proc.tty = mainthread->m_tty;
+  if (ev->get_type() == PPME_SYSCALL_EXECVE_19_X ||
+      ev->get_type() == PPME_SYSCALL_EXECVEAT_X) {
+    uint32_t n = ev->get_num_params();
+    printf("Execve called %s, %s Num Params: %d\n", mainthread->m_exe.c_str(),
+           mainthread->m_exepath.c_str(), n);
+    if (n >= 28) {
+      const sinsp_evt_param *param = ev->get_param(27);
+      p->proc.sid = *reinterpret_cast<int64_t *>(param->m_val);
+      printf("Execve %s, %s, SID: %d\n", mainthread->m_exe.c_str(),
+             mainthread->m_exepath.c_str(), p->proc.sid);
+      char *label = sc_get_ctx(p->proc.sid);
+      if (label != nullptr) {
+        p->proc.selabel = std::string(label);
+        printf("Execve %s, %s SID: %d, Label: %s\n", mainthread->m_exe.c_str(),
+               mainthread->m_exepath.c_str(), p->proc.sid,
+               p->proc.selabel.c_str());
+      }
+    }
+  }
+
   sinsp_threadinfo *parent = mainthread->get_parent_thread();
 
   if (parent != nullptr) {
@@ -77,6 +101,13 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
                                             << mainthread->m_clone_ts << " "
                                             << parent->m_pid << " "
                                             << parent->m_clone_ts);
+    if (IS_CLONE(ev->get_type()) && utils::getSyscallResult(ev) == 0) {
+      ProcessObj *parentproc = getProcess(&poid);
+      if (parentproc != nullptr) {
+        p->proc.sid = parentproc->proc.sid;
+        p->proc.selabel = parentproc->proc.selabel;
+      }
+    }
   } else {
     SF_DEBUG(m_logger, "Unable to find parent for process "
                            << mainthread->m_exe << " PID " << mainthread->m_pid
@@ -219,6 +250,14 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   ProcessObj *process = nullptr;
   if (proc != m_procs.end()) {
     created = false;
+
+    if (proc->second->proc.selabel.empty()) {
+      char *label = sc_get_ctx(proc->second->proc.sid);
+      if (label != nullptr && strlen(label) > 0) {
+        proc->second->proc.selabel = std::string(label);
+        proc->second->written = false;
+      }
+    }
 
     if (proc->second->written) {
       return proc->second;

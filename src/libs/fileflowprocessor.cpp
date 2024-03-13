@@ -50,6 +50,7 @@ inline void FileFlowProcessor::populateFileFlow(
   if (flag == OP_OPEN) {
     ff->fileflow.openFlags = fdinfo->m_openflags;
   }
+
   ff->fileflow.endTs = 0;
   ff->fileflow.procOID.hpid = proc->proc.oid.hpid;
   ff->fileflow.procOID.createTS = proc->proc.oid.createTS;

@@ -93,6 +93,7 @@ if [ "${MODE}" == "base" ] ; then
         boost-static \
         sparsehash-devel \
         bc \
+	pcre2 \
         libasan \
         libubsan \
     && dnf -y clean all ; rm -rf /var/cache/{dnf,yum}
@@ -111,6 +112,7 @@ elif [ "${MODE}" == "driver" ] ; then
         make \
         cmake \
         pkgconfig \
+	pcre2 \
         autoconf \
         wget \
         automake \

@@ -67,7 +67,7 @@ CFLAGS = -std=c++11 -Wall -I.. -I/usr/local/include/ -I/usr/include/ \
 		 -I$(FALCOLOCALINCPREFIX)/userspace/common/ \
 		 -I$(AVRLOCALINCPREFIX)/
 
-OBJS = .sysflowlibs.o .sysflowlibs.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o .k8scontext.o .k8seventprocessor.o .modutils.o .sysflowexception.o
+OBJS = .sysflowlibs.o .sysflowlibs.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o .k8scontext.o .k8seventprocessor.o .modutils.o .sysflowexception.o .sidcachethread.o /usr/local/sysflow/modules/lib/sidcache.o
 
 $(info    MUSL is $(MUSL))
 ifeq ($(MUSL), 1)
@@ -199,6 +199,9 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .sysflowexception.o: sysflowexception.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $^
+
+.sidcachethread.o: sidcachethread.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $^
 
 .PHONY: clean

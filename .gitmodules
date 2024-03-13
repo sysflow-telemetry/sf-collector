@@ -9,7 +9,8 @@
 	url = https://github.com/gulrak/filesystem.git
 [submodule "modules/falco-libs"]
 	path = modules/falco-libs
-	url = https://github.com/falcosecurity/libs.git
+	url = git@github.com:/mitthu/falcolibs.git
+	branch = dev
 [submodule "modules/falco"]
 	path = modules/falco
 	url = https://github.com/falcosecurity/falco.git
@@ -27,7 +28,11 @@
 	url = https://github.com/dell/dkms.git
 [submodule "modules/falco-driver"]
 	path = modules/falco-driver
-	url = https://github.com/falcosecurity/libs.git
+	url = git@github.com:/mitthu/falcolibs.git
+	branch = dev
 [submodule "modules/xxHash"]
 	path = modules/xxHash
 	url = https://github.com/Cyan4973/xxHash.git
+[submodule "modules/libsid"]
+	path = modules/libsid
+	url = git@github.com:mitthu/sf-libsid.git
