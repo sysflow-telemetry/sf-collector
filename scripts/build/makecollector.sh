@@ -1,0 +1,14 @@
+MODPREFIX=/usr/local/sysflow/modules
+DEBUG=0
+ASAN=0
+make -C src/collector SYSFLOW_BUILD_NUMBER=$BUILD_NUMBER \
+         LIBLOCALPREFIX=${MODPREFIX} \
+         FALCOLOCALLIBPREFIX=${MODPREFIX}/lib/falcosecurity \
+         FALCOLOCALINCPREFIX=${MODPREFIX}/include/falcosecurity \
+         AVRLOCALLIBPREFIX=${MODPREFIX}/lib \
+         AVRLOCALINCPREFIX=${MODPREFIX}/include \
+         SFLOCALINCPREFIX=${MODPREFIX}/include/sysflow/c++ \
+         FSLOCALINCPREFIX=${MODPREFIX}/include/filesystem \
+         SCHLOCALPREFIX=${MODPREFIX}/conf \
+         DEBUG=${DEBUG} \
+         ASAN=${ASAN}

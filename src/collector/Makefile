@@ -54,7 +54,7 @@ MUSL ?= 0
 # Compiler options
 CXX = g++
 #LIBS = /usr/local/sysflow/modules/lib/sidcache.a ../libs/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf /usr/local/sysflow/modules/lib/libbpf.a
-LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf
+LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lsepol
 MUSLFLAGS = -static -Os
 LDFLAGS = $(LIBS) -L$(LIBPREFIX)/ -L$(FALCOLOCALLIBPREFIX)/ -L$(AVRLOCALLIBPREFIX)/ 
 CFLAGS = -std=c++11 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ \

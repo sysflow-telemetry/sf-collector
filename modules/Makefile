@@ -34,8 +34,9 @@ all: init \
 
 .PHONY: init
 init:
-	cd falco && git fetch origin && git checkout $(FALCO_VERSION)
-	cd falco-driver && git fetch origin && git checkout $(FALCO_LIBS_DRIVER_VERSION)
+	git submodule update --init --recursive --force
+	#cd falco && git fetch origin && git checkout $(FALCO_VERSION)
+	#cd falco-driver && git fetch origin && git checkout $(FALCO_LIBS_DRIVER_VERSION)
 	cd avro && git fetch origin && git checkout $(AVRO_VERSION)
 	cd elfutils && git fetch origin && git checkout $(ELFUTILS_VERSION)
 	cd glog && git fetch origin && git checkout $(GLOG_VERSION)
@@ -51,7 +52,7 @@ modules: elfutils/package \
 		falcodriver/package \
 		avro/package \
 		glog/package \
-		snappy/package \
+		libsid/package \
 		xxhash/package
 
 .PHONY: install
@@ -62,8 +63,8 @@ install: modules \
 	sysflow/install \
 	fs/install \
 	glog/install \
-	snappy/install \
 	dkms-rh/install \
+	libsid/install \
 	xxhash/install
 
 .PHONY: modules/no-elfutils
@@ -189,8 +190,17 @@ avro/package:
 	cd avro/lang/c++ && mkdir -p build && cd build && \
 	cmake -DCMAKE_INSTALL_PREFIX=$(MODPREFIX) \
 	-DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-w" \
+        -DBUILD_SHARED_LIBS=OFF \
 	-DCMAKE_BUILD_TYPE=ALL_WARNINGS -G "Unix Makefiles" ../. && make -j${MAKE_JOBS} && \
 	cp -a ../api avro
+
+.PHONY: libsid/package
+libsid/package:
+	cd libsid/src/ && make
+
+.PHONY: libsid/install
+libsid/install:
+	cd libsid/src/ && cp -r *.h $(FALCOINCPREFIX)/ && cp -a .output/*.a $(FALCOLIBPREFIX)/ && cp -a .output/*.o $(FALCOLIBPREFIX)/
 
 .PHONY: avro/install
 avro/install:
@@ -257,4 +267,4 @@ uninstall:
 
 .PHONY: clean
 clean:
-	rm -rf avro/lang/c++/build falco-libs/build falco-driver/build glog/build snappy/build
+	rm -rf avro/lang/c++/build falco-libs/build falco-driver/build glog/build snappy/build libsid/src/.output
