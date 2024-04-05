@@ -259,7 +259,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   mt = mt->get_parent_thread();
 
   while (mt != nullptr && mt->m_tid != -1) {
-    if (mt->is_main_thread()) {
+    if (!mt->is_main_thread()) {
       sinsp_threadinfo *tmp = mt->get_main_thread();
       if (tmp != nullptr) {
         mt = tmp;
