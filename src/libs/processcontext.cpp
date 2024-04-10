@@ -415,6 +415,25 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
                   ? mainthread->m_exe
                   : mainthread->m_exepath;
   proc->exeArgs.clear();
+  if (ev->get_type() == PPME_SYSCALL_EXECVE_19_X ||
+      ev->get_type() == PPME_SYSCALL_EXECVEAT_X) {
+    uint32_t n = ev->get_num_params();
+    printf("Execve called %s, %s Num Params: %d\n", mainthread->m_exe.c_str(),
+           mainthread->m_exepath.c_str(), n);
+    if (n >= 28) {
+      const sinsp_evt_param *param = ev->get_param(27);
+      proc->sid = *reinterpret_cast<int64_t *>(param->m_val);
+      printf("Execve %s, %s, SID: %d\n", mainthread->m_exe.c_str(),
+             mainthread->m_exepath.c_str(), proc->sid);
+      char *label = sc_get_ctx(proc->sid);
+      if (label != nullptr) {
+        proc->selabel = std::string(label);
+        printf("Execve %s, %s SID: %d, Label: %s\n", mainthread->m_exe.c_str(),
+               mainthread->m_exepath.c_str(), proc->sid,
+               proc->selabel.c_str());
+      }
+    }
+  }
 
   int i = 0;
   for (auto it = mainthread->m_args.begin(); it != mainthread->m_args.end();
