@@ -302,7 +302,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - First release candidate of SysFlow Collector.
 
 [Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.3...HEAD
-[0.6.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.2...0.6.3
+[0.6.3]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/sysflow-telemetry/sf-collector/compare/0.5.1...0.6.0
