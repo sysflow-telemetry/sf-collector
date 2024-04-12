@@ -49,6 +49,7 @@ endif
 	cd dkms && git fetch origin && git checkout $(DKMS_VERSION)
 	cd filesystem && git fetch origin && git checkout $(GHCFS_VERSION)
 	cd sparsehash && git fetch origin && git checkout $(SPARSE_VERSION)
+	cd xxHash && git fetch origin && git checkout $(XXHASH_VERSION)
 
 # libelf is a pre-requisite for libs build
 .PHONY: modules
