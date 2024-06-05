@@ -100,6 +100,9 @@ int FileEventProcessor::writeLinkEvent(sinsp_evt *ev, OpFlags flag) {
   m_fileEvt.procOID.hpid = proc->proc.oid.hpid;
   m_fileEvt.procOID.createTS = proc->proc.oid.createTS;
   m_fileEvt.tid = ti->m_tid;
+  m_fileEvt.tCapEffective = sinsp_utils::caps_to_string(ti->m_cap_effective);
+  m_fileEvt.tCapInheritable = sinsp_utils::caps_to_string(ti->m_cap_inheritable);
+  m_fileEvt.tCapPermitted = sinsp_utils::caps_to_string(ti->m_cap_permitted);
   m_fileEvt.ret = utils::getSyscallResult(ev);
   m_fileEvt.fileOID = file1->file.oid;
   m_fileEvt.newFileOID.set_FOID(file2->file.oid);
@@ -144,6 +147,9 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
   m_fileEvt.procOID.hpid = proc->proc.oid.hpid;
   m_fileEvt.procOID.createTS = proc->proc.oid.createTS;
   m_fileEvt.tid = ti->m_tid;
+  m_fileEvt.tCapEffective = sinsp_utils::caps_to_string(ti->m_cap_effective);
+  m_fileEvt.tCapInheritable = sinsp_utils::caps_to_string(ti->m_cap_inheritable);
+  m_fileEvt.tCapPermitted = sinsp_utils::caps_to_string(ti->m_cap_permitted);
   m_fileEvt.ret = utils::getSyscallResult(ev);
   m_fileEvt.fileOID = file->file.oid;
   m_fileEvt.newFileOID.set_null();

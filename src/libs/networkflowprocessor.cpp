@@ -96,6 +96,10 @@ inline void NetworkFlowProcessor::populateNetFlow(NetFlowObj *nf, OpFlags flag,
   nf->netflow.procOID.hpid = proc->proc.oid.hpid;
   nf->netflow.procOID.createTS = proc->proc.oid.createTS;
   nf->netflow.tid = ti->m_tid;
+  nf->netflow.tCapEffective = sinsp_utils::caps_to_string(ti->m_cap_effective);
+  nf->netflow.tCapInheritable =
+      sinsp_utils::caps_to_string(ti->m_cap_inheritable);
+  nf->netflow.tCapPermitted = sinsp_utils::caps_to_string(ti->m_cap_permitted);
   nf->netflow.sip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sip;
   nf->netflow.dip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_dip;
   nf->netflow.sport = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sport;

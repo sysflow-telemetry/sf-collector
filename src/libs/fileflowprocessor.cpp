@@ -54,6 +54,10 @@ inline void FileFlowProcessor::populateFileFlow(
   ff->fileflow.procOID.hpid = proc->proc.oid.hpid;
   ff->fileflow.procOID.createTS = proc->proc.oid.createTS;
   ff->fileflow.tid = ti->m_tid;
+  ff->fileflow.tCapEffective = sinsp_utils::caps_to_string(ti->m_cap_effective);
+  ff->fileflow.tCapInheritable =
+      sinsp_utils::caps_to_string(ti->m_cap_inheritable);
+  ff->fileflow.tCapPermitted = sinsp_utils::caps_to_string(ti->m_cap_permitted);
   ff->fileflow.fd = fd;
   ff->fileflow.fileOID = file->file.oid;
   if (!m_cxt->isConsumerMode()) {

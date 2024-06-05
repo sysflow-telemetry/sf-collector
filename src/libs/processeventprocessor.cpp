@@ -46,6 +46,9 @@ void ProcessEventProcessor::writeCloneEvent(sinsp_evt *ev) {
   m_procEvt.procOID.hpid = proc->proc.oid.hpid;
   m_procEvt.procOID.createTS = proc->proc.oid.createTS;
   m_procEvt.tid = ti->m_tid;
+  m_procEvt.tCapEffective = sinsp_utils::caps_to_string(ti->m_cap_effective);
+  m_procEvt.tCapInheritable = sinsp_utils::caps_to_string(ti->m_cap_inheritable);
+  m_procEvt.tCapPermitted = sinsp_utils::caps_to_string(ti->m_cap_permitted);
   m_procEvt.ret = utils::getSyscallResult(ev);
   m_procEvt.args.clear();
   m_writer->writeProcessEvent(&m_procEvt, &(proc->proc));
@@ -66,6 +69,9 @@ void ProcessEventProcessor::writeSetUIDEvent(sinsp_evt *ev) {
   m_procEvt.procOID.hpid = proc->proc.oid.hpid;
   m_procEvt.procOID.createTS = proc->proc.oid.createTS;
   m_procEvt.tid = ti->m_tid;
+  m_procEvt.tCapEffective = sinsp_utils::caps_to_string(ti->m_cap_effective);
+  m_procEvt.tCapInheritable = sinsp_utils::caps_to_string(ti->m_cap_inheritable);
+  m_procEvt.tCapPermitted = sinsp_utils::caps_to_string(ti->m_cap_permitted);
   m_procEvt.ret = utils::getSyscallResult(ev);
   m_procEvt.args.clear();
   m_procEvt.args.push_back(m_uid);
@@ -82,6 +88,9 @@ void ProcessEventProcessor::writeExitEvent(sinsp_evt *ev) {
   m_procEvt.procOID.hpid = proc->proc.oid.hpid;
   m_procEvt.procOID.createTS = proc->proc.oid.createTS;
   m_procEvt.tid = ti->m_tid;
+  m_procEvt.tCapEffective = ti->m_cap_effective;
+  m_procEvt.tCapInheritable = ti->m_cap_inheritable;
+  m_procEvt.tCapPermitted = ti->m_cap_permitted;
   m_procEvt.ret = utils::getSyscallResult(ev);
   m_procEvt.args.clear();
   int64_t tid = -1;
@@ -119,6 +128,10 @@ void ProcessEventProcessor::writeExecEvent(sinsp_evt *ev) {
   m_procEvt.procOID.hpid = proc->proc.oid.hpid;
   m_procEvt.procOID.createTS = proc->proc.oid.createTS;
   m_procEvt.tid = ti->m_tid;
+  m_procEvt.tCapEffective = sinsp_utils::caps_to_string(ti->m_cap_effective);
+  m_procEvt.tCapInheritable = sinsp_utils::caps_to_string(ti->m_cap_inheritable);
+  m_procEvt.tCapPermitted = sinsp_utils::caps_to_string(ti->m_cap_permitted);
+
   m_procEvt.ret = utils::getSyscallResult(ev);
   m_procEvt.args.clear();
   m_writer->writeProcessEvent(&m_procEvt, &(proc->proc));

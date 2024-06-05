@@ -20,7 +20,7 @@
 #include "utils.h"
 #include "datatypes.h"
 #include "logger.h"
-#include "sysflow/avsc_sysflow5.hh"
+#include "sysflow/avsc_sysflow6.hh"
 #include "sysflowcontext.h"
 
 static NFKey s_nfdelkey;

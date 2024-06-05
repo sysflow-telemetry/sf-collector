@@ -3,7 +3,7 @@
     url = https://github.com/apache/avro.git
 [submodule "modules/sysflow"]
 	path = modules/sysflow
-	url = https://github.com/sysflow-telemetry/sf-apis.git
+	url = https://github.com/cisco-eti/sf-apis.git
 [submodule "modules/filesystem"]
 	path = modules/filesystem
 	url = https://github.com/gulrak/filesystem.git
