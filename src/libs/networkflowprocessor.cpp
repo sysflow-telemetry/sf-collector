@@ -56,7 +56,7 @@ inline int32_t NetworkFlowProcessor::getProtocol(scap_l4_proto proto) {
   return prt;
 }
 
-inline void NetworkFlowProcessor::canonicalizeKey(sinsp_fdinfo_t *fdinfo,
+inline void NetworkFlowProcessor::canonicalizeKey(sinsp_fdinfo *fdinfo,
                                                   NFKey *key, uint64_t tid,
                                                   uint64_t fd) {
   uint32_t sip = fdinfo->m_sockinfo.m_ipv4info.m_fields.m_sip;
@@ -87,7 +87,7 @@ inline void NetworkFlowProcessor::canonicalizeKey(NetFlowObj *nf, NFKey *key) {
 inline void NetworkFlowProcessor::populateNetFlow(NetFlowObj *nf, OpFlags flag,
                                                   sinsp_evt *ev,
                                                   ProcessObj *proc) {
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+  sinsp_fdinfo *fdinfo = ev->get_fd_info();
   sinsp_threadinfo *ti = ev->get_thread_info();
   nf->netflow.opFlags = flag;
   nf->netflow.ts = ev->get_ts();
@@ -166,7 +166,7 @@ inline void NetworkFlowProcessor::processExistingFlow(sinsp_evt *ev,
 }
 
 int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt *ev, OpFlags flag) {
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+  sinsp_fdinfo *fdinfo = ev->get_fd_info();
   if (fdinfo == nullptr) {
     SF_DEBUG(m_logger,
              "Event: " << ev->get_name()

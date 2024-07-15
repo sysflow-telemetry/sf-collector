@@ -69,6 +69,7 @@ CFLAGS = -std=c++17 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ 
 		 -I$(FALCOINCPREFIX)/driver/ \
 		 -I$(FALCOINCPREFIX)/userspace/libsinsp/ \
 		 -I$(FALCOINCPREFIX)/userspace/libscap/ \
+		 -I$(FALCOINCPREFIX)/userspace/ \
 		 -I$(AVRINCPREFIX)/ 
 
 $(info    MUSL is $(MUSL))

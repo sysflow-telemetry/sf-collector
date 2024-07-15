@@ -54,7 +54,7 @@ FileObj *FileContext::createFile(sinsp_evt *ev, std::string path, char typechar,
   }
   return f;
 }
-FileObj *FileContext::getFile(sinsp_evt *ev, sinsp_fdinfo_t *fdinfo,
+FileObj *FileContext::getFile(sinsp_evt *ev, sinsp_fdinfo *fdinfo,
                               SFObjectState state, bool &created) {
   return getFile(ev, fdinfo->m_name, fdinfo->get_typechar(), state, created);
 }

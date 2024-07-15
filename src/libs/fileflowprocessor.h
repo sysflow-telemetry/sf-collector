@@ -42,15 +42,15 @@ private:
   file::FileContext *m_fileCxt;
   void populateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev,
                         ProcessObj *proc, FileObj *file, std::string flowkey,
-                        sinsp_fdinfo_t *fdinfo, int64_t fd);
+                        sinsp_fdinfo *fdinfo, int64_t fd);
   void updateFileFlow(FileFlowObj *ff, OpFlags flag, sinsp_evt *ev,
-                      sinsp_fdinfo_t *fdinfo);
+                      sinsp_fdinfo *fdinfo);
   void processExistingFlow(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
                            OpFlags flag, std::string flowkey, FileFlowObj *ff,
-                           sinsp_fdinfo_t *fdinfo);
+                           sinsp_fdinfo *fdinfo);
   void processNewFlow(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
                       OpFlags flag, const std::string &flowkey,
-                      sinsp_fdinfo_t *fdinfo, int64_t fd);
+                      sinsp_fdinfo *fdinfo, int64_t fd);
   void removeAndWriteFileFlow(ProcessObj *proc, FileObj *file, FileFlowObj **nf,
                               std::string flowkey);
   void removeFileFlow(ProcessObj *proc, FileObj *file, FileFlowObj **ff,
@@ -59,7 +59,7 @@ private:
   void removeAndWriteRelatedFlows(ProcessObj *proc, FileFlowObj *ffo,
                                   uint64_t endTs);
   int createConsumerRecord(sinsp_evt *ev, ProcessObj *proc, FileObj *file,
-                           OpFlags flag, sinsp_fdinfo_t *fdinfo, int64_t fd);
+                           OpFlags flag, sinsp_fdinfo *fdinfo, int64_t fd);
   DEFINE_LOGGER();
 
 public:

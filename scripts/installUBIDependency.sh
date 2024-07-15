@@ -74,7 +74,6 @@ if [ "${MODE}" == "base" ] ; then
         autoconf \
         gettext-devel \
         wget \
-        automake \
         libtool \
         patch \
         binutils \
@@ -116,7 +115,6 @@ elif [ "${MODE}" == "driver" ] ; then
         pkgconfig \
         autoconf \
         wget \
-        automake \
         libtool \
         patch \
         binutils \

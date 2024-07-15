@@ -96,8 +96,8 @@ falcolibs/package:
 			-DUSE_BUNDLED_DEPS=ON \
 			-DUSE_BUNDLED_LIBELF=OFF \
 			-DCREATE_TEST_TARGETS=OFF \
-			-DBUILD_LIBSCAP_EXAMPLES=ON \
-			-DBUILD_LIBSINSP_EXAMPLES=ON \
+			-DBUILD_LIBSCAP_EXAMPLES=OFF \
+			-DBUILD_LIBSINSP_EXAMPLES=OFF \
 			-DCMD_MAKE="make -j${MAKE_JOBS}" \
 			${MUSL_FLAG} ../. && make -j${MAKE_JOBS} && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
@@ -107,13 +107,14 @@ falcolibs/package:
 	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
 	mkdir -p include/userspace/libsinsp/filter && cp ../userspace/libsinsp/filter/*.h include/userspace/libsinsp/filter/ && \
 	mkdir -p include/userspace/libsinsp/events && cp ../userspace/libsinsp/events/*.h include/userspace/libsinsp/events/ && \
-	mkdir -p include/userspace/libsinsp/include && cp ../userspace/libsinsp/include/*.h include/userspace/libsinsp/include/ && \
 	mkdir -p include/userspace/libsinsp/state && cp ../userspace/libsinsp/state/*.h include/userspace/libsinsp/state/ && \
 	mkdir -p include/userspace/plugin && cp ../userspace/plugin/*.h include/userspace/plugin/ && \
 	mkdir -p include/userspace/libscap && cd .. && find userspace/libscap -name '*.h' -exec cp -r --parents '{}' build/include \; && cd build && \
+	cp libscap/*.h include/userspace/libscap && \
 	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
 	cp -r tbb-prefix/src/tbb/include/tbb include/ && \
 	cp -r tbb-prefix/src/tbb/include/oneapi include/ && \
+	cp uthash-prefix/src/uthash/src/*.h include/ && \
 	cp -r protobuf-prefix/src/protobuf/target/include/google include/ && \
 	cp libbpf-prefix/src/libbpf-build/build/*.a lib/ && \
 	cp protobuf-prefix/src/protobuf/target/lib/libprotobuf.a lib && \
@@ -126,10 +127,6 @@ falcolibs/package:
 	cp libsinsp/*.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
 	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
-	cp ../../falco/scripts/falco-driver-loader bin/ && \
-	sed -i -E "s/@DRIVER_VERSION@/\"$(FALCO_LIBS_DRIVER_VERSION)\"/" bin/falco-driver-loader && \
-	sed -i -E "s/@FALCO_VERSION@/\"$(FALCO_VERSION)\"/" bin/falco-driver-loader && \
-	sed -i -E "s#@DRIVERS_REPO@#\"$(DRIVERS_REPO)\"#" bin/falco-driver-loader && \
     cp re2-prefix/build/libre2.a lib/ && \
 	cp grpc-prefix/src/grpc/*.a lib/ && \
 	find grpc-prefix/src/grpc/third_party/abseil-cpp -name '*.a' -exec cp '{}' lib \; && \

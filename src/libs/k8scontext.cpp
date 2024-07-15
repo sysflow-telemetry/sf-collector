@@ -66,7 +66,7 @@ int K8sContext::derefPod(const std::string &id) {
   }
   return result;
 }
-
+/*
 std::shared_ptr<PodObj> K8sContext::createPod(const k8s_pod_t *p,
                                               const k8s_state_t &k8sState) {
   SF_DEBUG(m_logger, "Creating Pod object: " << p->get_name())
@@ -110,11 +110,11 @@ std::shared_ptr<PodObj> K8sContext::createPod(const k8s_pod_t *p,
     pod->pod.services.push_back(srv);
   }
   return pod;
-}
+}*/
 
 std::shared_ptr<PodObj> K8sContext::getPod(sinsp_threadinfo *ti) {
   std::shared_ptr<PodObj> pod(nullptr);
-  if (ti->m_container_id.empty()) {
+  /*if (ti->m_container_id.empty()) {
     SF_DEBUG(m_logger, "Container ID is empty")
     return pod;
   }
@@ -146,7 +146,7 @@ std::shared_ptr<PodObj> K8sContext::getPod(sinsp_threadinfo *ti) {
 
   m_pods[p->get_uid()] = pod;
   m_writer->writePod(&(pod->pod));
-  pod->written = true;
+  pod->written = true;*/
   return pod;
 }
 
@@ -163,7 +163,7 @@ void K8sContext::clearPods() {
 void K8sContext::clearAllPods() { m_pods.clear(); }
 
 void K8sContext::updateAndWritePodState(std::string &uid) {
-  SF_DEBUG(m_logger, "Update and write pod state for modified pod: " << uid)
+ /* SF_DEBUG(m_logger, "Update and write pod state for modified pod: " << uid)
   const k8s_state_t &k8sState =
       m_cxt->getInspector()->m_k8s_client->get_state();
   const k8s_pod_t *pod =
@@ -190,7 +190,7 @@ void K8sContext::updateAndWritePodState(std::string &uid) {
   } else {
     SF_DEBUG(m_logger,
              "Unable to find pod with uid " << uid << " in global k8s state. ")
-  }
+  }*/
 }
 
 void K8sContext::updateCompState(sysflow::K8sAction action,

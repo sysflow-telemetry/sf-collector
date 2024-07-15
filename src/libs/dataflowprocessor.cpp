@@ -52,7 +52,7 @@ DataFlowProcessor::~DataFlowProcessor() {
 }
 
 int DataFlowProcessor::handleDataEvent(sinsp_evt *ev, OpFlags flag) {
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+  sinsp_fdinfo *fdinfo = ev->get_fd_info();
 
   if (fdinfo == nullptr) {
     SF_DEBUG(
