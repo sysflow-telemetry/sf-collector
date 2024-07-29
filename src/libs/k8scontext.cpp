@@ -163,34 +163,35 @@ void K8sContext::clearPods() {
 void K8sContext::clearAllPods() { m_pods.clear(); }
 
 void K8sContext::updateAndWritePodState(std::string &uid) {
- /* SF_DEBUG(m_logger, "Update and write pod state for modified pod: " << uid)
-  const k8s_state_t &k8sState =
-      m_cxt->getInspector()->m_k8s_client->get_state();
-  const k8s_pod_t *pod =
-      k8sState.get_component<k8s_pods, k8s_pod_t>(k8sState.get_pods(), uid);
+  /* SF_DEBUG(m_logger, "Update and write pod state for modified pod: " << uid)
+   const k8s_state_t &k8sState =
+       m_cxt->getInspector()->m_k8s_client->get_state();
+   const k8s_pod_t *pod =
+       k8sState.get_component<k8s_pods, k8s_pod_t>(k8sState.get_pods(), uid);
 
-  if (pod != nullptr) {
-    std::shared_ptr<PodObj> podO = getPod(uid);
-    if (podO == nullptr) {
-      SF_DEBUG(m_logger,
-               "Unable to find pod object in cache. Ignoring pod modification: "
-                   << uid)
-      return;
-    }
+   if (pod != nullptr) {
+     std::shared_ptr<PodObj> podO = getPod(uid);
+     if (podO == nullptr) {
+       SF_DEBUG(m_logger,
+                "Unable to find pod object in cache. Ignoring pod modification:
+   "
+                    << uid)
+       return;
+     }
 
-    std::shared_ptr<PodObj> podObj = createPod(pod, k8sState);
-    if (podObj != nullptr) {
-      podObj->refs = podO->refs;
-      m_pods[pod->get_uid()] = podObj;
-      m_writer->writePod(&(podObj->pod));
-      podObj->written = true;
-    } else {
-      SF_DEBUG(m_logger, "Unable to find pod with uid" << uid)
-    }
-  } else {
-    SF_DEBUG(m_logger,
-             "Unable to find pod with uid " << uid << " in global k8s state. ")
-  }*/
+     std::shared_ptr<PodObj> podObj = createPod(pod, k8sState);
+     if (podObj != nullptr) {
+       podObj->refs = podO->refs;
+       m_pods[pod->get_uid()] = podObj;
+       m_writer->writePod(&(podObj->pod));
+       podObj->written = true;
+     } else {
+       SF_DEBUG(m_logger, "Unable to find pod with uid" << uid)
+     }
+   } else {
+     SF_DEBUG(m_logger,
+              "Unable to find pod with uid " << uid << " in global k8s state. ")
+   }*/
 }
 
 void K8sContext::updateCompState(sysflow::K8sAction action,
