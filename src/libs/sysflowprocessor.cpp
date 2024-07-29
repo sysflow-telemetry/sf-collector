@@ -192,13 +192,13 @@ int SysFlowProcessor::run() {
       continue;
     }
 
-    if (m_cxt->getInspector()->m_k8s_client != nullptr &&
-        m_cxt->getInspector()->m_k8s_client->get_capture_events().size() > 0) {
-      SF_INFO(m_logger,
-              "Events Count: " << m_cxt->getInspector()
-                                      ->m_k8s_client->get_capture_events()
-                                      .size());
-    }
+    /* if (m_cxt->getInspector()->m_k8s_client != nullptr &&
+         m_cxt->getInspector()->m_k8s_client->get_capture_events().size() > 0) {
+       SF_INFO(m_logger,
+               "Events Count: " << m_cxt->getInspector()
+                                       ->m_k8s_client->get_capture_events()
+                                       .size());
+     }*/
 
     switch (ev->get_type()) {
       SF_EXECVE_ENTER()

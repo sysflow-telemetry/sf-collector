@@ -153,7 +153,7 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
   if (k8sURL != nullptr) {
     SF_INFO(m_logger, "Initing k8s client. URL: "
                           << k8sURL << " and certificate: " << k8sCert)
-    m_inspector->init_k8s_client(k8sURL, k8sCert, &config->exporterID, true);
+    // m_inspector->init_k8s_client(k8sURL, k8sCert, &config->exporterID, true);
     m_inspector->set_internal_events_mode(true);
     m_k8sEnabled = true;
   }

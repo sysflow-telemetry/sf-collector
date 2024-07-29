@@ -127,7 +127,7 @@ int64_t utils::getSyscallResult(sinsp_evt *ev) {
     case PT_FD:
     case PT_INT64:
     case PT_INT32:
-      res = *reinterpret_cast<int64_t *>(p->m_val);
+      res = *reinterpret_cast<const int64_t *>(p->m_val);
       break;
     default:
       SF_DEBUG(m_logger, "Syscall result not of type pid! Type: "
@@ -168,7 +168,7 @@ int64_t utils::getIntParam(sinsp_evt *ev, std::string pname) {
       case PT_FLAGS16:
       case PT_FLAGS32: {
         const sinsp_evt_param *p = ev->get_param(i);
-        return *reinterpret_cast<int64_t *>(p->m_val);
+        return *reinterpret_cast<const int64_t *>(p->m_val);
       }
       default:
         return 0;
@@ -272,7 +272,7 @@ int64_t utils::getFD(sinsp_evt *ev, const std::string &paraName) {
     const sinsp_evt_param *p = ev->get_param(i);
     if (param->type == PT_FD) {
       assert(p->m_len == sizeof(int64_t));
-      fd = (*reinterpret_cast<int64_t *>(p->m_val));
+      fd = (*reinterpret_cast<const int64_t *>(p->m_val));
     }
     break;
   }
@@ -304,7 +304,7 @@ std::string utils::getAbsolutePath(sinsp_threadinfo *ti, int64_t dirfd,
       }
       tmp = ti->get_cwd();
     } else {
-      sinsp_fdinfo_t *fdinfo = ti->get_fd(dirfd);
+      sinsp_fdinfo *fdinfo = ti->get_fd(dirfd);
       if (fdinfo == nullptr) {
         return p.string();
       }

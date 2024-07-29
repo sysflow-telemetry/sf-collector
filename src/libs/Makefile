@@ -67,6 +67,7 @@ CFLAGS = -std=c++17 -Wall -I.. -I/usr/local/include/ -I/usr/include/ \
 		 -I$(FALCOINCPREFIX)/userspace/libsinsp/ \
 		 -I$(FALCOINCPREFIX)/userspace/libscap/ \
 		 -I$(FALCOINCPREFIX)/userspace/common/ \
+		 -I$(FALCOINCPREFIX)/userspace/ \
 		 -I$(AVRINCPREFIX)/
 
 OBJS = .sysflowlibs.o .sysflowlibs.o .MurmurHash3.o .utils.o .containercontext.o .processcontext.o .processeventprocessor.o .controlflowprocessor.o .dataflowprocessor.o .networkflowprocessor.o .fileflowprocessor.o .fileeventprocessor.o .sysflowcontext.o .sysflowprocessor.o .sysflowwriter.o .sffilewriter.o .sfsockwriter.o .sfmultiwriter.o .sfcallbackwriter.o .filecontext.o .k8scontext.o .k8seventprocessor.o .modutils.o .sysflowexception.o

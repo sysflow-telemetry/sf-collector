@@ -15,6 +15,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2024-07-29
+
+### Added
+
+- falcoctl to manage driver download and installation in containers
+
+### Changed
+
+- Bump falco libs to 0.17.2 and drivers to 7.2.0+driver
+- Bump UBI to 9.4-1123.1719560047
+
+### Removed
+
+- falco-driver-loader - replaced with falcoctl
+
 ## [0.6.3] - 2024-04-07
 
 ### Changed
@@ -305,7 +320,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - First release candidate of SysFlow Collector.
 
-[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.3...HEAD
+[Unreleased]: https://github.com/sysflow-telemetry/sf-collector/compare/0.7.0-rc1...HEAD
+[0.7.0-rc1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.3...0.7.0-rc1
 [0.6.3]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/sysflow-telemetry/sf-collector/compare/0.6.0...0.6.1

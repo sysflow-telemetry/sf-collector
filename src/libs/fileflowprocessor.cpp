@@ -42,7 +42,7 @@ FileFlowProcessor::~FileFlowProcessor() = default;
 
 inline void FileFlowProcessor::populateFileFlow(
     FileFlowObj *ff, OpFlags flag, sinsp_evt *ev, ProcessObj *proc,
-    FileObj *file, std::string flowkey, sinsp_fdinfo_t *fdinfo, int64_t fd) {
+    FileObj *file, std::string flowkey, sinsp_fdinfo *fdinfo, int64_t fd) {
   sinsp_threadinfo *ti = ev->get_thread_info();
   ff->fileflow.opFlags = flag;
   ff->fileflow.ts = ev->get_ts();
@@ -98,7 +98,7 @@ void FileFlowProcessor::removeAndWriteRelatedFlows(ProcessObj *proc,
 
 inline void FileFlowProcessor::updateFileFlow(FileFlowObj *ff, OpFlags flag,
                                               sinsp_evt *ev,
-                                              sinsp_fdinfo_t *fdinfo) {
+                                              sinsp_fdinfo *fdinfo) {
   ff->fileflow.opFlags |= flag;
   ff->lastUpdate = utils::getCurrentTime(m_cxt);
   if (flag == OP_OPEN) {
@@ -121,7 +121,7 @@ inline void FileFlowProcessor::updateFileFlow(FileFlowObj *ff, OpFlags flag,
 inline void FileFlowProcessor::processNewFlow(sinsp_evt *ev, ProcessObj *proc,
                                               FileObj *file, OpFlags flag,
                                               const std::string &flowkey,
-                                              sinsp_fdinfo_t *fdinfo,
+                                              sinsp_fdinfo *fdinfo,
                                               int64_t fd) {
   auto *ff = new FileFlowObj();
   ff->exportTime = utils::getCurrentTime(m_cxt);
@@ -144,7 +144,7 @@ inline void FileFlowProcessor::processNewFlow(sinsp_evt *ev, ProcessObj *proc,
 inline int FileFlowProcessor::createConsumerRecord(sinsp_evt *ev,
                                                    ProcessObj *proc,
                                                    FileObj *file, OpFlags flag,
-                                                   sinsp_fdinfo_t *fdinfo,
+                                                   sinsp_fdinfo *fdinfo,
                                                    int64_t fd) {
   if (flag == OP_CLOSE || flag == OP_SHUTDOWN) {
     return 1;
@@ -176,7 +176,7 @@ inline void FileFlowProcessor::removeAndWriteFileFlow(ProcessObj *proc,
 
 inline void FileFlowProcessor::processExistingFlow(
     sinsp_evt *ev, ProcessObj *proc, FileObj *file, OpFlags flag,
-    std::string flowkey, FileFlowObj *ff, sinsp_fdinfo_t *fdinfo) {
+    std::string flowkey, FileFlowObj *ff, sinsp_fdinfo *fdinfo) {
   updateFileFlow(ff, flag, ev, fdinfo);
   if (flag == OP_CLOSE) {
     removeAndWriteRelatedFlows(proc, ff, ev->get_ts());
@@ -186,7 +186,7 @@ inline void FileFlowProcessor::processExistingFlow(
 }
 
 int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+  sinsp_fdinfo *fdinfo = ev->get_fd_info();
   int64_t fd = ev->get_fd_num();
 
   if (fdinfo == nullptr) {

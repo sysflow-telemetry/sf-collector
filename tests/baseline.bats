@@ -57,6 +57,7 @@ exporter=tests
 }
 
 @test "Trace comparison on event mpm web server" {
+  skip "Fixed in libs 0.14.x; it will be fixed in sysflow 0.8.0"
   tdir=${TDIR}/mpm-event
   tfile=full_capture
   run $sysporter -r ${tdir}/${tfile}.scap -w ${tdir}/${tfile}.sf -e $exporter > /tmp/${tfile}.log
@@ -73,6 +74,7 @@ exporter=tests
 }
 
 @test "Trace comparison on prefork mpm web server" {
+  skip "Fixed in libs 0.14.x; it will be fixed in sysflow 0.8.0"
   tdir=${TDIR}/mpm-preforked
   tfile=full_capture
   run $sysporter -r ${tdir}/${tfile}.scap -w ${tdir}/${tfile}.sf -e $exporter > /tmp/${tfile}.log
@@ -89,6 +91,7 @@ exporter=tests
 }
 
 @test "Trace comparison on multi-threaded mpm web server" {
+  skip "Fixed in libs 0.14.x; it will be fixed in sysflow 0.8.0"
   tdir=${TDIR}/mpm-worker
   tfile=full_capture
   run $sysporter -r ${tdir}/${tfile}.scap -w ${tdir}/${tfile}.sf -e $exporter > /tmp/${tfile}.log

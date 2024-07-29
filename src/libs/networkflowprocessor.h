@@ -37,7 +37,7 @@ private:
   writer::SysFlowWriter *m_writer;
   DataFlowSet *m_dfSet;
   DEFINE_LOGGER();
-  void canonicalizeKey(sinsp_fdinfo_t *fdinfo, NFKey *key, uint64_t tid,
+  void canonicalizeKey(sinsp_fdinfo *fdinfo, NFKey *key, uint64_t tid,
                        uint64_t fd);
   void canonicalizeKey(NetFlowObj *nf, NFKey *key);
   void populateNetFlow(NetFlowObj *nf, OpFlags flag, sinsp_evt *ev,

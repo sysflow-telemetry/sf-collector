@@ -115,7 +115,7 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
   sinsp_threadinfo *ti = ev->get_thread_info();
   bool created = false;
   ProcessObj *proc = m_processCxt->getProcess(ev, SFObjectState::REUP, created);
-  sinsp_fdinfo_t *fdinfo = ev->get_fd_info();
+  sinsp_fdinfo *fdinfo = ev->get_fd_info();
 
   FileObj *file = nullptr;
   if (fdinfo != nullptr) {
@@ -125,10 +125,10 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
                                ? utils::getPath(ev, "name")
                                : utils::getPath(ev, "path");
     if (IS_AT_SC(ev->get_type())) {
-      sinsp_evt_param *pinfo;
+      const sinsp_evt_param *pinfo;
       pinfo = ev->get_param(1);
       assert(pinfo->m_len == sizeof(int64_t));
-      int64_t dirfd = *reinterpret_cast<int64_t *>(pinfo->m_val);
+      const int64_t dirfd = *reinterpret_cast<const int64_t *>(pinfo->m_val);
       fileName = utils::getAbsolutePath(ti, dirfd, fileName);
     } else {
       fileName = utils::getAbsolutePath(ti, fileName);

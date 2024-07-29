@@ -103,18 +103,18 @@ falcolibs/package:
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
-	mkdir -p include/userspace/common && cp ../userspace/common/*.h include/userspace/common && cp ../build/common/*.h include/userspace/common &&\
 	mkdir -p include/userspace/libsinsp && cp ../userspace/libsinsp/*.h include/userspace/libsinsp && \
 	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
 	mkdir -p include/userspace/libsinsp/filter && cp ../userspace/libsinsp/filter/*.h include/userspace/libsinsp/filter/ && \
 	mkdir -p include/userspace/libsinsp/events && cp ../userspace/libsinsp/events/*.h include/userspace/libsinsp/events/ && \
-	mkdir -p include/userspace/libsinsp/include && cp ../userspace/libsinsp/include/*.h include/userspace/libsinsp/include/ && \
 	mkdir -p include/userspace/libsinsp/state && cp ../userspace/libsinsp/state/*.h include/userspace/libsinsp/state/ && \
 	mkdir -p include/userspace/plugin && cp ../userspace/plugin/*.h include/userspace/plugin/ && \
 	mkdir -p include/userspace/libscap && cd .. && find userspace/libscap -name '*.h' -exec cp -r --parents '{}' build/include \; && cd build && \
+	cp libscap/*.h include/userspace/libscap && \
 	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
 	cp -r tbb-prefix/src/tbb/include/tbb include/ && \
 	cp -r tbb-prefix/src/tbb/include/oneapi include/ && \
+	cp uthash-prefix/src/uthash/src/*.h include/ && \
 	cp -r protobuf-prefix/src/protobuf/target/include/google include/ && \
 	cp libbpf-prefix/src/libbpf-build/build/*.a lib/ && \
 	cp protobuf-prefix/src/protobuf/target/lib/libprotobuf.a lib && \
@@ -123,22 +123,15 @@ falcolibs/package:
 	cp jsoncpp-prefix/src/lib/libjsoncpp.a lib/ && \
 	cp -r jsoncpp-prefix/src/include/json  include/ && \
 	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
-	cp b64/base64.h include/ && \
-	cp -r jq-prefix/src/jq/target/include/*.h include/ && \
 	cp libpman/*.a lib/ && \
 	cp libsinsp/*.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
 	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
-	cp ../../falco/scripts/falco-driver-loader bin/ && \
-	sed -i -E "s/@DRIVER_VERSION@/\"$(FALCO_LIBS_DRIVER_VERSION)\"/" bin/falco-driver-loader && \
-	sed -i -E "s/@FALCO_VERSION@/\"$(FALCO_VERSION)\"/" bin/falco-driver-loader && \
-	sed -i -E "s#@DRIVERS_REPO@#\"$(DRIVERS_REPO)\"#" bin/falco-driver-loader && \
     cp re2-prefix/build/libre2.a lib/ && \
 	cp grpc-prefix/src/grpc/*.a lib/ && \
 	find grpc-prefix/src/grpc/third_party/abseil-cpp -name '*.a' -exec cp '{}' lib \; && \
 	cp c-ares-prefix/src/c-ares/target/lib/libcares.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
-	cp jq-prefix/src/jq/target/lib/*.a lib/ && \
 	cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
 	cp zlib-prefix/src/zlib/libz.a lib/libz.a
 ifeq ($(BUNDLE_FALCO_LIBS), 1)	
