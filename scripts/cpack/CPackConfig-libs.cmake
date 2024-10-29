@@ -48,6 +48,7 @@ set(CPACK_RPM_PACKAGE_ARCHITECTURE, "${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_RPM_PACKAGE_URL "https://github.com/sysflow-telemetry/sf-collector")
 set(CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
+    /etc/falco
     /usr/src
     /usr/src/dkms
     /usr/share/man
@@ -67,5 +68,5 @@ set(CPACK_RPM_SPEC_MORE_DEFINE "%define _build_id_links none")
 
 # Contents
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_PROCESSOR})
-set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build-driver/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build-driver/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build-libs/include" "/usr/include" "${CMAKE_CURRENT_LIST_DIR}/build-libs/lib" "/usr/lib")
+set(CPACK_INSTALLED_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/build-driver/bin" "/usr/bin" "${CMAKE_CURRENT_LIST_DIR}/build-driver/src" "/usr/src" "${CMAKE_CURRENT_LIST_DIR}/build-libs/include" "/usr/include" "${CMAKE_CURRENT_LIST_DIR}/build-libs/lib" "/usr/lib" "${CMAKE_CURRENT_LIST_DIR}/build-libs/etc/falco" "/etc/falco")
 

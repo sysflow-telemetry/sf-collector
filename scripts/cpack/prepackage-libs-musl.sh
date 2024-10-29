@@ -5,6 +5,7 @@ DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BUILD_DIR=build-libs-musl
 
 cd $DIR && rm -rf $BUILD_DIR && mkdir -p $BUILD_DIR
+mkdir -p $DIR/$BUILD_DIR/etc/falco && touch $DIR/$BUILD_DIR/etc/falco/falco.yaml
 mkdir -p $DIR/$BUILD_DIR/lib && cp -a /usr/local/sysflow/modules/lib/falcosecurity $DIR/$BUILD_DIR/lib/.
 mkdir -p $DIR/$BUILD_DIR/include && cp -a /usr/local/sysflow/modules/include/falcosecurity $DIR/$BUILD_DIR/include/.
 mkdir -p $DIR/$BUILD_DIR/lib && cp -a /usr/local/sysflow/lib $DIR/$BUILD_DIR/lib/sysflow && \

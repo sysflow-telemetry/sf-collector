@@ -11,6 +11,6 @@ docker run \
     -v /usr:/host/usr:ro \
     -v /etc/:/host/etc:ro \
     -v /var/lib:/host/var/lib:ro \
-    -e FALCO_BPF_PROBE="" \
+    -e FALCO_DRIVER_LOADER_OPTIONS="ebpf" \
     -e DRIVER_TYPE="e" \
     --rm callback:${SYSFLOW_VERSION}

@@ -11,13 +11,15 @@ then
 fi
 
 export HOME=/run/sysflow
-if [ "${DRIVER_TYPE}" == "ebpf" ] || [ -z "${DRIVER_TYPE}" ]; then
+if [ "${DRIVER_TYPE}" == "ebpf-core" ] || [ -z "${DRIVER_TYPE}" ]; then
+	/etc/sysflow/driver/falcoctl driver config --type modern_ebpf
+elif [ "${DRIVER_TYPE}" == "ebpf" ]; then
     export DRIVER_TYPE="ebpf"
     if [ -z "${FALCO_BPF_PROBE}" ]; then
        export FALCO_BPF_PROBE=""
     fi
-    /etc/sysflow/driver/falco-driver-loader bpf ${DRIVER_OPTS}
-elif [ "${DRIVER_TYPE}" == "kmod" ]; then
-    /etc/sysflow/driver/falco-driver-loader module ${DRIVER_OPTS}
+else
+	/etc/sysflow/driver/falcoctl driver config --type ${DRIVER_TYPE}
 fi
+/etc/sysflow/driver/falcoctl driver install --compile=true --download=true
 /usr/bin/sysporter -e ${NODE_ID:-${HOSTNAME}} -u ${SOCKET:-/sock/sysflow.sock} ${DRIVER_TYPE:+-k} "${DRIVER_TYPE}"  ${FILTER:+-f "$FILTER"}

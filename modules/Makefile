@@ -158,16 +158,17 @@ falcodriver/package:
         cmake \
 			-DDRIVER_PACKAGE_NAME=falco \
 			-DDRIVER_NAME=falco \
+			-DDRIVER_VERSION=$(FALCO_LIBS_DRIVER_VERSION) \
 			-DCMAKE_BUILD_TYPE=Release \
 			-DUSE_BUNDLED_DEPS=ON \
 			-DBUILD_LIBSCAP_GVISOR=Off \
 			-DBUILD_BPF=True .. && \
-	cp -r ../driver/bpf driver/src/
+	cp -r ../driver/ driver/src/
 
 .PHONY: falcodriver/install
 falcodriver/install:
-	mkdir -p "$(DRIVERPREFIX)$(FALCO_LIBS_DRIVER_VERSION)" && \
-	cd falco-driver/build && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_DRIVER_VERSION)"
+	mkdir -p "$(DRIVERPREFIX)$(FALCO_LIBS_DRIVER_VERSION)/bpf" && \
+	cd falco-driver/build && cp -a driver/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_DRIVER_VERSION)" && cp -a driver/bpf/src/* "$(DRIVERPREFIX)$(FALCO_LIBS_DRIVER_VERSION)/bpf"
 
 .PHONY: avro/package
 avro/package:
