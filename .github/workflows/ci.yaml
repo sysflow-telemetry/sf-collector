@@ -63,6 +63,7 @@ jobs:
         run: |
           echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCOCTL_VERSION=$(awk -F'=' '/FALCOCTL_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
       - name: Set image tags
         shell: bash
@@ -162,6 +163,7 @@ jobs:
             UBI_VER=${{ env.UBI_VERSION }}
             FALCO_VER=${{ env.FALCO_VERSION }}
             FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }}
+            FALCOCTL_VERSION=${{ env.FALCOCTL_VERSION }}
             BUILD_NUMBER=${{ env.SHA_SHORT }}
             VERSION=${{ env.BRANCH }}
             RELEASE=${{ env.SHA_SHORT }}
