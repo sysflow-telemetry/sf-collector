@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.7.0] - 2024-08-04
+## [0.7.0] - 2024-11-10
 
 ### Added
 
@@ -23,8 +23,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Bump falco libs to 0.17.2 and drivers to 7.2.0+driver
-- Bump UBI to 9.4-1123.1719560047
+- Bump falco libs to 0.18.1 and drivers to 7.3.0+driver, falcoctl 0.10.0
+- Bump UBI to 9.4-1214.1729773476
 
 ### Removed
 
