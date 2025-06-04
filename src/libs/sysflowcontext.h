@@ -32,6 +32,7 @@
 #include <cstring>
 #include <ppm_events_public.h>
 #include <sinsp.h>
+#include <user.h>
 #include <unistd.h>
 
 #define DRIVER_LOG "DRIVER_LOG"

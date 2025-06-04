@@ -84,7 +84,7 @@ OID *utils::getOIDDelKey() {
 std::string utils::getUserName(context::SysFlowContext *cxt,
                                std::string &containerid, uint32_t uid) {
   scap_userinfo *user =
-      cxt->getInspector()->m_usergroup_manager.get_user(containerid, uid);
+      cxt->getInspector()->m_usergroup_manager->get_user(containerid, uid);
   if (user != nullptr) {
     return user->name;
   } else {
@@ -96,7 +96,7 @@ std::string utils::getUserName(context::SysFlowContext *cxt,
 std::string utils::getGroupName(context::SysFlowContext *cxt,
                                 std::string &containerid, uint32_t gid) {
   scap_groupinfo *group =
-      cxt->getInspector()->m_usergroup_manager.get_group(containerid, gid);
+      cxt->getInspector()->m_usergroup_manager->get_group(containerid, gid);
   if (group != nullptr) {
     return group->name;
   } else {

@@ -124,10 +124,10 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
     }
     i++;
   }
-  p->proc.uid = static_cast<int32_t>(mainthread->m_user.uid());
-  p->proc.gid = static_cast<int32_t>(mainthread->m_group.gid());
-  p->proc.userName = mainthread->m_user.name();
-  p->proc.groupName = mainthread->m_group.name();
+  p->proc.uid = static_cast<int32_t>(mainthread->get_user()->uid);
+  p->proc.gid = static_cast<int32_t>(mainthread->get_group()->gid);
+  p->proc.userName = mainthread->get_user()->name;
+  p->proc.groupName = mainthread->get_group()->name;
   ContainerObj *cont = m_containerCxt->getContainer(ti);
   if (cont != nullptr) {
     p->proc.containerId.set_string(cont->cont.id);
@@ -408,10 +408,10 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
     i++;
   }
 
-  proc->uid = static_cast<int32_t>(mainthread->m_user.uid());
-  proc->gid = static_cast<int32_t>(mainthread->m_group.gid());
-  proc->userName = mainthread->m_user.name();
-  proc->groupName = mainthread->m_group.name();
+  proc->uid = static_cast<int32_t>(mainthread->get_user()->uid);
+  proc->gid = static_cast<int32_t>(mainthread->get_group()->gid);
+  proc->userName = mainthread->get_user()->name;
+  proc->groupName = mainthread->get_group()->name;
 }
 
 void ProcessContext::clearProcesses() {
