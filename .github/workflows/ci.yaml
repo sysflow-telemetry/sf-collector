@@ -373,6 +373,7 @@ jobs:
             BUILD_NUMBER=${{ env.SHA_SHORT }}
             VERSION=${{ env.BRANCH }}
             RELEASE=${{ env.SHA_SHORT }}
+            RUNTIME_IMAGE=alpine
       - name: Push README to Dockerhub
         uses: christian-korneck/update-container-description-action@v1
         if: ${{ github.ref == 'refs/heads/master' && github.event_name != 'pull_request' }}
