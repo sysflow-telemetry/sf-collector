@@ -364,6 +364,7 @@ jobs:
           tags: "${{ steps.meta.outputs.tags }}"
           labels: "${{ steps.meta.outputs.labels }}"
           target: runtime
+          file: Dockerfile.musl
           build-args: |
             ALPINE_VER=${{ env.ALPINE_VERSION }}
             FALCO_VER=${{ env.FALCO_VERSION }}
