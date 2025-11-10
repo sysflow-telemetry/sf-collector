@@ -193,6 +193,7 @@ jobs:
         run: |
           echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCOCTL_VERSION=$(awk -F'=' '/FALCOCTL_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "ALPINE_VERSION=$(awk -F'=' '/ALPINE_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
       - name: Set image tags
         shell: bash
