@@ -104,6 +104,7 @@ falcolibs/package:
 	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
 	mkdir -p include/userspace/libsinsp && cp ../userspace/libsinsp/*.h include/userspace/libsinsp && \
+	mkdir -p include/userspace/libsinsp/sinsp_filter_transformers && cp ../userspace/libsinsp/sinsp_filter_transformers/*.h include/userspace/libsinsp/sinsp_filter_transformers/ && \
 	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
 	mkdir -p include/userspace/libsinsp/filter && cp ../userspace/libsinsp/filter/*.h include/userspace/libsinsp/filter/ && \
 	mkdir -p include/userspace/libsinsp/events && cp ../userspace/libsinsp/events/*.h include/userspace/libsinsp/events/ && \
@@ -122,15 +123,15 @@ falcolibs/package:
 	cp tbb-prefix/src/tbb/lib_release/libtbb.a lib/ && \
 	cp jsoncpp-prefix/src/lib/libjsoncpp.a lib/ && \
 	cp -r jsoncpp-prefix/src/include/json  include/ && \
-	cp -r c-ares-prefix/src/c-ares/target/include/*.h include/ && \
+	cp -r c-ares-prefix/src/c-ares/include/*.h include/ && \
 	cp libpman/*.a lib/ && \
 	cp libsinsp/*.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
-	cp ../../falco/docker/falco/docker-entrypoint.sh bin/ && \
+	cp ../../falco/docker/driver-loader-buster/docker-entrypoint.sh bin/ && \
     cp re2-prefix/build/libre2.a lib/ && \
 	cp grpc-prefix/src/grpc/*.a lib/ && \
 	find grpc-prefix/src/grpc/third_party/abseil-cpp -name '*.a' -exec cp '{}' lib \; && \
-	cp c-ares-prefix/src/c-ares/target/lib/libcares.a lib/ && \
+	cp c-ares-prefix/src/c-ares/lib/libcares.a lib/ && \
 	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
 	cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
 	cp zlib-prefix/src/zlib/libz.a lib/libz.a

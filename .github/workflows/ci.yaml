@@ -48,6 +48,7 @@ jobs:
         clang-format-version: '12'
         check-path: ${{ matrix.path }}
   ubi:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -192,36 +193,39 @@ jobs:
         run: |
           echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "FALCOCTL_VERSION=$(awk -F'=' '/FALCOCTL_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "ALPINE_VERSION=$(awk -F'=' '/ALPINE_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
       - name: Set image tags
         shell: bash
         run: |
           echo "BASE_TAG=$(echo base-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.ALPINE_VERSION }})" >> $GITHUB_ENV
           echo "MODS_TAG=$(echo mods-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.ALPINE_VERSION }})" >> $GITHUB_ENV
+          echo "DRIVER_TAG=$(echo driver-${{ env.FALCO_LIBS_VERSION }}-${{ env.FALCO_VERSION }}-${{ env.ALPINE_VERSION }})" >> $GITHUB_ENV
       - name: Check package version
         id: checks
         shell: bash
         run: |
           echo "BASE_EXISTS=$(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.BASE_TAG }}/ > /dev/null && echo 1 || echo 0)" >> $GITHUB_ENV
           echo "MODS_EXISTS=$(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.MODS_TAG }}/ > /dev/null && echo 1 || echo 0)" >> $GITHUB_ENV
+          echo "DRIVER_EXISTS=$(curl --silent -f --head -lL https://hub.docker.com/v2/repositories/${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}/tags/${{ env.DRIVER_TAG }}/ > /dev/null && echo 1 || echo 0)" >> $GITHUB_ENV
       - name: Init modules
-        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         run: make -C modules init
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
-        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
       - name: Login to DockerHub
         uses: docker/login-action@v2
-        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
-        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -229,14 +233,14 @@ jobs:
       - name: Set build args
         id: args
         shell: bash
-        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         run: |
           echo "BRANCH=$(echo ${GITHUB_REF#refs/*/})" >> $GITHUB_ENV
           echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Build and push base
         id: base_docker_build
         uses: docker/build-push-action@v3
-        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         with:
           context: .
           push: true
@@ -253,7 +257,7 @@ jobs:
       - name: Build and push mods
         id: mods_docker_build
         uses: docker/build-push-action@v3
-        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         with:
           context: .
           push: true
@@ -267,14 +271,35 @@ jobs:
             BUILD_NUMBER=${{ env.SHA_SHORT }}
             VERSION=${{ env.BRANCH }}
             RELEASE=${{ env.SHA_SHORT }}
+      - name: Build and push driver
+        id: driver_docker_build
+        uses: docker/build-push-action@v3
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
+        with:
+          context: .
+          push: true
+          file: Dockerfile.driver.alpine.amd64
+          tags: |
+            ${{ env.ALPINE_DOCKER_REGISTRY_REPOSITORY }}:${{ env.DRIVER_TAG }}
+            ghcr.io/${{ env.GH_ORGANIZATION }}/alpine:${{ env.DRIVER_TAG }}
+          target: driver
+          build-args: |
+            ALPINE_VER=${{ env.ALPINE_VERSION }}
+            FALCO_VER=${{ env.FALCO_VERSION }}
+            FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }}
+            FALCOCTL_VERSION=${{ env.FALCOCTL_VERSION }}
+            BUILD_NUMBER=${{ env.SHA_SHORT }}
+            VERSION=${{ env.BRANCH }}
+            RELEASE=${{ env.SHA_SHORT }}
       - name: Image digest
-        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 }}
+        if: ${{ env.BASE_EXISTS == 0 || env.MODS_EXISTS == 0 || env.DRIVER_EXISTS == 0 }}
         run: |
           echo ${{ steps.base_docker_build.outputs.digest }}
           echo ${{ steps.mods_docker_build.outputs.digest }}
+          echo ${{ steps.driver_docker_build.outputs.digest }}
   tests:
     runs-on: ubuntu-latest
-    needs: [lint, ubi, alpine]
+    needs: [lint, alpine]
     if: "!contains(github.ref, '-skip-tests')"
     steps:
       - name: Checkout
@@ -288,11 +313,11 @@ jobs:
         uses: docker/setup-buildx-action@v2
       - name: Run tests
         run: |
-          make docker-testing-build
-          make docker-test
+          make docker-testing-build/musl
+          make docker-test/musl
   docker:
     runs-on: ubuntu-latest
-    needs: [tests, lint, ubi, alpine]
+    needs: [tests, lint, alpine]
     if: ${{ always() && !failure() && !cancelled() }}
     permissions:
       contents: read
@@ -309,7 +334,7 @@ jobs:
           echo "FALCO_VERSION=$(awk -F'=' '/FALCO_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "FALCO_LIBS_VERSION=$(awk -F'=' '/FALCO_LIBS_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
           echo "FALCO_LIBS_DRIVER_VERSION=$(awk -F'=' '/FALCO_LIBS_DRIVER_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
-          echo "UBI_VERSION=$(awk -F'=' '/UBI_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
+          echo "ALPINE_VERSION=$(awk -F'=' '/ALPINE_VERSION/{print $2}' makefile.manifest.inc)" >> $GITHUB_ENV
       - name: Init modules
         run: make -C modules init
       - name: Build image metadata
@@ -363,14 +388,16 @@ jobs:
           tags: "${{ steps.meta.outputs.tags }}"
           labels: "${{ steps.meta.outputs.labels }}"
           target: runtime
+          file: Dockerfile.musl
           build-args: |
-            UBI_VER=${{ env.UBI_VERSION }}
+            ALPINE_VER=${{ env.ALPINE_VERSION }}
             FALCO_VER=${{ env.FALCO_VERSION }}
             FALCO_LIBS_VER=${{ env.FALCO_LIBS_VERSION }}
             FALCO_LIBS_DRIVER_VER=${{ env.FALCO_LIBS_DRIVER_VERSION }}
             BUILD_NUMBER=${{ env.SHA_SHORT }}
             VERSION=${{ env.BRANCH }}
             RELEASE=${{ env.SHA_SHORT }}
+            RUNTIME_IMAGE=alpine
       - name: Push README to Dockerhub
         uses: christian-korneck/update-container-description-action@v1
         if: ${{ github.ref == 'refs/heads/master' && github.event_name != 'pull_request' }}
@@ -410,22 +437,16 @@ jobs:
         id: build_release_assets
         shell: bash
         run: |
-          make docker-libs-build
-          make docker-runtime-build
           make docker-libs-build/musl
           make docker-runtime-build/musl
           make package
-          make package-libs
           make package-libs/musl
           export $(sed 's/\?//g' makefile.manifest.inc | grep -v '^#' | xargs)
           echo "BIN_DEB=$(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.deb)" >> $GITHUB_ENV
-          echo "LIB_DEB=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.deb)" >> $GITHUB_ENV
           echo "LIBMUSL_DEB=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.deb)" >> $GITHUB_ENV
           echo "BIN_RPM=$(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.rpm)" >> $GITHUB_ENV
-          echo "LIB_RPM=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.rpm)" >> $GITHUB_ENV
           echo "LIBMUSL_RPM=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.rpm)" >> $GITHUB_ENV
           echo "BIN_TGZ=$(ls ${{ github.workspace }}/scripts/cpack/sfcollector-$SYSFLOW_VERSION-x86_64.tar.gz)" >> $GITHUB_ENV
-          echo "LIB_TGZ=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-$SYSFLOW_VERSION-x86_64.tar.gz)" >> $GITHUB_ENV
           echo "LIBMUSL_TGZ=$(ls ${{ github.workspace }}/scripts/cpack/libsysflow-musl-$SYSFLOW_VERSION-x86_64.tar.gz)" >> $GITHUB_ENV
       - name: Get Changelog Entry
         id: changelog_reader
@@ -442,12 +463,9 @@ jobs:
           draft: true
           files: |
             ${{ env.BIN_DEB }}
-            ${{ env.LIB_DEB }}
             ${{ env.LIBMUSL_DEB }}
             ${{ env.BIN_RPM }}
-            ${{ env.LIB_RPM }}
             ${{ env.LIBMUSL_RPM }}
             ${{ env.BIN_TGZ }}
-            ${{ env.LIB_TGZ }}
             ${{ env.LIBMUSL_TGZ }}
 

@@ -104,7 +104,7 @@ init:
 build: init docker-base-build docker-mods-build docker-driver-build docker-libs-build docker-collector-build docker-runtime-build
 
 .PHONY: build/musl
-build/musl: init docker-base-build/musl docker-mods-build/musl docker-driver-build docker-libs-build/musl docker-collector-build/musl docker-runtime-build/musl
+build/musl: init docker-base-build/musl docker-mods-build/musl docker-driver-build/musl docker-libs-build/musl docker-collector-build/musl docker-runtime-build/musl
 
 .PHONY: docker-base-build
 docker-base-build:
@@ -125,6 +125,10 @@ docker-mods-build/musl:
 .PHONY: docker-driver-build
 docker-driver-build:
 	( DOCKER_BUILDKIT=1 docker build --secret id=rhuser,src=$(shell pwd)/scripts/build/rhuser --secret id=rhpassword,src=$(shell pwd)/scripts/build/rhpassword --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg FALCOCTL_VERSION=${FALCOCTL_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --target driver -t sysflowtelemetry/ubi:driver-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.driver.amd64 . )
+
+.PHONY: docker-driver-build/musl
+docker-driver-build/musl:
+	( DOCKER_BUILDKIT=1 docker build --no-cache --build-arg ALPINE_VER=${ALPINE_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCOCTL_VERSION=${FALCOCTL_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target driver -t sysflowtelemetry/alpine:driver-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.driver.alpine.amd64 . )
 
 .PHONY: docker-libs-build
 docker-libs-build:
@@ -148,7 +152,7 @@ docker-runtime-build:
 
 .PHONY: docker-runtime-build/musl
 docker-runtime-build/musl:
-	( DOCKER_BUILDKIT=1 docker build --build-arg ARCH=${ARCH} --build-arg RUNTIME_IMAGE=${RUNTIME_IMAGE} --build-arg ALPINE_VER=${ALPINE_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target runtime -t sysflowtelemetry/sf-collector-musl:${SYSFLOW_VERSION} -f Dockerfile.musl . )
+	( DOCKER_BUILDKIT=1 docker build --build-arg ARCH=${ARCH} --build-arg RUNTIME_IMAGE=alpine --build-arg ALPINE_VER=${ALPINE_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target runtime -t sysflowtelemetry/sf-collector-musl:${SYSFLOW_VERSION} -f Dockerfile.musl . )
 
 .PHONY: docker-driver-build/musl/s390x
 docker-driver-build/musl/s390x:

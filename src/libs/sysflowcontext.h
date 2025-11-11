@@ -33,6 +33,7 @@
 #include <ppm_events_public.h>
 #include <sinsp.h>
 #include <unistd.h>
+#include <user.h>
 
 #define DRIVER_LOG "DRIVER_LOG"
 #define NODE_IP "NODE_IP"

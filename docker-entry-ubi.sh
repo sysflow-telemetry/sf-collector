@@ -3,6 +3,7 @@ set -x
 rm -fr /usr/src/kernels/ && rm -fr /usr/src/debug/
 rm -fr /lib/modules && ln -s $HOST_ROOT/lib/modules /lib/modules
 rm -fr /boot && ln -s $HOST_ROOT/boot /boot
+ln -s /dev $HOST_ROOT/dev
 if [ -S "/host/var/run/docker.sock" ] ; then
 echo "Docker Engine domain socket detected"
 fi
@@ -36,9 +37,12 @@ else
     fi
 fi
 
+DRIVER=${DRIVER_TYPE}
+
 if [ "${DRIVER_TYPE}" == "ebpf-core" ]; then
 	echo "Exporting SKIP_DRIVER_LOADER"
 	export SKIP_DRIVER_LOADER=1
+	DRIVER="modern_ebpf"
 fi
 
 if [ "${DRIVER_TYPE}" == "ebpf" ] && [ -z "${FALCO_BPF_PROBE}" ]; then
@@ -46,4 +50,15 @@ if [ "${DRIVER_TYPE}" == "ebpf" ] && [ -z "${FALCO_BPF_PROBE}" ]; then
 	export FALCO_BPF_PROBE=""
 fi
 
-exec /usr/local/sysflow/modules/bin/docker-entrypoint.sh "$@"    
+/usr/local/sysflow/modules/bin/docker-entrypoint.sh ${DRIVER} && /usr/local/sysflow/bin/sysporter \
+     ${INTERVAL:+-G} $INTERVAL \
+     ${OUTPUT:+-w} $OUTPUT \
+     ${EXPORTER_ID:+-e} "$EXPORTER_ID" \
+     ${FILTER:+-f} "$FILTER" \
+     ${CRI_PATH:+-p} ${CRI_PATH} \
+     ${CRI_TIMEOUT:+-t} ${CRI_TIMEOUT} \
+     ${SOCK_FILE:+-u} ${SOCK_FILE} \
+     ${SAMPLING_RATE:+-s} ${SAMPLING_RATE} \
+     ${DRIVER_TYPE:+-k} "${DRIVER_TYPE}" \
+     ${STATS:+-d} \
+     ${MODE:+-m} ${MODE}
