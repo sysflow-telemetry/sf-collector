@@ -77,3 +77,4 @@ COPY ./docker-entry-ubi.sh /usr/local/sysflow/modules/bin/
 RUN  cd /build/modules && \
      make INSTALL_PATH=${INSTALL_PATH} ARCH=${ARCH} MUSL=1 MAKE_JOBS=${MAKE_JOBS} install && \
      make clean && rm -rf /build/modules
+

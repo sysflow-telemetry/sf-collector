@@ -122,6 +122,5 @@ inline char *itoa(int val, int base) {
   }
   return &buf[i + 1];
 }
-
 } // namespace utils
 #endif

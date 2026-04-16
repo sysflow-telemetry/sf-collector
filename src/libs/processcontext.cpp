@@ -66,7 +66,7 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
   p->proc.env = mainthread->get_env();
   p->proc.tty = mainthread->m_tty;
 
-  sinsp_threadinfo *parent =  ev->get_inspector()->m_thread_manager->get_ancestor_process(*mainthread);
+  sinsp_threadinfo *parent = ev->get_inspector()->m_thread_manager->get_ancestor_process(*mainthread);
 
   if (parent != nullptr) {
     OID poid;
@@ -242,7 +242,6 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   std::string mt_container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*mt);
   std::string ti_container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
 
-
   SF_DEBUG(m_logger,
            "Get process - PID: " << mt->m_pid << " ts: " << mt->m_clone_ts
                                  << " Exepath: " << mt->m_exepath << " Exe: "
@@ -278,7 +277,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
 
   sinsp_threadinfo *ct = mt;
 
-  mt =  ev->get_inspector()->m_thread_manager->get_ancestor_process(*mt);
+  mt = ev->get_inspector()->m_thread_manager->get_ancestor_process(*mt);
 
   while (mt != nullptr && mt->m_tid != -1) {
     if (!mt->is_main_thread()) {
@@ -327,7 +326,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     parent->children.insert(processes.back()->proc.oid);
     processes.push_back(parent);
     ct = mt;
-    mt =  ev->get_inspector()->m_thread_manager->get_ancestor_process(*mt);
+    mt = ev->get_inspector()->m_thread_manager->get_ancestor_process(*mt);
   }
 
   if (mt == nullptr && ct->m_ptid != -1) {
