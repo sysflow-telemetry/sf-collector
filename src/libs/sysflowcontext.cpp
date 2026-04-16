@@ -45,13 +45,13 @@ SysFlowContext::SysFlowContext(SysFlowConfig *config)
     m_inspector->set_filter(config->falcoFilter);
   }
 
-  if (!config->criPath.empty()) {
-    m_inspector->set_cri_socket_path(config->criPath);
-  }
+  // if (!config->criPath.empty()) {
+  //   m_inspector->set_cri_socket_path(config->criPath);
+  // }
 
-  if (config->criTO > 0) {
-    m_inspector->set_cri_timeout(config->criTO);
-  }
+  // if (config->criTO > 0) {
+  //   m_inspector->set_cri_timeout(config->criTO);
+  // }
 
   const char *envP = std::getenv(DRIVER_LOG);
   if ((envP != nullptr && strcmp(envP, "1") == 0) ||

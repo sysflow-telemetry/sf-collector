@@ -22,6 +22,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <cstdint>
 
 namespace sfexception {
 

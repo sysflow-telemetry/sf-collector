@@ -244,10 +244,11 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
     return createConsumerRecord(ev, proc, file, flag, fdinfo, fd);
   }
   FileFlowObj *ff = nullptr;
+  std::string container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
   std::string flowkey;
-  flowkey.reserve(ti->m_container_id.length() + fdinfo->m_name.length() + 32);
+  flowkey.reserve(container_id.length() + fdinfo->m_name.length() + 32);
   flowkey += fdinfo->m_name;
-  flowkey += ti->m_container_id;
+  flowkey += container_id;
   flowkey.append(utils::itoa(ti->m_tid, 10));
   flowkey.append(utils::itoa(fd, 10));
 

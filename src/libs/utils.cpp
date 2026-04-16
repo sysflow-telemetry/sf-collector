@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "sysflow/avsc_sysflow5.hh"
 #include "sysflowcontext.h"
+#include "sha1.h"
 
 static NFKey s_nfdelkey;
 static NFKey s_nfemptykey;
@@ -30,6 +31,98 @@ static OID s_oiddelkey;
 static OID s_oidemptykey;
 
 CREATE_LOGGER_2("sysflow.utils");
+
+namespace {
+
+const size_t CONTAINER_ID_LENGTH = 64;
+
+/**
+ * @brief A pattern to match cgroup paths against
+ */
+struct cgroup_layout {
+	const char *prefix;
+	const char *suffix;
+};
+
+/**
+ * @brief Aggregated cgroup layout containing all known container runtime patterns
+ */
+constexpr const cgroup_layout ALL_RUNC_CGROUP_LAYOUTS[] = {
+    // CRI patterns
+    {"/crio-", ""},                  // non-systemd cri-o
+    {"/cri-containerd-", ".scope"},  // systemd containerd
+    {"/crio-", ".scope"},            // systemd cri-o
+    {":cri-containerd:", ""},        // containerd without "SystemdCgroup = true"
+    {"/docker-", ".scope"},          // systemd docker in cri-dockerd scenario
+    // Podman patterns
+    {"/libpod-", ".scope"},            // podman
+    {"/libpod-", ".scope/container"},  // podman
+    {"/libpod-", ""},                  // non-systemd podman, e.g. on alpine
+    {nullptr, nullptr}
+};
+
+/**
+ * Check if cgroup ends with <prefix><container_id><suffix>.
+ */
+static bool match_one_container_id(const std::string &cgroup,
+                                   const std::string &prefix,
+                                   const std::string &suffix) {
+	// Single pass: find suffix first (from end), then validate prefix position
+	size_t end_pos = cgroup.rfind(suffix);
+
+	// Isn't this supposed to always be the last character?
+	if(end_pos == std::string::npos) {
+		return false;
+	}
+
+	// Calculate expected start position and validate prefix
+	if(end_pos < prefix.size()) {
+		return false;
+	}
+	size_t start_pos = cgroup.rfind(prefix, end_pos - 1);
+	if(start_pos == std::string::npos) {
+		return false;
+	}
+	start_pos += prefix.size();
+
+	// Fast character validation using lookup instead of find_first_not_of
+	if(end_pos - start_pos == CONTAINER_ID_LENGTH) {
+		bool all_valid = true;
+		for(size_t i = start_pos; i < end_pos && all_valid; ++i) {
+			unsigned char c = cgroup[i];
+			all_valid = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+		}
+		if(all_valid) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static bool match_container_id(const std::string &cgroup,
+                               const cgroup_layout *layout) {
+	for(size_t i = 0; layout[i].prefix && layout[i].suffix; ++i) {
+		if(match_one_container_id(cgroup, layout[i].prefix, layout[i].suffix)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static bool matches_runc_cgroups(const sinsp_threadinfo *tinfo,
+                                 const cgroup_layout *layout) {
+	for(const auto &it : tinfo->cgroups()) {
+		if(match_container_id(it.second, layout)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+}  // anonymous namespace
 
 void initKeys() {
   s_nfdelkey.ip1 = 1;
@@ -48,9 +141,11 @@ void initKeys() {
 }
 
 void utils::generateFOID(const std::string &key, FOID *foid) {
-  SHA1(reinterpret_cast<const unsigned char *>(key.c_str()), key.size(),
-       foid->begin());
+    SHA1 sha1;
+    sha1.add(reinterpret_cast<const uint8_t*>(key.c_str()), key.size());
+    sha1.getHash(foid->data());
 }
+
 
 NFKey *utils::getNFEmptyKey() {
   if (!s_keysinit) {
@@ -106,7 +201,12 @@ std::string utils::getGroupName(context::SysFlowContext *cxt,
 
 bool utils::isInContainer(sinsp_evt *ev) {
   sinsp_threadinfo *ti = ev->get_thread_info();
-  return !ti->m_container_id.empty();
+  if (ti == NULL) {
+    return false;
+  }
+
+  // Check against all known container runtime patterns
+  return matches_runc_cgroups(ti, ALL_RUNC_CGROUP_LAYOUTS);
 }
 
 time_t utils::getExportTime(context::SysFlowContext *cxt) {
@@ -127,7 +227,7 @@ int64_t utils::getSyscallResult(sinsp_evt *ev) {
     case PT_FD:
     case PT_INT64:
     case PT_INT32:
-      res = *reinterpret_cast<const int64_t *>(p->m_val);
+      res = *reinterpret_cast<const int64_t *>(p->data());
       break;
     default:
       SF_DEBUG(m_logger, "Syscall result not of type pid! Type: "
@@ -168,7 +268,7 @@ int64_t utils::getIntParam(sinsp_evt *ev, std::string pname) {
       case PT_FLAGS16:
       case PT_FLAGS32: {
         const sinsp_evt_param *p = ev->get_param(i);
-        return *reinterpret_cast<const int64_t *>(p->m_val);
+        return *reinterpret_cast<const int64_t *>(p->data());
       }
       default:
         return 0;
@@ -251,7 +351,7 @@ std::string utils::getPath(sinsp_evt *ev, const std::string &paraName) {
     const sinsp_evt_param *p = ev->get_param(i);
     if (param->type == PT_FSPATH || param->type == PT_CHARBUF ||
         param->type == PT_FSRELPATH) {
-      path = std::string(p->m_val, p->m_len);
+      path = std::string(p->data(), p->len());
       SF_DEBUG(m_logger, "getPath: Param '" << name << "'s value is " << path);
       sanitize_string(path);
     }
@@ -271,8 +371,8 @@ int64_t utils::getFD(sinsp_evt *ev, const std::string &paraName) {
     }
     const sinsp_evt_param *p = ev->get_param(i);
     if (param->type == PT_FD) {
-      assert(p->m_len == sizeof(int64_t));
-      fd = (*reinterpret_cast<const int64_t *>(p->m_val));
+      assert(p->len() == sizeof(int64_t));
+      fd = (*reinterpret_cast<const int64_t *>(p->data()));
     }
     break;
   }

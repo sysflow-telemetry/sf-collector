@@ -65,7 +65,8 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
   p->proc.cwd = mainthread->get_cwd();
   p->proc.env = mainthread->get_env();
   p->proc.tty = mainthread->m_tty;
-  sinsp_threadinfo *parent = mainthread->get_parent_thread();
+
+  sinsp_threadinfo *parent =  ev->get_inspector()->m_thread_manager->get_ancestor_process(*mainthread);
 
   if (parent != nullptr) {
     OID poid;
@@ -124,10 +125,26 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
     }
     i++;
   }
-  p->proc.uid = static_cast<int32_t>(mainthread->get_user()->uid);
-  p->proc.gid = static_cast<int32_t>(mainthread->get_group()->gid);
-  p->proc.userName = mainthread->get_user()->name;
-  p->proc.groupName = mainthread->get_group()->name;
+
+  std::string container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*mainthread);
+
+  p->proc.uid = static_cast<int32_t>(mainthread->m_uid);
+  p->proc.gid = static_cast<int32_t>(mainthread->m_gid);
+
+  scap_userinfo *user_info = ev->get_inspector()->m_usergroup_manager->get_user(container_id, p->proc.uid);
+  if (user_info != nullptr){
+    p->proc.userName = user_info->name;
+  }else{
+    p->proc.userName = "";
+  }
+
+  scap_groupinfo *group_info = ev->get_inspector()->m_usergroup_manager->get_group(container_id, p->proc.gid);
+  if (group_info != nullptr){
+    p->proc.groupName = group_info->name;
+  }else{
+    p->proc.groupName = "";
+  }
+
   ContainerObj *cont = m_containerCxt->getContainer(ti);
   if (cont != nullptr) {
     p->proc.containerId.set_string(cont->cont.id);
@@ -222,11 +239,15 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   key.hpid = mt->m_pid;
   created = true;
 
+  std::string mt_container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*mt);
+  std::string ti_container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
+
+
   SF_DEBUG(m_logger,
            "Get process - PID: " << mt->m_pid << " ts: " << mt->m_clone_ts
                                  << " Exepath: " << mt->m_exepath << " Exe: "
-                                 << mt->m_exe << " MTCI " << mt->m_container_id
-                                 << " TICI: " << ti->m_container_id)
+                                 << mt->m_exe << " MTCI " << mt_container_id
+                                 << " TICI: " << ti_container_id)
   ProcessTable::iterator proc = m_procs.find(&key);
   ProcessObj *process = nullptr;
   if (proc != m_procs.end()) {
@@ -256,7 +277,8 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   processes.push_back(process);
 
   sinsp_threadinfo *ct = mt;
-  mt = mt->get_parent_thread();
+
+  mt =  ev->get_inspector()->m_thread_manager->get_ancestor_process(*mt);
 
   while (mt != nullptr && mt->m_tid != -1) {
     if (!mt->is_main_thread()) {
@@ -267,7 +289,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     }
     if (mt->m_clone_ts == 0 && mt->m_pid == 0) {
       ct = mt;
-      mt = mt->get_parent_thread();
+      mt =  ev->get_inspector()->m_thread_manager->get_ancestor_process(*mt);
       continue;
     }
     key.createTS = mt->m_clone_ts;
@@ -305,7 +327,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     parent->children.insert(processes.back()->proc.oid);
     processes.push_back(parent);
     ct = mt;
-    mt = mt->get_parent_thread();
+    mt =  ev->get_inspector()->m_thread_manager->get_ancestor_process(*mt);
   }
 
   if (mt == nullptr && ct->m_ptid != -1) {
@@ -408,10 +430,24 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
     i++;
   }
 
-  proc->uid = static_cast<int32_t>(mainthread->get_user()->uid);
-  proc->gid = static_cast<int32_t>(mainthread->get_group()->gid);
-  proc->userName = mainthread->get_user()->name;
-  proc->groupName = mainthread->get_group()->name;
+  std::string container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*mainthread);
+
+  proc->uid = static_cast<int32_t>(mainthread->m_uid);
+  proc->gid = static_cast<int32_t>(mainthread->m_gid);
+
+  scap_userinfo *user_info = ev->get_inspector()->m_usergroup_manager->get_user(container_id, proc->uid);
+  if (user_info != nullptr){
+    proc->userName = user_info->name;
+  }else{
+    proc->userName = "";
+  }
+
+  scap_groupinfo *group_info = ev->get_inspector()->m_usergroup_manager->get_group(container_id, proc->gid);
+  if (group_info != nullptr){
+    proc->groupName = group_info->name;
+  }else{
+    proc->groupName = "";
+  }
 }
 
 void ProcessContext::clearProcesses() {

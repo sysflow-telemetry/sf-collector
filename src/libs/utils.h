@@ -28,7 +28,6 @@
 #include <ctime>
 #include <fstream>
 #include <json/json.h>
-#include <openssl/sha.h>
 #include <sinsp.h>
 #include <sstream>
 #include <string>
@@ -123,5 +122,6 @@ inline char *itoa(int val, int base) {
   }
   return &buf[i + 1];
 }
+
 } // namespace utils
 #endif

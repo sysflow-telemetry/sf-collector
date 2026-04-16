@@ -104,7 +104,7 @@ int K8sEventProcessor::handleK8sEvent(sinsp_evt *ev) {
   int res = 1;
 
   const sinsp_evt_param *parinfo = ev->get_param(0);
-  std::string payload(parinfo->m_val, parinfo->m_len);
+  std::string payload(parinfo->data(), parinfo->len());
   m_k8sEvt.message = payload;
   m_k8sEvt.ts = ev->get_ts();
 

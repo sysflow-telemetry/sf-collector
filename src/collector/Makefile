@@ -55,7 +55,7 @@ MUSL ?= 0
 
 # Compiler options
 CXX = g++
-LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lssl -lcrypto -lpthread -lm -ldl -lupb -laddress_sorting -lre2 -lcares -lprotobuf -lstdc++fs -lelf
+LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lpthread -lm -ldl -lre2 -lprotobuf -lstdc++fs -lelf
 MUSLFLAGS = -Os
 LDFLAGS = $(LIBS) -L$(FALCOLIBPREFIX)/ -L$(AVRLIBPREFIX)/  -L/usr/lib/ 
 CFLAGS = -std=c++17 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ \
@@ -65,7 +65,6 @@ CFLAGS = -std=c++17 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ 
 	 	 -I$(FALCOINCPREFIX)/ \
 		 -I$(FALCOINCPREFIX)/curl/ \
 		 -I$(FALCOINCPREFIX)/json2/ \
-		 -I$(FALCOINCPREFIX)/openssl/ \
 		 -I$(FALCOINCPREFIX)/driver/ \
 		 -I$(FALCOINCPREFIX)/userspace/libsinsp/ \
 		 -I$(FALCOINCPREFIX)/userspace/libscap/ \

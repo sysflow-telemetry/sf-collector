@@ -213,7 +213,7 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt *ev, OpFlags flag) {
   SF_DEBUG(m_logger, proc->proc.exe
                          << " "
                          << ipv4tuple_to_string(
-                                &(fdinfo->m_sockinfo.m_ipv4info), false)
+                                fdinfo->m_sockinfo.m_ipv4info, false)
                          << " Proto: " << getProtocol(fdinfo->get_l4proto())
                          << " Server: " << fdinfo->is_role_server()
                          << " Client: " << fdinfo->is_role_client() << " "

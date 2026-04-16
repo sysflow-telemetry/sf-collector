@@ -50,6 +50,7 @@ endif
 	cd filesystem && git fetch origin && git checkout $(GHCFS_VERSION)
 	cd sparsehash && git fetch origin && git checkout $(SPARSE_VERSION)
 	cd xxHash && git fetch origin && git checkout $(XXHASH_VERSION)
+	cd hash-library && git fetch origin && git checkout $(HASH_LIBRARY)
 
 # libelf is a pre-requisite for libs build
 .PHONY: modules
@@ -61,7 +62,8 @@ modules: elf/package \
 		glog/package \
 		snappy/package \
 		xxhash/package \
-		sparsehash/package
+		sparsehash/package \
+		hash-library/package
 
 .PHONY: install
 install: modules \
@@ -74,7 +76,8 @@ install: modules \
 	snappy/install \
 	dkms-rh/install \
 	xxhash/install \
-	sparsehash/install
+	sparsehash/install \
+	hash-library/install
 
 .PHONY: falcolibs/package
 falcolibs/package:
@@ -101,18 +104,15 @@ falcolibs/package:
 			-DCMD_MAKE="make -j${MAKE_JOBS}" \
 			${MUSL_FLAG} ../. && make -j${MAKE_JOBS} && \
 	mkdir -p include && mkdir -p lib && mkdir -p bin && \
-	mkdir -p include/curl && cp curl-prefix/src/curl/include/curl/*.h include/curl && \
 	mkdir -p include/driver && cp driver/src/*h include/driver && cp ../driver/*h include/driver && \
 	mkdir -p include/userspace/libsinsp && cp ../userspace/libsinsp/*.h include/userspace/libsinsp && \
 	mkdir -p include/userspace/libsinsp/sinsp_filter_transformers && cp ../userspace/libsinsp/sinsp_filter_transformers/*.h include/userspace/libsinsp/sinsp_filter_transformers/ && \
-	mkdir -p include/userspace/libsinsp/container_engine && cp ../userspace/libsinsp/container_engine/*.h include/userspace/libsinsp/container_engine/ && \
 	mkdir -p include/userspace/libsinsp/filter && cp ../userspace/libsinsp/filter/*.h include/userspace/libsinsp/filter/ && \
 	mkdir -p include/userspace/libsinsp/events && cp ../userspace/libsinsp/events/*.h include/userspace/libsinsp/events/ && \
 	mkdir -p include/userspace/libsinsp/state && cp ../userspace/libsinsp/state/*.h include/userspace/libsinsp/state/ && \
 	mkdir -p include/userspace/plugin && cp ../userspace/plugin/*.h include/userspace/plugin/ && \
 	mkdir -p include/userspace/libscap && cd .. && find userspace/libscap -name '*.h' -exec cp -r --parents '{}' build/include \; && cd build && \
 	cp libscap/*.h include/userspace/libscap && \
-	mkdir -p include/openssl && cp openssl-prefix/src/openssl/include/openssl/*.h include/openssl && \
 	cp -r tbb-prefix/src/tbb/include/tbb include/ && \
 	cp -r tbb-prefix/src/tbb/include/oneapi include/ && \
 	cp uthash-prefix/src/uthash/src/*.h include/ && \
@@ -123,27 +123,16 @@ falcolibs/package:
 	cp tbb-prefix/src/tbb/lib_release/libtbb.a lib/ && \
 	cp jsoncpp-prefix/src/lib/libjsoncpp.a lib/ && \
 	cp -r jsoncpp-prefix/src/include/json  include/ && \
-	cp -r c-ares-prefix/src/c-ares/include/*.h include/ && \
 	cp libpman/*.a lib/ && \
 	cp libsinsp/*.a lib/ && \
 	find libscap -name '*.a' -exec cp '{}' lib \; && \
 	cp ../../falco/docker/driver-loader-buster/docker-entrypoint.sh bin/ && \
     cp re2-prefix/build/libre2.a lib/ && \
-	cp grpc-prefix/src/grpc/*.a lib/ && \
-	find grpc-prefix/src/grpc/third_party/abseil-cpp -name '*.a' -exec cp '{}' lib \; && \
-	cp c-ares-prefix/src/c-ares/lib/libcares.a lib/ && \
-	cp curl-prefix/src/curl/lib/.libs/libcurl.a lib/ && \
-	cp openssl-prefix/src/openssl/target/lib/*.a lib/ && \
 	cp zlib-prefix/src/zlib/libz.a lib/libz.a
 ifeq ($(BUNDLE_FALCO_LIBS), 1)	
 	cp -r falco-libs/build/lib falco-libs/build/bundle
 	cp falco-libs.$(ARCH).mri falco-libs/build/bundle 
 	cd falco-libs/build/bundle && \
-	mv libgrpc++.a libgrpcpp.a && \
-	mv libgrpc++_alts.a libgrpcpp_alts.a && \
-	mv libgrpc++_error_details.a libgrpcpp_error_details.a && \
-	mv libgrpc++_reflection.a libgrpcpp_reflection.a && \
-	mv libgrpc++_unsecure.a libgrpcpp_unsecure.a && \
 	ar -M <falco-libs.$(ARCH).mri && cp libs.a ../lib/
 endif
 
@@ -233,6 +222,14 @@ sparsehash/package:
 .PHONY: sparsehash/install
 sparsehash/install:
 	cd sparsehash && make install
+
+.PHONY: hash-library/package
+hash-library/package:
+	cd hash-library && $(CXX) -c sha1.cpp -o sha1.o && ar rcs sha1.a sha1.o
+
+.PHONY: hash-library/install
+hash-library/install:
+	cd hash-library && cp sha1.a $(LIBPREFIX) && cp sha1.h $(MODPREFIX)/include/
 
 .PHONY: dkms-deb/install
 dkms-deb/install:
