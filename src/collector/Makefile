@@ -55,7 +55,7 @@ MUSL ?= 0
 
 # Compiler options
 CXX = g++
-LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lpthread -lm -ldl -lre2 -lprotobuf -lstdc++fs -lelf
+LIBS = ../libs/libsysflow_with_deps.a -lstdc++ -lz -lpthread -lm -ldl -lre2 -lstdc++fs -lelf
 MUSLFLAGS = -Os
 LDFLAGS = $(LIBS) -L$(FALCOLIBPREFIX)/ -L$(AVRLIBPREFIX)/  -L/usr/lib/ 
 CFLAGS = -std=c++17 -Wall -I.. -I../libs/ -I/usr/local/include/ -I/usr/include/ \
