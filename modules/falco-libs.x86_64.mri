@@ -2,6 +2,7 @@ create libs.a
 addlib libdriver_event_schema.a
 addlib libscap.a
 addlib libscap_engine_bpf.a
+addlib libscap_engine_gvisor.a
 addlib libscap_engine_kmod.a
 addlib libscap_engine_nodriver.a
 addlib libscap_engine_noop.a

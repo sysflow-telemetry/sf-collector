@@ -116,7 +116,10 @@ falcolibs/package:
 	cp -r tbb-prefix/src/tbb/include/tbb include/ && \
 	cp -r tbb-prefix/src/tbb/include/oneapi include/ && \
 	cp uthash-prefix/src/uthash/src/*.h include/ && \
+	cp -r protobuf-prefix/src/protobuf/target/include/google include/ && \
 	cp libbpf-prefix/src/libbpf-build/build/*.a lib/ && \
+	cp protobuf-prefix/src/protobuf/target/lib/libprotobuf.a lib && \
+	cp protobuf-prefix/src/protobuf/target/lib/libprotoc.a lib && \
 	cp tbb-prefix/src/tbb/lib_release/libtbb.a lib/ && \
 	cp jsoncpp-prefix/src/lib/libjsoncpp.a lib/ && \
 	cp -r jsoncpp-prefix/src/include/json  include/ && \
