@@ -28,7 +28,6 @@
 #include <ctime>
 #include <fstream>
 #include <json/json.h>
-#include <openssl/sha.h>
 #include <sinsp.h>
 #include <sstream>
 #include <string>

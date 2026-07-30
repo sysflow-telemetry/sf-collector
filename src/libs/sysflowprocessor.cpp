@@ -188,7 +188,10 @@ int SysFlowProcessor::run() {
     m_processCxt->checkForDeletion();
     checkAndRotateFile();
 
-    if (m_cxt->isFilterContainers() && !utils::isInContainer(ev)) {
+    if (m_cxt->isFilterContainers() && utils::isInContainer(ev)) {
+      // Suppress further events for this thread
+      int64_t tid = ev->get_tid();
+      m_cxt->getInspector()->suppress_events_tid(tid);
       continue;
     }
 

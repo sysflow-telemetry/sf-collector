@@ -128,7 +128,7 @@ docker-driver-build:
 
 .PHONY: docker-driver-build/musl
 docker-driver-build/musl:
-	( DOCKER_BUILDKIT=1 docker build --no-cache --build-arg ALPINE_VER=${ALPINE_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCOCTL_VERSION=${FALCOCTL_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target driver -t sysflowtelemetry/alpine:driver-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${UBI_VERSION} -f Dockerfile.driver.alpine.amd64 . )
+	( DOCKER_BUILDKIT=1 docker build --no-cache --build-arg ALPINE_VER=${ALPINE_VERSION} --build-arg UBI_VER=${UBI_VERSION} --build-arg FALCO_VER=${FALCO_VERSION} --build-arg FALCOCTL_VERSION=${FALCOCTL_VERSION} --build-arg FALCO_LIBS_VER=${FALCO_LIBS_VERSION} --build-arg FALCO_LIBS_DRIVER_VER=${FALCO_LIBS_DRIVER_VERSION} --target driver -t sysflowtelemetry/alpine:driver-${FALCO_LIBS_VERSION}-${FALCO_VERSION}-${ALPINE_VERSION} -f Dockerfile.driver.alpine.amd64 . )
 
 .PHONY: docker-libs-build
 docker-libs-build:

@@ -210,16 +210,15 @@ int NetworkFlowProcessor::handleNetFlowEvent(sinsp_evt *ev, OpFlags flag) {
     nf = nfi->second;
   }
 
-  SF_DEBUG(m_logger, proc->proc.exe
-                         << " "
-                         << ipv4tuple_to_string(
-                                &(fdinfo->m_sockinfo.m_ipv4info), false)
-                         << " Proto: " << getProtocol(fdinfo->get_l4proto())
-                         << " Server: " << fdinfo->is_role_server()
-                         << " Client: " << fdinfo->is_role_client() << " "
-                         << ev->get_name() << " " << proc->proc.oid.hpid << " "
-                         << proc->proc.oid.createTS << " " << ti->m_tid << " "
-                         << ev->get_fd_num());
+  SF_DEBUG(
+      m_logger, proc->proc.exe
+                    << " "
+                    << ipv4tuple_to_string(fdinfo->m_sockinfo.m_ipv4info, false)
+                    << " Proto: " << getProtocol(fdinfo->get_l4proto())
+                    << " Server: " << fdinfo->is_role_server() << " Client: "
+                    << fdinfo->is_role_client() << " " << ev->get_name() << " "
+                    << proc->proc.oid.hpid << " " << proc->proc.oid.createTS
+                    << " " << ti->m_tid << " " << ev->get_fd_num());
 
   if (nf == nullptr) {
     SF_DEBUG(m_logger, "Processing as new flow!");

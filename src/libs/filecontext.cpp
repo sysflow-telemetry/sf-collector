@@ -64,8 +64,10 @@ FileObj *FileContext::getFile(sinsp_evt *ev, const std::string &path,
   sinsp_threadinfo *ti = ev->get_thread_info();
   created = true;
   std::string key;
-  key.reserve(ti->m_container_id.length() + path.length());
-  key += ti->m_container_id;
+  std::string container_id =
+      ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
+  key.reserve(container_id.length() + path.length());
+  key += container_id;
   key += path;
   FileTable::iterator f = m_files.find(key);
   FileObj *file = nullptr;

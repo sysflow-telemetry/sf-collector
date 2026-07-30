@@ -39,7 +39,7 @@ private:
   writer::SysFlowWriter *m_writer;
   sfk8s::K8sContext *m_k8sCxt;
   ContainerObj *createContainer(sinsp_threadinfo *ti);
-  void setContainer(ContainerObj **cont, sinsp_container_info::ptr_t container);
+  void setContainer(ContainerObj **cont);
   void reupPod(sinsp_threadinfo *ti, ContainerObj *cont);
 
 public:

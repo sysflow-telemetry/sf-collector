@@ -127,8 +127,8 @@ int FileEventProcessor::writeFileEvent(sinsp_evt *ev, OpFlags flag) {
     if (IS_AT_SC(ev->get_type())) {
       const sinsp_evt_param *pinfo;
       pinfo = ev->get_param(1);
-      assert(pinfo->m_len == sizeof(int64_t));
-      const int64_t dirfd = *reinterpret_cast<const int64_t *>(pinfo->m_val);
+      assert(pinfo->len() == sizeof(int64_t));
+      const int64_t dirfd = *reinterpret_cast<const int64_t *>(pinfo->data());
       fileName = utils::getAbsolutePath(ti, dirfd, fileName);
     } else {
       fileName = utils::getAbsolutePath(ti, fileName);

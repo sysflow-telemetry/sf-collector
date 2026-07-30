@@ -34,3 +34,6 @@
 [submodule "modules/elf"]
 	path = modules/elf
 	url = https://github.com/arachsys/libelf.git
+[submodule "modules/hash-library"]
+	path = modules/hash-library
+	url = https://github.com/stbrumme/hash-library.git
