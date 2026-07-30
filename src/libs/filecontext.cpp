@@ -64,7 +64,8 @@ FileObj *FileContext::getFile(sinsp_evt *ev, const std::string &path,
   sinsp_threadinfo *ti = ev->get_thread_info();
   created = true;
   std::string key;
-  std::string container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
+  std::string container_id =
+      ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
   key.reserve(container_id.length() + path.length());
   key += container_id;
   key += path;

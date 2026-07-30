@@ -66,7 +66,8 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
   p->proc.env = mainthread->get_env();
   p->proc.tty = mainthread->m_tty;
 
-  sinsp_threadinfo *parent = ev->get_inspector()->m_thread_manager->get_ancestor_process(*mainthread);
+  sinsp_threadinfo *parent =
+      ev->get_inspector()->m_thread_manager->get_ancestor_process(*mainthread);
 
   if (parent != nullptr) {
     OID poid;
@@ -126,22 +127,26 @@ ProcessObj *ProcessContext::createProcess(sinsp_threadinfo *ti, sinsp_evt *ev,
     i++;
   }
 
-  std::string container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*mainthread);
+  std::string container_id =
+      ev->get_inspector()->m_plugin_tables.get_container_id(*mainthread);
 
   p->proc.uid = static_cast<int32_t>(mainthread->m_uid);
   p->proc.gid = static_cast<int32_t>(mainthread->m_gid);
 
-  scap_userinfo *user_info = ev->get_inspector()->m_usergroup_manager->get_user(container_id, p->proc.uid);
-  if (user_info != nullptr){
+  scap_userinfo *user_info = ev->get_inspector()->m_usergroup_manager->get_user(
+      container_id, p->proc.uid);
+  if (user_info != nullptr) {
     p->proc.userName = user_info->name;
-  }else{
+  } else {
     p->proc.userName = "";
   }
 
-  scap_groupinfo *group_info = ev->get_inspector()->m_usergroup_manager->get_group(container_id, p->proc.gid);
-  if (group_info != nullptr){
+  scap_groupinfo *group_info =
+      ev->get_inspector()->m_usergroup_manager->get_group(container_id,
+                                                          p->proc.gid);
+  if (group_info != nullptr) {
     p->proc.groupName = group_info->name;
-  }else{
+  } else {
     p->proc.groupName = "";
   }
 
@@ -239,14 +244,16 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
   key.hpid = mt->m_pid;
   created = true;
 
-  std::string mt_container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*mt);
-  std::string ti_container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
+  std::string mt_container_id =
+      ev->get_inspector()->m_plugin_tables.get_container_id(*mt);
+  std::string ti_container_id =
+      ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
 
-  SF_DEBUG(m_logger,
-           "Get process - PID: " << mt->m_pid << " ts: " << mt->m_clone_ts
-                                 << " Exepath: " << mt->m_exepath << " Exe: "
-                                 << mt->m_exe << " MTCI " << mt_container_id
-                                 << " TICI: " << ti_container_id)
+  SF_DEBUG(m_logger, "Get process - PID: "
+                         << mt->m_pid << " ts: " << mt->m_clone_ts
+                         << " Exepath: " << mt->m_exepath
+                         << " Exe: " << mt->m_exe << " MTCI " << mt_container_id
+                         << " TICI: " << ti_container_id)
   ProcessTable::iterator proc = m_procs.find(&key);
   ProcessObj *process = nullptr;
   if (proc != m_procs.end()) {
@@ -288,7 +295,7 @@ ProcessObj *ProcessContext::getProcess(sinsp_evt *ev, SFObjectState state,
     }
     if (mt->m_clone_ts == 0 && mt->m_pid == 0) {
       ct = mt;
-      mt =  ev->get_inspector()->m_thread_manager->get_ancestor_process(*mt);
+      mt = ev->get_inspector()->m_thread_manager->get_ancestor_process(*mt);
       continue;
     }
     key.createTS = mt->m_clone_ts;
@@ -429,22 +436,26 @@ void ProcessContext::updateProcess(Process *proc, sinsp_evt *ev,
     i++;
   }
 
-  std::string container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*mainthread);
+  std::string container_id =
+      ev->get_inspector()->m_plugin_tables.get_container_id(*mainthread);
 
   proc->uid = static_cast<int32_t>(mainthread->m_uid);
   proc->gid = static_cast<int32_t>(mainthread->m_gid);
 
-  scap_userinfo *user_info = ev->get_inspector()->m_usergroup_manager->get_user(container_id, proc->uid);
-  if (user_info != nullptr){
+  scap_userinfo *user_info = ev->get_inspector()->m_usergroup_manager->get_user(
+      container_id, proc->uid);
+  if (user_info != nullptr) {
     proc->userName = user_info->name;
-  }else{
+  } else {
     proc->userName = "";
   }
 
-  scap_groupinfo *group_info = ev->get_inspector()->m_usergroup_manager->get_group(container_id, proc->gid);
-  if (group_info != nullptr){
+  scap_groupinfo *group_info =
+      ev->get_inspector()->m_usergroup_manager->get_group(container_id,
+                                                          proc->gid);
+  if (group_info != nullptr) {
     proc->groupName = group_info->name;
-  }else{
+  } else {
     proc->groupName = "";
   }
 }

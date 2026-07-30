@@ -244,7 +244,8 @@ int FileFlowProcessor::handleFileFlowEvent(sinsp_evt *ev, OpFlags flag) {
     return createConsumerRecord(ev, proc, file, flag, fdinfo, fd);
   }
   FileFlowObj *ff = nullptr;
-  std::string container_id = ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
+  std::string container_id =
+      ev->get_inspector()->m_plugin_tables.get_container_id(*ti);
   std::string flowkey;
   flowkey.reserve(container_id.length() + fdinfo->m_name.length() + 32);
   flowkey += fdinfo->m_name;

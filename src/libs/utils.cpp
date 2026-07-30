@@ -20,9 +20,9 @@
 #include "utils.h"
 #include "datatypes.h"
 #include "logger.h"
+#include "sha1.h"
 #include "sysflow/avsc_sysflow5.hh"
 #include "sysflowcontext.h"
-#include "sha1.h"
 
 static NFKey s_nfdelkey;
 static NFKey s_nfemptykey;
@@ -45,21 +45,21 @@ struct cgroup_layout {
 };
 
 /**
- * @brief Aggregated cgroup layout containing all known container runtime patterns
+ * @brief Aggregated cgroup layout containing all known container runtime
+ * patterns
  */
 constexpr const cgroup_layout ALL_RUNC_CGROUP_LAYOUTS[] = {
-  // CRI patterns
-  {"/crio-", ""},                  // non-systemd cri-o
-  {"/cri-containerd-", ".scope"},  // systemd containerd
-  {"/crio-", ".scope"},            // systemd cri-o
-  {":cri-containerd:", ""},        // containerd without "SystemdCgroup = true"
-  {"/docker-", ".scope"},          // systemd docker in cri-dockerd scenario
-  // Podman patterns
-  {"/libpod-", ".scope"},            // podman
-  {"/libpod-", ".scope/container"},  // podman
-  {"/libpod-", ""},                  // non-systemd podman, e.g. on alpine
-  {nullptr, nullptr}
-};
+    // CRI patterns
+    {"/crio-", ""},                 // non-systemd cri-o
+    {"/cri-containerd-", ".scope"}, // systemd containerd
+    {"/crio-", ".scope"},           // systemd cri-o
+    {":cri-containerd:", ""},       // containerd without "SystemdCgroup = true"
+    {"/docker-", ".scope"},         // systemd docker in cri-dockerd scenario
+    // Podman patterns
+    {"/libpod-", ".scope"},           // podman
+    {"/libpod-", ".scope/container"}, // podman
+    {"/libpod-", ""},                 // non-systemd podman, e.g. on alpine
+    {nullptr, nullptr}};
 
 /**
  * Check if cgroup ends with <prefix><container_id><suffix>.
@@ -71,28 +71,29 @@ static bool match_one_container_id(const std::string &cgroup,
   size_t end_pos = cgroup.rfind(suffix);
 
   // Isn't this supposed to always be the last character?
-  if(end_pos == std::string::npos) {
+  if (end_pos == std::string::npos) {
     return false;
   }
 
   // Calculate expected start position and validate prefix
-  if(end_pos < prefix.size()) {
+  if (end_pos < prefix.size()) {
     return false;
   }
   size_t start_pos = cgroup.rfind(prefix, end_pos - 1);
-  if(start_pos == std::string::npos) {
+  if (start_pos == std::string::npos) {
     return false;
   }
   start_pos += prefix.size();
 
   // Fast character validation using lookup instead of find_first_not_of
-  if(end_pos - start_pos == CONTAINER_ID_LENGTH) {
+  if (end_pos - start_pos == CONTAINER_ID_LENGTH) {
     bool all_valid = true;
-    for(size_t i = start_pos; i < end_pos && all_valid; ++i) {
+    for (size_t i = start_pos; i < end_pos && all_valid; ++i) {
       unsigned char c = cgroup[i];
-      all_valid = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+      all_valid = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
+                  (c >= 'A' && c <= 'F');
     }
-    if(all_valid) {
+    if (all_valid) {
       return true;
     }
   }
@@ -102,8 +103,8 @@ static bool match_one_container_id(const std::string &cgroup,
 
 static bool match_container_id(const std::string &cgroup,
                                const cgroup_layout *layout) {
-  for(size_t i = 0; layout[i].prefix && layout[i].suffix; ++i) {
-    if(match_one_container_id(cgroup, layout[i].prefix, layout[i].suffix)) {
+  for (size_t i = 0; layout[i].prefix && layout[i].suffix; ++i) {
+    if (match_one_container_id(cgroup, layout[i].prefix, layout[i].suffix)) {
       return true;
     }
   }
@@ -113,8 +114,8 @@ static bool match_container_id(const std::string &cgroup,
 
 static bool matches_runc_cgroups(const sinsp_threadinfo *tinfo,
                                  const cgroup_layout *layout) {
-  for(const auto &it : tinfo->cgroups()) {
-    if(match_container_id(it.second, layout)) {
+  for (const auto &it : tinfo->cgroups()) {
+    if (match_container_id(it.second, layout)) {
       return true;
     }
   }
@@ -122,7 +123,7 @@ static bool matches_runc_cgroups(const sinsp_threadinfo *tinfo,
   return false;
 }
 
-}  // anonymous namespace
+} // anonymous namespace
 
 void initKeys() {
   s_nfdelkey.ip1 = 1;
@@ -142,10 +143,9 @@ void initKeys() {
 
 void utils::generateFOID(const std::string &key, FOID *foid) {
   SHA1 sha1;
-  sha1.add(reinterpret_cast<const uint8_t*>(key.c_str()), key.size());
+  sha1.add(reinterpret_cast<const uint8_t *>(key.c_str()), key.size());
   sha1.getHash(foid->data());
 }
-
 
 NFKey *utils::getNFEmptyKey() {
   if (!s_keysinit) {

@@ -47,7 +47,8 @@ ContainerContext::~ContainerContext() { clearAllContainers(); }
 
 ContainerObj *ContainerContext::createContainer(sinsp_threadinfo *ti) {
 
-  // std::string container_id = m_cxt->getInspector()->m_plugin_tables.get_container_id(*ti);
+  // std::string container_id =
+  // m_cxt->getInspector()->m_plugin_tables.get_container_id(*ti);
 
   // if (container_id.empty()) {
   //   return nullptr;
@@ -120,7 +121,8 @@ ContainerObj *ContainerContext::getContainer(sinsp_threadinfo *ti) {
 
   //   if (cont->second->written && cont->second->incomplete) {
   //     SF_DEBUG(m_logger,
-  //              "Container is written and includes name: " << container->m_name);
+  //              "Container is written and includes name: " <<
+  //              container->m_name);
   //     if (container->m_name.compare(INCOMPLETE) == 0 ||
   //         container->m_image.compare(INCOMPLETE) == 0) {
   //       return cont->second;
